@@ -1,14 +1,10 @@
-<<<<<<< HEAD
-/* ---- Reset & Base ---- */
-=======
->>>>>>> 7d70d52febab02c7984d7e111dfce15ec76c9074
-*, *::before, *::after {
+*::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
-body.register-page {
+body.register-akun-page {
     font-family: 'Poppins', 'Segoe UI', sans-serif;
     background-color: #f0ede6;
     color: #1a1a1a;
@@ -17,8 +13,8 @@ body.register-page {
     flex-direction: column;
 }
 
-/* ---- Top Navigation Bar ---- */
-.register-navbar {
+/* ---- Navbar ---- */
+.ra-navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -28,7 +24,7 @@ body.register-page {
     flex-shrink: 0;
 }
 
-.register-navbar .nav-back {
+.ra-navbar .nav-back {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -38,16 +34,16 @@ body.register-page {
     transition: color 0.2s;
 }
 
-.register-navbar .nav-back:hover {
-    color: #1a4731;
-}
-
-.register-navbar .nav-back svg {
+.ra-navbar .nav-back svg {
     width: 16px;
     height: 16px;
 }
 
-.register-navbar .nav-login {
+.ra-navbar .nav-back:hover {
+    color: #1a4731;
+}
+
+.ra-navbar .nav-masuk {
     display: flex;
     align-items: center;
     gap: 5px;
@@ -58,18 +54,18 @@ body.register-page {
     transition: color 0.2s;
 }
 
-.register-navbar .nav-login:hover {
-    color: #1a4731;
-    text-decoration: underline;
-}
-
-.register-navbar .nav-login svg {
+.ra-navbar .nav-masuk svg {
     width: 14px;
     height: 14px;
 }
 
+.ra-navbar .nav-masuk:hover {
+    color: #1a4731;
+    text-decoration: underline;
+}
+
 /* ---- Main Container ---- */
-.register-container {
+.ra-container {
     max-width: 480px;
     width: 100%;
     margin: 0 auto;
@@ -78,11 +74,11 @@ body.register-page {
 }
 
 /* ---- Header ---- */
-.register-header {
+.ra-header {
     margin-bottom: 28px;
 }
 
-.register-header h1 {
+.ra-header h1 {
     font-size: 2rem;
     font-weight: 700;
     color: #1a3a28;
@@ -90,90 +86,106 @@ body.register-page {
     margin-bottom: 8px;
 }
 
-.register-header p {
+.ra-header p {
     font-size: 0.95rem;
     color: #6b6b6b;
 }
 
 /* ---- Step Indicator ---- */
-.step-indicator {
+.ra-steps {
     display: flex;
     align-items: center;
-    gap: 0;
     margin-bottom: 32px;
 }
 
-.step-item {
+.ra-step {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.step-number {
+.ra-step-num {
     width: 32px;
     height: 32px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.88rem;
+    font-size: 0.85rem;
     font-weight: 700;
     flex-shrink: 0;
-    transition: background-color 0.3s, color 0.3s;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
 
-.step-item.active .step-number {
+/* Active step */
+.ra-step.is-active .ra-step-num {
     background-color: #1a4731;
     color: #fff;
+    border: none;
 }
 
-.step-item.inactive .step-number {
+.ra-step.is-active .ra-step-label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #1a6640;
+}
+
+/* Completed step */
+.ra-step.is-done .ra-step-num {
+    background-color: #1a6640;
+    color: #fff;
+    border: none;
+}
+
+.ra-step.is-done .ra-step-label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #1a6640;
+}
+
+/* Inactive step */
+.ra-step.is-inactive .ra-step-num {
     background-color: transparent;
     color: #b0a89a;
     border: 1.5px solid #c8c2b8;
 }
 
-.step-item.completed .step-number {
-    background-color: #1a6640;
-    color: #fff;
-}
-
-.step-label {
+.ra-step.is-inactive .ra-step-label {
     font-size: 0.88rem;
-    font-weight: 600;
-    transition: color 0.3s;
-}
-
-.step-item.active .step-label {
-    color: #1a6640;
-}
-
-.step-item.inactive .step-label {
+    font-weight: 500;
     color: #b0a89a;
 }
 
-.step-item.completed .step-label {
-    color: #1a6640;
-}
-
-/* ---- Step Connector Line ---- */
-.step-connector {
+/* Connector line between steps */
+.ra-step-line {
     flex: 1;
     height: 1.5px;
     background-color: #c8c2b8;
     margin: 0 10px;
-    min-width: 30px;
+    min-width: 28px;
+    transition: background-color 0.3s;
 }
 
-.step-connector.done {
+.ra-step-line.is-done {
     background-color: #1a6640;
 }
 
 /* ---- Form ---- */
-.register-form {
+.ra-form {
     display: flex;
     flex-direction: column;
     gap: 20px;
+}
+
+/* ---- Step Panel ---- */
+.ra-panel {
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.ra-panel.is-visible {
+    display: flex;
 }
 
 /* ---- Form Group ---- */
@@ -190,13 +202,13 @@ body.register-page {
 }
 
 /* ---- Two Column Row ---- */
-.form-row {
+.form-row-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
 }
 
-/* ---- Input Wrapper (icon + input) ---- */
+/* ---- Input Wrapper ---- */
 .input-wrapper {
     position: relative;
     display: flex;
@@ -242,7 +254,7 @@ body.register-page {
     border: 1.5px solid #ddd8cf;
     border-radius: 12px;
     outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
 }
 
 .input-wrapper input.has-icon-right {
@@ -259,157 +271,21 @@ body.register-page {
     background-color: #fff;
 }
 
-/* ---- Submit / Next Button ---- */
-.btn-register {
-    width: 100%;
-    padding: 16px;
-    font-size: 1rem;
-    font-weight: 700;
-    color: #fff;
-    background-color: #1a4731;
-    border: none;
-    border-radius: 14px;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
-    letter-spacing: 0.02em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 4px;
-}
-
-.btn-register:hover {
-    background-color: #143824;
-}
-
-.btn-register:active {
-    transform: scale(0.99);
-}
-
-/* Step 2 back button */
-.btn-back-step {
-    width: 100%;
-    padding: 14px 16px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #4a4a4a;
-    background-color: transparent;
-    border: 1.5px solid #ddd8cf;
-    border-radius: 14px;
-    cursor: pointer;
-    transition: border-color 0.2s, background-color 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.btn-back-step:hover {
-    border-color: #b0a89a;
-    background-color: #f0ede6;
-}
-
-.btn-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-/* ---- Error Messages ---- */
+/* ---- Error ---- */
 .form-error {
     font-size: 0.82rem;
     color: #dc2626;
     margin-top: -4px;
 }
 
-/* ---- Login Link ---- */
-.register-footer-link {
-    text-align: center;
-    margin-top: 28px;
-    font-size: 0.9rem;
-    color: #6b6b6b;
-}
-
-.register-footer-link a {
-    font-weight: 700;
-    color: #1a6640;
-    text-decoration: none;
-    transition: color 0.2s;
-}
-
-.register-footer-link a:hover {
-    color: #1a4731;
-    text-decoration: underline;
-}
-
-/* ---- Page Footer (copyright) ---- */
-.register-page-footer {
-    text-align: center;
-    padding: 20px 24px 28px;
-    font-size: 0.8rem;
-    color: #9ca3af;
-    flex-shrink: 0;
-}
-
-.register-page-footer a {
-    color: #9ca3af;
-    text-decoration: none;
-    transition: color 0.2s;
-}
-
-.register-page-footer a:hover {
-    color: #4a4a4a;
-    text-decoration: underline;
-}
-
-.register-page-footer span {
-    margin: 0 6px;
-}
-
-/* ---- Help FAB Button ---- */
-.help-fab {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    width: 44px;
-    height: 44px;
-    background-color: #2d2d2d;
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    font-size: 1.1rem;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-    transition: background-color 0.2s;
-    z-index: 100;
-}
-
-.help-fab:hover {
-    background-color: #1a4731;
-}
-
-/* ---- Step panels ---- */
-.step-panel {
-    display: none;
-}
-
-.step-panel.active {
-    display: contents;
-}
-
-/* ---- Password strength hint ---- */
-.password-hint {
+/* ---- Password Hint ---- */
+.input-hint {
     font-size: 0.78rem;
     color: #9ca3af;
     margin-top: -4px;
 }
 
-/* ---- Terms checkbox ---- */
+/* ---- Terms Checkbox ---- */
 .terms-check {
     display: flex;
     align-items: flex-start;
@@ -442,17 +318,138 @@ body.register-page {
     text-decoration: underline;
 }
 
+/* ---- Lanjutkan / Submit Button ---- */
+.btn-lanjutkan {
+    width: 100%;
+    padding: 16px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    background-color: #1a4731;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    letter-spacing: 0.02em;
+    transition: background-color 0.2s, transform 0.1s;
+    margin-top: 4px;
+}
+
+.btn-lanjutkan:hover { background-color: #143824; }
+.btn-lanjutkan:active { transform: scale(0.99); }
+
+/* ---- Kembali Button (step 2) ---- */
+.btn-kembali {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #4a4a4a;
+    background-color: transparent;
+    border: 1.5px solid #ddd8cf;
+    border-radius: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.btn-kembali:hover {
+    border-color: #b0a89a;
+    background-color: #ece9e2;
+}
+
+.btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* ---- Footer Link (Sudah punya akun?) ---- */
+.ra-footer-link {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 0.9rem;
+    color: #6b6b6b;
+}
+
+.ra-footer-link a {
+    font-weight: 700;
+    color: #1a6640;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.ra-footer-link a:hover {
+    color: #1a4731;
+    text-decoration: underline;
+}
+
+/* ---- Page Footer (copyright) ---- */
+.ra-page-footer {
+    text-align: center;
+    padding: 20px 24px 28px;
+    font-size: 0.8rem;
+    color: #b0a89a;
+    flex-shrink: 0;
+}
+
+.ra-page-footer a {
+    color: #b0a89a;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.ra-page-footer a:hover {
+    color: #4a4a4a;
+}
+
+.ra-page-footer .sep {
+    margin: 0 6px;
+}
+
+/* ---- Help FAB ---- */
+.help-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 44px;
+    height: 44px;
+    background-color: #2d2d2d;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    transition: background-color 0.2s;
+    z-index: 100;
+}
+
+.help-fab:hover {
+    background-color: #1a4731;
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 480px) {
-    .register-container {
+    .ra-container {
         padding: 32px 20px 32px;
     }
 
-    .register-header h1 {
+    .ra-header h1 {
         font-size: 1.7rem;
     }
 
-    .form-row {
+    .form-row-2 {
         grid-template-columns: 1fr;
     }
 }
