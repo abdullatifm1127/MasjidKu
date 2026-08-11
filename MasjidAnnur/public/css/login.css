@@ -1,0 +1,350 @@
+/* ---- Reset & Base ---- */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body.login-page {
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    background-color: #f0ede6;
+    color: #1a1a1a;
+    min-height: 100vh;
+}
+
+/* ---- Top Navigation Bar ---- */
+.login-navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background-color: #f0ede6;
+    border-bottom: 1px solid #e0dbd2;
+}
+
+.login-navbar .nav-back {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    color: #4a4a4a;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.login-navbar .nav-back:hover {
+    color: #1a4731;
+}
+
+.login-navbar .nav-back svg {
+    width: 16px;
+    height: 16px;
+}
+
+.login-navbar .nav-register {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1a6640;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.login-navbar .nav-register:hover {
+    color: #1a4731;
+    text-decoration: underline;
+}
+
+/* ---- Main Container ---- */
+.login-container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+}
+
+/* ---- Header ---- */
+.login-header {
+    margin-bottom: 36px;
+}
+
+.login-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a3a28;
+    line-height: 1.2;
+    margin-bottom: 8px;
+}
+
+.login-header p {
+    font-size: 0.95rem;
+    color: #6b6b6b;
+}
+
+/* ---- Form ---- */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ---- Form Group ---- */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+/* ---- Input Wrapper (icon + input) ---- */
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper .input-icon {
+    position: absolute;
+    left: 14px;
+    width: 18px;
+    height: 18px;
+    color: #9ca3af;
+    pointer-events: none;
+    flex-shrink: 0;
+}
+
+.input-wrapper .input-icon-right {
+    position: absolute;
+    right: 14px;
+    width: 20px;
+    height: 20px;
+    color: #9ca3af;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.input-wrapper .input-icon-right:hover {
+    color: #1a4731;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 14px 16px 14px 44px;
+    font-size: 0.95rem;
+    color: #1a1a1a;
+    background-color: #f8f6f1;
+    border: 1.5px solid #ddd8cf;
+    border-radius: 12px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Input with right icon (password) */
+.input-wrapper input.has-icon-right {
+    padding-right: 44px;
+}
+
+.input-wrapper input::placeholder {
+    color: #b0a89a;
+}
+
+.input-wrapper input:focus {
+    border-color: #1a6640;
+    box-shadow: 0 0 0 3px rgba(26, 102, 64, 0.12);
+    background-color: #fff;
+}
+
+/* ---- Remember Me & Forgot Password Row ---- */
+.form-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: -4px;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    color: #4a4a4a;
+    user-select: none;
+}
+
+.remember-me input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid #b0a89a;
+    border-radius: 4px;
+    accent-color: #1a6640;
+    cursor: pointer;
+}
+
+.forgot-password {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #1a6640;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.forgot-password:hover {
+    color: #1a4731;
+    text-decoration: underline;
+}
+
+/* ---- Submit Button ---- */
+.btn-login {
+    width: 100%;
+    padding: 16px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    background-color: #1a4731;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    letter-spacing: 0.02em;
+    margin-top: 4px;
+}
+
+.btn-login:hover {
+    background-color: #143824;
+}
+
+.btn-login:active {
+    transform: scale(0.99);
+}
+
+/* ---- Divider ---- */
+.login-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #b0a89a;
+    font-size: 0.85rem;
+    margin: 4px 0;
+}
+
+.login-divider::before,
+.login-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: #ddd8cf;
+}
+
+/* ---- Social Login Buttons ---- */
+.social-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.btn-social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 13px 16px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #1a1a1a;
+    background-color: #fff;
+    border: 1.5px solid #ddd8cf;
+    border-radius: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+
+.btn-social:hover {
+    background-color: #f8f6f1;
+    border-color: #b0a89a;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.btn-social img,
+.btn-social svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+/* ---- Register Link Footer ---- */
+.login-footer {
+    text-align: center;
+    margin-top: 32px;
+    font-size: 0.9rem;
+    color: #6b6b6b;
+}
+
+.login-footer a {
+    font-weight: 700;
+    color: #1a6640;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.login-footer a:hover {
+    color: #1a4731;
+    text-decoration: underline;
+}
+
+/* ---- Help FAB Button ---- */
+.help-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 44px;
+    height: 44px;
+    background-color: #2d2d2d;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    transition: background-color 0.2s;
+}
+
+.help-fab:hover {
+    background-color: #1a4731;
+}
+
+/* ---- Error Messages ---- */
+.form-error {
+    font-size: 0.82rem;
+    color: #dc2626;
+    margin-top: -4px;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 480px) {
+    .login-container {
+        padding: 32px 20px 80px;
+    }
+
+    .login-header h1 {
+        font-size: 1.7rem;
+    }
+
+    .social-buttons {
+        grid-template-columns: 1fr 1fr;
+    }
+}
