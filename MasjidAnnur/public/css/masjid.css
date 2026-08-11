@@ -22,7 +22,7 @@
 .bg-emerald-50{background-color:#ecfdf5}
 .bg-emerald-500\/20{background-color:color-mix(in srgb, #10b981 2000%, transparent)}
 .bg-emerald-600{background-color:#059669}
-.bg-emerald-700{background-color:#047857}
+.bg-emerald-700{background-color:#047857}   
 .bg-emerald-900{background-color:#064e33}
 .bg-emerald-950{background-color:#022c1a}
 .bg-gradient-to-br{background-image:linear-gradient(to bottom right,var(--tw-gradient-stops))}

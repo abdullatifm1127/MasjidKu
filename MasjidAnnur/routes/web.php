@@ -21,3 +21,4 @@ Route::get('/register', function () {
 Route::get('/forgot-password', function () {
     return view('auth.login');
 })->name('password.request');
+
