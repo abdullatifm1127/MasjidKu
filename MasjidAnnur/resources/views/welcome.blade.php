@@ -17,7 +17,7 @@
             <a href="#fitur">Fitur</a>
             <a href="#cara-kerja">Cara Kerja</a>
             <a href="#tentang">Tentang</a>
-            <a class="nav-login" href="{{ route('login') }}">Masuk</a>
+            <button type="button" class="nav-login" onclick="openAuthModal()">Masuk</button>
             <a class="nav-register" href="{{ route('register') }}">Daftarkan Masjid</a>
         </nav>
         <button class="menu-toggle" type="button" aria-label="Buka menu" onclick="document.body.classList.toggle('menu-open')">☰</button>
@@ -34,7 +34,7 @@
             <h1>Masjid <span class="accent">Digital</span><br><span class="green">untuk Umat</span></h1>
             <p>Kelola masjid Anda secara digital. Jadwal shalat, donasi online, agenda kegiatan, dan informasi jamaah — semua dalam satu platform terpadu.</p>
             <div class="hero-actions">
-                <a class="btn btn-gold" href="{{ route('register') }}">Jelajahi Masjid</a>
+                <a class="btn btn-gold" href="{{ route('register') }}">Daftarkan Masjid</a>
                 <a class="btn btn-outline" href="#fitur">Pelajari Fitur</a>
             </div>
             <div class="stats">
@@ -43,25 +43,6 @@
                 <div><strong>Rp 12M</strong><span>Total Donasi</span></div>
             </div>
         </div>
-        <div class="hero-preview">
-            <div class="preview-card">
-                <div class="preview-head">
-                    <div class="mosque-icon">🕌</div>
-                    <div><strong>Baitul Digital</strong><small>Jakarta Selatan</small></div>
-                    <span class="status">Aktif</span>
-                </div>
-                <div class="prayer-grid">
-                    @foreach([['Subuh','04:32'],['Dzuhur','12:05'],['Ashar','15:21'],['Maghrib','18:02'],['Isya','19:14']] as $i => $p)
-                        <div class="prayer {{ $i === 2 ? 'active' : '' }}"><small>{{ $p[0] }}</small><strong>{{ $p[1] }}</strong></div>
-                    @endforeach
-                </div>
-                <div class="preview-item"><div class="row-between"><span>Donasi Renovasi</span><b>72%</b></div><div class="progress"><i style="width:72%"></i></div></div>
-                <div class="preview-item mini"><span>📅</span><div><strong>Kajian Fiqih Kontemporer</strong><small>Hari ini · 19:30 WIB</small></div></div>
-                <div class="preview-item mini"><span>👥</span><div><strong>2.412 jamaah terdaftar</strong><small>+38 minggu ini</small></div></div>
-            </div>
-            <div class="floating-badge">🕌 <span><strong>120+ Masjid</strong><small>se-Indonesia</small></span></div>
-        </div>
-    </div>
 </section>
 
 <section id="fitur" class="section geometric-bg">
