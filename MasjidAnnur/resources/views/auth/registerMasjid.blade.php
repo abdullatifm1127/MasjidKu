@@ -55,7 +55,7 @@
         </div>
 
         {{-- ===== FORM ===== --}}
-        <form id="rmForm" method="POST" action="{{ route('daftar.masjid') }}">
+        <form id="rmForm" method="POST" action="{{ route('daftar.masjid.store') }}">
             @csrf
 
             {{-- ─── PANEL 1 : Informasi Masjid ─── --}}

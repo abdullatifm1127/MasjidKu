@@ -25,13 +25,27 @@
                 <li><a href="#kontak" class="nav-link">Kontak</a></li>
             </ul>
             <div class="navbar-actions">
-                @auth
-                    <a href="{{ url('/dashboard') }}" class="btn-nav-primary">Dashboard</a>
-                @else
-                    <a href="{{ route('login') }}" class="btn-nav-outline">Masuk</a>
-                    <a href="{{ route('register') }}" class="btn-nav-primary">Daftar Akun</a>
-                @endauth
-            </div>
+        @auth
+        <a href="{{ route('daftar.masjid') }}" class="btn-nav-primary">
+            Daftarkan Masjid
+        </a>
+
+         <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+             @csrf
+                <button type="submit" class="btn-nav-outline">
+                Logout
+                </button>
+                </form>
+            @else
+                <a href="{{ route('login') }}" class="btn-nav-outline">
+                    Masuk
+                </a>
+                <a href="{{ route('register') }}" class="btn-nav-primary">
+                    Daftar Akun
+                </a>
+            @endauth
+        </div>
+                    
             <button class="navbar-toggle" id="navToggle" aria-label="Buka menu">
                 <span></span><span></span><span></span>
             </button>
