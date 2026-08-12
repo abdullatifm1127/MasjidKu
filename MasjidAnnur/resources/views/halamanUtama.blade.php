@@ -19,9 +19,9 @@
             </a>
             <ul class="navbar-menu" id="navMenu">
                 <li><a href="#beranda" class="nav-link active">Beranda</a></li>
-                <li><a href="#tentang" class="nav-link">Fitur</a></li>
+                <li><a href="#tentang" class="nav-link">Fasilitas</a></li>
                 <li><a href="#program" class="nav-link">Program</a></li>
-                <li><a href="#donasi" class="nav-link">Donasi</a></li>
+                <li><a href="#donasi" class="nav-link">Artikel</a></li>
                 <li><a href="#kontak" class="nav-link">Kontak</a></li>
             </ul>
             <div class="navbar-actions">
@@ -82,7 +82,7 @@
     <section class="features" id="tentang">
         <div class="section-container">
             <div class="section-header">
-                <span class="section-badge">Fitur Unggulan</span>
+                <span class="section-badge">FASILITAS UNGGULAN</span>
                 <h2>Semua yang Anda Butuhkan<br>dalam Satu Platform</h2>
                 <p>Dirancang khusus untuk kebutuhan masjid modern di Indonesia.</p>
             </div>
@@ -172,20 +172,9 @@
         <div class="section-container">
             <div class="cta-box">
                 <div class="cta-text">
-                    <span class="section-badge light">Donasi</span>
-                    <h2>Mari Bersama Membangun<br>Masjid yang Lebih Baik</h2>
-                    <p>Setiap donasi Anda akan digunakan untuk kemakmuran masjid dan kesejahteraan jamaah.</p>
-                    <a href="#" class="btn-primary">Donasi Sekarang 🤲</a>
-                </div>
-                <div class="cta-visual">
-                    <div class="donation-card">
-                        <p class="donation-label">Total Donasi Bulan Ini</p>
-                        <p class="donation-amount">Rp 47.250.000</p>
-                        <div class="donation-bar">
-                            <div class="donation-fill" style="width: 63%"></div>
-                        </div>
-                        <p class="donation-target">63% dari target Rp 75.000.000</p>
-                    </div>
+                    <h2>Menambah Ilmu, Mencerahkan Iman</h2>
+                    <p>Selamat datang di ruang literasi masjid untuk menambah ilmu dan mencerahkan iman..</p>
+                    <a href="#" class="btn-primary">Baca Artikel Sekarang</a>
                 </div>
             </div>
         </div>
