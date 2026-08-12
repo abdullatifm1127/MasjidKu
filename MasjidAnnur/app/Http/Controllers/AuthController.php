@@ -28,7 +28,7 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->route('daftar.masjid');
+        return redirect()->route('home');
     }
 
     // Proses Login
