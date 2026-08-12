@@ -95,18 +95,25 @@ body {
     flex-shrink: 0;
 }
 
-.btn-nav-outline {
+/* ---- PERBAIKAN DI SINI (Gabungkan a dan button) ---- */
+a.btn-nav-outline,
+button.btn-nav-outline {
+    display: inline-block;
     padding: 8px 18px;
     font-size: 0.875rem;
     font-weight: 600;
     color: #fff;
+    background: transparent; /* Memastikan background transparan */
     border: 1.5px solid rgba(255,255,255,0.4);
     border-radius: 10px;
     text-decoration: none;
+    cursor: pointer;
+    font-family: inherit; /* Menyamakan font dengan body */
     transition: background 0.2s, border-color 0.2s;
 }
 
-.btn-nav-outline:hover {
+a.btn-nav-outline:hover,
+button.btn-nav-outline:hover {
     background: rgba(255,255,255,0.1);
     border-color: rgba(255,255,255,0.7);
 }
