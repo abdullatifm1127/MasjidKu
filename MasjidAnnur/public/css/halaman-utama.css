@@ -407,6 +407,23 @@ button.btn-nav-outline:hover {
     line-height: 1.65;
 }
 
+    /* Button Logout */
+/* .btn-nav-logout {
+    padding: 8px 18px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.4);
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+} */
+
+/* .btn-nav-logout:hover {
+    background: #bb2d3b;
+    border-color: #bb2d3b;
+} */
+
 /* ---- PROGRAMS ---- */
 .programs { background: var(--cream); }
 
