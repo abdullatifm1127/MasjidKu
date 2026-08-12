@@ -19,7 +19,7 @@
             </a>
             <ul class="navbar-menu" id="navMenu">
                 <li><a href="#beranda" class="nav-link active">Beranda</a></li>
-                <li><a href="#tentang" class="nav-link">Fasilitas</a></li>
+                <li><a href="#tentang" class="nav-link">Fitur</a></li>
                 <li><a href="#program" class="nav-link">Program</a></li>
                 <li><a href="#donasi" class="nav-link">Artikel</a></li>
                 <li><a href="#kontak" class="nav-link">Kontak</a></li>
@@ -82,7 +82,7 @@
     <section class="features" id="tentang">
         <div class="section-container">
             <div class="section-header">
-                <span class="section-badge">FASILITAS UNGGULAN</span>
+                <span class="section-badge">FITRUR UNGGULAN</span>
                 <h2>Semua yang Anda Butuhkan<br>dalam Satu Platform</h2>
                 <p>Dirancang khusus untuk kebutuhan masjid modern di Indonesia.</p>
             </div>
