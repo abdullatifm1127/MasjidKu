@@ -13,6 +13,20 @@ class MosqueController extends Controller
      */
     public function create()
     {
+        // Cek apakah user sudah pernah mendaftarkan masjid sebelumnya
+        $existingMosque = Mosque::where('user_id', Auth::id())->first();
+
+        if ($existingMosque) {
+            // Jika statusnya masih pending, arahkan ke halaman waiting
+            if ($existingMosque->status === 'pending') {
+                return redirect()->route('waiting');
+            }
+            // Jika sudah approved, arahkan ke dashboard
+            if ($existingMosque->status === 'approved') {
+                return redirect()->route('dashboard');
+            }
+        }
+
         return view('auth.registerMasjid');
     }
 
@@ -21,6 +35,13 @@ class MosqueController extends Controller
      */
     public function store(Request $request)
     {
+        // Cek pengaman ganda agar 1 akun tidak bisa daftar dua kali
+        $existingMosque = Mosque::where('user_id', Auth::id())->first();
+        if ($existingMosque) {
+            return redirect()->route('waiting')
+                ->with('error', 'Anda sudah mendaftarkan masjid sebelumnya.');
+        }
+
         $validated = $request->validate([
             'mosque_name' => 'required|string|max:255',
             'arabic_name' => 'nullable|string|max:255',
@@ -45,7 +66,7 @@ class MosqueController extends Controller
             'imam_phone' => 'nullable|string|max:30',
 
             'chairman_name' => 'required|string|max:255',
-            'chairman_phone' => 'required|string|max:30',
+            'chairman_phone' => 'nullable|string|max:30',
 
             'secretary_name' => 'nullable|string|max:255',
             'treasurer_name' => 'nullable|string|max:255',
@@ -65,6 +86,7 @@ class MosqueController extends Controller
 
         $mosque = Mosque::create([
             'user_id' => Auth::id(),
+            'status' => 'pending', // Memastikan status awal ter-set pending
 
             'mosque_name' => $validated['mosque_name'],
             'arabic_name' => $validated['arabic_name'] ?? null,
@@ -104,8 +126,8 @@ class MosqueController extends Controller
         ]);
 
         return redirect()
-            ->route('dashboard')
-            ->with('success', 'Masjid berhasil didaftarkan.');
+            ->route('waiting')
+            ->with('success', 'Masjid berhasil didaftarkan dan menunggu verifikasi admin.');
     }
 
     /**

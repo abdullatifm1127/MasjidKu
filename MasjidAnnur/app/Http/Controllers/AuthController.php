@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Mosque;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -40,7 +41,33 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
+
             $request->session()->regenerate();
+
+            $user = Auth::user();
+
+            $mosque = Mosque::where('user_id', $user->id)->first();
+
+            // Belum mendaftarkan masjid
+            if (!$mosque) {
+                return redirect()->route('daftar.masjid');
+            }
+
+            // Menunggu verifikasi admin
+            if ($mosque->status === 'pending') {
+                return redirect()->route('waiting');
+            }
+
+            // Sudah disetujui admin
+            if ($mosque->status === 'approved') {
+                return redirect()->route('dashboard');
+            }
+
+            // Ditolak admin
+            if ($mosque->status === 'rejected') {
+                return redirect()->route('home')
+                    ->with('error', 'Pendaftaran masjid ditolak admin.');
+            }
 
             return redirect()->route('home');
         }

@@ -57,6 +57,13 @@ return new class extends Migration
 
             $table->text('description')->nullable();
 
+            // Status Verifikasi
+            $table->enum('status', [
+                'pending',
+                'approved',
+                'rejected'
+            ])->default('pending');
+
             $table->timestamps();
         });
     }

@@ -1,8 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Mosque;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MosqueController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -11,7 +14,12 @@ use App\Http\Controllers\MosqueController;
 */
 
 Route::get('/', function () {
-    return view('halamanUtama');
+    $userMosque = null;
+    if (Auth::check()) {
+        $userMosque = Mosque::where('user_id', Auth::id())->first();
+    }
+
+    return view('halamanUtama', compact('userMosque'));
 })->name('home');
 
 
@@ -66,9 +74,40 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
+| Halaman Waiting (Dipindah keluar dari middleware auth)
+|--------------------------------------------------------------------------
+*/
+Route::get('/waiting', function () {
+    // Jika tidak ada user yang login sama sekali, baru arahkan ke login
+    if (!Auth::check()) {
+        return redirect()->route('login');
+    }
+    return view('waiting');
+})->name('waiting');
+
+
+/*
+|--------------------------------------------------------------------------
 | Forgot Password
 |--------------------------------------------------------------------------
 */
 Route::get('/forgot-password', function () {
     return view('auth.login'); // Ubah jika nanti sudah membuat view khusus forgot password
 })->name('password.request');
+
+
+/*
+|--------------------------------------------------------------------------
+| Admin
+|--------------------------------------------------------------------------
+*/
+
+// Dashboard Admin
+Route::get('/admin/dashboard', function () {
+    return view('auth.berandaAdmin');
+})->name('admin.dashboard');
+
+// Landing Page Editor
+Route::get('/admin/landing-page', function () {
+    return view('admin.landingPage');
+})->name('admin.landing-page');

@@ -10,7 +10,7 @@ class Mosque extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+        protected $fillable = [
         'user_id',
 
         'mosque_name',
@@ -48,6 +48,8 @@ class Mosque extends Model
         'has_prayer_schedule',
 
         'description',
+
+        'status',
     ];
 
     protected $casts = [
