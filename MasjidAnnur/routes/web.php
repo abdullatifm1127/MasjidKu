@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MosqueController;
+
 /*
 |--------------------------------------------------------------------------
 | Halaman Utama
@@ -26,7 +27,7 @@ Route::get('/login', function () {
 })->name('login');
 
 // Proses Login
-Route::post('/login', [\App\Http\Controllers\AuthController::class, 'login'])
+Route::post('/login', [AuthController::class, 'login'])
     ->name('login.process');
 
 // Halaman Daftar Akun
@@ -35,22 +36,20 @@ Route::get('/register', function () {
 })->name('register');
 
 // Proses Daftar Akun
-Route::post('/register', [\App\Http\Controllers\AuthController::class, 'register'])
+Route::post('/register', [AuthController::class, 'register'])
     ->name('register.process');
 
 // Logout
-Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout'])
+Route::post('/logout', [AuthController::class, 'logout'])
     ->name('logout');
 
 
 /*
 |--------------------------------------------------------------------------
-| Halaman yang membutuhkan Login
+| Halaman yang membutuhkan Login (Protected Routes)
 |--------------------------------------------------------------------------
 */
-
 Route::middleware('auth')->group(function () {
-
     // Form Daftarkan Masjid
     Route::get('/daftar-masjid', [MosqueController::class, 'create'])
         ->name('daftar.masjid');
@@ -62,7 +61,6 @@ Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/dashboard', [MosqueController::class, 'dashboard'])
         ->name('dashboard');
-
 });
 
 
@@ -71,7 +69,6 @@ Route::middleware('auth')->group(function () {
 | Forgot Password
 |--------------------------------------------------------------------------
 */
-
 Route::get('/forgot-password', function () {
-    return view('auth.login');
+    return view('auth.login'); // Ubah jika nanti sudah membuat view khusus forgot password
 })->name('password.request');
