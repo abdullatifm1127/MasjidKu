@@ -26,6 +26,7 @@ Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
+<<<<<<< HEAD
 // Proses Login
 Route::post('/login', [AuthController::class, 'login'])
     ->name('login.process');
