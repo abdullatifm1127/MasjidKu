@@ -25,25 +25,31 @@
                 <li><a href="#kontak" class="nav-link">Kontak</a></li>
             </ul>
             <div class="navbar-actions">
-        @auth
-        <a href="{{ route('daftar.masjid') }}" class="btn-nav-primary">
-            Daftarkan Masjid
-        </a>
+         @auth
+    @php
+        $mosque = \App\Models\Mosque::where('user_id', Auth::id())->first();
+    @endphp
 
-         <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-             @csrf
-                <button type="submit" class="btn-nav-outline">
-                Logout
-                </button>
-                </form>
-            @else
-                <a href="{{ route('login') }}" class="btn-nav-outline">
-                    Masuk
-                </a>
-                <a href="{{ route('register') }}" class="btn-nav-primary">
-                    Daftar Akun
-                </a>
-            @endauth
+    @if(!$mosque)
+        {{-- Belum daftar masjid --}}
+        <a href="{{ route('daftar.masjid') }}" class="btn-nav-primary">Daftarkan Masjid</a>
+    @elseif($mosque->status === 'pending')
+        {{-- Jika status pending, arahkan langsung ke halaman waiting, JANGAN ke daftar-masjid --}}
+        <a href="{{ route('waiting') }}" class="btn-nav-primary" style="background-color: #d97706;">Menunggu Verifikasi</a>
+    @elseif($mosque->status === 'approved')
+        {{-- Sudah disetujui --}}
+        <a href="{{ route('dashboard') }}" class="btn-nav-primary" style="background-color: #059669;">Dashboard Masjid</a>
+    @endif
+
+    <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+        @csrf
+        <button type="submit" class="btn-nav-outline">Logout</button>
+    </form>
+@else
+    <a href="{{ route('login') }}" class="btn-nav-outline">Masuk</a>
+    <a href="{{ route('register') }}" class="btn-nav-primary">Daftar Akun</a>
+@endauth
+
         </div>
                     
             <button class="navbar-toggle" id="navToggle" aria-label="Buka menu">
