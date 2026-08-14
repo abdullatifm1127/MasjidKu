@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Mosque;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MosqueController;
-
+use App\Http\Controllers\SuperAdmin\PenggunaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -133,12 +133,7 @@ Route::get('/superadmin/dashboard', function () {
 })->name('superadmin.dashboard');
 
 // Verifikasi Pendaftaran Super Admin
-Route::get('/superadmin/verifikasi', function () {
-    // Hanya ambil masjid yang statusnya pending
-    $pendaftaran = Mosque::where('status', 'pending')->latest()->get();
-
-    return view('auth.verifSuperAdmin', compact('pendaftaran'));
-})->name('superadmin.verifikasi');
+Route::get('/superadmin/verifikasi', [\App\Http\Controllers\MosqueController::class, 'verifikasi'])->name('superadmin.verifikasi');
 
 // Approve & Reject pendaftaran (placeholder — ganti dengan controller saat ada logika DB)
 Route::put('/superadmin/verifikasi/{id}/approve', function ($id) {
@@ -156,9 +151,7 @@ Route::put('/superadmin/verifikasi/{id}/reject', function ($id) {
 })->name('superadmin.verifikasi.reject');
 
 // Manajemen Masjid Super Admin
-Route::get('/superadmin/manajemen-masjid', function () {
-    return view('auth.manajemenMasjidSuperAdmin');
-})->name('superadmin.manajemen-masjid');
+Route::get('/superadmin/manajemen-masjid', [\App\Http\Controllers\MosqueController::class, 'manajemenMasjid'])->name('superadmin.manajemen-masjid');
 
 Route::post('/superadmin/manajemen-masjid', function (\Illuminate\Http\Request $request) {
     $validated = $request->validate([
@@ -179,10 +172,13 @@ Route::post('/superadmin/manajemen-masjid', function (\Illuminate\Http\Request $
         ->with('success', 'Masjid berhasil ditambahkan.');
 })->name('superadmin.manajemen-masjid.store');
 
-// Pengguna Super Admin
-Route::get('/superadmin/pengguna', function () {
-    return view('auth.penggunaSuperAdmin');
-})->name('superadmin.pengguna');
+// Rute untuk menampilkan halaman daftar pengguna
+Route::get('/superadmin/pengguna', [\App\Http\Controllers\SuperAdmin\PenggunaController::class, 'index'])->name('superadmin.pengguna');
+// Rute untuk menyimpan pengguna baru
+Route::post('/superadmin/pengguna', [\App\Http\Controllers\SuperAdmin\PenggunaController::class, 'store'])->name('superadmin.pengguna.store');
+// Rute untuk memperbarui data pengguna
+Route::put('/superadmin/pengguna/{id}', [\App\Http\Controllers\SuperAdmin\PenggunaController::class, 'update'])->name('superadmin.pengguna.update');
+
 
 Route::post('/superadmin/pengguna', function (\Illuminate\Http\Request $request) {
     $validated = $request->validate([

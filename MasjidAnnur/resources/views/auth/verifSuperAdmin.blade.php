@@ -12,9 +12,7 @@
 </head>
 <body class="sa-page" id="saBody">
 
-
     <aside class="sa-sidebar" id="saSidebar">
-
         <div class="sa-brand">
             <div class="sa-brand-avatar">SA</div>
             <div class="sa-brand-info">
@@ -31,23 +29,19 @@
                 <span class="sa-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
                 <span class="sa-nav-label">Dashboard</span>
             </a>
-
             <a href="{{ route('superadmin.verifikasi') }}" class="sa-nav-item active sa-nav-has-badge">
                 <span class="sa-nav-icon"><i class="fa-solid fa-shield-halved"></i></span>
                 <span class="sa-nav-label">Verifikasi Pendaftaran</span>
                 <span class="sa-nav-badge-dot amber"></span>
             </a>
-
             <a href="{{ route('superadmin.manajemen-masjid') }}" class="sa-nav-item">
                 <span class="sa-nav-icon"><i class="fa-solid fa-mosque"></i></span>
                 <span class="sa-nav-label">Manajemen Masjid</span>
             </a>
-
             <a href="{{ route('superadmin.pengguna') }}" class="sa-nav-item">
                 <span class="sa-nav-icon"><i class="fa-solid fa-users"></i></span>
                 <span class="sa-nav-label">Pengguna</span>
             </a>
-
             <a href="{{ route('superadmin.pengaturan') }}" class="sa-nav-item">
                 <span class="sa-nav-icon"><i class="fa-solid fa-gear"></i></span>
                 <span class="sa-nav-label">Pengaturan</span>
@@ -67,7 +61,6 @@
             </a>
             <form id="sa-logout-form" method="POST" action="{{ route('logout') }}" style="display:none;">@csrf</form>
         </div>
-
     </aside>
 
     {{-- ===== MAIN ===== --}}
@@ -77,7 +70,7 @@
         <header class="sa-topbar">
             <div class="sa-topbar-left">
                 <div class="sa-topbar-title">Verifikasi Pendaftaran</div>
-                <span class="vf-topbar-badge">2 pending</span>
+                <span class="vf-topbar-badge">{{ $totalPending ?? 0 }} pending</span>
             </div>
             <div class="sa-topbar-right">
                 <a href="{{ url('/') }}" class="sa-btn-website" target="_blank">
@@ -98,33 +91,32 @@
                 <div class="vf-summary-card amber">
                     <div class="vf-summary-icon">⏳</div>
                     <div class="vf-summary-info">
-                        <div class="vf-summary-val">2</div>
+                        <div class="vf-summary-val">{{ $totalPending ?? 0 }}</div>
                         <div class="vf-summary-label">Menunggu Verifikasi</div>
                     </div>
                 </div>
                 <div class="vf-summary-card green">
                     <div class="vf-summary-icon">✅</div>
                     <div class="vf-summary-info">
-                        <div class="vf-summary-val">1</div>
+                        <div class="vf-summary-val">{{ $totalApproved ?? 0 }}</div>
                         <div class="vf-summary-label">Disetujui</div>
                     </div>
                 </div>
                 <div class="vf-summary-card red">
                     <div class="vf-summary-icon">❌</div>
                     <div class="vf-summary-info">
-                        <div class="vf-summary-val">1</div>
+                        <div class="vf-summary-val">{{ $totalRejected ?? 0 }}</div>
                         <div class="vf-summary-label">Ditolak</div>
                     </div>
                 </div>
             </div>
 
-            {{-- ===== FILTER BAR ===== --}}
             <div class="vf-filter-bar">
                 <div class="vf-filter-tabs">
-                    <button class="vf-filter-tab active" data-filter="semua">Semua (4)</button>
-                    <button class="vf-filter-tab pending" data-filter="pending">⏳ Pending (2)</button>
-                    <button class="vf-filter-tab disetujui" data-filter="disetujui">✓ Disetujui (1)</button>
-                    <button class="vf-filter-tab ditolak" data-filter="ditolak">✕ Ditolak (1)</button>
+                    <button class="vf-filter-tab active" data-filter="semua">Semua ({{ $totalSemua ?? 0 }})</button>
+                    <button class="vf-filter-tab pending" data-filter="pending">⏳ Pending ({{ $totalPending ?? 0 }})</button>
+                    <button class="vf-filter-tab disetujui" data-filter="disetujui">✓ Disetujui ({{ $totalApproved ?? 0 }})</button>
+                    <button class="vf-filter-tab ditolak" data-filter="ditolak">✕ Ditolak ({{ $totalRejected ?? 0 }})</button>
                 </div>
                 <div class="vf-search-wrap">
                     <i class="fa-solid fa-magnifying-glass vf-search-icon"></i>
@@ -135,147 +127,132 @@
             {{-- ===== DAFTAR PENDAFTARAN ===== --}}
             <div id="vfList">
 
-                
-                    
-@foreach($pendaftaran as $p)
-<div class="vf-card {{ $p->status }}"
-     data-status="{{ $p->status }}"
-     data-search="{{ strtolower($p->mosque_name.' '.$p->city.' '.$p->email) }}">
+                @foreach($pendaftaran as $p)
+                @php
+                    // Normalisasi status database ('approved'/'rejected') ke format filter JS ('disetujui'/'ditolak')
+                    $dbStatus = strtolower(trim($p->status));
+                    if ($dbStatus === 'approved' || $dbStatus === 'aktif') {
+                        $filterStatus = 'disetujui';
+                    } elseif ($dbStatus === 'rejected') {
+                        $filterStatus = 'ditolak';
+                    } else {
+                        $filterStatus = 'pending';
+                    }
+                @endphp
+                <div class="vf-card {{ $filterStatus }}"
+                     data-status="{{ $filterStatus }}"
+                     data-search="{{ strtolower($p->mosque_name.' '.$p->city.' '.$p->email) }}">
 
-    <div class="vf-card-inner">
+                    <div class="vf-card-inner">
 
-        <div class="vf-card-header">
-            <div class="vf-mosque-avatar" style="background:#4f46e5">
-                {{ strtoupper(substr($p->mosque_name, 0, 2)) }}
-            </div>
+                        <div class="vf-card-header">
+                            <div class="vf-mosque-avatar" style="background:#4f46e5">
+                                {{ strtoupper(substr($p->mosque_name, 0, 2)) }}
+                            </div>
 
-            <div class="vf-mosque-title">
-                <div class="vf-mosque-name-row">
+                            <div class="vf-mosque-title">
+                                <div class="vf-mosque-name-row">
+                                    <span class="vf-mosque-name">
+                                        {{ $p->mosque_name }}
+                                    </span>
 
-                    <span class="vf-mosque-name">
-                        {{ $p->mosque_name }}
-                    </span>
+                                    <span class="vf-status-badge {{ $filterStatus }}">
+                                        @if($filterStatus === 'pending')
+                                            ⏳ Menunggu
+                                        @elseif($filterStatus === 'disetujui')
+                                            ✓ Disetujui
+                                        @else
+                                            ✕ Ditolak
+                                        @endif
+                                    </span>
+                                </div>
 
-                    <span class="vf-status-badge {{ $p->status }}">
-                        @if($p->status === 'pending')
-                            ⏳ Menunggu
-                        @elseif($p->status === 'approved')
-                            ✓ Disetujui
-                        @else
-                            ✕ Ditolak
-                        @endif
-                    </span>
+                                <div class="vf-mosque-sub">
+                                    {{ $p->city }} · {{ $p->founded ?? '-' }} · {{ $p->capacity ?? '-' }} jamaah
+                                </div>
+                            </div>
+                        </div>
 
+                        <div class="vf-info-grid">
+                            <div class="vf-info-item">
+                                <div class="vf-info-label">Imam</div>
+                                <div class="vf-info-val">{{ $p->imam_name ?? '-' }}</div>
+                            </div>
+                            <div class="vf-info-item">
+                                <div class="vf-info-label">Ketua</div>
+                                <div class="vf-info-val">{{ $p->chairman_name ?? '-' }}</div>
+                            </div>
+                            <div class="vf-info-item">
+                                <div class="vf-info-label">Email</div>
+                                <div class="vf-info-val">{{ $p->email }}</div>
+                            </div>
+                            <div class="vf-info-item">
+                                <div class="vf-info-label">Telepon</div>
+                                <div class="vf-info-val">{{ $p->phone ?? '-' }}</div>
+                            </div>
+                        </div>
+
+                        <div class="vf-tags">
+                            @if(is_array($p->programs))
+                                @foreach(array_slice($p->programs, 0, 4) as $prog)
+                                    <span class="vf-tag">{{ $prog }}</span>
+                                @endforeach
+
+                                @if(count($p->programs) > 4)
+                                    <span class="vf-tag-more">
+                                        +{{ count($p->programs) - 4 }} lainnya
+                                    </span>
+                                @endif
+                            @endif
+                        </div>
+
+                        <div class="vf-actions">
+                            <button type="button"
+                                    class="vf-btn-detail"
+                                    onclick="vfOpenDetail({{ $p->id }})">
+                                <i class="fa-solid fa-eye"></i>
+                                Lihat Detail
+                            </button>
+
+                            @if($filterStatus === 'pending')
+                                <form method="POST"
+                                      action="{{ route('superadmin.verifikasi.approve', $p->id) }}"
+                                      style="display:inline;">
+                                    @csrf
+                                    @method('PUT')
+                                    <button type="submit" class="vf-btn-approve">
+                                        <i class="fa-solid fa-check"></i>
+                                        Setujui
+                                    </button>
+                                </form>
+
+                                <form method="POST"
+                                      action="{{ route('superadmin.verifikasi.reject', $p->id) }}"
+                                      style="display:inline;">
+                                    @csrf
+                                    @method('PUT')
+                                    <button type="submit" class="vf-btn-reject">
+                                        <i class="fa-solid fa-xmark"></i>
+                                        Tolak
+                                    </button>
+                                </form>
+                            @elseif($filterStatus === 'disetujui')
+                                <span class="vf-status-label green">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    Sudah disetujui
+                                </span>
+                            @else
+                                <span class="vf-status-label red">
+                                    <i class="fa-solid fa-xmark"></i>
+                                    Pendaftaran ditolak
+                                </span>
+                            @endif
+                        </div>
+
+                    </div>
                 </div>
-
-                <div class="vf-mosque-sub">
-                    {{ $p->city }} · {{ $p->founded }} · {{ $p->capacity }} jamaah
-                </div>
-            </div>
-        </div>
-
-        <div class="vf-info-grid">
-
-            <div class="vf-info-item">
-                <div class="vf-info-label">Imam</div>
-                <div class="vf-info-val">
-                    {{ $p->imam_name ?? '-' }}
-                </div>
-            </div>
-
-            <div class="vf-info-item">
-                <div class="vf-info-label">Ketua</div>
-                <div class="vf-info-val">
-                    {{ $p->chairman_name ?? '-' }}
-                </div>
-            </div>
-
-            <div class="vf-info-item">
-                <div class="vf-info-label">Email</div>
-                <div class="vf-info-val">
-                    {{ $p->email }}
-                </div>
-            </div>
-
-            <div class="vf-info-item">
-                <div class="vf-info-label">Telepon</div>
-                <div class="vf-info-val">
-                    {{ $p->phone ?? '-' }}
-                </div>
-            </div>
-
-        </div>
-
-        <div class="vf-tags">
-            @if(is_array($p->programs))
-                @foreach(array_slice($p->programs, 0, 4) as $prog)
-                    <span class="vf-tag">{{ $prog }}</span>
                 @endforeach
 
-                @if(count($p->programs) > 4)
-                    <span class="vf-tag-more">
-                        +{{ count($p->programs) - 4 }} lainnya
-                    </span>
-                @endif
-            @endif
-        </div>
-
-        <div class="vf-actions">
-
-            <button type="button"
-                    class="vf-btn-detail"
-                    onclick="vfOpenDetail({{ $p->id }})">
-                <i class="fa-solid fa-eye"></i>
-                Lihat Detail
-            </button>
-
-            @if($p->status === 'pending')
-
-                <form method="POST"
-                      action="{{ route('superadmin.verifikasi.approve', $p->id) }}"
-                      style="display:inline;">
-                    @csrf
-                    @method('PUT')
-
-                    <button type="submit" class="vf-btn-approve">
-                        <i class="fa-solid fa-check"></i>
-                        Setujui
-                    </button>
-                </form>
-
-                <form method="POST"
-                      action="{{ route('superadmin.verifikasi.reject', $p->id) }}"
-                      style="display:inline;">
-                    @csrf
-                    @method('PUT')
-
-                    <button type="submit" class="vf-btn-reject">
-                        <i class="fa-solid fa-xmark"></i>
-                        Tolak
-                    </button>
-                </form>
-
-            @elseif($p->status === 'approved')
-
-                <span class="vf-status-label green">
-                    <i class="fa-solid fa-circle-check"></i>
-                    Sudah disetujui
-                </span>
-
-            @else
-
-                <span class="vf-status-label red">
-                    <i class="fa-solid fa-xmark"></i>
-                    Pendaftaran ditolak
-                </span>
-
-            @endif
-
-        </div>
-
-    </div>
-</div>
-@endforeach
                 {{-- Empty state --}}
                 <div class="vf-empty" id="vfEmpty" style="display:none;">
                     <div class="vf-empty-icon">🔍</div>
@@ -351,10 +328,9 @@
 
             document.getElementById('vfModalTitle').textContent = 'Detail — ' + d.mosque_name;
 
-            const statusMap = { pending: '⏳ Menunggu', approved: '✓ Disetujui', rejected: '✕ Ditolak' };
+            const statusMap = { pending: '⏳ Menunggu', approved: '✓ Disetujui', rejected: '✕ Ditolak', disetujui: '✓ Disetujui', ditolak: '✕ Ditolak' };
             const programTags = (d.programs || []).map(p => `<span class="vf-tag">${p}</span>`).join('');
             
-            // Format tanggal buat (created_at) jika diperlukan, atau sesuaikan
             const formattedDate = d.created_at ? new Date(d.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
 
             document.getElementById('vfModalBody').innerHTML = `
@@ -379,6 +355,7 @@
 
             document.getElementById('vfModalOverlay').classList.add('active');
         }
+
         document.getElementById('vfModalClose').addEventListener('click', () => {
             document.getElementById('vfModalOverlay').classList.remove('active');
         });

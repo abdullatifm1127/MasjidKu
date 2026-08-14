@@ -134,23 +134,23 @@ class MosqueController extends Controller
      * Dashboard masjid.
      */
     public function dashboard()
-{
-    // Mengambil data masjid milik user yang sedang login
-    $mosque = Mosque::where('user_id', Auth::id())->first();
+    {
+        // Mengambil data masjid milik user yang sedang login
+        $mosque = Mosque::where('user_id', Auth::id())->first();
 
-    // Jika belum mendaftarkan masjid, arahkan ke form pendaftaran
-    if (!$mosque) {
-        return redirect()->route('daftar.masjid');
+        // Jika belum mendaftarkan masjid, arahkan ke form pendaftaran
+        if (!$mosque) {
+            return redirect()->route('daftar.masjid');
+        }
+
+        // Jika statusnya masih pending, arahkan ke halaman waiting
+        if ($mosque->status === 'pending') {
+            return redirect()->route('waiting');
+        }
+
+        // Jika sudah approved, tampilkan halaman beranda admin
+        return view('auth.berandaAdmin', compact('mosque'));
     }
-
-    // Jika statusnya masih pending, arahkan ke halaman waiting
-    if ($mosque->status === 'pending') {
-        return redirect()->route('waiting');
-    }
-
-    // Jika sudah approved, tampilkan halaman beranda admin
-    return view('auth.berandaAdmin', compact('mosque'));
-}
 
     /**
      * Halaman edit Profil Masjid (admin).
@@ -245,4 +245,45 @@ class MosqueController extends Controller
         return redirect()->route('admin.profil-masjid')
             ->with('success', 'Profil masjid berhasil disimpan.');
     }
+
+    /**
+     * Halaman Verifikasi Super Admin (Menampilkan semua pendaftaran & statistik).
+     */
+    public function verifikasi()
+    {
+        // Ambil semua data masjid dari database
+        $pendaftaran = Mosque::latest()->get();
+
+        // Hitung jumlah masing-masing status secara dinamis
+        $totalPending = Mosque::where('status', 'pending')->count();
+        $totalApproved = Mosque::where('status', 'approved')->count();
+        $totalRejected = Mosque::where('status', 'rejected')->count();
+        $totalSemua = $pendaftaran->count();
+
+        return view('auth.verifSuperAdmin', compact(
+            'pendaftaran', 
+            'totalPending', 
+            'totalApproved', 
+            'totalRejected', 
+            'totalSemua'
+        ));
+    }
+
+    public function manajemenMasjid()
+{
+    $masjids = Mosque::latest()->get();
+
+    $totalSemua = $masjids->count();
+    $totalAktif = Mosque::where('status', 'approved')->count();
+    $totalPending = Mosque::where('status', 'pending')->count();
+    $totalNonaktif = Mosque::where('status', 'rejected')->count();
+
+    return view('auth.manajemenMasjidSuperAdmin', compact(
+        'masjids', 
+        'totalSemua', 
+        'totalAktif', 
+        'totalPending', 
+        'totalNonaktif'
+    ));
+}
 }

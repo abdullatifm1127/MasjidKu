@@ -1,8 +1,8 @@
 <?php
 
 namespace App\Models;
-use App\Models\Mosque;
 
+use App\Models\Mosque;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -23,6 +23,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'masjid',
+        'last_active_at',
     ];
 
     /**
@@ -46,7 +49,7 @@ class User extends Authenticatable
     ];
 
     public function mosques(): HasMany
-{
-    return $this->hasMany(Mosque::class);
-}
+    {
+        return $this->hasMany(Mosque::class);
+    }
 }
