@@ -112,7 +112,11 @@
                         <span class="sa-stat-dot amber"></span>
                     </div>
                     <div class="sa-stat-value">Rp 1.9 M</div>
+<<<<<<< HEAD
                     <div class="sa-stat-label">Omzet Bulan ini</div>
+=======
+                    <div class="sa-stat-label">Total Donasi Terkumpul</div>
+>>>>>>> 2ca46e20aed05c9f014802bc52f3d1c4bc5fd904
                     <div class="sa-stat-sub">dari target Rp 2.6 M</div>
                 </div>
 
@@ -303,6 +307,12 @@
         </main>
     </div>
 
+<<<<<<< HEAD
+=======
+    {{-- Help FAB --}}
+    <button class="help-fab" aria-label="Bantuan">?</button>
+
+>>>>>>> 2ca46e20aed05c9f014802bc52f3d1c4bc5fd904
     <script>
         // Sidebar collapse toggle
         document.getElementById('saSidebarToggle').addEventListener('click', () => {

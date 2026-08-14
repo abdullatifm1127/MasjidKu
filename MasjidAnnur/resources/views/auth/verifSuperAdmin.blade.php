@@ -135,6 +135,7 @@
             {{-- ===== DAFTAR PENDAFTARAN ===== --}}
             <div id="vfList">
 
+<<<<<<< HEAD
                 @php
                 $pendaftaran = [
                     [
@@ -302,6 +303,149 @@
                 </div>
                 @endforeach
 
+=======
+                
+                    
+@foreach($pendaftaran as $p)
+<div class="vf-card {{ $p->status }}"
+     data-status="{{ $p->status }}"
+     data-search="{{ strtolower($p->mosque_name.' '.$p->city.' '.$p->email) }}">
+
+    <div class="vf-card-inner">
+
+        <div class="vf-card-header">
+            <div class="vf-mosque-avatar" style="background:#4f46e5">
+                {{ strtoupper(substr($p->mosque_name, 0, 2)) }}
+            </div>
+
+            <div class="vf-mosque-title">
+                <div class="vf-mosque-name-row">
+
+                    <span class="vf-mosque-name">
+                        {{ $p->mosque_name }}
+                    </span>
+
+                    <span class="vf-status-badge {{ $p->status }}">
+                        @if($p->status === 'pending')
+                            ⏳ Menunggu
+                        @elseif($p->status === 'approved')
+                            ✓ Disetujui
+                        @else
+                            ✕ Ditolak
+                        @endif
+                    </span>
+
+                </div>
+
+                <div class="vf-mosque-sub">
+                    {{ $p->city }} · {{ $p->founded }} · {{ $p->capacity }} jamaah
+                </div>
+            </div>
+        </div>
+
+        <div class="vf-info-grid">
+
+            <div class="vf-info-item">
+                <div class="vf-info-label">Imam</div>
+                <div class="vf-info-val">
+                    {{ $p->imam_name ?? '-' }}
+                </div>
+            </div>
+
+            <div class="vf-info-item">
+                <div class="vf-info-label">Ketua</div>
+                <div class="vf-info-val">
+                    {{ $p->chairman_name ?? '-' }}
+                </div>
+            </div>
+
+            <div class="vf-info-item">
+                <div class="vf-info-label">Email</div>
+                <div class="vf-info-val">
+                    {{ $p->email }}
+                </div>
+            </div>
+
+            <div class="vf-info-item">
+                <div class="vf-info-label">Telepon</div>
+                <div class="vf-info-val">
+                    {{ $p->phone ?? '-' }}
+                </div>
+            </div>
+
+        </div>
+
+        <div class="vf-tags">
+            @if(is_array($p->programs))
+                @foreach(array_slice($p->programs, 0, 4) as $prog)
+                    <span class="vf-tag">{{ $prog }}</span>
+                @endforeach
+
+                @if(count($p->programs) > 4)
+                    <span class="vf-tag-more">
+                        +{{ count($p->programs) - 4 }} lainnya
+                    </span>
+                @endif
+            @endif
+        </div>
+
+        <div class="vf-actions">
+
+            <button type="button"
+                    class="vf-btn-detail"
+                    onclick="vfOpenDetail({{ $p->id }})">
+                <i class="fa-solid fa-eye"></i>
+                Lihat Detail
+            </button>
+
+            @if($p->status === 'pending')
+
+                <form method="POST"
+                      action="{{ route('superadmin.verifikasi.approve', $p->id) }}"
+                      style="display:inline;">
+                    @csrf
+                    @method('PUT')
+
+                    <button type="submit" class="vf-btn-approve">
+                        <i class="fa-solid fa-check"></i>
+                        Setujui
+                    </button>
+                </form>
+
+                <form method="POST"
+                      action="{{ route('superadmin.verifikasi.reject', $p->id) }}"
+                      style="display:inline;">
+                    @csrf
+                    @method('PUT')
+
+                    <button type="submit" class="vf-btn-reject">
+                        <i class="fa-solid fa-xmark"></i>
+                        Tolak
+                    </button>
+                </form>
+
+            @elseif($p->status === 'approved')
+
+                <span class="vf-status-label green">
+                    <i class="fa-solid fa-circle-check"></i>
+                    Sudah disetujui
+                </span>
+
+            @else
+
+                <span class="vf-status-label red">
+                    <i class="fa-solid fa-xmark"></i>
+                    Pendaftaran ditolak
+                </span>
+
+            @endif
+
+        </div>
+
+    </div>
+</div>
+@endforeach
+>>>>>>> 2ca46e20aed05c9f014802bc52f3d1c4bc5fd904
                 {{-- Empty state --}}
                 <div class="vf-empty" id="vfEmpty" style="display:none;">
                     <div class="vf-empty-icon">🔍</div>
@@ -313,6 +457,11 @@
         </main>
     </div>
 
+<<<<<<< HEAD
+=======
+    {{-- Help FAB --}}
+    <button class="help-fab" aria-label="Bantuan">?</button>
+>>>>>>> 2ca46e20aed05c9f014802bc52f3d1c4bc5fd904
 
     {{-- ===== MODAL DETAIL ===== --}}
     <div class="vf-modal-overlay" id="vfModalOverlay">
@@ -373,6 +522,7 @@
             const d = detailData.find(x => x.id === id);
             if (!d) return;
 
+<<<<<<< HEAD
             document.getElementById('vfModalTitle').textContent = 'Detail — ' + d.nama;
 
             const statusMap = { pending: '⏳ Menunggu', disetujui: '✓ Disetujui', ditolak: '✕ Ditolak' };
@@ -393,6 +543,31 @@
                     <div class="vf-modal-field"><div class="vf-info-label">Email</div><div class="vf-info-val">${d.email}</div></div>
                     <div class="vf-modal-field"><div class="vf-info-label">Telepon</div><div class="vf-info-val">${d.telepon}</div></div>
                     <div class="vf-modal-field"><div class="vf-info-label">Tanggal Daftar</div><div class="vf-info-val">${d.daftar}</div></div>
+=======
+            document.getElementById('vfModalTitle').textContent = 'Detail — ' + d.mosque_name;
+
+            const statusMap = { pending: '⏳ Menunggu', approved: '✓ Disetujui', rejected: '✕ Ditolak' };
+            const programTags = (d.programs || []).map(p => `<span class="vf-tag">${p}</span>`).join('');
+            
+            // Format tanggal buat (created_at) jika diperlukan, atau sesuaikan
+            const formattedDate = d.created_at ? new Date(d.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+
+            document.getElementById('vfModalBody').innerHTML = `
+                <div class="vf-modal-row">
+                    <div class="vf-modal-avatar" style="background:#4f46e5">${d.mosque_name.substring(0, 2).toUpperCase()}</div>
+                    <div>
+                        <div class="vf-modal-mosque-name">${d.mosque_name}</div>
+                        <div class="vf-modal-mosque-sub">${d.city} · ${d.founded ?? '-'} · ${d.capacity ?? '-'} jamaah</div>
+                        <span class="vf-status-badge ${d.status} vf-modal-status">${statusMap[d.status] || d.status}</span>
+                    </div>
+                </div>
+                <div class="vf-modal-grid">
+                    <div class="vf-modal-field"><div class="vf-info-label">Imam</div><div class="vf-info-val">${d.imam_name ?? '-'}</div></div>
+                    <div class="vf-modal-field"><div class="vf-info-label">Ketua</div><div class="vf-info-val">${d.chairman_name ?? '-'}</div></div>
+                    <div class="vf-modal-field"><div class="vf-info-label">Email</div><div class="vf-info-val">${d.email}</div></div>
+                    <div class="vf-modal-field"><div class="vf-info-label">Telepon</div><div class="vf-info-val">${d.phone ?? '-'}</div></div>
+                    <div class="vf-modal-field"><div class="vf-info-label">Tanggal Daftar</div><div class="vf-info-val">${formattedDate}</div></div>
+>>>>>>> 2ca46e20aed05c9f014802bc52f3d1c4bc5fd904
                 </div>
                 <div class="vf-info-label" style="margin:16px 0 8px">Program Kegiatan</div>
                 <div class="vf-tags">${programTags}</div>
@@ -400,7 +575,10 @@
 
             document.getElementById('vfModalOverlay').classList.add('active');
         }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2ca46e20aed05c9f014802bc52f3d1c4bc5fd904
         document.getElementById('vfModalClose').addEventListener('click', () => {
             document.getElementById('vfModalOverlay').classList.remove('active');
         });

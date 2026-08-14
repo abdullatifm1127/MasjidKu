@@ -1,0 +1,520 @@
+.sa-topbar {
+    justify-content: space-between;
+}
+
+.sa-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.vf-topbar-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    background: #fef9c3;
+    color: #92400e;
+    border-radius: 100px;
+    border: 1px solid #fde68a;
+}
+
+/* ---- Page content ---- */
+.vf-content {
+    gap: 20px;
+}
+
+.vf-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.vf-summary-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 22px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+}
+
+.vf-summary-card.amber {
+    background: #fffbeb;
+    border-color: #fde68a;
+}
+
+.vf-summary-card.green {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.vf-summary-card.red {
+    background: #fff1f2;
+    border-color: #fecdd3;
+}
+
+.vf-summary-icon {
+    font-size: 2rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.vf-summary-val {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.vf-summary-card.amber .vf-summary-val { color: #92400e; }
+.vf-summary-card.green .vf-summary-val { color: #166534; }
+.vf-summary-card.red   .vf-summary-val { color: #9f1239; }
+
+.vf-summary-label {
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
+.vf-summary-card.amber .vf-summary-label { color: #b45309; }
+.vf-summary-card.green .vf-summary-label { color: #15803d; }
+.vf-summary-card.red   .vf-summary-label { color: #be123c; }
+
+
+.vf-filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.vf-filter-tabs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.vf-filter-tab {
+    padding: 7px 16px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    border-radius: 8px;
+    border: 1.5px solid #e5e7eb;
+    background: #fff;
+    color: #4b5563;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+}
+
+.vf-filter-tab:hover { border-color: #9ca3af; color: #111827; }
+
+.vf-filter-tab.active[data-filter="semua"]     { background: #111827; border-color: #111827; color: #fff; }
+.vf-filter-tab.active[data-filter="pending"]   { background: #fef9c3; border-color: #fde68a; color: #92400e; }
+.vf-filter-tab.active[data-filter="disetujui"] { background: #dcfce7; border-color: #bbf7d0; color: #166534; }
+.vf-filter-tab.active[data-filter="ditolak"]   { background: #fee2e2; border-color: #fecaca; color: #991b1b; }
+
+.vf-search-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.vf-search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    pointer-events: none;
+}
+
+.vf-search {
+    padding: 8px 12px 8px 32px;
+    font-size: 0.82rem;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #111827;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    outline: none;
+    width: 240px;
+    transition: border-color 0.18s;
+    background: #fff;
+}
+
+.vf-search:focus { border-color: #1a4731; }
+.vf-search::placeholder { color: #9ca3af; }
+
+.vf-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    border-left: 4px solid #e5e7eb;
+    margin-bottom: 14px;
+    overflow: hidden;
+    transition: box-shadow 0.18s;
+}
+
+.vf-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+
+.vf-card.pending   { border-left-color: #f59e0b; }
+.vf-card.disetujui { border-left-color: #22c55e; }
+.vf-card.ditolak   { border-left-color: #ef4444; }
+
+.vf-card-inner {
+    padding: 20px 24px;
+}
+
+/* Header row */
+.vf-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.vf-mosque-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.vf-mosque-title { flex: 1; min-width: 0; }
+
+.vf-mosque-name-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+}
+
+.vf-mosque-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.vf-mosque-sub {
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+/* Status badges */
+.vf-status-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 100px;
+    flex-shrink: 0;
+}
+
+.vf-status-badge.pending   { background: #fef9c3; color: #92400e; border: 1px solid #fde68a; }
+.vf-status-badge.disetujui { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.vf-status-badge.ditolak   { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+.vf-daftar-info {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.vf-daftar-label {
+    font-size: 0.7rem;
+    color: #9ca3af;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+}
+
+.vf-daftar-val {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Info grid */
+.vf-info-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.vf-info-item { }
+
+.vf-info-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 3px;
+}
+
+.vf-info-val {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #111827;
+}
+
+/* Tags */
+.vf-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.vf-tag {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 3px 10px;
+    background: #f3f4f6;
+    color: #374151;
+    border-radius: 100px;
+    border: 1px solid #e5e7eb;
+}
+
+.vf-tag-more {
+    background: #eff6ff;
+    color: #1e40af;
+    border-color: #bfdbfe;
+}
+
+/* Action buttons */
+.vf-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.vf-btn-detail {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #374151;
+    background: #fff;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.18s;
+}
+
+.vf-btn-detail:hover { background: #f9fafb; border-color: #9ca3af; }
+
+.vf-btn-approve {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #fff;
+    background: #1a4731;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.18s;
+}
+
+.vf-btn-approve:hover { background: #0e3320; }
+
+.vf-btn-reject {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #ef4444;
+    background: #fff;
+    border: 1.5px solid #fca5a5;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.18s;
+}
+
+.vf-btn-reject:hover { background: #fef2f2; border-color: #ef4444; }
+
+.vf-status-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 8px;
+}
+
+.vf-status-label.green { color: #166534; background: #f0fdf4; }
+.vf-status-label.red   { color: #991b1b; background: #fff1f2; }
+
+/* Empty state */
+.vf-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 10px;
+}
+
+.vf-empty-icon { font-size: 2.5rem; }
+.vf-empty-text { font-size: 0.9rem; color: #9ca3af; font-weight: 500; }
+
+/* =============================================================
+   MODAL
+   ============================================================= */
+.vf-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.vf-modal-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.vf-modal {
+    background: #fff;
+    border-radius: 14px;
+    width: 560px;
+    max-width: 95vw;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(0.95);
+    transition: transform 0.2s;
+}
+
+.vf-modal-overlay.active .vf-modal {
+    transform: scale(1);
+}
+
+.vf-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    border-bottom: 1px solid #f3f4f6;
+    flex-shrink: 0;
+}
+
+.vf-modal-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.vf-modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9ca3af;
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    transition: color 0.18s, background 0.18s;
+}
+
+.vf-modal-close:hover { color: #111827; background: #f3f4f6; }
+
+.vf-modal-body {
+    padding: 22px;
+    overflow-y: auto;
+}
+
+.vf-modal-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.vf-modal-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.vf-modal-mosque-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 4px;
+}
+
+.vf-modal-mosque-sub {
+    font-size: 0.82rem;
+    color: #6b7280;
+    margin-bottom: 8px;
+}
+
+.vf-modal-status { display: inline-flex; }
+
+.vf-modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 4px;
+}
+
+.vf-modal-field { }
+
+/* =============================================================
+   RESPONSIVE
+   ============================================================= */
+@media (max-width: 1024px) {
+    .vf-info-grid { grid-template-columns: 1fr 1fr; }
+    .vf-summary-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 768px) {
+    .vf-summary-grid { grid-template-columns: 1fr; }
+    .vf-filter-bar { flex-direction: column; align-items: flex-start; }
+    .vf-search { width: 100%; }
+    .vf-search-wrap { width: 100%; }
+    .vf-info-grid { grid-template-columns: 1fr 1fr; }
+    .vf-daftar-info { display: none; }
+    .vf-modal-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+    .vf-info-grid { grid-template-columns: 1fr; }
+    .vf-card-inner { padding: 16px; }
+}

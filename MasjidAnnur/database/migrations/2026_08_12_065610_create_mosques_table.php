@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('mosque_name');
             $table->string('arabic_name')->nullable();
             $table->string('tagline')->nullable();
-            $table->year('founded')->nullable();
+            $table->integer('founded')->nullable();
             $table->string('capacity')->nullable();
 
             // Alamat

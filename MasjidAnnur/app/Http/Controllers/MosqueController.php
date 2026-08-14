@@ -134,11 +134,115 @@ class MosqueController extends Controller
      * Dashboard masjid.
      */
     public function dashboard()
-    {
-        $mosques = Mosque::where('user_id', Auth::id())
-            ->latest()
-            ->get();
+{
+    // Mengambil data masjid milik user yang sedang login
+    $mosque = Mosque::where('user_id', Auth::id())->first();
 
-        return view('dashboard', compact('mosques'));
+    // Jika belum mendaftarkan masjid, arahkan ke form pendaftaran
+    if (!$mosque) {
+        return redirect()->route('daftar.masjid');
+    }
+
+    // Jika statusnya masih pending, arahkan ke halaman waiting
+    if ($mosque->status === 'pending') {
+        return redirect()->route('waiting');
+    }
+
+    // Jika sudah approved, tampilkan halaman beranda admin
+    return view('auth.berandaAdmin', compact('mosque'));
+}
+
+    /**
+     * Halaman edit Profil Masjid (admin).
+     */
+    public function editProfil()
+    {
+        // Ambil masjid pertama yang ada — bisa disesuaikan jika multi-masjid
+        $mosque = Mosque::first();
+
+        return view('auth.profilMasjid', compact('mosque'));
+    }
+
+    /**
+     * Simpan perubahan Profil Masjid (admin).
+     */
+    public function updateProfil(Request $request)
+    {
+        $mosque = Mosque::first();
+
+        if (!$mosque) {
+            return redirect()->route('admin.profil-masjid')
+                ->with('error', 'Data masjid belum tersedia.');
+        }
+
+        $validated = $request->validate([
+            'mosque_name'       => 'required|string|max:255',
+            'arabic_name'       => 'nullable|string|max:255',
+            'tagline'           => 'nullable|string|max:255',
+            'founded'           => 'nullable|integer|min:1000|max:' . date('Y'),
+            'capacity'          => 'nullable|string|max:100',
+            'description'       => 'nullable|string',
+
+            'organization_name' => 'nullable|string|max:255',
+            'imam_name'         => 'required|string|max:255',
+            'imam_phone'        => 'nullable|string|max:30',
+            'chairman_name'     => 'required|string|max:255',
+            'chairman_phone'    => 'nullable|string|max:30',
+            'secretary_name'    => 'nullable|string|max:255',
+            'treasurer_name'    => 'nullable|string|max:255',
+
+            'address'           => 'required|string',
+            'kelurahan'         => 'required|string|max:255',
+            'kecamatan'         => 'required|string|max:255',
+            'postal_code'       => 'nullable|string|max:20',
+            'city'              => 'required|string|max:255',
+            'province'          => 'required|string|max:255',
+
+            'phone'             => 'required|string|max:30',
+            'email'             => 'required|email|max:255',
+            'website'           => 'nullable|string|max:255',
+
+            'facilities'        => 'nullable|array',
+            'facilities.*'      => 'string',
+            'programs'          => 'nullable|array',
+            'programs.*'        => 'string',
+        ]);
+
+        $mosque->update([
+            'mosque_name'       => $validated['mosque_name'],
+            'arabic_name'       => $validated['arabic_name'] ?? null,
+            'tagline'           => $validated['tagline'] ?? null,
+            'founded'           => $validated['founded'] ?? null,
+            'capacity'          => $validated['capacity'] ?? null,
+            'description'       => $validated['description'] ?? null,
+
+            'organization_name' => $validated['organization_name'] ?? null,
+            'imam_name'         => $validated['imam_name'],
+            'imam_phone'        => $validated['imam_phone'] ?? null,
+            'chairman_name'     => $validated['chairman_name'],
+            'chairman_phone'    => $validated['chairman_phone'] ?? null,
+            'secretary_name'    => $validated['secretary_name'] ?? null,
+            'treasurer_name'    => $validated['treasurer_name'] ?? null,
+
+            'address'           => $validated['address'],
+            'kelurahan'         => $validated['kelurahan'],
+            'kecamatan'         => $validated['kecamatan'],
+            'postal_code'       => $validated['postal_code'] ?? null,
+            'city'              => $validated['city'],
+            'province'          => $validated['province'],
+
+            'phone'             => $validated['phone'],
+            'email'             => $validated['email'],
+            'website'           => $validated['website'] ?? null,
+
+            'facilities'        => $validated['facilities'] ?? [],
+            'programs'          => $validated['programs'] ?? [],
+
+            'has_online_donation'  => $request->has('has_online_donation'),
+            'has_prayer_schedule'  => $request->has('has_prayer_schedule'),
+        ]);
+
+        return redirect()->route('admin.profil-masjid')
+            ->with('success', 'Profil masjid berhasil disimpan.');
     }
 }
