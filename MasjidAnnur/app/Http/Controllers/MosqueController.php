@@ -134,13 +134,23 @@ class MosqueController extends Controller
      * Dashboard masjid.
      */
     public function dashboard()
-    {
-        $mosques = Mosque::where('user_id', Auth::id())
-            ->latest()
-            ->get();
+{
+    // Mengambil data masjid milik user yang sedang login
+    $mosque = Mosque::where('user_id', Auth::id())->first();
 
-        return view('dashboard', compact('mosques'));
+    // Jika belum mendaftarkan masjid, arahkan ke form pendaftaran
+    if (!$mosque) {
+        return redirect()->route('daftar.masjid');
     }
+
+    // Jika statusnya masih pending, arahkan ke halaman waiting
+    if ($mosque->status === 'pending') {
+        return redirect()->route('waiting');
+    }
+
+    // Jika sudah approved, tampilkan halaman beranda admin
+    return view('auth.berandaAdmin', compact('mosque'));
+}
 
     /**
      * Halaman edit Profil Masjid (admin).

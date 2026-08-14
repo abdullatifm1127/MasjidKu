@@ -103,9 +103,10 @@ Route::get('/forgot-password', function () {
 */
 
 // Dashboard Admin
-Route::get('/admin/dashboard', function () {
-    return view('auth.berandaAdmin');
-})->name('admin.dashboard');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/dashboard', [MosqueController::class, 'dashboard'])
+        ->name('admin.dashboard');
+});
 
 // Landing Page Editor
 Route::get('/admin/landing-page', function () {
@@ -133,7 +134,10 @@ Route::get('/superadmin/dashboard', function () {
 
 // Verifikasi Pendaftaran Super Admin
 Route::get('/superadmin/verifikasi', function () {
-    return view('auth.verifSuperAdmin');
+    // Hanya ambil masjid yang statusnya pending
+    $pendaftaran = Mosque::where('status', 'pending')->latest()->get();
+
+    return view('auth.verifSuperAdmin', compact('pendaftaran'));
 })->name('superadmin.verifikasi');
 
 // Approve & Reject pendaftaran (placeholder — ganti dengan controller saat ada logika DB)
