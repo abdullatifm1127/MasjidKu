@@ -1,0 +1,480 @@
+.mm-content {
+    gap: 16px;
+}
+
+/* ---- Alert ---- */
+.mm-alert {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 16px;
+    border-radius: 10px;
+    font-size: 0.84rem;
+    font-weight: 500;
+}
+
+.mm-alert-success {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.mm-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.mm-filter-tabs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.mm-filter-tab {
+    padding: 7px 16px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    border-radius: 8px;
+    border: 1.5px solid #e5e7eb;
+    background: #fff;
+    color: #4b5563;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.18s;
+}
+
+.mm-filter-tab:hover { border-color: #9ca3af; color: #111827; }
+.mm-filter-tab.active { background: #111827; border-color: #111827; color: #fff; }
+
+.mm-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mm-search-wrap {
+    position: relative;
+}
+
+.mm-search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    pointer-events: none;
+}
+
+.mm-search {
+    padding: 8px 12px 8px 30px;
+    font-size: 0.82rem;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #111827;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    outline: none;
+    width: 220px;
+    background: #fff;
+    transition: border-color 0.18s;
+}
+
+.mm-search:focus { border-color: #1a4731; }
+.mm-search::placeholder { color: #9ca3af; }
+
+.mm-btn-tambah {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 18px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #fff;
+    background: #1a4731;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.18s;
+}
+
+.mm-btn-tambah:hover { background: #0e3320; }
+
+.mm-table-wrap {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.mm-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.84rem;
+}
+
+/* Header */
+.mm-table thead tr {
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.mm-table th {
+    padding: 11px 18px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+    text-align: left;
+    white-space: nowrap;
+}
+
+/* Rows */
+.mm-row {
+    border-bottom: 1px solid #f3f4f6;
+    transition: background 0.14s;
+}
+
+.mm-row:last-child { border-bottom: none; }
+.mm-row:hover { background: #fafafa; }
+
+.mm-table td {
+    padding: 14px 18px;
+    vertical-align: middle;
+}
+
+/* Column: Masjid */
+.mm-td-masjid { min-width: 200px; }
+
+.mm-mosque-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mm-mosque-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    color: #fff;
+    font-size: 0.88rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.mm-mosque-nama {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 2px;
+}
+
+.mm-mosque-arab {
+    font-size: 0.78rem;
+    color: #9ca3af;
+    direction: rtl;
+    font-family: 'Amiri', 'Times New Roman', serif;
+}
+
+/* Column: Kota */
+.mm-td-kota {
+    color: #374151;
+    min-width: 130px;
+}
+
+/* Column: Imam */
+.mm-td-imam {
+    color: #4b5563;
+    min-width: 180px;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Column: Status */
+.mm-td-status { min-width: 120px; }
+
+.mm-status-select-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.mm-status-select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 5px 28px 5px 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    border-radius: 8px;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.18s;
+}
+
+.mm-status-select.aktif {
+    background: #dcfce7;
+    color: #166534;
+    border-color: #bbf7d0;
+}
+
+.mm-status-select.pending {
+    background: #fef9c3;
+    color: #92400e;
+    border-color: #fde68a;
+}
+
+.mm-status-select.nonaktif {
+    background: #f3f4f6;
+    color: #6b7280;
+    border-color: #e5e7eb;
+}
+
+.mm-select-arrow {
+    position: absolute;
+    right: 9px;
+    pointer-events: none;
+    color: inherit;
+    opacity: 0.7;
+}
+
+/* Column: Donasi */
+.mm-td-donasi { min-width: 140px; }
+
+.mm-donasi-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mm-donasi-bar-track {
+    flex: 1;
+    height: 7px;
+    background: #f3f4f6;
+    border-radius: 100px;
+    overflow: hidden;
+    min-width: 80px;
+}
+
+.mm-donasi-bar-fill {
+    height: 100%;
+    border-radius: 100px;
+    transition: width 0.4s ease;
+}
+
+.mm-donasi-pct {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #374151;
+    white-space: nowrap;
+    min-width: 32px;
+}
+
+/* Column: Aksi */
+.mm-td-aksi { text-align: right; white-space: nowrap; }
+
+.mm-kelola-link {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #1a4731;
+    text-decoration: none;
+    padding: 5px 8px;
+    border-radius: 6px;
+    transition: background 0.16s;
+    opacity: 0;
+    transition: opacity 0.18s, background 0.18s;
+}
+
+.mm-row:hover .mm-kelola-link { opacity: 1; }
+.mm-kelola-link:hover { background: #f0fdf4; }
+
+/* Empty state */
+.mm-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 56px 20px;
+    gap: 10px;
+}
+
+.mm-empty-icon { font-size: 2.4rem; }
+.mm-empty-text { font-size: 0.88rem; color: #9ca3af; font-weight: 500; }
+
+/* =============================================================
+   MODAL TAMBAH MASJID
+   ============================================================= */
+.mm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.mm-modal-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.mm-modal {
+    background: #fff;
+    border-radius: 14px;
+    width: 560px;
+    max-width: 96vw;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(0.95);
+    transition: transform 0.2s;
+}
+
+.mm-modal-overlay.active .mm-modal { transform: scale(1); }
+
+.mm-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    border-bottom: 1px solid #f3f4f6;
+    flex-shrink: 0;
+}
+
+.mm-modal-title {
+    font-size: 0.96rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.mm-modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9ca3af;
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    transition: color 0.18s, background 0.18s;
+}
+
+.mm-modal-close:hover { color: #111827; background: #f3f4f6; }
+
+.mm-modal-body {
+    padding: 22px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.mm-modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.mm-modal-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.mm-modal-field-full {
+    margin-bottom: 20px;
+}
+
+.mm-modal-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #6b7280;
+}
+
+.mm-req { color: #ef4444; }
+
+.mm-modal-input {
+    padding: 9px 12px;
+    font-size: 0.86rem;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #111827;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.18s;
+    background: #fff;
+}
+
+.mm-modal-input:focus { border-color: #1a4731; }
+.mm-modal-input::placeholder { color: #9ca3af; }
+.mm-rtl { text-align: right; }
+
+.mm-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.mm-btn-cancel {
+    padding: 9px 20px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #374151;
+    background: #fff;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.18s;
+}
+
+.mm-btn-cancel:hover { background: #f9fafb; }
+
+.mm-btn-simpan {
+    padding: 9px 22px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #fff;
+    background: #1a4731;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.18s;
+}
+
+.mm-btn-simpan:hover { background: #0e3320; }
+
+/* =============================================================
+   RESPONSIVE
+   ============================================================= */
+@media (max-width: 900px) {
+    .mm-toolbar { flex-direction: column; align-items: flex-start; }
+    .mm-toolbar-right { width: 100%; justify-content: space-between; }
+    .mm-search { width: 100%; }
+    .mm-td-imam { display: none; }
+}
+
+@media (max-width: 640px) {
+    .mm-td-kota { display: none; }
+    .mm-modal-grid { grid-template-columns: 1fr; }
+}
