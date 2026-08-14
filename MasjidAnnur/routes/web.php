@@ -19,7 +19,7 @@ Route::get('/', function () {
         $userMosque = Mosque::where('user_id', Auth::id())->first();
     }
 
-    return view('halamanUtama', compact('userMosque'));
+return view('auth.halamanUtama', compact('userMosque'));
 })->name('home');
 
 
