@@ -23,6 +23,13 @@ Route::get('/', function () {
     return view('auth.halamanUtama', compact('userMosque'));
 })->name('home');
 
+// Halaman Publik Masjid
+Route::get('/masjidUser', function () {
+    $mosque = Mosque::first(); 
+    return view('auth.halamanUtamaUser', compact('mosque'));
+})->name('masjid.publik');
+
+
 /*
 |--------------------------------------------------------------------------
 | Authentication
