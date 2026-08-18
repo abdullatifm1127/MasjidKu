@@ -6,8 +6,8 @@
     <title>Pengguna - Super Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/berandaSuperAdmin.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/penggunaSuperAdmin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/superadmin/berandaSuperAdmin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/superadmin/penggunaSuperAdmin.css') }}">
 </head>
 <body class="sa-page" id="saBody">
 
@@ -195,11 +195,8 @@
         </main>
     </div>
 
-<<<<<<< HEAD
-=======
     {{-- Help FAB --}}
     <button class="help-fab" aria-label="Bantuan">?</button>
->>>>>>> 2ca46e20aed05c9f014802bc52f3d1c4bc5fd904
 
     {{-- ===== MODAL TAMBAH/EDIT PENGGUNA ===== --}}
     <div class="pg-modal-overlay" id="pgModalOverlay">
@@ -235,15 +232,17 @@
                         </select>
                     </div>
                     <div class="pg-modal-field">
-                        <label class="pg-modal-label" for="pgFieldMasjid">Masjid</label>
-                        <select name="masjid" id="pgFieldMasjid" class="pg-modal-input">
-                        <option value="">— Pilih Masjid —</option>
-                        <option value="Baitul Digital">Baitul Digital</option>
-                        <option value="Masjid Ar-Rahman">Masjid Ar-Rahman</option>
-                        <option value="Masjid Al-Aqsa">Masjid Al-Aqsa</option>
-                    </select>
-                    </div>
-                    <div class="pg-modal-field" id="pgPasswordWrap">
+    <label class="pg-modal-label" for="pgFieldMasjid">Masjid</label>
+    <select name="masjid" id="pgFieldMasjid" class="pg-modal-input">
+        <option value="">— Pilih Masjid —</option>
+
+        {{-- Ganti $mosque->name menjadi $mosque->mosque_name --}}
+        @foreach($mosques as $mosque)
+            <option value="{{ $mosque->mosque_name }}">{{ $mosque->mosque_name }}</option>
+        @endforeach
+    </select>
+</div>
+                        <div class="pg-modal-field" id="pgPasswordWrap">
                         <label class="pg-modal-label" for="pgFieldPassword">Password <span class="pg-req" id="pgPasswordReq">*</span></label>
                         <input type="password" name="password" id="pgFieldPassword" class="pg-modal-input" placeholder="Min. 8 karakter">
                     </div>

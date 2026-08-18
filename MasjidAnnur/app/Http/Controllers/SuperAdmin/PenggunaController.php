@@ -6,14 +6,18 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Mosque;
 
 class PenggunaController extends Controller
 {
     public function index()
-    {
-        $pengguna = User::all();
-        return view('auth.penggunaSuperAdmin', compact('pengguna'));
-    }
+{
+    $pengguna = User::all();
+    // Tambahkan baris ini untuk mengambil data masjid dari database
+    $mosques = \App\Models\Mosque::all(); 
+    // Tambahkan 'mosques' ke dalam compact()
+    return view('auth.superadmin.penggunaSuperAdmin', compact('pengguna', 'mosques'));
+}
 
     public function store(Request $request)
 {

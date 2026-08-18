@@ -6,7 +6,7 @@
     <title>Dashboard Admin - Masjid Annur</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/berandaAdmin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/adminmasjid/berandaAdmin.css') }}">
 </head>
 <body class="admin-page" id="adminBody">
 
@@ -24,7 +24,7 @@
                 </svg>
             </div>
             <div class="ba-brand-text">
-                <strong>SIM Masjid</strong>
+                <strong>Nama Masjid</strong>
                 <span>Baitul Digital</span>
             </div>
         </a>
@@ -134,7 +134,7 @@
                 </button>
                 <div>
                     <div class="ba-page-title">Dashboard</div>
-                    <div class="ba-page-sub">Selamat datang di panel admin SIM Masjid</div>
+                    <div class="ba-page-sub">Selamat datang di panel admin Nama Masjid</div>
                 </div>
             </div>
             <div class="ba-topbar-right">
@@ -289,7 +289,7 @@
 
             {{-- Info Banner --}}
             <div class="ba-banner">
-                <div class="ba-banner-title">SIM Masjid — Baitul Digital</div>
+                <div class="ba-banner-title">Nama Masjid — Baitul Digital</div>
                 <div class="ba-banner-sub">Sistem Informasi Masjid versi 1.0 · Modul aktif: Landing Page, Profil Masjid</div>
                 <div class="ba-banner-tags">
                     <span class="ba-banner-tag active">Modul Landing Page &#10003;</span>

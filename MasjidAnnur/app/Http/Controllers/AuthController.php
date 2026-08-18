@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon; // <--- 1. TAMBAHKAN INI DI BAGIAN ATAS
 
 class AuthController extends Controller
 {
@@ -23,6 +24,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'last_active_at' => Carbon::now(), // <--- 2. Tambahkan ini saat register jika langsung login
         ]);
 
         Auth::login($user);
@@ -45,6 +47,12 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             $user = Auth::user();
+
+            // <--- 3. UPDATE 'last_active_at' DI SINI SAAT LOGIN BERHASIL --->
+            \App\Models\User::where('id', $user->id)->update([
+                'last_active_at' => Carbon::now(),
+            ]);
+            // -------------------------------------------------------------
 
             $mosque = Mosque::where('user_id', $user->id)->first();
 

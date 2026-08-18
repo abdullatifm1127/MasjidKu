@@ -6,7 +6,7 @@
     <title>Editor Landing Page - Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/landingPage.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/adminmasjid/landingPage.css') }}">
 </head>
 <body class="lp-page" id="lpBody">
 

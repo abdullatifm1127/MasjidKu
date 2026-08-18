@@ -27,7 +27,7 @@ class MosqueController extends Controller
             }
         }
 
-        return view('auth.registerMasjid');
+        return view('auth.adminmasjid.registerMasjid');
     }
 
     /**
@@ -149,7 +149,7 @@ class MosqueController extends Controller
         }
 
         // Jika sudah approved, tampilkan halaman beranda admin
-        return view('auth.berandaAdmin', compact('mosque'));
+        return view('auth.adminmasjid.berandaAdmin', compact('mosque'));
     }
 
     /**
@@ -160,7 +160,7 @@ class MosqueController extends Controller
         // Ambil masjid pertama yang ada — bisa disesuaikan jika multi-masjid
         $mosque = Mosque::first();
 
-        return view('auth.profilMasjid', compact('mosque'));
+        return view('adminmasjid.profilMasjid', compact('mosque'));
     }
 
     /**
@@ -260,7 +260,7 @@ class MosqueController extends Controller
         $totalRejected = Mosque::where('status', 'rejected')->count();
         $totalSemua = $pendaftaran->count();
 
-        return view('auth.verifSuperAdmin', compact(
+        return view('auth.superadmin.verifSuperAdmin', compact(
             'pendaftaran', 
             'totalPending', 
             'totalApproved', 
@@ -278,7 +278,7 @@ class MosqueController extends Controller
     $totalPending = Mosque::where('status', 'pending')->count();
     $totalNonaktif = Mosque::where('status', 'rejected')->count();
 
-    return view('auth.manajemenMasjidSuperAdmin', compact(
+    return view('auth.superadmin.manajemenMasjidSuperAdmin', compact(
         'masjids', 
         'totalSemua', 
         'totalAktif', 
