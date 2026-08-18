@@ -10,31 +10,6 @@
 </head>
 <body>
 
-  <!-- TOP BAR: JADWAL SHALAT  -->
-    <div class="hu-praybar">
-        <div class="hu-praybar-left">
-            <span class="hu-praybar-label">Jadwal Shalat</span>
-            <span class="hu-praybar-date">— Senin, 17 Agustus 2026</span>
-        </div>
-        <div class="hu-praybar-times">
-            @php
-                $prayers = [
-                    ['name' => 'Subuh',   'time' => '04:32', 'active' => false],
-                    ['name' => 'Dzuhur',  'time' => '12:05', 'active' => false],
-                    ['name' => 'Ashar',   'time' => '15:21', 'active' => false],
-                    ['name' => 'Maghrib', 'time' => '18:02', 'active' => false],
-                    ['name' => 'Isya',    'time' => '19:14', 'active' => true],
-                ];
-            @endphp
-            @foreach($prayers as $p)
-            <div class="hu-prayer {{ $p['active'] ? 'active' : '' }}">
-                <div class="hu-prayer-name">{{ $p['name'] }}</div>
-                <div class="hu-prayer-time">{{ $p['time'] }}</div>
-            </div>
-            @endforeach
-        </div>
-    </div>
-
      <!-- NAVBAR -->
     <header class="hu-navbar" id="huNavbar">
         <div class="hu-navbar-inner">
@@ -199,6 +174,19 @@
                 <div class="hu-section-tag hu-tag-light">Hari Ini</div>
                 <h2 class="hu-section-title hu-title-light">Jadwal Waktu Shalat</h2>
             </div>
+        
+            @php
+                $prayers = [
+                    ['name' => 'Subuh',   'time' => '04:32', 'active' => false],
+                    ['name' => 'Dzuhur',  'time' => '12:05', 'active' => false],
+                    ['name' => 'Ashar',   'time' => '15:21', 'active' => false],
+                    ['name' => 'Maghrib', 'time' => '18:02', 'active' => false],
+                    ['name' => 'Isya',    'time' => '19:14', 'active' => true],
+                ];
+            @endphp
+            @foreach($prayers as $p)
+             @endforeach
+        
             <div class="hu-shalat-grid">
                 @foreach($prayers as $p)
                 <div class="hu-shalat-card {{ $p['active'] ? 'active' : '' }}">
