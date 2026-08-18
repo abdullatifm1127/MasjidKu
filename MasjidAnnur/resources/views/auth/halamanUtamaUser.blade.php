@@ -147,7 +147,7 @@
                 <div class="hu-profil-v2-right">
                     <div class="hu-profil-v2-images">
                         <div class="hu-profil-v2-img hu-img-tall">
-                            <img src="https://cdn.prod.website-files.com/65af5f0812c914d3fef6a68c/65f2b082077626ffe6e59c61_28.%20Membangun%20Keterhubungan%20Spiritual%20Melalui%20Bacaan%20Al-Quran.png"
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7skeyX4a7nPzMZhaMJEkntS_hwmhPHlRzoBvUGvTIzj9RsfMwGy1T5240&s=10"
                                  alt="Al-Quran" loading="lazy">
                         </div>
                         <div class="hu-profil-v2-img hu-img-short">
