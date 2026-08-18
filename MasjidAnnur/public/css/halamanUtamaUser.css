@@ -1,0 +1,1705 @@
+*::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --green:      #1a4731;
+    --green-mid:  #1a6640;
+    --green-light:#f0fdf4;
+    --amber:      #d97706;
+    --amber-bg:   #f59e0b;
+    --white:      #ffffff;
+    --dark:       #0f1923;
+    --gray:       #f5f5f7;
+    --text:       #1a1a1a;
+    --text-mid:   #4b5563;
+    --text-light: #9ca3af;
+    --border:     #e5e7eb;
+    --radius:     12px;
+    --font:       'Inter', 'Segoe UI', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: var(--font);
+    color: var(--text);
+    background: #fff;
+    overflow-x: hidden;
+}
+
+/* =============================================================
+   PRAYER TIME BAR
+   ============================================================= */
+.hu-praybar {
+    background: #0f1923;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: 44px;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 300;
+}
+
+.hu-praybar-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hu-praybar-label {
+    font-weight: 700;
+    color: var(--amber-bg);
+    font-size: 0.78rem;
+}
+
+.hu-praybar-date {
+    color: rgba(255,255,255,0.55);
+    font-size: 0.76rem;
+}
+
+.hu-praybar-times {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.hu-prayer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 14px;
+    min-width: 64px;
+    height: 44px;
+    justify-content: center;
+    border-left: 1px solid rgba(255,255,255,0.06);
+}
+
+.hu-prayer:first-child { border-left: none; }
+
+.hu-prayer.active {
+    background: var(--amber-bg);
+    color: #1a1a1a;
+}
+
+.hu-prayer-name {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    opacity: 0.7;
+    text-transform: uppercase;
+}
+
+.hu-prayer.active .hu-prayer-name { opacity: 1; }
+
+.hu-prayer-time {
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+/* =============================================================
+   NAVBAR
+   ============================================================= */
+.hu-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    transition: box-shadow 0.2s;
+}
+
+.hu-navbar.scrolled {
+    box-shadow: 0 2px 16px rgba(0,0,0,0.1);
+}
+
+.hu-navbar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+}
+
+/* Brand */
+.hu-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.hu-brand-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--green);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.hu-brand-name {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--green);
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.hu-brand-city {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-light);
+}
+
+/* Nav links */
+.hu-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+}
+
+.hu-nav-link {
+    padding: 6px 12px;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: var(--text-mid);
+    text-decoration: none;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: color 0.16s, background 0.16s;
+}
+
+.hu-nav-link:hover,
+.hu-nav-link.active {
+    color: var(--green);
+    background: var(--green-light);
+}
+
+/* Ganti Masjid button */
+.hu-ganti-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: var(--font);
+    color: var(--text-mid);
+    background: var(--gray);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.16s;
+}
+
+.hu-ganti-btn:hover { background: #e9e9ec; }
+
+/* Hamburger */
+.hu-hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    flex-shrink: 0;
+}
+
+.hu-hamburger span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--text);
+    border-radius: 2px;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.hu-hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hu-hamburger.active span:nth-child(2) { opacity: 0; }
+.hu-hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* =============================================================
+   INFO TICKER
+   ============================================================= */
+.hu-ticker {
+    background: #fefce8;
+    border-bottom: 1px solid #fde68a;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.hu-ticker-label {
+    background: var(--amber);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 4px 10px;
+    letter-spacing: 0.08em;
+    flex-shrink: 0;
+    margin-right: 16px;
+    margin-left: 32px;
+    border-radius: 4px;
+}
+
+.hu-ticker-wrap {
+    overflow: hidden;
+    flex: 1;
+}
+
+.hu-ticker-track {
+    display: inline-flex;
+    align-items: center;
+    gap: 24px;
+    white-space: nowrap;
+    animation: ticker 20s linear infinite;
+}
+
+@keyframes ticker {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+.hu-ticker-text {
+    font-size: 0.82rem;
+    color: #92400e;
+    font-weight: 500;
+}
+
+.hu-ticker-dot {
+    color: var(--amber);
+    font-size: 0.5rem;
+}
+
+/* =============================================================
+   HERO SECTION
+   ============================================================= */
+.hu-hero {
+    position: relative;
+    height: calc(100vh - 44px - 60px - 38px);
+    min-height: 480px;
+    max-height: 680px;
+    overflow: hidden;
+    background: #1a2a3a url('https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Masjid_Nabawi_WB.jpg/1280px-Masjid_Nabawi_WB.jpg') center/cover no-repeat;
+    display: flex;
+    align-items: flex-end;
+}
+
+.hu-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(10,20,30,0.15) 0%,
+        rgba(10,20,30,0.5)  50%,
+        rgba(10,20,30,0.75) 100%
+    );
+}
+
+.hu-hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 0 56px 72px;
+    max-width: 700px;
+}
+
+.hu-hero-arabic {
+    font-family: 'Amiri', 'Times New Roman', serif;
+    font-size: 1.6rem;
+    color: rgba(255,255,255,0.75);
+    direction: rtl;
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+}
+
+.hu-hero-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+.hu-hero-tagline {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 28px;
+    font-weight: 400;
+}
+
+.hu-hero-btns {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.hu-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 28px;
+    background: var(--amber);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.18s, transform 0.18s;
+}
+
+.hu-btn-primary:hover {
+    background: #b45309;
+    transform: translateY(-1px);
+}
+
+.hu-btn-outline {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 28px;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none;
+    border: 1.5px solid rgba(255,255,255,0.5);
+    backdrop-filter: blur(4px);
+    transition: background 0.18s;
+}
+
+.hu-btn-outline:hover { background: rgba(255,255,255,0.25); }
+
+.hu-hero-scroll {
+    position: absolute;
+    bottom: 24px;
+    right: 32px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255,255,255,0.6);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    writing-mode: horizontal-tb;
+}
+
+/* =============================================================
+   SECTIONS — BASE
+   ============================================================= */
+.hu-section {
+    padding: 72px 0;
+}
+
+.hu-section-gray { background: var(--gray); }
+.hu-section-dark { background: var(--dark); }
+.hu-section-green { background: var(--green); }
+
+.hu-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+}
+
+.hu-section-head {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.hu-section-tag {
+    display: inline-block;
+    padding: 4px 14px;
+    background: var(--green-light);
+    color: var(--green);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 100px;
+    margin-bottom: 12px;
+}
+
+.hu-tag-light {
+    background: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.9);
+}
+
+.hu-section-title {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 800;
+    color: var(--text);
+}
+
+.hu-title-light { color: #fff; }
+
+.hu-section-sub {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.7);
+    margin-top: 8px;
+}
+
+.hu-section-head-light { }
+
+/* =============================================================
+   PROFIL V2 — Premium layout (sesuai screenshot)
+   ============================================================= */
+.hu-profil-section {
+    background: #faf8f3;
+}
+
+.hu-profil-v2-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 72px;
+    align-items: start;
+}
+
+/* ---- Kiri ---- */
+.hu-profil-v2-tag {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #c9a05a;
+    margin-bottom: 16px;
+}
+
+.hu-profil-v2-title {
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 800;
+    color: #1a2a3a;
+    line-height: 1.15;
+    margin-bottom: 20px;
+}
+
+.hu-profil-v2-title em {
+    font-style: italic;
+    color: #1a4731;
+}
+
+.hu-profil-v2-desc {
+    font-size: 0.95rem;
+    color: #4b5563;
+    line-height: 1.8;
+    margin-bottom: 24px;
+    max-width: 480px;
+}
+
+.hu-profil-v2-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    color: #c9a05a;
+    font-size: 1rem;
+}
+
+.hu-profil-v2-divider::before,
+.hu-profil-v2-divider::after {
+    content: '';
+    flex: 1;
+    max-width: 60px;
+    height: 1px;
+    background: #d1c4a0;
+}
+
+.hu-profil-v2-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 32px;
+}
+
+.hu-profil-v2-stat-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+    margin-bottom: 4px;
+}
+
+.hu-profil-v2-stat-val {
+    font-size: 0.96rem;
+    font-weight: 700;
+    color: #1a2a3a;
+    line-height: 1.3;
+}
+
+/* ---- Kanan ---- */
+.hu-profil-v2-right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.hu-profil-v2-images {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: end;
+}
+
+.hu-profil-v2-img {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+.hu-profil-v2-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+}
+
+.hu-profil-v2-img:hover img { transform: scale(1.04); }
+
+.hu-img-tall  { height: 240px; }
+.hu-img-short { height: 180px; align-self: end; }
+
+/* Ayat quran card */
+.hu-profil-v2-ayat {
+    background: #fff;
+    border: 1px solid #e8e2d5;
+    border-radius: 12px;
+    padding: 20px 22px;
+    text-align: right;
+}
+
+.hu-profil-v2-arabic {
+    font-family: 'Amiri', 'Times New Roman', serif;
+    font-size: 1.4rem;
+    color: #1a2a3a;
+    direction: rtl;
+    line-height: 1.8;
+    margin-bottom: 10px;
+}
+
+.hu-profil-v2-trans {
+    font-size: 0.8rem;
+    color: #6b7280;
+    font-style: italic;
+    line-height: 1.6;
+    text-align: left;
+}
+
+/* =============================================================
+   PROFIL SECTION (old — kept for info cards in kontak)
+   ============================================================= */
+
+.hu-profil-desc {
+    font-size: 1rem;
+    color: var(--text-mid);
+    line-height: 1.8;
+    margin-bottom: 32px;
+}
+
+.hu-profil-stats {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+}
+
+.hu-stat-val {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--green);
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.hu-stat-label {
+    font-size: 0.78rem;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.hu-profil-info {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.hu-info-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 18px;
+    background: var(--gray);
+    border-radius: 10px;
+    border-left: 3px solid var(--green);
+}
+
+.hu-info-icon { font-size: 1.2rem; flex-shrink: 0; }
+
+.hu-info-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-light);
+    margin-bottom: 3px;
+}
+
+.hu-info-val {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* =============================================================
+   JADWAL SHALAT
+   ============================================================= */
+.hu-shalat-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+}
+
+.hu-shalat-card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius);
+    padding: 24px 16px;
+    text-align: center;
+    transition: background 0.18s;
+}
+
+.hu-shalat-card.active {
+    background: var(--amber-bg);
+    border-color: var(--amber-bg);
+}
+
+.hu-shalat-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 10px;
+}
+
+.hu-shalat-card.active .hu-shalat-name { color: rgba(0,0,0,0.7); }
+
+.hu-shalat-time {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.hu-shalat-card.active .hu-shalat-time { color: #1a1a1a; }
+
+.hu-shalat-now {
+    margin-top: 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: rgba(0,0,0,0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+/* =============================================================
+   PROGRAM
+   ============================================================= */
+.hu-program-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.hu-program-card {
+    background: var(--gray);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 16px;
+    text-align: center;
+    transition: box-shadow 0.18s, transform 0.18s;
+}
+
+.hu-program-card:hover {
+    box-shadow: 0 4px 16px rgba(26,71,49,0.12);
+    transform: translateY(-2px);
+}
+
+.hu-program-icon {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+}
+
+.hu-program-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* =============================================================
+   FASILITAS
+   ============================================================= */
+.hu-fasilitas-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.hu-fasilitas-tag {
+    padding: 8px 18px;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 100px;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: var(--text-mid);
+    transition: border-color 0.16s, color 0.16s;
+}
+
+.hu-fasilitas-tag:hover {
+    border-color: var(--green);
+    color: var(--green);
+}
+
+/* =============================================================
+   ACARA
+   ============================================================= */
+.hu-acara-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.hu-acara-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 18px 22px;
+    background: var(--gray);
+    border-radius: var(--radius);
+    border-left: 4px solid var(--green);
+    transition: box-shadow 0.16s;
+}
+
+.hu-acara-item:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+
+.hu-acara-date {
+    text-align: center;
+    min-width: 48px;
+    flex-shrink: 0;
+}
+
+.hu-acara-day {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--green);
+    line-height: 1;
+}
+
+.hu-acara-month {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.hu-acara-info { flex: 1; }
+
+.hu-acara-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+
+.hu-acara-meta {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+.hu-acara-btn {
+    padding: 7px 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--green);
+    background: var(--green-light);
+    border-radius: 8px;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.16s;
+}
+
+.hu-acara-btn:hover { background: #bbf7d0; }
+
+/* =============================================================
+   DONASI
+   ============================================================= */
+.hu-donasi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.hu-donasi-card {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: var(--radius);
+    padding: 28px 22px;
+    text-align: center;
+    backdrop-filter: blur(4px);
+}
+
+.hu-donasi-icon { font-size: 2rem; margin-bottom: 12px; }
+
+.hu-donasi-judul {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+.hu-donasi-progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.hu-donasi-progress-bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 100px;
+    overflow: hidden;
+}
+
+.hu-donasi-progress-fill {
+    height: 100%;
+    background: var(--amber-bg);
+    border-radius: 100px;
+    transition: width 0.5s ease;
+}
+
+.hu-donasi-pct {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--amber-bg);
+    white-space: nowrap;
+    min-width: 32px;
+}
+
+.hu-donasi-nominal {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 18px;
+}
+
+.hu-donasi-btn {
+    display: inline-block;
+    padding: 10px 24px;
+    background: var(--amber-bg);
+    color: #fff;
+    font-size: 0.84rem;
+    font-weight: 700;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.18s;
+}
+
+.hu-donasi-btn:hover { background: #b45309; }
+
+/* =============================================================
+   KONTAK
+   ============================================================= */
+.hu-kontak-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+}
+
+.hu-kontak-info {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.hu-kontak-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.hu-kontak-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
+
+.hu-kontak-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-light);
+    margin-bottom: 3px;
+}
+
+.hu-kontak-val {
+    font-size: 0.9rem;
+    color: var(--text);
+    line-height: 1.6;
+}
+
+.hu-kontak-map { }
+
+.hu-map-placeholder {
+    background: var(--gray);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    height: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.hu-map-icon { font-size: 2.5rem; }
+.hu-map-text { font-size: 0.9rem; font-weight: 600; color: var(--text-mid); }
+.hu-map-sub  { font-size: 0.8rem; color: var(--text-light); }
+
+/* =============================================================
+   FOOTER
+   ============================================================= */
+.hu-footer {
+    background: #0f1923;
+    color: rgba(255,255,255,0.7);
+    padding: 56px 0 0;
+}
+
+.hu-footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 48px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.hu-footer-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.hu-footer-arabic {
+    font-family: 'Amiri', serif;
+    font-size: 1rem;
+    color: var(--amber-bg);
+    direction: rtl;
+    margin-bottom: 8px;
+}
+
+.hu-footer-tagline {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.45);
+}
+
+.hu-footer-link-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 14px;
+}
+
+.hu-footer-links a {
+    display: block;
+    font-size: 0.84rem;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    margin-bottom: 8px;
+    transition: color 0.16s;
+}
+
+.hu-footer-links a:hover { color: #fff; }
+
+.hu-footer-bottom {
+    padding: 18px 0;
+    font-size: 0.76rem;
+    color: rgba(255,255,255,0.3);
+    text-align: center;
+}
+
+/* =============================================================
+   HELP FAB
+   ============================================================= */
+.help-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 44px;
+    height: 44px;
+    background: var(--green);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+    z-index: 300;
+    transition: background 0.2s;
+}
+
+.help-fab:hover { background: var(--green-mid); }
+
+/* =============================================================
+   RESPONSIVE
+   ============================================================= */
+@media (max-width: 1024px) {
+    .hu-profil-grid      { grid-template-columns: 1fr; }
+    .hu-profil-v2-grid   { grid-template-columns: 1fr; gap: 40px; }
+    .hu-shalat-grid      { grid-template-columns: repeat(3, 1fr); }
+    .hu-program-grid     { grid-template-columns: repeat(3, 1fr); }
+    .hu-donasi-grid      { grid-template-columns: 1fr 1fr; }
+    .hu-kontak-grid      { grid-template-columns: 1fr; }
+    .hu-footer-grid      { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+    .hu-praybar        { padding: 0 16px; }
+    .hu-praybar-date   { display: none; }
+    .hu-prayer         { min-width: 52px; padding: 0 10px; }
+
+    .hu-navbar-inner   { padding: 0 16px; gap: 12px; }
+    .hu-nav            { display: none; position: absolute; top: 60px; left: 0; right: 0; background: #fff; flex-direction: column; padding: 16px; border-bottom: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .hu-nav.open       { display: flex; }
+    .hu-hamburger      { display: flex; }
+    .hu-ganti-btn      { display: none; }
+
+    .hu-ticker-label   { margin-left: 16px; }
+
+    .hu-hero-content   { padding: 0 24px 56px; }
+    .hu-section        { padding: 48px 0; }
+    .hu-container      { padding: 0 16px; }
+
+    .hu-shalat-grid    { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .hu-program-grid   { grid-template-columns: repeat(2, 1fr); }
+    .hu-donasi-grid    { grid-template-columns: 1fr; }
+    .hu-footer-grid    { grid-template-columns: 1fr; gap: 28px; }
+}
+
+@media (max-width: 480px) {
+    .hu-praybar-times  { gap: 0; }
+    .hu-prayer         { min-width: 44px; padding: 0 6px; }
+    .hu-prayer-name    { font-size: 0.58rem; }
+    .hu-prayer-time    { font-size: 0.78rem; }
+
+    .hu-shalat-grid    { grid-template-columns: 1fr 1fr; }
+    .hu-program-grid   { grid-template-columns: 1fr 1fr; }
+    .hu-acara-item     { flex-wrap: wrap; }
+}
+
+/* =============================================================
+   PROGRAM V2 — pill list style
+   ============================================================= */
+.hu-program-section {
+    background: #f5f0e8;
+    padding: 72px 0;
+}
+
+.hu-tag-amber {
+    background: transparent;
+    color: #c9a05a;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0;
+    margin-bottom: 12px;
+    display: inline-block;
+}
+
+.hu-title-dark { color: #1a2a3a; }
+
+.hu-program-v2-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 8px;
+}
+
+.hu-program-v2-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    background: #fff;
+    border: 1.5px solid #e5ddd0;
+    border-radius: 100px;
+    font-size: 0.9rem;
+    color: #1a2a3a;
+    font-weight: 500;
+    transition: border-color 0.18s, background 0.18s;
+    cursor: default;
+}
+
+.hu-program-v2-item:hover {
+    border-color: #1a4731;
+    background: #f0fdf4;
+}
+
+.hu-program-v2-num {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #c9a05a;
+    letter-spacing: 0.05em;
+}
+
+/* =============================================================
+   ACARA V2 — card grid
+   ============================================================= */
+.hu-acara-section {
+    background: #faf8f3;
+    padding: 72px 0;
+}
+
+.hu-acara-v2-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.hu-acara-lihat {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #1a2a3a;
+    text-decoration: none;
+    white-space: nowrap;
+    padding-bottom: 2px;
+    border-bottom: 1px solid #1a2a3a;
+    transition: color 0.16s;
+}
+
+.hu-acara-lihat:hover { color: #1a4731; border-color: #1a4731; }
+
+.hu-acara-v2-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.hu-acara-v2-card {
+    background: #fff;
+    border: 1px solid #e8e2d5;
+    border-radius: 14px;
+    padding: 22px 22px 20px;
+    border-top: 3px solid #e8e2d5;
+    transition: box-shadow 0.18s, border-top-color 0.18s;
+}
+
+.hu-acara-v2-card:first-child {
+    border-top-color: #c9a05a;
+}
+
+.hu-acara-v2-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.hu-acara-v2-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.hu-acara-v2-date {
+    display: flex;
+    flex-direction: column;
+}
+
+.hu-acara-v2-month {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+    line-height: 1;
+    margin-bottom: 2px;
+}
+
+.hu-acara-v2-day {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #1a2a3a;
+    line-height: 1;
+}
+
+.hu-acara-v2-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    background: #fef3c7;
+    color: #92400e;
+    border-radius: 100px;
+    border: 1px solid #fde68a;
+}
+
+.hu-acara-v2-judul {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a2a3a;
+    margin-bottom: 6px;
+    line-height: 1.3;
+}
+
+.hu-acara-v2-meta {
+    font-size: 0.78rem;
+    color: #9ca3af;
+    margin-bottom: 16px;
+}
+
+.hu-acara-v2-link {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #1a4731;
+    text-decoration: none;
+    transition: opacity 0.16s;
+}
+
+.hu-acara-v2-link:hover { opacity: 0.7; }
+
+/* =============================================================
+   DONASI V2 — dark split layout
+   ============================================================= */
+.hu-donasi-v2-section {
+    background: #1a2a3a;
+}
+
+.hu-donasi-v2-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 80px 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+}
+
+/* Kiri */
+.hu-tag-amber-light {
+    color: #f59e0b;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 14px;
+}
+
+.hu-donasi-v2-title {
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.15;
+    margin-bottom: 20px;
+}
+
+.hu-donasi-v2-title em {
+    font-style: italic;
+    color: #f59e0b;
+}
+
+.hu-donasi-v2-desc {
+    font-size: 0.92rem;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.8;
+    margin-bottom: 32px;
+}
+
+.hu-donasi-v2-desc strong { color: #fff; }
+
+.hu-donasi-v2-progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 8px;
+}
+
+.hu-donasi-v2-pct {
+    font-weight: 700;
+    color: #f59e0b;
+}
+
+.hu-donasi-v2-track {
+    height: 8px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 100px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.hu-donasi-v2-fill {
+    height: 100%;
+    background: #f59e0b;
+    border-radius: 100px;
+    transition: width 0.6s ease;
+}
+
+.hu-donasi-v2-amounts {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.5);
+}
+
+/* Kanan — card */
+.hu-donasi-v2-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 28px 28px 24px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+}
+
+.hu-donasi-v2-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a2a3a;
+    margin-bottom: 18px;
+}
+
+.hu-donasi-v2-nominals {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.hu-nominal-btn {
+    padding: 11px 8px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    font-family: var(--font);
+    color: #1a2a3a;
+    background: #fff;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.16s;
+}
+
+.hu-nominal-btn:hover,
+.hu-nominal-btn.selected {
+    background: #1a2a3a;
+    color: #fff;
+    border-color: #1a2a3a;
+}
+
+.hu-donasi-v2-or {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin-bottom: 8px;
+}
+
+.hu-donasi-v2-input-wrap {
+    display: flex;
+    align-items: center;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 14px;
+}
+
+.hu-donasi-v2-prefix {
+    padding: 10px 12px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #6b7280;
+    background: #f9fafb;
+    border-right: 1px solid #e5e7eb;
+    flex-shrink: 0;
+}
+
+.hu-donasi-v2-input {
+    flex: 1;
+    padding: 10px 12px;
+    font-size: 0.88rem;
+    font-family: var(--font);
+    border: none;
+    outline: none;
+    color: #1a2a3a;
+}
+
+.hu-donasi-v2-label-field {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-bottom: 6px;
+}
+
+.hu-donasi-v2-input-name {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 0.88rem;
+    font-family: var(--font);
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    outline: none;
+    color: #1a2a3a;
+    margin-bottom: 16px;
+    transition: border-color 0.18s;
+}
+
+.hu-donasi-v2-input-name:focus { border-color: #1a4731; }
+.hu-donasi-v2-input-name::placeholder { color: #9ca3af; }
+
+.hu-donasi-v2-submit {
+    width: 100%;
+    padding: 13px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    font-family: var(--font);
+    color: #fff;
+    background: #1a2a3a;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    transition: background 0.18s;
+}
+
+.hu-donasi-v2-submit:hover { background: #0f1923; }
+
+.hu-donasi-v2-note {
+    font-size: 0.72rem;
+    color: #9ca3af;
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* Responsive additions */
+@media (max-width: 1024px) {
+    .hu-donasi-v2-inner { grid-template-columns: 1fr; gap: 36px; }
+    .hu-acara-v2-grid   { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+    .hu-acara-v2-grid   { grid-template-columns: 1fr; }
+    .hu-donasi-v2-inner { padding: 48px 16px; }
+}
+
+/* =============================================================
+   HUBUNGI KAMI V2
+   ============================================================= */
+.hu-hubungi-section {
+    background: #fff;
+    padding: 72px 0 64px;
+}
+
+.hu-hubungi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.hu-hubungi-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 22px 20px;
+    border: 1.5px solid #e8e2d5;
+    border-radius: 12px;
+    background: #fafaf8;
+    transition: box-shadow 0.18s, border-color 0.18s;
+}
+
+.hu-hubungi-card:hover {
+    border-color: #1a4731;
+    box-shadow: 0 2px 12px rgba(26,71,49,0.08);
+}
+
+.hu-hubungi-icon {
+    width: 40px;
+    height: 40px;
+    background: #f0f4ff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a3a6a;
+    flex-shrink: 0;
+}
+
+.hu-hubungi-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+    margin-bottom: 5px;
+}
+
+.hu-hubungi-val {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #1a2a3a;
+    line-height: 1.6;
+}
+
+/* =============================================================
+   FOOTER V2
+   ============================================================= */
+.hu-footer-v2 {
+    background: #1a2a3a;
+    position: relative;
+}
+
+.hu-footer-v2-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 56px 32px 0;
+}
+
+.hu-footer-v2-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: 40px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Brand */
+.hu-footer-v2-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.hu-footer-v2-tagline {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.7;
+}
+
+/* Arabic */
+.hu-footer-v2-arabic-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hu-footer-v2-arabic {
+    font-family: 'Amiri', serif;
+    font-size: 1.4rem;
+    color: rgba(255,255,255,0.35);
+    direction: rtl;
+    text-align: center;
+    line-height: 1.8;
+}
+
+/* Columns */
+.hu-footer-v2-col-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 14px;
+}
+
+.hu-footer-v2-link {
+    display: block;
+    font-size: 0.84rem;
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    margin-bottom: 8px;
+    transition: color 0.16s;
+}
+
+.hu-footer-v2-link:hover { color: #fff; }
+
+.hu-footer-v2-link-active {
+    color: #f59e0b !important;
+}
+
+/* Bottom bar */
+.hu-footer-v2-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 0;
+    font-size: 0.74rem;
+    color: rgba(255,255,255,0.25);
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Kembali button */
+.hu-kembali-btn {
+    position: absolute;
+    bottom: 22px;
+    left: 32px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.7);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+}
+
+.hu-kembali-btn:hover {
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+}
+
+/* Responsive hubungi & footer */
+@media (max-width: 1024px) {
+    .hu-footer-v2-grid   { grid-template-columns: 1fr 1fr; }
+    .hu-footer-v2-arabic-col { display: none; }
+}
+
+@media (max-width: 768px) {
+    .hu-hubungi-grid     { grid-template-columns: 1fr; }
+    .hu-footer-v2-grid   { grid-template-columns: 1fr 1fr; gap: 24px; }
+    .hu-footer-v2-inner  { padding: 40px 16px 0; }
+    .hu-kembali-btn      { left: 16px; bottom: 18px; }
+}
+
+@media (max-width: 480px) {
+    .hu-footer-v2-grid   { grid-template-columns: 1fr; }
+    .hu-footer-v2-bottom { flex-direction: column; gap: 4px; }
+}
