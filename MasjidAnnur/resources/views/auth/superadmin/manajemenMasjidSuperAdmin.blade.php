@@ -6,15 +6,14 @@
     <title>Manajemen Masjid - Super Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/berandaSuperAdmin.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/manajemenMasjidSuperAdmin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/superadmin/berandaSuperAdmin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/superadmin/manajemenMasjidSuperAdmin.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body class="sa-page" id="saBody">
 
     {{-- ===== SIDEBAR ===== --}}
     <aside class="sa-sidebar" id="saSidebar">
-
         <div class="sa-brand">
             <div class="sa-brand-avatar">SA</div>
             <div class="sa-brand-info">
@@ -31,23 +30,19 @@
                 <span class="sa-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
                 <span class="sa-nav-label">Dashboard</span>
             </a>
-
             <a href="{{ route('superadmin.verifikasi') }}" class="sa-nav-item sa-nav-has-badge">
                 <span class="sa-nav-icon"><i class="fa-solid fa-shield-halved"></i></span>
                 <span class="sa-nav-label">Verifikasi Pendaftaran</span>
                 <span class="sa-nav-badge-dot amber"></span>
             </a>
-
             <a href="{{ route('superadmin.manajemen-masjid') }}" class="sa-nav-item active">
                 <span class="sa-nav-icon"><i class="fa-solid fa-mosque"></i></span>
                 <span class="sa-nav-label">Manajemen Masjid</span>
             </a>
-
             <a href="{{ route('superadmin.pengguna') }}" class="sa-nav-item">
                 <span class="sa-nav-icon"><i class="fa-solid fa-users"></i></span>
                 <span class="sa-nav-label">Pengguna</span>
             </a>
-
             <a href="{{ route('superadmin.pengaturan') }}" class="sa-nav-item">
                 <span class="sa-nav-icon"><i class="fa-solid fa-gear"></i></span>
                 <span class="sa-nav-label">Pengaturan</span>
@@ -67,7 +62,6 @@
             </a>
             <form id="sa-logout-form" method="POST" action="{{ route('logout') }}" style="display:none;">@csrf</form>
         </div>
-
     </aside>
 
     {{-- ===== MAIN ===== --}}
@@ -99,12 +93,12 @@
 
             {{-- ===== TOOLBAR ===== --}}
             <div class="mm-toolbar">
-                {{-- Filter tabs --}}
+                {{-- Filter tabs dinamis --}}
                 <div class="mm-filter-tabs">
-                    <button class="mm-filter-tab active" data-filter="semua">Semua (3)</button>
-                    <button class="mm-filter-tab" data-filter="aktif">Aktif (2)</button>
-                    <button class="mm-filter-tab" data-filter="pending">Pending (1)</button>
-                    <button class="mm-filter-tab" data-filter="nonaktif">Nonaktif (0)</button>
+                    <button class="mm-filter-tab active" data-filter="semua">Semua ({{ $totalSemua }})</button>
+                    <button class="mm-filter-tab" data-filter="aktif">Aktif ({{ $totalAktif }})</button>
+                    <button class="mm-filter-tab" data-filter="pending">Pending ({{ $totalPending }})</button>
+                    <button class="mm-filter-tab" data-filter="nonaktif">Nonaktif ({{ $totalNonaktif }})</button>
                 </div>
 
                 {{-- Search + Tambah --}}
@@ -135,69 +129,39 @@
                     </thead>
                     <tbody id="mmTbody">
 
+                        @foreach($masjids as $m)
                         @php
-                        $masjidList = [
-                            [
-                                'id'       => 1,
-                                'initial'  => 'B',
-                                'color'    => '#1a4731',
-                                'nama'     => 'Baitul Digital',
-                                'arab'     => 'بيت الديجيتال',
-                                'kota'     => 'Jakarta Selatan',
-                                'imam'     => 'Ustadz Dr. Ahmad Fauzi, L...',
-                                'status'   => 'aktif',
-                                'donasi_pct' => 72,
-                                'donasi_color' => '#f59e0b',
-                            ],
-                            [
-                                'id'       => 2,
-                                'initial'  => 'M',
-                                'color'    => '#1e40af',
-                                'nama'     => 'Masjid Ar-Rahman',
-                                'arab'     => 'مسجد الرحمن',
-                                'kota'     => 'Bandung',
-                                'imam'     => 'Ustadz H. Yusuf Mansur Al...',
-                                'status'   => 'aktif',
-                                'donasi_pct' => 77,
-                                'donasi_color' => '#f59e0b',
-                            ],
-                            [
-                                'id'       => 3,
-                                'initial'  => 'M',
-                                'color'    => '#374151',
-                                'nama'     => 'Masjid Al-Aqsa',
-                                'arab'     => 'مسجد الأقصى',
-                                'kota'     => 'Surabaya',
-                                'imam'     => 'KH. Muhammad Zainuddi...',
-                                'status'   => 'pending',
-                                'donasi_pct' => 78,
-                                'donasi_color' => '#22c55e',
-                            ],
-                        ];
+                            // Menyesuaikan status database dengan filter front-end ('aktif', 'pending', 'nonaktif')
+                            $statusClass = 'pending';
+                            if ($m->status === 'approved' || $m->status === 'aktif') {
+                                $statusClass = 'aktif';
+                            } elseif ($m->status === 'rejected') {
+                                $statusClass = 'nonaktif';
+                            } else {
+                                $statusClass = $m->status;
+                            }
                         @endphp
-
-                        @foreach($masjidList as $m)
-                        <tr class="mm-row" data-status="{{ $m['status'] }}"
-                            data-search="{{ strtolower($m['nama'].' '.$m['kota']) }}">
+                        <tr class="mm-row" data-status="{{ $statusClass }}"
+                            data-search="{{ strtolower($m->mosque_name.' '.$m->city) }}">
                             <td class="mm-td-masjid">
                                 <div class="mm-mosque-cell">
-                                    <div class="mm-mosque-avatar" style="background:{{ $m['color'] }}">{{ $m['initial'] }}</div>
+                                    <div class="mm-mosque-avatar" style="background:#1a4731">{{ strtoupper(substr($m->mosque_name, 0, 1)) }}</div>
                                     <div class="mm-mosque-names">
-                                        <div class="mm-mosque-nama">{{ $m['nama'] }}</div>
-                                        <div class="mm-mosque-arab">{{ $m['arab'] }}</div>
+                                        <div class="mm-mosque-nama">{{ $m->mosque_name }}</div>
+                                        <div class="mm-mosque-arab">{{ $m->arabic_name ?? '-' }}</div>
                                     </div>
                                 </div>
                             </td>
-                            <td class="mm-td-kota">{{ $m['kota'] }}</td>
-                            <td class="mm-td-imam">{{ $m['imam'] }}</td>
+                            <td class="mm-td-kota">{{ $m->city }}</td>
+                            <td class="mm-td-imam">{{ $m->imam_name ?? '-' }}</td>
                             <td class="mm-td-status">
                                 <div class="mm-status-select-wrap">
-                                    <select class="mm-status-select {{ $m['status'] }}"
-                                            data-id="{{ $m['id'] }}"
+                                    <select class="mm-status-select {{ $statusClass }}"
+                                            data-id="{{ $m->id }}"
                                             onchange="mmChangeStatus(this)">
-                                        <option value="aktif"    {{ $m['status']==='aktif'    ? 'selected' : '' }}>Aktif</option>
-                                        <option value="pending"  {{ $m['status']==='pending'  ? 'selected' : '' }}>Pending</option>
-                                        <option value="nonaktif" {{ $m['status']==='nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                                        <option value="aktif"    {{ $statusClass === 'aktif'    ? 'selected' : '' }}>Aktif</option>
+                                        <option value="pending"  {{ $statusClass === 'pending'  ? 'selected' : '' }}>Pending</option>
+                                        <option value="nonaktif" {{ $statusClass === 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
                                     </select>
                                     <i class="fa-solid fa-chevron-down mm-select-arrow"></i>
                                 </div>
@@ -206,9 +170,9 @@
                                 <div class="mm-donasi-wrap">
                                     <div class="mm-donasi-bar-track">
                                         <div class="mm-donasi-bar-fill"
-                                             style="width:{{ $m['donasi_pct'] }}%; background:{{ $m['donasi_color'] }}"></div>
+                                             style="width:75%; background:#f59e0b"></div>
                                     </div>
-                                    <span class="mm-donasi-pct">{{ $m['donasi_pct'] }}%</span>
+                                    <span class="mm-donasi-pct">75%</span>
                                 </div>
                             </td>
                             <td class="mm-td-aksi">
@@ -229,6 +193,7 @@
 
         </main>
     </div>
+
 
     {{-- Help FAB --}}
     <button class="help-fab" aria-label="Bantuan">?</button>

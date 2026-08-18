@@ -6,14 +6,13 @@
     <title>Pengguna - Super Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/berandaSuperAdmin.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/penggunaSuperAdmin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/superadmin/berandaSuperAdmin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/superadmin/penggunaSuperAdmin.css') }}">
 </head>
 <body class="sa-page" id="saBody">
 
     {{-- ===== SIDEBAR ===== --}}
     <aside class="sa-sidebar" id="saSidebar">
-
         <div class="sa-brand">
             <div class="sa-brand-avatar">SA</div>
             <div class="sa-brand-info">
@@ -91,12 +90,10 @@
             </a>
             <form id="sa-logout-form" method="POST" action="{{ route('logout') }}" style="display:none;">@csrf</form>
         </div>
-
     </aside>
 
     {{-- ===== MAIN ===== --}}
     <div class="sa-main" id="saMain">
-
         <header class="sa-topbar">
             <div class="sa-topbar-title">Pengguna</div>
             <div class="sa-topbar-right">
@@ -116,7 +113,6 @@
         </header>
 
         <main class="sa-content pg-content">
-
             @if(session('success'))
             <div class="pg-alert pg-alert-success">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="15" height="15">
@@ -150,153 +146,108 @@
                         </tr>
                     </thead>
                     <tbody>
-
                         @php
-                        $pengguna = [
-                            [
-                                'id'      => 1,
-                                'inisial' => 'AF',
-                                'warna'   => '#1a4731',
-                                'nama'    => 'Ahmad Fauzi',
-                                'email'   => 'ahmad@baituldigital.id',
-                                'peran'   => 'tenant_admin',
-                                'masjid'  => 'Baitul Digital',
-                                'aktif'   => '10 menit lalu',
-                                'online'  => true,
-                            ],
-                            [
-                                'id'      => 2,
-                                'inisial' => 'YM',
-                                'warna'   => '#1e40af',
-                                'nama'    => 'Yusuf Mansur',
-                                'email'   => 'yusuf@ar-rahman.id',
-                                'peran'   => 'tenant_admin',
-                                'masjid'  => 'Masjid Ar-Rahman',
-                                'aktif'   => '2 jam lalu',
-                                'online'  => false,
-                            ],
-                            [
-                                'id'      => 3,
-                                'inisial' => 'MZ',
-                                'warna'   => '#374151',
-                                'nama'    => 'Muhammad Zainuddin',
-                                'email'   => 'zain@al-aqsa.id',
-                                'peran'   => 'tenant_admin',
-                                'masjid'  => 'Masjid Al-Aqsa',
-                                'aktif'   => '1 hari lalu',
-                                'online'  => false,
-                            ],
-                            [
-                                'id'      => 4,
-                                'inisial' => 'SA',
-                                'warna'   => '#7c3aed',
-                                'nama'    => 'Super Admin',
-                                'email'   => 'admin@masjidku.id',
-                                'peran'   => 'super_admin',
-                                'masjid'  => '— Semua —',
-                                'aktif'   => 'Sekarang',
-                                'online'  => true,
-                            ],
-                        ];
+                        
                         @endphp
 
                         @foreach($pengguna as $u)
-                        <tr class="pg-row" id="pg-row-{{ $u['id'] }}">
-
+                        <tr class="pg-row" id="pg-row-{{ $u->id }}">
                             {{-- Pengguna --}}
                             <td class="pg-td-user">
                                 <div class="pg-user-cell">
-                                    <div class="pg-avatar" style="background:{{ $u['warna'] }}">
-                                        {{ $u['inisial'] }}
-                                        @if($u['online'])
+                                    <div class="pg-avatar" style="background:{{ $u->warna ?? '#1a4731' }}">
+                                        {{ strtoupper(substr($u->name, 0, 1)) }}
+                                        @if(!empty($u->online))
                                         <span class="pg-online-dot"></span>
                                         @endif
                                     </div>
                                     <div>
-                                        <div class="pg-nama">{{ $u['nama'] }}</div>
-                                        <div class="pg-email">{{ $u['email'] }}</div>
+                                        <div class="pg-nama">{{ $u->name }}</div>
+                                        <div class="pg-email">{{ $u->email }}</div>
                                     </div>
                                 </div>
                             </td>
-
+                            
                             {{-- Peran --}}
                             <td class="pg-td-peran">
-                                <span class="pg-peran-badge {{ $u['peran'] === 'super_admin' ? 'super' : 'tenant' }}">
-                                    {{ $u['peran'] === 'super_admin' ? 'Super Admin' : 'Tenant Admin' }}
+                                <span class="pg-peran-badge {{ ($u->role ?? '') === 'super_admin' ? 'super' : 'tenant' }}">
+                                    {{ ($u->role ?? '') === 'super_admin' ? 'Super Admin' : 'Tenant Admin' }}
                                 </span>
                             </td>
 
                             {{-- Masjid --}}
-                            <td class="pg-td-masjid">{{ $u['masjid'] }}</td>
+                            <td class="pg-td-masjid">{{ $u->masjid ?? '-' }}</td>
 
                             {{-- Terakhir aktif --}}
-                            <td class="pg-td-aktif">{{ $u['aktif'] }}</td>
+                            <td class="pg-td-aktif">
+                                {{ $u->last_active_at ? \Carbon\Carbon::parse($u->last_active_at)->diffForHumans() : '-' }}
+                            </td>
 
                             {{-- Aksi --}}
                             <td class="pg-td-aksi">
-                                <button class="pg-btn-edit" onclick="pgOpenEdit({{ $u['id'] }})">Edit</button>
+                                <button type="button" class="pg-btn-edit" onclick="pgOpenEdit({{ $u->id }})">Edit</button>
                             </td>
-
                         </tr>
                         @endforeach
-
                     </tbody>
                 </table>
             </div>
-
         </main>
     </div>
 
     {{-- Help FAB --}}
     <button class="help-fab" aria-label="Bantuan">?</button>
 
-    {{-- ===== MODAL TAMBAH PENGGUNA ===== --}}
+    {{-- ===== MODAL TAMBAH/EDIT PENGGUNA ===== --}}
     <div class="pg-modal-overlay" id="pgModalOverlay">
         <div class="pg-modal">
             <div class="pg-modal-head">
                 <span class="pg-modal-title" id="pgModalTitle">Tambah Pengguna</span>
-                <button class="pg-modal-close" id="pgModalClose" aria-label="Tutup">
+                <button type="button" class="pg-modal-close" id="pgModalClose" aria-label="Tutup">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="18" height="18">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
             </div>
+            
             <form class="pg-modal-body" id="pgModalForm" method="POST" action="{{ route('superadmin.pengguna.store') }}">
                 @csrf
-                <input type="hidden" name="_method" id="pgFormMethod" value="POST">
+                <div id="pgMethodContainer"></div>
                 <input type="hidden" name="user_id" id="pgUserId" value="">
 
                 <div class="pg-modal-grid">
                     <div class="pg-modal-field">
-                        <label class="pg-modal-label">Nama Lengkap <span class="pg-req">*</span></label>
+                        <label class="pg-modal-label" for="pgFieldName">Nama Lengkap <span class="pg-req">*</span></label>
                         <input type="text" name="name" id="pgFieldName" class="pg-modal-input" placeholder="Nama pengguna" required>
                     </div>
                     <div class="pg-modal-field">
-                        <label class="pg-modal-label">Email <span class="pg-req">*</span></label>
+                        <label class="pg-modal-label" for="pgFieldEmail">Email <span class="pg-req">*</span></label>
                         <input type="email" name="email" id="pgFieldEmail" class="pg-modal-input" placeholder="email@domain.id" required>
                     </div>
                     <div class="pg-modal-field">
-                        <label class="pg-modal-label">Peran <span class="pg-req">*</span></label>
+                        <label class="pg-modal-label" for="pgFieldRole">Peran <span class="pg-req">*</span></label>
                         <select name="role" id="pgFieldRole" class="pg-modal-input">
                             <option value="tenant_admin">Tenant Admin</option>
                             <option value="super_admin">Super Admin</option>
                         </select>
                     </div>
                     <div class="pg-modal-field">
-                        <label class="pg-modal-label">Masjid</label>
-                        <select name="mosque" id="pgFieldMasjid" class="pg-modal-input">
-                            <option value="">— Pilih Masjid —</option>
-                            <option value="Baitul Digital">Baitul Digital</option>
-                            <option value="Masjid Ar-Rahman">Masjid Ar-Rahman</option>
-                            <option value="Masjid Al-Aqsa">Masjid Al-Aqsa</option>
-                        </select>
-                    </div>
-                    <div class="pg-modal-field" id="pgPasswordWrap">
-                        <label class="pg-modal-label">Password <span class="pg-req" id="pgPasswordReq">*</span></label>
+    <label class="pg-modal-label" for="pgFieldMasjid">Masjid</label>
+    <select name="masjid" id="pgFieldMasjid" class="pg-modal-input">
+        <option value="">— Pilih Masjid —</option>
+
+        {{-- Ganti $mosque->name menjadi $mosque->mosque_name --}}
+        @foreach($mosques as $mosque)
+            <option value="{{ $mosque->mosque_name }}">{{ $mosque->mosque_name }}</option>
+        @endforeach
+    </select>
+</div>
+                        <div class="pg-modal-field" id="pgPasswordWrap">
+                        <label class="pg-modal-label" for="pgFieldPassword">Password <span class="pg-req" id="pgPasswordReq">*</span></label>
                         <input type="password" name="password" id="pgFieldPassword" class="pg-modal-input" placeholder="Min. 8 karakter">
                     </div>
                     <div class="pg-modal-field" id="pgPasswordConfirmWrap">
-                        <label class="pg-modal-label">Konfirmasi Password</label>
+                        <label class="pg-modal-label" for="pgFieldPasswordConfirm">Konfirmasi Password</label>
                         <input type="password" name="password_confirmation" id="pgFieldPasswordConfirm" class="pg-modal-input" placeholder="Ulangi password">
                     </div>
                 </div>
@@ -310,42 +261,34 @@
     </div>
 
     <script>
+        // Mengubah data array PHP langsung menjadi objek JSON yang aman untuk JS
+        const pgData = {!! json_encode($pengguna) !!};
+
         // Sidebar toggle
         document.getElementById('saSidebarToggle').addEventListener('click', () => {
             document.getElementById('saSidebar').classList.toggle('collapsed');
             document.getElementById('saMain').classList.toggle('expanded');
         });
 
-        // Data pengguna untuk modal edit
-        const pgData = @json($pengguna ?? []);
-
-        // Buka modal tambah
-        document.getElementById('pgTambahBtn').addEventListener('click', () => {
-            resetModal();
-            document.getElementById('pgModalTitle').textContent = 'Tambah Pengguna';
-            document.getElementById('pgFormMethod').value = 'POST';
-            document.getElementById('pgUserId').value = '';
-            document.getElementById('pgPasswordReq').style.display = 'inline';
-            document.getElementById('pgModalForm').action = '{{ route('superadmin.pengguna.store') }}';
-            openModal();
-        });
-
         // Buka modal edit
-        function pgOpenEdit(id) {
+       function pgOpenEdit(id) {
             const u = pgData.find(x => x.id === id);
             if (!u) return;
 
             resetModal();
             document.getElementById('pgModalTitle').textContent = 'Edit Pengguna';
-            document.getElementById('pgFormMethod').value = 'PUT';
+            document.getElementById('pgMethodContainer').innerHTML = '<input type="hidden" name="_method" value="PUT">';
+            
             document.getElementById('pgUserId').value = u.id;
-            document.getElementById('pgFieldName').value  = u.nama;
+            document.getElementById('pgFieldName').value = u.name; // <-- Pastikan u.name, bukan u.nama
             document.getElementById('pgFieldEmail').value = u.email;
-            document.getElementById('pgFieldRole').value  = u.peran;
-            document.getElementById('pgFieldMasjid').value = u.masjid === '— Semua —' ? '' : u.masjid;
+            document.getElementById('pgFieldRole').value = u.role; // <-- Pastikan u.role, bukan u.peran
+            document.getElementById('pgFieldMasjid').value = u.masjid ?? '';
+            
             document.getElementById('pgPasswordReq').style.display = 'none';
             document.getElementById('pgSimpanBtn').textContent = 'Simpan Perubahan';
             document.getElementById('pgModalForm').action = '/superadmin/pengguna/' + u.id;
+            
             openModal();
         }
 
@@ -355,10 +298,20 @@
         function resetModal() {
             document.getElementById('pgModalForm').reset();
             document.getElementById('pgSimpanBtn').textContent = 'Simpan Pengguna';
+            document.getElementById('pgPasswordReq').style.display = 'inline';
+            document.getElementById('pgMethodContainer').innerHTML = '';
         }
 
+        // Event listener tombol tambah pengguna baru
+        document.getElementById('pgTambahBtn').addEventListener('click', () => {
+            resetModal();
+            document.getElementById('pgModalTitle').textContent = 'Tambah Pengguna';
+            document.getElementById('pgModalForm').action = "{{ route('superadmin.pengguna.store') }}";
+            openModal();
+        });
+
         document.getElementById('pgModalClose').addEventListener('click', closeModal);
-        document.getElementById('pgCancelBtn').addEventListener('click',  closeModal);
+        document.getElementById('pgCancelBtn').addEventListener('click', closeModal);
         document.getElementById('pgModalOverlay').addEventListener('click', function (e) {
             if (e.target === this) closeModal();
         });

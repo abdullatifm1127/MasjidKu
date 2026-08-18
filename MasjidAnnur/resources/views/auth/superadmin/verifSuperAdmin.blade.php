@@ -6,15 +6,13 @@
     <title>Verifikasi Pendaftaran - Super Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/berandaSuperAdmin.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/verifSuperAdmin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/superadmin/berandaSuperAdmin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/superadmin/verifSuperAdmin.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body class="sa-page" id="saBody">
 
-
     <aside class="sa-sidebar" id="saSidebar">
-
         <div class="sa-brand">
             <div class="sa-brand-avatar">SA</div>
             <div class="sa-brand-info">
@@ -31,23 +29,19 @@
                 <span class="sa-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
                 <span class="sa-nav-label">Dashboard</span>
             </a>
-
             <a href="{{ route('superadmin.verifikasi') }}" class="sa-nav-item active sa-nav-has-badge">
                 <span class="sa-nav-icon"><i class="fa-solid fa-shield-halved"></i></span>
                 <span class="sa-nav-label">Verifikasi Pendaftaran</span>
                 <span class="sa-nav-badge-dot amber"></span>
             </a>
-
             <a href="{{ route('superadmin.manajemen-masjid') }}" class="sa-nav-item">
                 <span class="sa-nav-icon"><i class="fa-solid fa-mosque"></i></span>
                 <span class="sa-nav-label">Manajemen Masjid</span>
             </a>
-
             <a href="{{ route('superadmin.pengguna') }}" class="sa-nav-item">
                 <span class="sa-nav-icon"><i class="fa-solid fa-users"></i></span>
                 <span class="sa-nav-label">Pengguna</span>
             </a>
-
             <a href="{{ route('superadmin.pengaturan') }}" class="sa-nav-item">
                 <span class="sa-nav-icon"><i class="fa-solid fa-gear"></i></span>
                 <span class="sa-nav-label">Pengaturan</span>
@@ -67,7 +61,6 @@
             </a>
             <form id="sa-logout-form" method="POST" action="{{ route('logout') }}" style="display:none;">@csrf</form>
         </div>
-
     </aside>
 
     {{-- ===== MAIN ===== --}}
@@ -77,18 +70,18 @@
         <header class="sa-topbar">
             <div class="sa-topbar-left">
                 <div class="sa-topbar-title">Verifikasi Pendaftaran</div>
-                <span class="vf-topbar-badge">2 pending</span>
+                <span class="vf-topbar-badge">{{ $totalPending ?? 0 }} pending</span>
             </div>
             <div class="sa-topbar-right">
-                <a href="{{ url('/') }}" class="sa-btn-website" target="_blank">
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                    Lihat Website
-                </a>
-                <button class="sa-notif-btn" aria-label="Notifikasi">
-                    <i class="fa-solid fa-bell"></i>
-                    <span class="sa-notif-dot"></span>
-                </button>
-            </div>
+            <a href="{{ route('home') }}" class="sa-btn-website" target="_blank">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                Lihat Website
+            </a>
+            <button class="sa-notif-btn" aria-label="Notifikasi">
+                <i class="fa-solid fa-bell"></i>
+                <span class="sa-notif-dot"></span>
+            </button>
+        </div>
         </header>
 
         <main class="sa-content vf-content">
@@ -98,33 +91,32 @@
                 <div class="vf-summary-card amber">
                     <div class="vf-summary-icon">⏳</div>
                     <div class="vf-summary-info">
-                        <div class="vf-summary-val">2</div>
+                        <div class="vf-summary-val">{{ $totalPending ?? 0 }}</div>
                         <div class="vf-summary-label">Menunggu Verifikasi</div>
                     </div>
                 </div>
                 <div class="vf-summary-card green">
                     <div class="vf-summary-icon">✅</div>
                     <div class="vf-summary-info">
-                        <div class="vf-summary-val">1</div>
+                        <div class="vf-summary-val">{{ $totalApproved ?? 0 }}</div>
                         <div class="vf-summary-label">Disetujui</div>
                     </div>
                 </div>
                 <div class="vf-summary-card red">
                     <div class="vf-summary-icon">❌</div>
                     <div class="vf-summary-info">
-                        <div class="vf-summary-val">1</div>
+                        <div class="vf-summary-val">{{ $totalRejected ?? 0 }}</div>
                         <div class="vf-summary-label">Ditolak</div>
                     </div>
                 </div>
             </div>
 
-            {{-- ===== FILTER BAR ===== --}}
             <div class="vf-filter-bar">
                 <div class="vf-filter-tabs">
-                    <button class="vf-filter-tab active" data-filter="semua">Semua (4)</button>
-                    <button class="vf-filter-tab pending" data-filter="pending">⏳ Pending (2)</button>
-                    <button class="vf-filter-tab disetujui" data-filter="disetujui">✓ Disetujui (1)</button>
-                    <button class="vf-filter-tab ditolak" data-filter="ditolak">✕ Ditolak (1)</button>
+                    <button class="vf-filter-tab active" data-filter="semua">Semua ({{ $totalSemua ?? 0 }})</button>
+                    <button class="vf-filter-tab pending" data-filter="pending">⏳ Pending ({{ $totalPending ?? 0 }})</button>
+                    <button class="vf-filter-tab disetujui" data-filter="disetujui">✓ Disetujui ({{ $totalApproved ?? 0 }})</button>
+                    <button class="vf-filter-tab ditolak" data-filter="ditolak">✕ Ditolak ({{ $totalRejected ?? 0 }})</button>
                 </div>
                 <div class="vf-search-wrap">
                     <i class="fa-solid fa-magnifying-glass vf-search-icon"></i>
@@ -134,167 +126,124 @@
 
             {{-- ===== DAFTAR PENDAFTARAN ===== --}}
             <div id="vfList">
-
-                @php
-                $pendaftaran = [
-                    [
-                        'id'        => 1,
-                        'initial'   => 'M',
-                        'color'     => '#6b7280',
-                        'nama'      => 'Masjid Al-Nur',
-                        'status'    => 'pending',
-                        'kota'      => 'Yogyakarta, Di Yogyakarta',
-                        'tahun'     => '2001',
-                        'jamaah'    => '800 jamaah',
-                        'imam'      => 'Ustadz H. Mahmud Fauzi, Lc.',
-                        'ketua'     => 'Dr. Irwan Setiadi, M.Si.',
-                        'email'     => 'info@masjidalnur.id',
-                        'telepon'   => '+62 274 512 345',
-                        'program'   => ['TPA / TPQ','Tahsin Al-Quran','Kajian Hadits','Majelis Taklim','Qurban'],
-                        'daftar'    => '13 Agu 2026, 09:15',
-                    ],
-                    [
-                        'id'        => 2,
-                        'initial'   => 'M',
-                        'color'     => '#374151',
-                        'nama'      => 'Masjid Baiturrohman',
-                        'status'    => 'pending',
-                        'kota'      => 'Samarinda, Kalimantan Timur',
-                        'tahun'     => '1998',
-                        'jamaah'    => '1.200 jamaah',
-                        'imam'      => 'KH. Abdurrahman Wahid, S.Ag.',
-                        'ketua'     => 'H. Sutrisno Hadi',
-                        'email'     => 'admin@baiturrohman-smr.id',
-                        'telepon'   => '+62 541 201 456',
-                        'program'   => ['Hafalan Quran 30 Juz','Kajian Fiqih','Pengajian Bulanan','Program Yatim Piatu','Donasi Sosial'],
-                        'daftar'    => '12 Agu 2026, 14:30',
-                    ],
-                    [
-                        'id'        => 3,
-                        'initial'   => 'B',
-                        'color'     => '#1a4731',
-                        'nama'      => 'Baitul Digital',
-                        'status'    => 'disetujui',
-                        'kota'      => 'Jakarta Selatan, DKI Jakarta',
-                        'tahun'     => '1987',
-                        'jamaah'    => '2.500 jamaah',
-                        'imam'      => 'Ustadz Ahmad Fauzan, Lc.',
-                        'ketua'     => 'Ir. Hendra Kusuma, M.T.',
-                        'email'     => 'admin@baituldigital.id',
-                        'telepon'   => '+62 21 780 1234',
-                        'program'   => ['TPA / TPQ','Kajian Rutin','Tahfidz Al-Qur\'an','Kajian Fiqih'],
-                        'daftar'    => '10 Agu 2026, 08:00',
-                    ],
-                    [
-                        'id'        => 4,
-                        'initial'   => 'M',
-                        'color'     => '#7c3aed',
-                        'nama'      => 'Masjid Nurul Huda',
-                        'status'    => 'ditolak',
-                        'kota'      => 'Medan, Sumatera Utara',
-                        'tahun'     => '2010',
-                        'jamaah'    => '400 jamaah',
-                        'imam'      => 'Ustadz Rizki Amal',
-                        'ketua'     => 'Bapak Suharto',
-                        'email'     => 'nurulhuda@gmail.com',
-                        'telepon'   => '+62 61 885 9900',
-                        'program'   => ['Pengajian Ibu-ibu','Shalat Berjamaah'],
-                        'daftar'    => '9 Agu 2026, 16:45',
-                    ],
-                ];
-                @endphp
-
                 @foreach($pendaftaran as $p)
-                <div class="vf-card {{ $p['status'] }}" data-status="{{ $p['status'] }}" data-search="{{ strtolower($p['nama'].' '.$p['kota'].' '.$p['email']) }}">
+                @php
+                    $dbStatus = strtolower(trim($p->status));
+                    if ($dbStatus === 'approved' || $dbStatus === 'aktif' || $dbStatus === 'disetujui') {
+                        $filterStatus = 'disetujui';
+                    } elseif ($dbStatus === 'rejected' || $dbStatus === 'ditolak') {
+                        $filterStatus = 'ditolak';
+                    } else {
+                        $filterStatus = 'pending';
+                    }
+                @endphp
+                <div class="vf-card {{ $filterStatus }}"
+                     data-status="{{ $filterStatus }}"
+                     data-search="{{ strtolower($p->mosque_name.' '.$p->city.' '.$p->email) }}">
 
-                    {{-- Border kiri warna sesuai status --}}
                     <div class="vf-card-inner">
 
-                        {{-- Header row --}}
                         <div class="vf-card-header">
-                            <div class="vf-mosque-avatar" style="background:{{ $p['color'] }}">{{ $p['initial'] }}</div>
+                            <div class="vf-mosque-avatar" style="background:#4f46e5">
+                                {{ strtoupper(substr($p->mosque_name ?? 'MS', 0, 2)) }}
+                            </div>
+
                             <div class="vf-mosque-title">
                                 <div class="vf-mosque-name-row">
-                                    <span class="vf-mosque-name">{{ $p['nama'] }}</span>
-                                    <span class="vf-status-badge {{ $p['status'] }}">
-                                        @if($p['status'] === 'pending') ⏳ Menunggu
-                                        @elseif($p['status'] === 'disetujui') ✓ Disetujui
-                                        @else ✕ Ditolak
+                                    <span class="vf-mosque-name">
+                                        {{ $p->mosque_name }}
+                                    </span>
+
+                                    <span class="vf-status-badge {{ $filterStatus }}">
+                                        @if($filterStatus === 'pending')
+                                            ⏳ Menunggu
+                                        @elseif($filterStatus === 'disetujui')
+                                            ✓ Disetujui
+                                        @else
+                                            ✕ Ditolak
                                         @endif
                                     </span>
                                 </div>
+
                                 <div class="vf-mosque-sub">
-                                    {{ $p['kota'] }} · {{ $p['tahun'] }} · {{ $p['jamaah'] }}
+                                    {{ $p->city }} · {{ $p->founded ?? '-' }} · {{ $p->capacity ?? '-' }} jamaah
                                 </div>
-                            </div>
-                            <div class="vf-daftar-info">
-                                <div class="vf-daftar-label">Daftar</div>
-                                <div class="vf-daftar-val">{{ $p['daftar'] }}</div>
                             </div>
                         </div>
 
-                        {{-- Info grid --}}
                         <div class="vf-info-grid">
                             <div class="vf-info-item">
                                 <div class="vf-info-label">Imam</div>
-                                <div class="vf-info-val">{{ $p['imam'] }}</div>
+                                <div class="vf-info-val">{{ $p->imam_name ?? '-' }}</div>
                             </div>
                             <div class="vf-info-item">
                                 <div class="vf-info-label">Ketua</div>
-                                <div class="vf-info-val">{{ $p['ketua'] }}</div>
+                                <div class="vf-info-val">{{ $p->chairman_name ?? '-' }}</div>
                             </div>
                             <div class="vf-info-item">
                                 <div class="vf-info-label">Email</div>
-                                <div class="vf-info-val">{{ $p['email'] }}</div>
+                                <div class="vf-info-val">{{ $p->email }}</div>
                             </div>
                             <div class="vf-info-item">
                                 <div class="vf-info-label">Telepon</div>
-                                <div class="vf-info-val">{{ $p['telepon'] }}</div>
+                                <div class="vf-info-val">{{ $p->phone ?? '-' }}</div>
                             </div>
                         </div>
 
-                        {{-- Program tags --}}
                         <div class="vf-tags">
-                            @foreach(array_slice($p['program'], 0, 4) as $prog)
-                                <span class="vf-tag">{{ $prog }}</span>
-                            @endforeach
-                            @if(count($p['program']) > 4)
-                                <span class="vf-tag vf-tag-more">+{{ count($p['program']) - 4 }} lainnya</span>
+                            @if(is_array($p->programs))
+                                @foreach(array_slice($p->programs, 0, 4) as $prog)
+                                    <span class="vf-tag">{{ $prog }}</span>
+                                @endforeach
+
+                                @if(count($p->programs) > 4)
+                                    <span class="vf-tag vf-tag-more">
+                                        +{{ count($p->programs) - 4 }} lainnya
+                                    </span>
+                                @endif
                             @endif
                         </div>
 
-                        {{-- Actions --}}
                         <div class="vf-actions">
-                            <button class="vf-btn-detail" onclick="vfOpenDetail({{ $p['id'] }})">
+                            <button type="button"
+                                    class="vf-btn-detail"
+                                    onclick="vfOpenDetail({{ $p->id }})">
                                 <i class="fa-solid fa-eye"></i>
                                 Lihat Detail
                             </button>
 
-                            @if($p['status'] === 'pending')
-                            <form method="POST" action="{{ route('superadmin.verifikasi.approve', $p['id']) }}" style="display:inline;">
-                                @csrf @method('PUT')
-                                <button type="submit" class="vf-btn-approve">
-                                    <i class="fa-solid fa-check"></i>
-                                    Setujui
-                                </button>
-                            </form>
-                            <form method="POST" action="{{ route('superadmin.verifikasi.reject', $p['id']) }}" style="display:inline;">
-                                @csrf @method('PUT')
-                                <button type="submit" class="vf-btn-reject">
-                                    <i class="fa-solid fa-xmark"></i>
-                                    Tolak
-                                </button>
-                            </form>
-                            @elseif($p['status'] === 'disetujui')
-                            <span class="vf-status-label green">
-                                <i class="fa-solid fa-circle-check"></i>
-                                Sudah disetujui
-                            </span>
+                            @if($filterStatus === 'pending')
+                                <form method="POST"
+                                      action="{{ route('superadmin.verifikasi.approve', $p->id) }}"
+                                      style="display:inline;">
+                                    @csrf
+                                    @method('PUT')
+                                    <button type="submit" class="vf-btn-approve">
+                                        <i class="fa-solid fa-check"></i>
+                                        Setujui
+                                    </button>
+                                </form>
+
+                                <form method="POST"
+                                      action="{{ route('superadmin.verifikasi.reject', $p->id) }}"
+                                      style="display:inline;">
+                                    @csrf
+                                    @method('PUT')
+                                    <button type="submit" class="vf-btn-reject">
+                                        <i class="fa-solid fa-xmark"></i>
+                                        Tolak
+                                    </button>
+                                </form>
+                            @elseif($filterStatus === 'disetujui')
+                                <span class="vf-status-label green">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    Sudah disetujui
+                                </span>
                             @else
-                            <span class="vf-status-label red">
-                                <i class="fa-solid fa-xmark"></i>
-                                Pendaftaran ditolak
-                            </span>
+                                <span class="vf-status-label red">
+                                    <i class="fa-solid fa-xmark"></i>
+                                    Pendaftaran ditolak
+                                </span>
                             @endif
                         </div>
 
@@ -375,26 +324,28 @@
             const d = detailData.find(x => x.id === id);
             if (!d) return;
 
-            document.getElementById('vfModalTitle').textContent = 'Detail — ' + d.nama;
+            document.getElementById('vfModalTitle').textContent = 'Detail — ' + d.mosque_name;
 
-            const statusMap = { pending: '⏳ Menunggu', disetujui: '✓ Disetujui', ditolak: '✕ Ditolak' };
-            const programTags = (d.program || []).map(p => `<span class="vf-tag">${p}</span>`).join('');
+            const statusMap = { pending: '⏳ Menunggu', approved: '✓ Disetujui', rejected: '✕ Ditolak', disetujui: '✓ Disetujui', ditolak: '✕ Ditolak' };
+            const programTags = (d.programs || []).map(p => `<span class="vf-tag">${p}</span>`).join('');
+            
+            const formattedDate = d.created_at ? new Date(d.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
 
             document.getElementById('vfModalBody').innerHTML = `
                 <div class="vf-modal-row">
-                    <div class="vf-modal-avatar" style="background:${d.color}">${d.initial}</div>
+                    <div class="vf-modal-avatar" style="background:#4f46e5">${d.mosque_name.substring(0, 2).toUpperCase()}</div>
                     <div>
-                        <div class="vf-modal-mosque-name">${d.nama}</div>
-                        <div class="vf-modal-mosque-sub">${d.kota} · ${d.tahun} · ${d.jamaah}</div>
-                        <span class="vf-status-badge ${d.status} vf-modal-status">${statusMap[d.status]}</span>
+                        <div class="vf-modal-mosque-name">${d.mosque_name}</div>
+                        <div class="vf-modal-mosque-sub">${d.city} · ${d.founded ?? '-'} · ${d.capacity ?? '-'} jamaah</div>
+                        <span class="vf-status-badge ${d.status} vf-modal-status">${statusMap[d.status] || d.status}</span>
                     </div>
                 </div>
                 <div class="vf-modal-grid">
-                    <div class="vf-modal-field"><div class="vf-info-label">Imam</div><div class="vf-info-val">${d.imam}</div></div>
-                    <div class="vf-modal-field"><div class="vf-info-label">Ketua</div><div class="vf-info-val">${d.ketua}</div></div>
+                    <div class="vf-modal-field"><div class="vf-info-label">Imam</div><div class="vf-info-val">${d.imam_name ?? '-'}</div></div>
+                    <div class="vf-modal-field"><div class="vf-info-label">Ketua</div><div class="vf-info-val">${d.chairman_name ?? '-'}</div></div>
                     <div class="vf-modal-field"><div class="vf-info-label">Email</div><div class="vf-info-val">${d.email}</div></div>
-                    <div class="vf-modal-field"><div class="vf-info-label">Telepon</div><div class="vf-info-val">${d.telepon}</div></div>
-                    <div class="vf-modal-field"><div class="vf-info-label">Tanggal Daftar</div><div class="vf-info-val">${d.daftar}</div></div>
+                    <div class="vf-modal-field"><div class="vf-info-label">Telepon</div><div class="vf-info-val">${d.phone ?? '-'}</div></div>
+                    <div class="vf-modal-field"><div class="vf-info-label">Tanggal Daftar</div><div class="vf-info-val">${formattedDate}</div></div>
                 </div>
                 <div class="vf-info-label" style="margin:16px 0 8px">Program Kegiatan</div>
                 <div class="vf-tags">${programTags}</div>

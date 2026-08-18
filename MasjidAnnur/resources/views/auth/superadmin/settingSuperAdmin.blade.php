@@ -6,8 +6,8 @@
     <title>Pengaturan - Super Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/berandaSuperAdmin.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/settingSuperAdmin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/superadmin/berandaSuperAdmin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/superadmin/settingSuperAdmin.css') }}">
 </head>
 <body class="sa-page" id="saBody">
 
@@ -126,7 +126,8 @@
             </div>
             @endif
 
-            <form method="POST" action="{{ route('superadmin.pengaturan.update') }}" id="stForm">
+            {{-- FORM UTAMA UNTUK UPDATE PENGATURAN & PASSWORD --}}
+            <form action="{{ route('superadmin.pengaturan.update') }}" method="POST">
                 @csrf
                 @method('PUT')
 
@@ -142,9 +143,11 @@
                             <div class="st-field">
                                 <label class="st-label" for="platform_name">NAMA PLATFORM</label>
                                 <input type="text" id="platform_name" name="platform_name"
-                                       class="st-input"
-                                       value="{{ old('platform_name', 'MasjidKu') }}"
-                                       placeholder="Nama platform">
+                                    class="st-input @error('platform_name') is-invalid @enderror"
+                                    value="{{ old('platform_name', $setting->platform_name ?? 'MasjidKu') }}">
+                                @error('platform_name')
+                                    <div class="st-error-msg">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="st-field">
@@ -260,7 +263,7 @@
                             <p class="st-hint">Kosongkan jika tidak ingin mengubah password.</p>
                         </div>
 
-                        {{-- Simpan --}}
+                        {{-- Tombol Simpan (Sekarang di dalam form utama) --}}
                         <div class="st-footer">
                             <button type="submit" class="st-btn-simpan">Simpan Pengaturan</button>
                         </div>
@@ -308,7 +311,7 @@
                         <div class="st-info-card st-danger-card">
                             <div class="st-info-title red">Zona Berbahaya</div>
                             <p class="st-danger-desc">Tindakan berikut bersifat permanen dan tidak dapat dibatalkan.</p>
-                            <button type="button" class="st-btn-danger" onclick="return confirm('Yakin ingin menghapus semua data? Tindakan ini tidak bisa dibatalkan.')">
+                            <button type="button" class="st-btn-danger" onclick="if(confirm('Yakin ingin menghapus semua data? Tindakan ini tidak bisa dibatalkan.')) { document.getElementById('delete-tenant-form').submit(); }">
                                 Hapus Semua Data Tenant
                             </button>
                         </div>
@@ -316,6 +319,12 @@
                     </div>
 
                 </div>
+            </form>
+
+            {{-- Form Terpisah Khusus untuk Aksi Hapus Tenant (Zona Berbahaya) --}}
+            <form id="delete-tenant-form" action="{{ route('superadmin.pengaturan.reset') }}" method="POST" style="display: none;">
+                @csrf
+                @method('DELETE')
             </form>
 
         </main>
@@ -326,9 +335,18 @@
 
     <script>
         document.getElementById('saSidebarToggle').addEventListener('click', () => {
-            document.getElementById('saSidebar').classList.toggle('collapsed');
+            const isCollapsed = document.getElementById('saSidebar').classList.toggle('collapsed');
             document.getElementById('saMain').classList.toggle('expanded');
+            localStorage.setItem('sidebarCollapsed', isCollapsed);
         });
+
+        // Load state saat halaman dimuat
+        window.onload = () => {
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                document.getElementById('saSidebar').classList.add('collapsed');
+                document.getElementById('saMain').classList.add('expanded');
+            }
+        };
     </script>
 </body>
 </html>

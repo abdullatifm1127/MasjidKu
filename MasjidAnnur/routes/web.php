@@ -5,21 +5,22 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Mosque;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MosqueController;
-
+use App\Http\Controllers\SuperAdmin\PenggunaController;
+use App\Http\Controllers\SuperAdmin\BerandaSuperAdminController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\SuperAdmin\PengaturanController;
 
 /*
 |--------------------------------------------------------------------------
 | Halaman Utama
 |--------------------------------------------------------------------------
 */
-
 Route::get('/', function () {
     $userMosque = null;
     if (Auth::check()) {
         $userMosque = Mosque::where('user_id', Auth::id())->first();
     }
-
-return view('auth.halamanUtama', compact('userMosque'));
+    return view('auth.halamanUtama', compact('userMosque'));
 })->name('home');
 
 // Halaman Publik Masjid
@@ -34,29 +35,22 @@ Route::get('/masjidUser', function () {
 | Authentication
 |--------------------------------------------------------------------------
 */
-
-// Halaman Login
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
-// Proses Login
 Route::post('/login', [AuthController::class, 'login'])
     ->name('login.process');
 
-// Halaman Daftar Akun
 Route::get('/register', function () {
     return view('auth.registerAkun');
 })->name('register');
 
-// Proses Daftar Akun
 Route::post('/register', [AuthController::class, 'register'])
     ->name('register.process');
 
-// Logout
 Route::post('/logout', [AuthController::class, 'logout'])
     ->name('logout');
-
 
 /*
 |--------------------------------------------------------------------------
@@ -64,33 +58,27 @@ Route::post('/logout', [AuthController::class, 'logout'])
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
-    // Form Daftarkan Masjid
     Route::get('/daftar-masjid', [MosqueController::class, 'create'])
         ->name('daftar.masjid');
 
-    // Proses simpan masjid
     Route::post('/daftar-masjid', [MosqueController::class, 'store'])
         ->name('daftar.masjid.store');
 
-    // Dashboard
     Route::get('/dashboard', [MosqueController::class, 'dashboard'])
         ->name('dashboard');
 });
 
-
 /*
 |--------------------------------------------------------------------------
-| Halaman Waiting (Dipindah keluar dari middleware auth)
+| Halaman Waiting
 |--------------------------------------------------------------------------
 */
 Route::get('/waiting', function () {
-    // Jika tidak ada user yang login sama sekali, baru arahkan ke login
     if (!Auth::check()) {
         return redirect()->route('login');
     }
-    return view('waiting');
+    return view('mosque.waiting');
 })->name('waiting');
-
 
 /*
 |--------------------------------------------------------------------------
@@ -98,51 +86,40 @@ Route::get('/waiting', function () {
 |--------------------------------------------------------------------------
 */
 Route::get('/forgot-password', function () {
-    return view('auth.login'); // Ubah jika nanti sudah membuat view khusus forgot password
+    return view('auth.login');
 })->name('password.request');
-
 
 /*
 |--------------------------------------------------------------------------
 | Admin
 |--------------------------------------------------------------------------
 */
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/dashboard', [MosqueController::class, 'dashboard'])
+        ->name('admin.dashboard');
+});
 
-// Dashboard Admin
-Route::get('/admin/dashboard', function () {
-    return view('auth.berandaAdmin');
-})->name('admin.dashboard');
-
-// Landing Page Editor
 Route::get('/admin/landing-page', function () {
     return view('admin.landingPage');
 })->name('admin.landing-page');
 
-// Profil Masjid Admin
 Route::get('/admin/profil-masjid', [MosqueController::class, 'editProfil'])
     ->name('admin.profil-masjid');
 
 Route::put('/admin/profil-masjid', [MosqueController::class, 'updateProfil'])
     ->name('admin.profil-masjid.update');
 
-
 /*
 |--------------------------------------------------------------------------
 | Super Admin
 |--------------------------------------------------------------------------
 */
+Route::get('/superadmin/dashboard', [BerandaSuperAdminController::class, 'dashboard'])
+    ->name('superadmin.dashboard');
 
-// Dashboard Super Admin
-Route::get('/superadmin/dashboard', function () {
-    return view('auth.berandaSuperAdmin');
-})->name('superadmin.dashboard');
+Route::get('/superadmin/verifikasi', [MosqueController::class, 'verifikasi'])
+    ->name('superadmin.verifikasi');
 
-// Verifikasi Pendaftaran Super Admin
-Route::get('/superadmin/verifikasi', function () {
-    return view('auth.verifSuperAdmin');
-})->name('superadmin.verifikasi');
-
-// Approve & Reject pendaftaran (placeholder — ganti dengan controller saat ada logika DB)
 Route::put('/superadmin/verifikasi/{id}/approve', function ($id) {
     $mosque = Mosque::findOrFail($id);
     $mosque->update(['status' => 'approved']);
@@ -157,10 +134,8 @@ Route::put('/superadmin/verifikasi/{id}/reject', function ($id) {
         ->with('error', 'Pendaftaran telah ditolak.');
 })->name('superadmin.verifikasi.reject');
 
-// Manajemen Masjid Super Admin
-Route::get('/superadmin/manajemen-masjid', function () {
-    return view('auth.manajemenMasjidSuperAdmin');
-})->name('superadmin.manajemen-masjid');
+Route::get('/superadmin/manajemen-masjid', [MosqueController::class, 'manajemenMasjid'])
+    ->name('superadmin.manajemen-masjid');
 
 Route::post('/superadmin/manajemen-masjid', function (\Illuminate\Http\Request $request) {
     $validated = $request->validate([
@@ -181,61 +156,33 @@ Route::post('/superadmin/manajemen-masjid', function (\Illuminate\Http\Request $
         ->with('success', 'Masjid berhasil ditambahkan.');
 })->name('superadmin.manajemen-masjid.store');
 
-// Pengguna Super Admin
-Route::get('/superadmin/pengguna', function () {
-    return view('auth.penggunaSuperAdmin');
-})->name('superadmin.pengguna');
+// Manajemen Pengguna Super Admin (Menggunakan Controller Bersih Tanpa Duplikasi)
+Route::get('/superadmin/pengguna', [PenggunaController::class, 'index'])
+    ->name('superadmin.pengguna');
 
-Route::post('/superadmin/pengguna', function (\Illuminate\Http\Request $request) {
-    $validated = $request->validate([
-        'name'                  => 'required|string|max:255',
-        'email'                 => 'required|email|max:255|unique:users',
-        'role'                  => 'required|in:tenant_admin,super_admin',
-        'password'              => 'required|string|min:8|confirmed',
-    ]);
+Route::post('/superadmin/pengguna', [PenggunaController::class, 'store'])
+    ->name('superadmin.pengguna.store');
 
-    \App\Models\User::create([
-        'name'     => $validated['name'],
-        'email'    => $validated['email'],
-        'password' => bcrypt($validated['password']),
-    ]);
-
-    return redirect()->route('superadmin.pengguna')
-        ->with('success', 'Pengguna berhasil ditambahkan.');
-})->name('superadmin.pengguna.store');
-
-Route::put('/superadmin/pengguna/{id}', function (\Illuminate\Http\Request $request, $id) {
-    $user = \App\Models\User::findOrFail($id);
-
-    $rules = [
-        'name'  => 'required|string|max:255',
-        'email' => 'required|email|max:255|unique:users,email,' . $id,
-    ];
-
-    if ($request->filled('password')) {
-        $rules['password'] = 'string|min:8|confirmed';
-    }
-
-    $validated = $request->validate($rules);
-
-    $user->update(array_filter([
-        'name'     => $validated['name'],
-        'email'    => $validated['email'],
-        'password' => $request->filled('password') ? bcrypt($request->password) : null,
-    ]));
-
-    return redirect()->route('superadmin.pengguna')
-        ->with('success', 'Data pengguna berhasil diperbarui.');
-})->name('superadmin.pengguna.update');
+Route::put('/superadmin/pengguna/{id}', [PenggunaController::class, 'update'])
+    ->name('superadmin.pengguna.update');
 
 // Pengaturan Super Admin
-Route::get('/superadmin/pengaturan', function () {
-    return view('auth.settingSuperAdmin');
-})->name('superadmin.pengaturan');
+// Rute untuk menampilkan halaman
+Route::get('/superadmin/pengaturan', [PengaturanController::class, 'index'])
+    ->name('superadmin.pengaturan');
+// Rute untuk memproses update
+Route::put('/superadmin/pengaturan', [PengaturanController::class, 'update'])
+    ->name('superadmin.pengaturan.update');
 
-Route::put('/superadmin/pengaturan', function (\Illuminate\Http\Request $request) {
-    // Simpan ke config / database sesuai kebutuhan project
-    // Saat ini redirect balik dengan pesan sukses
-    return redirect()->route('superadmin.pengaturan')
-        ->with('success', 'Pengaturan berhasil disimpan.');
-})->name('superadmin.pengaturan.update');
+//halaman superadmin
+// Menampilkan form login
+Route::get('/superadmin/login', [LoginController::class, 'showLoginForm'])->name('login');
+// Memproses data login dari form
+Route::post('/superadmin/login', [LoginController::class, 'login']);
+// Logout
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+//seting
+Route::put('/superadmin/pengaturan/update', [PengaturanController::class, 'update'])->name('superadmin.pengaturan.update');
+Route::delete('/superadmin/pengaturan/reset', [App\Http\Controllers\SuperAdmin\PengaturanController::class, 'reset'])
+    ->name('superadmin.pengaturan.reset');

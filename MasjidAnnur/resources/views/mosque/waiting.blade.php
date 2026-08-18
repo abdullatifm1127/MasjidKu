@@ -3,19 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menunggu Verifikasi</title>
+    <title>Menunggu Verifikasi - MasjidKu</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Memanggil CSS Terpisah -->
+    <link rel="stylesheet" href="{{ asset('css/waiting/waiting.css') }}">
 </head>
 <body>
-    <h2>Pendaftaran Masjid Berhasil</h2>
 
-    <p>
-        Data masjid Anda sedang menunggu verifikasi admin.
-        Silakan tunggu sampai disetujui.
-    </p>
+    <div class="card">
+        <div class="icon-container">⏳</div>
+        <h2>Pendaftaran Masjid Berhasil</h2>
+        <p>
+            Data masjid Anda sedang menunggu verifikasi dari admin. Silakan tunggu beberapa saat sampai akun Anda disetujui.
+        </p>
 
-    <!-- Pastikan menggunakan tag <a> dengan route('home') -->
-    <a href="{{ route('home') }}" style="display: inline-block; padding: 10px 20px; background-color: #4b5563; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
-    ← Kembali ke Beranda
-</a>
+        <button onclick="window.location.href='{{ route('home') }}'" class="btn-home">
+            ← Kembali ke Beranda
+        </button>
+    </div>
+
 </body>
 </html>
