@@ -24,12 +24,14 @@ Route::get('/', function () {
 })->name('home');
 
 // Halaman Publik Masjid
-Route::get('/masjidUser', function () {
-    $mosque = Mosque::first(); 
-    return view('auth.halamanUtamaUser', compact('mosque'));
+
+Route::middleware(['auth'])->get('/masjidUser', function () {
+    $mosque = Mosque::where('user_id', Auth::id())->first();  
+    if (!$mosque) {
+        return redirect()->route('daftar.masjid')->with('error', 'Anda belum mendaftarkan masjid.');
+    }
+    return view('auth.adminmasjid.halamanUtamaUser', compact('mosque'));
 })->name('masjid.publik');
-
-
 /*
 |--------------------------------------------------------------------------
 | Authentication
@@ -91,98 +93,68 @@ Route::get('/forgot-password', function () {
 
 /*
 |--------------------------------------------------------------------------
-| Admin
+| Admin Masjid (Harus Login)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin/dashboard', [MosqueController::class, 'dashboard'])
         ->name('admin.dashboard');
+
+    Route::get('/admin/landing-page', function () {
+        return view('admin.landingPage');
+    })->name('admin.landing-page');
+
+    Route::get('/admin/profil-masjid', [MosqueController::class, 'editProfil'])
+        ->name('admin.profil-masjid');
+
+    Route::put('/admin/profil-masjid', [MosqueController::class, 'updateProfil'])
+        ->name('admin.profil-masjid.update');
 });
-
-Route::get('/admin/landing-page', function () {
-    return view('admin.landingPage');
-})->name('admin.landing-page');
-
-Route::get('/admin/profil-masjid', [MosqueController::class, 'editProfil'])
-    ->name('admin.profil-masjid');
-
-Route::put('/admin/profil-masjid', [MosqueController::class, 'updateProfil'])
-    ->name('admin.profil-masjid.update');
-
 /*
 |--------------------------------------------------------------------------
-| Super Admin
+| Super Admin (Harus Login & Punya Akses)
 |--------------------------------------------------------------------------
 */
-Route::get('/superadmin/dashboard', [BerandaSuperAdminController::class, 'dashboard'])
-    ->name('superadmin.dashboard');
+Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(function () {
+    
+    Route::get('/dashboard', [BerandaSuperAdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/verifikasi', [MosqueController::class, 'verifikasi'])->name('verifikasi');
+    
+    Route::put('/verifikasi/{id}/approve', function ($id) {
+        $mosque = Mosque::findOrFail($id);
+        $mosque->update(['status' => 'approved']);
+        return redirect()->route('superadmin.verifikasi')->with('success', 'Pendaftaran berhasil disetujui.');
+    })->name('verifikasi.approve');
 
-Route::get('/superadmin/verifikasi', [MosqueController::class, 'verifikasi'])
-    ->name('superadmin.verifikasi');
+    Route::put('/verifikasi/{id}/reject', function ($id) {
+        $mosque = Mosque::findOrFail($id);
+        $mosque->update(['status' => 'rejected']);
+        return redirect()->route('superadmin.verifikasi')->with('error', 'Pendaftaran telah ditolak.');
+    })->name('verifikasi.reject');
 
-Route::put('/superadmin/verifikasi/{id}/approve', function ($id) {
-    $mosque = Mosque::findOrFail($id);
-    $mosque->update(['status' => 'approved']);
-    return redirect()->route('superadmin.verifikasi')
-        ->with('success', 'Pendaftaran berhasil disetujui.');
-})->name('superadmin.verifikasi.approve');
+    Route::get('/manajemen-masjid', [MosqueController::class, 'manajemenMasjid'])->name('manajemen-masjid');
+    
+    Route::post('/manajemen-masjid', function (\Illuminate\Http\Request $request) {
+        $validated = $request->validate([
+            'mosque_name'   => 'required|string|max:255',
+            'arabic_name'   => 'nullable|string|max:255',
+            'city'          => 'required|string|max:255',
+            'province'      => 'required|string|max:255',
+            'imam_name'     => 'required|string|max:255',
+            'chairman_name' => 'required|string|max:255',
+            'email'         => 'required|email|max:255',
+            'phone'         => 'nullable|string|max:30',
+            'status'        => 'required|in:approved,pending',
+        ]);
+        Mosque::create(array_merge($validated, ['user_id' => 1]));
+        return redirect()->route('superadmin.manajemen-masjid')->with('success', 'Masjid berhasil ditambahkan.');
+    })->name('manajemen-masjid.store');
 
-Route::put('/superadmin/verifikasi/{id}/reject', function ($id) {
-    $mosque = Mosque::findOrFail($id);
-    $mosque->update(['status' => 'rejected']);
-    return redirect()->route('superadmin.verifikasi')
-        ->with('error', 'Pendaftaran telah ditolak.');
-})->name('superadmin.verifikasi.reject');
+    Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna');
+    Route::post('/pengguna', [PenggunaController::class, 'store'])->name('pengguna.store');
+    Route::put('/pengguna/{id}', [PenggunaController::class, 'update'])->name('pengguna.update');
 
-Route::get('/superadmin/manajemen-masjid', [MosqueController::class, 'manajemenMasjid'])
-    ->name('superadmin.manajemen-masjid');
-
-Route::post('/superadmin/manajemen-masjid', function (\Illuminate\Http\Request $request) {
-    $validated = $request->validate([
-        'mosque_name'   => 'required|string|max:255',
-        'arabic_name'   => 'nullable|string|max:255',
-        'city'          => 'required|string|max:255',
-        'province'      => 'required|string|max:255',
-        'imam_name'     => 'required|string|max:255',
-        'chairman_name' => 'required|string|max:255',
-        'email'         => 'required|email|max:255',
-        'phone'         => 'nullable|string|max:30',
-        'status'        => 'required|in:approved,pending',
-    ]);
-
-    Mosque::create(array_merge($validated, ['user_id' => 1]));
-
-    return redirect()->route('superadmin.manajemen-masjid')
-        ->with('success', 'Masjid berhasil ditambahkan.');
-})->name('superadmin.manajemen-masjid.store');
-
-// Manajemen Pengguna Super Admin (Menggunakan Controller Bersih Tanpa Duplikasi)
-Route::get('/superadmin/pengguna', [PenggunaController::class, 'index'])
-    ->name('superadmin.pengguna');
-
-Route::post('/superadmin/pengguna', [PenggunaController::class, 'store'])
-    ->name('superadmin.pengguna.store');
-
-Route::put('/superadmin/pengguna/{id}', [PenggunaController::class, 'update'])
-    ->name('superadmin.pengguna.update');
-
-// Pengaturan Super Admin
-// Rute untuk menampilkan halaman
-Route::get('/superadmin/pengaturan', [PengaturanController::class, 'index'])
-    ->name('superadmin.pengaturan');
-// Rute untuk memproses update
-Route::put('/superadmin/pengaturan', [PengaturanController::class, 'update'])
-    ->name('superadmin.pengaturan.update');
-
-//halaman superadmin
-// Menampilkan form login
-Route::get('/superadmin/login', [LoginController::class, 'showLoginForm'])->name('login');
-// Memproses data login dari form
-Route::post('/superadmin/login', [LoginController::class, 'login']);
-// Logout
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-
-//seting
-Route::put('/superadmin/pengaturan/update', [PengaturanController::class, 'update'])->name('superadmin.pengaturan.update');
-Route::delete('/superadmin/pengaturan/reset', [App\Http\Controllers\SuperAdmin\PengaturanController::class, 'reset'])
-    ->name('superadmin.pengaturan.reset');
+    Route::get('/pengaturan', [PengaturanController::class, 'index'])->name('pengaturan');
+    Route::put('/pengaturan', [PengaturanController::class, 'update'])->name('pengaturan.update');
+    Route::delete('/pengaturan/reset', [PengaturanController::class, 'reset'])->name('pengaturan.reset');
+});

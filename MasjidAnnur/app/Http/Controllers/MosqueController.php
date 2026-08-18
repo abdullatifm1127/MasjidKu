@@ -286,4 +286,11 @@ class MosqueController extends Controller
         'totalNonaktif'
     ));
 }
+    public function landingPage()
+    {
+        $user = Auth::user();
+        $mosque = Mosque::where('user_id', $user->id)->first();
+
+        return view('admin.landingPage', compact('mosque'));
+    }
 }
