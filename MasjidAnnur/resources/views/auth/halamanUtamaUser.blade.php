@@ -147,7 +147,7 @@
                 <div class="hu-profil-v2-right">
                     <div class="hu-profil-v2-images">
                         <div class="hu-profil-v2-img hu-img-tall">
-                            <img src="https://images.unsplash.com/photo-1585846888147-1a2b4e1e7fa4?w=500&q=80"
+                            <img src="https://cdn.prod.website-files.com/65af5f0812c914d3fef6a68c/65f2b082077626ffe6e59c61_28.%20Membangun%20Keterhubungan%20Spiritual%20Melalui%20Bacaan%20Al-Quran.png"
                                  alt="Al-Quran" loading="lazy">
                         </div>
                         <div class="hu-profil-v2-img hu-img-short">
