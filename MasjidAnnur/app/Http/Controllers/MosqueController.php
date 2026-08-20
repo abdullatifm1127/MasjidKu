@@ -156,12 +156,16 @@ class MosqueController extends Controller
      * Halaman edit Profil Masjid (admin).
      */
     public function editProfil()
-    {
-        // Ambil masjid pertama yang ada — bisa disesuaikan jika multi-masjid
-        $mosque = Mosque::first();
+{
+    // Mengambil data masjid berdasarkan user yang sedang login
+    $mosque = Mosque::where('user_id', Auth::id())->first();
 
-        return view('adminmasjid.profilMasjid', compact('mosque'));
+    if (!$mosque) {
+        return redirect()->route('daftar.masjid')->with('error', 'Anda belum mendaftarkan masjid.');
     }
+
+    return view('auth.adminmasjid.profilMasjid', compact('mosque'));
+}
 
     /**
      * Simpan perubahan Profil Masjid (admin).

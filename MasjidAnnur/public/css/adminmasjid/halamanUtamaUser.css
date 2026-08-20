@@ -1,456 +1,316 @@
-*::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
-    --green:      #1a4731;
-    --green-mid:  #1a6640;
-    --green-light:#f0fdf4;
-    --amber:      #d97706;
-    --amber-bg:   #f59e0b;
-    --white:      #ffffff;
-    --dark:       #0f1923;
-    --gray:       #f5f5f7;
-    --text:       #1a1a1a;
-    --text-mid:   #4b5563;
-    --text-light: #9ca3af;
-    --border:     #e5e7eb;
-    --radius:     12px;
-    --font:       'Inter', 'Segoe UI', sans-serif;
+    --ink: #1C2620;
+    --ink-soft: #4B5A50;
+    --parchment: #FBF7EC;
+    --parchment-deep: #F1E7CC;
+    --emerald-900: #0B3D2E;
+    --emerald-800: #0F4A38;
+    --emerald-700: #15583F;
+    --emerald-600: #1E6E4C;
+    --emerald-100: #E4EEE6;
+    --brass: #C0923D;
+    --brass-light: #E7CD8E;
+    --brass-deep: #93672A;
+    --line: rgba(20, 30, 24, 0.12);
+    --shadow-soft: 0 24px 60px -30px rgba(11, 61, 46, 0.45);
+    --shadow-card: 0 14px 34px -18px rgba(28, 38, 32, 0.25);
+
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'Inter', -apple-system, sans-serif;
+    --font-arabic: 'Amiri', serif;
+
+    --arch: 999px 999px 0 0;
+    --radius-card: 22px;
 }
+
+* { box-sizing: border-box; }
 
 html { scroll-behavior: smooth; }
 
 body {
-    font-family: var(--font);
-    color: var(--text);
-    background: #fff;
-    overflow-x: hidden;
+    margin: 0;
+    background: var(--parchment);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* =============================================================
-   PRAYER TIME BAR
-   ============================================================= */
+img { max-width: 100%; display: block; }
+
+a { color: inherit; text-decoration: none; }
+
+:focus-visible {
+    outline: 2px solid var(--brass);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+.hu-container {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 28px;
+}
+
+/* ---------- utilitas tipografi ---------- */
+h1, h2, h3 { font-family: var(--font-display); margin: 0; }
+
+.hu-section-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+}
+.hu-tag-amber       { background: var(--emerald-100); color: var(--emerald-800); }
+.hu-tag-amber-light { background: rgba(255,255,255,0.12); color: var(--brass-light); border: 1px solid rgba(231,205,142,0.4); }
+.hu-tag-light        { background: rgba(255,255,255,0.1); color: var(--brass-light); border: 1px solid rgba(231,205,142,0.35); }
+
+.hu-section-title {
+    font-size: clamp(1.7rem, 2.6vw, 2.4rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+.hu-title-dark  { color: var(--ink); }
+.hu-title-light { color: #fff; }
+
+.hu-section-head { margin-bottom: 40px; }
+.hu-section-head-light { text-align: center; }
+.hu-section-head-light .hu-section-title { margin: 0 auto; }
+
+.hu-section { padding: 88px 0; }
+
+/* ===================================================================
+   TOP BAR — JADWAL SHALAT
+   =================================================================== */
 .hu-praybar {
-    background: #0f1923;
+    background: var(--emerald-900);
     color: #fff;
+    font-family: var(--font-body);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 32px;
-    height: 44px;
-    font-size: 0.8rem;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 300;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    padding: 9px 28px;
+    font-size: 0.82rem;
 }
+.hu-praybar-left { display: flex; align-items: center; gap: 8px; opacity: 0.92; }
+.hu-praybar-label { font-weight: 700; letter-spacing: 0.03em; }
+.hu-praybar-date { color: var(--brass-light); }
+.hu-praybar-times { display: flex; gap: 22px; flex-wrap: wrap; }
+.hu-prayer { display: flex; align-items: baseline; gap: 6px; opacity: 0.75; }
+.hu-prayer-name { font-weight: 500; }
+.hu-prayer-time { font-variant-numeric: tabular-nums; color: var(--brass-light); }
+.hu-prayer.active { opacity: 1; font-weight: 700; }
+.hu-prayer.active .hu-prayer-time { color: #fff; }
 
-.hu-praybar-left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.hu-praybar-label {
-    font-weight: 700;
-    color: var(--amber-bg);
-    font-size: 0.78rem;
-}
-
-.hu-praybar-date {
-    color: rgba(255,255,255,0.55);
-    font-size: 0.76rem;
-}
-
-.hu-praybar-times {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-}
-
-.hu-prayer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0 14px;
-    min-width: 64px;
-    height: 44px;
-    justify-content: center;
-    border-left: 1px solid rgba(255,255,255,0.06);
-}
-
-.hu-prayer:first-child { border-left: none; }
-
-.hu-prayer.active {
-    background: var(--amber-bg);
-    color: #1a1a1a;
-}
-
-.hu-prayer-name {
-    font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    opacity: 0.7;
-    text-transform: uppercase;
-}
-
-.hu-prayer.active .hu-prayer-name { opacity: 1; }
-
-.hu-prayer-time {
-    font-size: 0.88rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-}
-
-/* =============================================================
+/* ===================================================================
    NAVBAR
-   ============================================================= */
+   =================================================================== */
 .hu-navbar {
     position: sticky;
     top: 0;
-    z-index: 200;
-    background: #fff;
-    border-bottom: 1px solid var(--border);
-    transition: box-shadow 0.2s;
+    z-index: 50;
+    background: rgba(251, 247, 236, 0.86);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
-
 .hu-navbar.scrolled {
-    box-shadow: 0 2px 16px rgba(0,0,0,0.1);
+    border-bottom-color: var(--line);
+    box-shadow: 0 8px 24px -18px rgba(11,61,46,0.35);
 }
-
 .hu-navbar-inner {
-    max-width: 1200px;
+    max-width: 1160px;
     margin: 0 auto;
-    padding: 0 32px;
-    height: 60px;
+    padding: 14px 28px;
     display: flex;
     align-items: center;
-    gap: 32px;
+    gap: 24px;
 }
-
-/* Brand */
-.hu-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    flex-shrink: 0;
-}
-
+.hu-brand { display: flex; align-items: center; gap: 12px; margin-right: auto; }
 .hu-brand-icon {
-    width: 36px;
-    height: 36px;
-    background: var(--green);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    flex-shrink: 0;
+    width: 40px; height: 40px;
+    display: grid; place-items: center;
+    background: var(--emerald-900);
+    color: var(--brass-light);
+    border-radius: var(--arch);
 }
+.hu-brand-text { display: flex; flex-direction: column; line-height: 1.15; }
+.hu-brand-name { font-family: var(--font-display); font-weight: 600; font-size: 1.02rem; color: var(--ink); }
+.hu-brand-city { font-size: 0.74rem; color: var(--ink-soft); }
 
-.hu-brand-name {
-    display: block;
-    font-size: 0.92rem;
-    font-weight: 700;
-    color: var(--green);
-    line-height: 1.2;
-    white-space: nowrap;
-}
-
-.hu-brand-city {
-    display: block;
-    font-size: 0.7rem;
-    color: var(--text-light);
-}
-
-/* Nav links */
-.hu-nav {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    flex: 1;
-}
-
+.hu-nav { display: flex; align-items: center; gap: 4px; }
 .hu-nav-link {
-    padding: 6px 12px;
-    font-size: 0.84rem;
+    font-size: 0.86rem;
     font-weight: 500;
-    color: var(--text-mid);
-    text-decoration: none;
-    border-radius: 6px;
-    white-space: nowrap;
-    transition: color 0.16s, background 0.16s;
+    color: var(--ink-soft);
+    padding: 8px 14px;
+    border-radius: 999px;
+    transition: background 0.2s ease, color 0.2s ease;
 }
+.hu-nav-link:hover { color: var(--ink); background: var(--emerald-100); }
+.hu-nav-link.active { color: var(--emerald-900); background: var(--emerald-100); font-weight: 600; }
 
-.hu-nav-link:hover,
-.hu-nav-link.active {
-    color: var(--green);
-    background: var(--green-light);
-}
-
-/* Ganti Masjid button */
 .hu-ganti-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 7px 14px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    font-family: var(--font);
-    color: var(--text-mid);
-    background: var(--gray);
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--font-body);
+    font-size: 0.8rem; font-weight: 600;
+    background: transparent;
+    color: var(--emerald-900);
+    border: 1px solid var(--line);
+    padding: 9px 16px;
+    border-radius: 999px;
     cursor: pointer;
-    white-space: nowrap;
-    flex-shrink: 0;
-    transition: background 0.16s;
+    transition: border-color 0.2s ease, background 0.2s ease;
 }
+.hu-ganti-btn:hover { border-color: var(--emerald-700); background: var(--emerald-100); }
 
-.hu-ganti-btn:hover { background: #e9e9ec; }
-
-/* Hamburger */
 .hu-hamburger {
     display: none;
     flex-direction: column;
-    gap: 5px;
+    gap: 4px;
     background: none;
     border: none;
     cursor: pointer;
     padding: 6px;
-    flex-shrink: 0;
 }
-
-.hu-hamburger span {
-    display: block;
-    width: 22px;
-    height: 2px;
-    background: var(--text);
-    border-radius: 2px;
-    transition: transform 0.2s, opacity 0.2s;
-}
-
-.hu-hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hu-hamburger span { width: 20px; height: 2px; background: var(--ink); border-radius: 2px; transition: transform 0.25s ease, opacity 0.25s ease; }
+.hu-hamburger.active span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
 .hu-hamburger.active span:nth-child(2) { opacity: 0; }
-.hu-hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.hu-hamburger.active span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
-/* =============================================================
+/* ===================================================================
    INFO TICKER
-   ============================================================= */
+   =================================================================== */
 .hu-ticker {
-    background: #fefce8;
-    border-bottom: 1px solid #fde68a;
-    height: 38px;
+    display: flex;
+    align-items: stretch;
+    background: var(--brass-light);
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+}
+.hu-ticker-label {
+    flex-shrink: 0;
+    display: flex; align-items: center;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    color: #fff;
+    background: var(--brass-deep);
+    padding: 8px 16px;
+}
+.hu-ticker-wrap { flex: 1; overflow: hidden; position: relative; }
+.hu-ticker-track {
     display: flex;
     align-items: center;
-    overflow: hidden;
-}
-
-.hu-ticker-label {
-    background: var(--amber);
-    color: #fff;
-    font-size: 0.7rem;
-    font-weight: 800;
-    padding: 4px 10px;
-    letter-spacing: 0.08em;
-    flex-shrink: 0;
-    margin-right: 16px;
-    margin-left: 32px;
-    border-radius: 4px;
-}
-
-.hu-ticker-wrap {
-    overflow: hidden;
-    flex: 1;
-}
-
-.hu-ticker-track {
-    display: inline-flex;
-    align-items: center;
-    gap: 24px;
+    gap: 14px;
     white-space: nowrap;
-    animation: ticker 20s linear infinite;
+    padding: 8px 20px;
+    animation: hu-scroll 26s linear infinite;
+    width: max-content;
+}
+.hu-ticker-text { font-size: 0.82rem; font-weight: 500; color: #4A3A16; }
+.hu-ticker-dot { font-size: 0.5rem; color: var(--brass-deep); }
+@keyframes hu-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
 }
 
-@keyframes ticker {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-}
-
-.hu-ticker-text {
-    font-size: 0.82rem;
-    color: #92400e;
-    font-weight: 500;
-}
-
-.hu-ticker-dot {
-    color: var(--amber);
-    font-size: 0.5rem;
-}
-
-/* =============================================================
-   HERO SECTION
-   ============================================================= */
+/* ===================================================================
+   HERO
+   =================================================================== */
 .hu-hero {
     position: relative;
-    height: calc(100vh - 44px - 60px - 38px);
-    min-height: 480px;
-    max-height: 680px;
-    overflow: hidden;
-    background: #1a2a3a url('https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Masjid_Nabawi_WB.jpg/1280px-Masjid_Nabawi_WB.jpg') center/cover no-repeat;
+    min-height: 84vh;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    isolation: isolate;
 }
-
 .hu-hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        to bottom,
-        rgba(10,20,30,0.15) 0%,
-        rgba(10,20,30,0.5)  50%,
-        rgba(10,20,30,0.75) 100%
-    );
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(60% 55% at 50% 0%, rgba(231,205,142,0.16), transparent 70%),
+        repeating-linear-gradient(115deg, rgba(255,255,255,0.035) 0 2px, transparent 2px 34px);
+    pointer-events: none;
 }
-
 .hu-hero-content {
     position: relative;
-    z-index: 2;
-    padding: 0 56px 72px;
-    max-width: 700px;
+    z-index: 1;
+    max-width: 720px;
+    padding: 120px 28px 96px;
+    animation: hu-rise 0.9s cubic-bezier(.2,.8,.2,1) both;
 }
-
 .hu-hero-arabic {
-    font-family: 'Amiri', 'Times New Roman', serif;
-    font-size: 1.6rem;
-    color: rgba(255,255,255,0.75);
-    direction: rtl;
-    margin-bottom: 8px;
-    letter-spacing: 0.02em;
+    font-family: var(--font-arabic);
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    color: var(--brass-light);
+    margin-bottom: 18px;
+    min-height: 1em;
 }
-
 .hu-hero-title {
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    font-weight: 800;
-    color: #fff;
-    line-height: 1.1;
-    margin-bottom: 12px;
-    text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(2.4rem, 6vw, 4.2rem);
+    line-height: 1.06;
+    letter-spacing: -0.015em;
 }
-
 .hu-hero-tagline {
-    font-size: 1rem;
-    color: rgba(255,255,255,0.8);
-    margin-bottom: 28px;
-    font-weight: 400;
+    margin: 22px auto 0;
+    max-width: 520px;
+    font-size: 1.05rem;
+    line-height: 1.65;
+    opacity: 0.88;
 }
-
 .hu-hero-btns {
     display: flex;
     align-items: center;
-    gap: 12px;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 36px;
     flex-wrap: wrap;
 }
-
-.hu-btn-primary {
-    display: inline-flex;
-    align-items: center;
-    padding: 12px 28px;
-    background: var(--amber);
-    color: #fff;
-    font-size: 0.9rem;
-    font-weight: 700;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: background 0.18s, transform 0.18s;
-}
-
-.hu-btn-primary:hover {
-    background: #b45309;
-    transform: translateY(-1px);
-}
-
-.hu-btn-outline {
-    display: inline-flex;
-    align-items: center;
-    padding: 12px 28px;
-    background: rgba(255,255,255,0.15);
-    color: #fff;
-    font-size: 0.9rem;
+.hu-btn-primary, .hu-btn-outline {
+    font-family: var(--font-body);
     font-weight: 600;
-    border-radius: 8px;
-    text-decoration: none;
-    border: 1.5px solid rgba(255,255,255,0.5);
-    backdrop-filter: blur(4px);
-    transition: background 0.18s;
+    font-size: 0.92rem;
+    padding: 14px 30px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
-
-.hu-btn-outline:hover { background: rgba(255,255,255,0.25); }
+.hu-btn-primary {
+    background: var(--brass);
+    color: #241705;
+    box-shadow: 0 14px 30px -12px rgba(192,146,61,0.65);
+}
+.hu-btn-primary:hover { transform: translateY(-2px); background: var(--brass-light); }
+.hu-btn-outline {
+    background: transparent;
+    color: inherit;
+    border: 1.5px solid rgba(255,255,255,0.55);
+}
+.hu-btn-outline:hover { background: rgba(255,255,255,0.12); transform: translateY(-2px); }
 
 .hu-hero-scroll {
     position: absolute;
-    bottom: 24px;
-    right: 32px;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: rgba(255,255,255,0.6);
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    writing-mode: horizontal-tb;
-}
-
-/* =============================================================
-   SECTIONS — BASE
-   ============================================================= */
-.hu-section {
-    padding: 72px 0;
-}
-
-.hu-section-gray { background: var(--gray); }
-.hu-section-dark { background: var(--dark); }
-.hu-section-green { background: var(--green); }
-
-.hu-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 32px;
-}
-
-.hu-section-head {
-    text-align: center;
-    margin-bottom: 48px;
-}
-
-.hu-section-tag {
-    display: inline-block;
-    padding: 4px 14px;
-    background: var(--green-light);
-    color: var(--green);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    border-radius: 100px;
-    margin-bottom: 12px;
-}
-
-.hu-tag-light {
-    background: rgba(255,255,255,0.15);
-    color: rgba(255,255,255,0.9);
-}
-
-.hu-section-title {
-    font-size: clamp(1.5rem, 3vw, 2rem);
-    font-weight: 800;
-    color: var(--text);
-}
-
-.hu-title-light { color: #fff; }
-
-.hu-section-sub {
-    font-size: 0.9rem;
+    bottom: 26px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    font-size: 0.68rem; letter-spacing: 0.18em;
     color: rgba(255,255,255,0.7);
     margin-top: 8px;
 }
@@ -459,135 +319,93 @@ body {
 
 .hu-profil-section {
     background: #faf8f3;
+    animation: hu-bob 2.4s ease-in-out infinite;
+}
+@keyframes hu-bob { 0%,100% { transform: translate(-50%,0); } 50% { transform: translate(-50%,6px); } }
+@keyframes hu-rise { from { opacity: 0; transform: translateY(18px);} to { opacity: 1; transform: translateY(0);} }
+
+/* tepi arcade riwaq — pembatas bergerigi khas lengkungan masjid, dipakai
+   di beberapa titik transisi antarbagian sebagai elemen tanda tangan */
+.hu-hero::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 30px;
+    background: var(--parchment);
+    -webkit-mask-image: radial-gradient(circle at 15px 30px, transparent 15px, black 16px);
+    mask-image: radial-gradient(circle at 15px 30px, transparent 15px, black 16px);
+    -webkit-mask-size: 30px 30px;
+    mask-size: 30px 30px;
+    -webkit-mask-repeat: repeat-x;
+    mask-repeat: repeat-x;
 }
 
+/* ===================================================================
+   PROFIL MASJID
+   =================================================================== */
+.hu-profil-section { padding-top: 100px; }
 .hu-profil-v2-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 72px;
+    grid-template-columns: 1fr 0.92fr;
+    gap: 64px;
     align-items: start;
 }
-
-/* ---- Kiri ---- */
 .hu-profil-v2-tag {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #c9a05a;
-    margin-bottom: 16px;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--brass-deep); margin-bottom: 14px;
 }
-
 .hu-profil-v2-title {
-    font-size: clamp(2rem, 4vw, 2.8rem);
-    font-weight: 800;
-    color: #1a2a3a;
+    font-size: clamp(1.9rem, 3vw, 2.6rem);
+    font-weight: 600;
     line-height: 1.15;
-    margin-bottom: 20px;
+    color: var(--emerald-900);
 }
-
-.hu-profil-v2-title em {
-    font-style: italic;
-    color: #1a4731;
-}
-
+.hu-profil-v2-title em { font-style: italic; color: var(--brass-deep); }
 .hu-profil-v2-desc {
-    font-size: 0.95rem;
-    color: #4b5563;
-    line-height: 1.8;
-    margin-bottom: 24px;
-    max-width: 480px;
-}
-
-.hu-profil-v2-divider {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 28px;
-    color: #c9a05a;
+    margin-top: 20px;
+    color: var(--ink-soft);
     font-size: 1rem;
+    line-height: 1.75;
 }
-
-.hu-profil-v2-divider::before,
-.hu-profil-v2-divider::after {
-    content: '';
-    flex: 1;
-    max-width: 60px;
-    height: 1px;
-    background: #d1c4a0;
+.hu-profil-v2-divider {
+    margin: 32px 0;
+    display: flex; align-items: center; gap: 14px;
+    color: var(--brass);
 }
-
+.hu-profil-v2-divider::before, .hu-profil-v2-divider::after {
+    content: ""; flex: 1; height: 1px; background: var(--line);
+}
 .hu-profil-v2-stats {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px 32px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px 28px;
 }
+.hu-profil-v2-stat-label { font-size: 0.76rem; color: var(--ink-soft); margin-bottom: 4px; }
+.hu-profil-v2-stat-val { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; color: var(--emerald-900); }
 
-.hu-profil-v2-stat-label {
-    font-size: 0.68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #9ca3af;
-    margin-bottom: 4px;
-}
+.hu-profil-v2-images { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.hu-profil-v2-img { overflow: hidden; box-shadow: var(--shadow-card); }
+.hu-profil-v2-img img { width: 100%; height: 100%; object-fit: cover; }
+.hu-img-tall  { border-radius: var(--arch); aspect-ratio: 3 / 4.4; align-self: end; }
+.hu-img-short { border-radius: 16px; aspect-ratio: 3 / 2.6; align-self: start; margin-top: 34px; }
 
-.hu-profil-v2-stat-val {
-    font-size: 0.96rem;
-    font-weight: 700;
-    color: #1a2a3a;
-    line-height: 1.3;
-}
-
-/* ---- Kanan ---- */
-.hu-profil-v2-right {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.hu-profil-v2-images {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    align-items: end;
-}
-
-.hu-profil-v2-img {
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-}
-
-.hu-profil-v2-img img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.4s ease;
-}
-
-.hu-profil-v2-img:hover img { transform: scale(1.04); }
-
-.hu-img-tall  { height: 240px; }
-.hu-img-short { height: 180px; align-self: end; }
-
-/* Ayat quran card */
 .hu-profil-v2-ayat {
-    background: #fff;
-    border: 1px solid #e8e2d5;
-    border-radius: 12px;
-    padding: 20px 22px;
-    text-align: right;
+    margin-top: 22px;
+    background: var(--emerald-900);
+    color: rgba(255,255,255,0.9);
+    border-radius: 18px;
+    padding: 22px 24px;
+    font-size: 0.92rem;
+    line-height: 1.7;
 }
 
-.hu-profil-v2-arabic {
-    font-family: 'Amiri', 'Times New Roman', serif;
-    font-size: 1.4rem;
-    color: #1a2a3a;
-    direction: rtl;
-    line-height: 1.8;
-    margin-bottom: 10px;
+/* ===================================================================
+   JADWAL SHALAT (grid gelap)
+   =================================================================== */
+.hu-section-dark {
+    background: var(--emerald-900);
+    background-image: radial-gradient(60% 90% at 100% 0%, rgba(231,205,142,0.08), transparent 60%);
+    position: relative;
 }
 
 .hu-profil-v2-trans {
@@ -658,46 +476,22 @@ body {
     font-weight: 600;
     color: var(--text);
 }
-
 .hu-shalat-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 16px;
 }
-
 .hu-shalat-card {
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: var(--radius);
-    padding: 24px 16px;
     text-align: center;
-    transition: background 0.18s;
+    padding: 30px 12px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: transform 0.25s ease, background 0.25s ease;
 }
-
-.hu-shalat-card.active {
-    background: var(--amber-bg);
-    border-color: var(--amber-bg);
-}
-
-.hu-shalat-name {
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: rgba(255,255,255,0.65);
-    margin-bottom: 10px;
-}
-
-.hu-shalat-card.active .hu-shalat-name { color: rgba(0,0,0,0.7); }
-
-.hu-shalat-time {
-    font-size: 1.6rem;
-    font-weight: 800;
-    color: #fff;
-}
-
-.hu-shalat-card.active .hu-shalat-time { color: #1a1a1a; }
-
+.hu-shalat-card:hover { transform: translateY(-4px); background: rgba(255,255,255,0.08); }
+.hu-shalat-name { font-size: 0.86rem; color: var(--brass-light); font-weight: 600; margin-bottom: 10px; letter-spacing: 0.02em; }
+.hu-shalat-time { font-family: var(--font-display); font-size: 1.7rem; color: #fff; font-weight: 600; font-variant-numeric: tabular-nums; }
 .hu-shalat-now {
     margin-top: 8px;
     font-size: 0.7rem;
@@ -1113,28 +907,26 @@ body {
     gap: 12px;
     justify-content: center;
     margin-top: 8px;
+    margin-top: 10px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em;
+    color: var(--emerald-900); background: var(--brass-light);
+    display: inline-block; padding: 4px 10px; border-radius: 999px;
 }
+.hu-shalat-card.active { background: var(--brass); border-color: var(--brass); }
+.hu-shalat-card.active .hu-shalat-name,
+.hu-shalat-card.active .hu-shalat-time { color: #241705; }
 
+/* ===================================================================
+   PROGRAM UNGGULAN
+   =================================================================== */
+.hu-program-v2-list { display: flex; flex-direction: column; }
 .hu-program-v2-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 22px;
-    background: #fff;
-    border: 1.5px solid #e5ddd0;
-    border-radius: 100px;
-    font-size: 0.9rem;
-    color: #1a2a3a;
-    font-weight: 500;
-    transition: border-color 0.18s, background 0.18s;
-    cursor: default;
+    display: flex; align-items: baseline; gap: 22px;
+    padding: 24px 4px;
+    border-bottom: 1px solid var(--line);
+    transition: padding-left 0.25s ease, color 0.25s ease;
 }
-
-.hu-program-v2-item:hover {
-    border-color: #1a4731;
-    background: #f0fdf4;
-}
-
+.hu-program-v2-item:first-child { border-top: 1px solid var(--line); }
+.hu-program-v2-item:hover { padding-left: 14px; color: var(--emerald-800); }
 .hu-program-v2-num {
     font-size: 0.65rem;
     font-weight: 800;
@@ -1173,195 +965,89 @@ body {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
-}
 
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--brass-deep);
+    min-width: 34px;
+}
+.hu-program-v2-name { font-family: var(--font-display); font-size: 1.3rem; font-weight: 500; }
+
+/* ===================================================================
+   ACARA
+   =================================================================== */
+.hu-acara-section { padding: 88px 0; background: var(--parchment-deep); }
+.hu-acara-v2-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 40px; gap: 16px; flex-wrap: wrap; }
+.hu-acara-lihat { font-weight: 600; font-size: 0.88rem; color: var(--emerald-800); border-bottom: 1.5px solid var(--brass); padding-bottom: 2px; }
+.hu-acara-v2-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
 .hu-acara-v2-card {
-    background: #fff;
-    border: 1px solid #e8e2d5;
-    border-radius: 14px;
-    padding: 22px 22px 20px;
-    border-top: 3px solid #e8e2d5;
-    transition: box-shadow 0.18s, border-top-color 0.18s;
+    background: var(--parchment);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    padding: 26px;
+    box-shadow: var(--shadow-card);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
-
-.hu-acara-v2-card:first-child {
-    border-top-color: #c9a05a;
-}
-
-.hu-acara-v2-card:hover {
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-}
-
-.hu-acara-v2-top {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 16px;
-}
-
+.hu-acara-v2-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-soft); }
+.hu-acara-v2-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; }
 .hu-acara-v2-date {
-    display: flex;
-    flex-direction: column;
+    width: 56px; height: 56px;
+    border-radius: var(--arch);
+    background: var(--emerald-900);
+    color: #fff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    line-height: 1.1;
 }
-
-.hu-acara-v2-month {
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #9ca3af;
-    line-height: 1;
-    margin-bottom: 2px;
-}
-
-.hu-acara-v2-day {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: #1a2a3a;
-    line-height: 1;
-}
-
+.hu-acara-v2-month { font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brass-light); }
+.hu-acara-v2-day { font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; }
 .hu-acara-v2-badge {
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 3px 10px;
-    background: #fef3c7;
-    color: #92400e;
-    border-radius: 100px;
-    border: 1px solid #fde68a;
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em;
+    color: var(--brass-deep); background: var(--brass-light);
+    padding: 5px 10px; border-radius: 999px;
 }
+.hu-acara-v2-judul { font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; line-height: 1.3; color: var(--ink); }
+.hu-acara-v2-meta { margin-top: 8px; font-size: 0.82rem; color: var(--ink-soft); }
+.hu-acara-v2-link { display: inline-block; margin-top: 18px; font-size: 0.85rem; font-weight: 600; color: var(--emerald-800); }
+.hu-acara-v2-link:hover { color: var(--brass-deep); }
 
-.hu-acara-v2-judul {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #1a2a3a;
-    margin-bottom: 6px;
-    line-height: 1.3;
-}
-
-.hu-acara-v2-meta {
-    font-size: 0.78rem;
-    color: #9ca3af;
-    margin-bottom: 16px;
-}
-
-.hu-acara-v2-link {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #1a4731;
-    text-decoration: none;
-    transition: opacity 0.16s;
-}
-
-.hu-acara-v2-link:hover { opacity: 0.7; }
-
-/* =============================================================
-   DONASI V2 — dark split layout
-   ============================================================= */
+/* ===================================================================
+   DONASI
+   =================================================================== */
 .hu-donasi-v2-section {
-    background: #1a2a3a;
+    background: var(--emerald-900);
+    color: #fff;
+    padding: 96px 0;
 }
-
 .hu-donasi-v2-inner {
-    max-width: 1200px;
+    max-width: 1160px;
     margin: 0 auto;
-    padding: 80px 32px;
+    padding: 0 28px;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 64px;
+    grid-template-columns: 1fr 0.88fr;
+    gap: 60px;
     align-items: center;
 }
+.hu-donasi-v2-title { font-size: clamp(1.9rem, 3vw, 2.6rem); font-weight: 600; line-height: 1.14; }
+.hu-donasi-v2-title em { font-style: italic; color: var(--brass-light); }
+.hu-donasi-v2-desc { margin-top: 18px; color: rgba(255,255,255,0.78); line-height: 1.75; }
+.hu-donasi-v2-desc strong { color: var(--brass-light); }
 
-/* Kiri */
-.hu-tag-amber-light {
-    color: #f59e0b;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    display: inline-block;
-    margin-bottom: 14px;
-}
+.hu-donasi-v2-progress-wrap { margin-top: 30px; }
+.hu-donasi-v2-progress-label { display: flex; justify-content: space-between; font-size: 0.84rem; margin-bottom: 8px; color: rgba(255,255,255,0.75); }
+.hu-donasi-v2-pct { color: var(--brass-light); font-weight: 700; }
+.hu-donasi-v2-track { height: 8px; background: rgba(255,255,255,0.14); border-radius: 999px; overflow: hidden; }
+.hu-donasi-v2-fill { height: 100%; background: linear-gradient(90deg, var(--brass-deep), var(--brass-light)); border-radius: 999px; }
+.hu-donasi-v2-amounts { display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.8rem; color: rgba(255,255,255,0.6); }
 
-.hu-donasi-v2-title {
-    font-size: clamp(2rem, 4vw, 2.8rem);
-    font-weight: 800;
-    color: #fff;
-    line-height: 1.15;
-    margin-bottom: 20px;
-}
-
-.hu-donasi-v2-title em {
-    font-style: italic;
-    color: #f59e0b;
-}
-
-.hu-donasi-v2-desc {
-    font-size: 0.92rem;
-    color: rgba(255,255,255,0.7);
-    line-height: 1.8;
-    margin-bottom: 32px;
-}
-
-.hu-donasi-v2-desc strong { color: #fff; }
-
-.hu-donasi-v2-progress-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.8rem;
-    color: rgba(255,255,255,0.6);
-    margin-bottom: 8px;
-}
-
-.hu-donasi-v2-pct {
-    font-weight: 700;
-    color: #f59e0b;
-}
-
-.hu-donasi-v2-track {
-    height: 8px;
-    background: rgba(255,255,255,0.15);
-    border-radius: 100px;
-    overflow: hidden;
-    margin-bottom: 8px;
-}
-
-.hu-donasi-v2-fill {
-    height: 100%;
-    background: #f59e0b;
-    border-radius: 100px;
-    transition: width 0.6s ease;
-}
-
-.hu-donasi-v2-amounts {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.8rem;
-    color: rgba(255,255,255,0.5);
-}
-
-/* Kanan — card */
 .hu-donasi-v2-card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 28px 28px 24px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    background: var(--parchment);
+    color: var(--ink);
+    border-radius: var(--radius-card);
+    padding: 30px;
+    box-shadow: var(--shadow-soft);
 }
-
-.hu-donasi-v2-card-title {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #1a2a3a;
-    margin-bottom: 18px;
-}
-
-.hu-donasi-v2-nominals {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 16px;
-}
-
+.hu-donasi-v2-card-title { font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; margin-bottom: 18px; }
+.hu-donasi-v2-nominals { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .hu-nominal-btn {
     padding: 11px 8px;
     font-size: 0.84rem;
@@ -1492,37 +1178,65 @@ body {
     gap: 14px;
     padding: 22px 20px;
     border: 1.5px solid #e8e2d5;
+    font-family: var(--font-body);
+    font-weight: 600; font-size: 0.88rem;
+    padding: 13px 10px;
     border-radius: 12px;
-    background: #fafaf8;
-    transition: box-shadow 0.18s, border-color 0.18s;
+    border: 1.5px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
-
-.hu-hubungi-card:hover {
-    border-color: #1a4731;
-    box-shadow: 0 2px 12px rgba(26,71,49,0.08);
+.hu-nominal-btn:hover { border-color: var(--brass); }
+.hu-nominal-btn.selected { background: var(--emerald-900); border-color: var(--emerald-900); color: #fff; }
+.hu-donasi-v2-or { text-align: center; font-size: 0.78rem; color: var(--ink-soft); margin: 16px 0 10px; }
+.hu-donasi-v2-input-wrap { display: flex; align-items: center; border: 1.5px solid var(--line); border-radius: 12px; overflow: hidden; }
+.hu-donasi-v2-prefix { padding: 13px 12px; background: var(--parchment-deep); font-weight: 600; color: var(--ink-soft); }
+.hu-donasi-v2-input {
+    flex: 1; border: none; padding: 13px 12px; font-size: 0.95rem;
+    font-family: var(--font-body); background: transparent; color: var(--ink);
 }
+.hu-donasi-v2-input:focus { outline: none; }
+.hu-donasi-v2-label-field { font-size: 0.78rem; color: var(--ink-soft); margin: 16px 0 6px; }
+.hu-donasi-v2-input-name {
+    width: 100%; padding: 13px 12px; border-radius: 12px; border: 1.5px solid var(--line);
+    font-family: var(--font-body); font-size: 0.92rem; color: var(--ink);
+}
+.hu-donasi-v2-submit {
+    width: 100%; margin-top: 20px; padding: 15px; border: none; border-radius: 999px;
+    background: var(--brass); color: #241705; font-weight: 700; font-size: 0.95rem;
+    cursor: pointer; transition: background 0.2s ease, transform 0.2s ease;
+}
+.hu-donasi-v2-submit:hover { background: var(--brass-light); transform: translateY(-1px); }
+.hu-donasi-v2-note { text-align: center; font-size: 0.72rem; color: var(--ink-soft); margin-top: 14px; }
 
+/* ===================================================================
+   HUBUNGI KAMI
+   =================================================================== */
+.hu-hubungi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.hu-hubungi-card {
+    display: flex; gap: 16px; align-items: flex-start;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    padding: 24px;
+}
 .hu-hubungi-icon {
-    width: 40px;
-    height: 40px;
-    background: #f0f4ff;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #1a3a6a;
     flex-shrink: 0;
+    width: 42px; height: 42px;
+    border-radius: var(--arch);
+    background: var(--emerald-100);
+    color: var(--emerald-800);
+    display: grid; place-items: center;
 }
+.hu-hubungi-label { font-size: 0.74rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.hu-hubungi-val { font-size: 0.95rem; font-weight: 500; line-height: 1.5; }
+.hu-hubungi-val a { color: var(--emerald-800); font-weight: 600; }
 
-.hu-hubungi-label {
-    font-size: 0.68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #9ca3af;
-    margin-bottom: 5px;
+.hu-hubungi-social {
+    display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap;
 }
-
 .hu-hubungi-val {
     font-size: 0.9rem;
     font-weight: 500;
@@ -1540,121 +1254,110 @@ body {
     margin: 0 auto;
     padding: 56px 32px 0;
 }
+.hu-hubungi-social a {
+    font-size: 0.84rem; font-weight: 600;
+    padding: 9px 18px;
+    border-radius: 999px;
+    border: 1.5px solid var(--line);
+    color: var(--ink);
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+.hu-hubungi-social a:hover { border-color: var(--brass); color: var(--brass-deep); background: var(--brass-light); }
 
+/* ===================================================================
+   FOOTER
+   =================================================================== */
+.hu-footer-v2 { background: var(--emerald-900); color: rgba(255,255,255,0.8); position: relative; }
+.hu-footer-v2-inner { max-width: 1160px; margin: 0 auto; padding: 72px 28px 32px; }
 .hu-footer-v2-grid {
     display: grid;
-    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    grid-template-columns: 1.6fr 1fr 1fr 1fr;
     gap: 40px;
     padding-bottom: 40px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid rgba(255,255,255,0.12);
 }
+.hu-footer-v2-name { font-family: var(--font-display); font-size: 1.35rem; font-weight: 600; color: #fff; margin-bottom: 10px; }
+.hu-footer-v2-tagline { font-size: 0.88rem; line-height: 1.7; opacity: 0.8; }
+.hu-footer-v2-arabic { font-family: var(--font-arabic); font-size: 1.8rem; color: var(--brass-light); }
+.hu-footer-v2-col-title { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brass-light); margin-bottom: 14px; }
+.hu-footer-v2-link { display: block; font-size: 0.88rem; padding: 6px 0; opacity: 0.82; transition: opacity 0.2s ease; }
+.hu-footer-v2-link:hover, .hu-footer-v2-link-active { opacity: 1; color: var(--brass-light); }
 
-/* Brand */
-.hu-footer-v2-name {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 8px;
-}
-
-.hu-footer-v2-tagline {
-    font-size: 0.82rem;
-    color: rgba(255,255,255,0.5);
-    line-height: 1.7;
-}
-
-/* Arabic */
-.hu-footer-v2-arabic-col {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.hu-footer-v2-arabic {
-    font-family: 'Amiri', serif;
-    font-size: 1.4rem;
-    color: rgba(255,255,255,0.35);
-    direction: rtl;
-    text-align: center;
-    line-height: 1.8;
-}
-
-/* Columns */
-.hu-footer-v2-col-title {
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: rgba(255,255,255,0.35);
-    margin-bottom: 14px;
-}
-
-.hu-footer-v2-link {
-    display: block;
-    font-size: 0.84rem;
-    color: rgba(255,255,255,0.6);
-    text-decoration: none;
-    margin-bottom: 8px;
-    transition: color 0.16s;
-}
-
-.hu-footer-v2-link:hover { color: #fff; }
-
-.hu-footer-v2-link-active {
-    color: #f59e0b !important;
-}
-
-/* Bottom bar */
 .hu-footer-v2-bottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 0;
-    font-size: 0.74rem;
-    color: rgba(255,255,255,0.25);
-    flex-wrap: wrap;
-    gap: 8px;
+    padding-top: 24px;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    font-size: 0.78rem; opacity: 0.65;
 }
 
-/* Kembali button */
 .hu-kembali-btn {
     position: absolute;
-    bottom: 22px;
-    left: 32px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 18px;
+    top: 28px; right: 28px;
     background: rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.7);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 100px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    font-family: var(--font);
-    cursor: pointer;
-    transition: background 0.18s, color 0.18s;
-}
-
-.hu-kembali-btn:hover {
-    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.2);
     color: #fff;
+    font-size: 0.78rem;
+    padding: 9px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+.hu-kembali-btn:hover { background: rgba(255,255,255,0.18); }
+
+.help-fab {
+    position: fixed;
+    bottom: 26px; right: 26px;
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    background: var(--emerald-900);
+    color: var(--brass-light);
+    border: none;
+    font-size: 1.1rem;
+    box-shadow: var(--shadow-soft);
+    cursor: pointer;
+    z-index: 40;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+.help-fab:hover { transform: translateY(-3px); background: var(--emerald-700); }
+
+/* ===================================================================
+   RESPONSIVE
+   =================================================================== */
+@media (max-width: 980px) {
+    .hu-profil-v2-grid { grid-template-columns: 1fr; gap: 40px; }
+    .hu-profil-v2-images { max-width: 420px; }
+    .hu-donasi-v2-inner { grid-template-columns: 1fr; }
+    .hu-shalat-grid { grid-template-columns: repeat(3, 1fr); }
+    .hu-acara-v2-grid { grid-template-columns: repeat(2, 1fr); }
+    .hu-hubungi-grid { grid-template-columns: 1fr 1fr; }
+    .hu-footer-v2-grid { grid-template-columns: 1fr 1fr; }
 }
 
-/* Responsive hubungi & footer */
-@media (max-width: 1024px) {
-    .hu-footer-v2-grid   { grid-template-columns: 1fr 1fr; }
-    .hu-footer-v2-arabic-col { display: none; }
+@media (max-width: 720px) {
+    .hu-praybar { justify-content: flex-start; padding: 10px 18px; }
+    .hu-praybar-times { gap: 14px; overflow-x: auto; }
+    .hu-nav {
+        position: absolute; top: 100%; left: 0; right: 0;
+        flex-direction: column; align-items: stretch; gap: 2px;
+        background: var(--parchment);
+        border-bottom: 1px solid var(--line);
+        padding: 10px 20px 16px;
+        display: none;
+    }
+    .hu-nav.open { display: flex; }
+    .hu-ganti-btn span { display: none; }
+    .hu-hamburger { display: flex; }
+    .hu-section { padding: 64px 0; }
+    .hu-hero-content { padding: 100px 22px 72px; }
+    .hu-shalat-grid { grid-template-columns: repeat(2, 1fr); }
+    .hu-acara-v2-grid { grid-template-columns: 1fr; }
+    .hu-hubungi-grid { grid-template-columns: 1fr; }
+    .hu-footer-v2-grid { grid-template-columns: 1fr; gap: 28px; }
+    .hu-donasi-v2-nominals { grid-template-columns: 1fr 1fr; }
+    .hu-kembali-btn { position: static; margin-top: 20px; display: inline-block; }
 }
 
-@media (max-width: 768px) {
-    .hu-hubungi-grid     { grid-template-columns: 1fr; }
-    .hu-footer-v2-grid   { grid-template-columns: 1fr 1fr; gap: 24px; }
-    .hu-footer-v2-inner  { padding: 40px 16px 0; }
-    .hu-kembali-btn      { left: 16px; bottom: 18px; }
-}
-
-@media (max-width: 480px) {
-    .hu-footer-v2-grid   { grid-template-columns: 1fr; }
-    .hu-footer-v2-bottom { flex-direction: column; gap: 4px; }
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .hu-hero-content, .hu-hero-scroll, .hu-ticker-track { animation: none; }
+    * { transition-duration: 0.001ms !important; }
 }

@@ -1,16 +1,42 @@
 /* ============================================================
    profilMasjid.css  —  Profil Masjid Admin Page
    Inherits sidebar/layout from berandaAdmin.css (ba2-* classes)
+   Conflict-resolved / merged version
    ============================================================ */
 
 /* ============================================================
-   CONTENT AREA OVERRIDES
+   CONTENT AREA
    ============================================================ */
 .pm-content {
-    padding: 24px 28px 100px;
+    padding: 24px 28px 100px; /* room for sticky footer */
     flex: 1;
     display: flex;
     flex-direction: column;
+    gap: 0;
+}
+
+/* ---- Alert banners ---- */
+.pm-alert {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 16px;
+}
+
+.pm-alert-success {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.pm-alert-error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
 }
 
 /* ============================================================
@@ -19,11 +45,11 @@
 .pm-tabs {
     display: flex;
     align-items: center;
+    gap: 0;
     border-bottom: 2px solid #e8e4dc;
     margin-bottom: 22px;
     overflow-x: auto;
     flex-shrink: 0;
-    gap: 0;
 }
 
 .pm-tab {
@@ -40,53 +66,65 @@
     margin-bottom: -2px;
     cursor: pointer;
     white-space: nowrap;
-    font-family: 'Poppins', sans-serif;
-    transition: color 0.15s, border-color 0.15s;
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    transition: color 0.18s, border-color 0.18s;
 }
 
+.pm-tab i { font-size: 12px; }
+
 .pm-tab:hover { color: #1a4731; }
+
 .pm-tab.active {
     color: #1a4731;
     border-bottom-color: #1a4731;
     font-weight: 600;
 }
 
-.pm-tab i { font-size: 12px; }
-
 /* Preview tab push to right */
-.pm-tab-preview { margin-left: auto; }
+.pm-tab-preview { margin-left: auto; color: #6b7280; }
+
+.pm-tab-preview.active {
+    color: #1a4731;
+    border-bottom-color: #1a4731;
+}
 
 /* ============================================================
-   PANELS
+   TAB PANELS
    ============================================================ */
+.pm-tab-content,
 .pm-panel { display: none; }
+
+.pm-tab-content.active,
 .pm-panel.active { display: block; }
 
 /* ============================================================
-   CARD
+   SECTION / CARD
    ============================================================ */
+.pm-section,
 .pm-card {
     background: #ffffff;
     border: 1px solid #e8e4dc;
     border-radius: 12px;
-    padding: 22px 26px;
-    margin-bottom: 18px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
 }
 
+.pm-section-title,
 .pm-card-title {
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 0.94rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #1a1a1a;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
 }
 
+.pm-section-bar,
 .pm-card-bar {
     display: inline-block;
     width: 4px;
-    height: 16px;
+    height: 18px;
     background: #1a4731;
     border-radius: 4px;
     flex-shrink: 0;
@@ -100,48 +138,77 @@
 }
 
 /* ============================================================
-   FORM
+   FORM FIELDS
    ============================================================ */
 .pm-field {
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    margin-bottom: 14px;
+    gap: 6px;
+    margin-bottom: 16px;
 }
-.pm-field:last-child { margin-bottom: 0; }
+
+.pm-section > .pm-field:last-child,
+.pm-section > .pm-grid-2:last-child,
+.pm-section > .pm-grid-3:last-child,
+.pm-field:last-child {
+    margin-bottom: 0;
+}
 
 .pm-label {
-    font-size: 0.67rem;
+    font-size: 0.72rem;
     font-weight: 700;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
+    letter-spacing: 0.06em;
     color: #9ca3af;
+    text-transform: uppercase;
 }
 
-.pm-label .pm-req { color: #ef4444; margin-left: 2px; }
+.pm-required,
+.pm-label .pm-req {
+    color: #ef4444;
+    margin-left: 2px;
+}
 
 .pm-input,
-.pm-textarea {
+.pm-textarea,
+.pm-input-add {
     width: 100%;
-    padding: 9px 13px;
-    font-size: 0.88rem;
-    font-family: 'Poppins', sans-serif;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
     color: #1a1a1a;
     background: #ffffff;
     border: 1px solid #d1d5db;
     border-radius: 8px;
     outline: none;
-    transition: border-color 0.16s, box-shadow 0.16s;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    box-sizing: border-box;
 }
 
 .pm-input:focus,
-.pm-textarea:focus {
+.pm-textarea:focus,
+.pm-input-add:focus {
     border-color: #1a4731;
-    box-shadow: 0 0 0 3px rgba(26, 71, 49, 0.09);
+    box-shadow: 0 0 0 3px rgba(26, 71, 49, 0.1);
 }
 
 .pm-input::placeholder,
-.pm-textarea::placeholder { color: #9ca3af; }
+.pm-textarea::placeholder,
+.pm-input-add::placeholder { color: #9ca3af; }
+
+.pm-input-error {
+    border-color: #ef4444;
+}
+
+.pm-input-error:focus {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.pm-field-error {
+    font-size: 0.78rem;
+    color: #ef4444;
+    font-weight: 500;
+}
 
 .pm-textarea {
     resize: vertical;
@@ -152,22 +219,36 @@
 /* RTL input for Arabic */
 .pm-input-rtl {
     direction: rtl;
-    font-family: 'Poppins', 'Segoe UI', 'Tahoma', sans-serif;
     text-align: right;
+    font-size: 1rem;
+    font-family: 'Poppins', 'Segoe UI', 'Tahoma', sans-serif;
 }
 
-/* 2-column grid */
+/* ---- Grids ---- */
 .pm-grid-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    gap: 16px;
+    margin-bottom: 16px;
 }
 
-/* 3-column grid */
 .pm-grid-3 {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 14px;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+/* ---- Divider label ---- */
+.pm-divider-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 8px 0 6px;
+    border-top: 1px solid #f3f4f6;
+    margin-bottom: 14px;
 }
 
 /* ============================================================
@@ -223,7 +304,76 @@
 }
 
 /* ============================================================
-   PROGRAM LIST (Tab 4)
+   CHECKBOXES (Fasilitas & Program)
+   ============================================================ */
+.pm-checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.pm-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 9px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    transition: border-color 0.18s, background 0.18s;
+    user-select: none;
+}
+
+.pm-checkbox-item:hover {
+    border-color: #1a4731;
+    background: #f0fdf4;
+}
+
+.pm-checkbox-item input[type="checkbox"] {
+    display: none;
+}
+
+.pm-checkbox-box {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
+    background: #fff;
+}
+
+.pm-checkbox-item input[type="checkbox"]:checked ~ .pm-checkbox-box {
+    background: #1a4731;
+    border-color: #1a4731;
+}
+
+.pm-checkbox-item input[type="checkbox"]:checked ~ .pm-checkbox-box::after {
+    content: '';
+    display: block;
+    width: 5px;
+    height: 9px;
+    border: 2px solid #fff;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg) translateY(-1px);
+}
+
+.pm-checkbox-item input[type="checkbox"]:checked ~ .pm-checkbox-label {
+    color: #1a4731;
+    font-weight: 600;
+}
+
+.pm-checkbox-label {
+    font-size: 0.84rem;
+    color: #374151;
+}
+
+/* ============================================================
+   PROGRAM LIST (Tab Program)
    ============================================================ */
 .pm-program-list {
     display: flex;
@@ -287,24 +437,6 @@
     gap: 10px;
 }
 
-.pm-input-add {
-    flex: 1;
-    padding: 9px 13px;
-    font-size: 0.86rem;
-    font-family: 'Poppins', sans-serif;
-    color: #1a1a1a;
-    background: #ffffff;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    outline: none;
-    transition: border-color 0.16s, box-shadow 0.16s;
-}
-.pm-input-add:focus {
-    border-color: #1a4731;
-    box-shadow: 0 0 0 3px rgba(26,71,49,0.09);
-}
-.pm-input-add::placeholder { color: #9ca3af; }
-
 .pm-btn-add-program {
     display: flex;
     align-items: center;
@@ -325,45 +457,186 @@
 .pm-btn-add-program i { font-size: 11px; }
 
 /* ============================================================
-   PREVIEW (Tab 5)
+   TOGGLE SWITCHES (Fitur Digital)
+   ============================================================ */
+.pm-toggle-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.pm-toggle-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.pm-toggle-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.pm-toggle-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 3px;
+}
+
+.pm-toggle-desc {
+    font-size: 0.78rem;
+    color: #9ca3af;
+}
+
+/* Switch */
+.pm-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.pm-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.pm-switch-track {
+    position: absolute;
+    inset: 0;
+    background: #d1d5db;
+    border-radius: 100px;
+    transition: background 0.2s;
+}
+
+.pm-switch-track::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.pm-switch input:checked + .pm-switch-track {
+    background: #1a4731;
+}
+
+.pm-switch input:checked + .pm-switch-track::after {
+    transform: translateX(20px);
+}
+
+/* ============================================================
+   PREVIEW TAB
    ============================================================ */
 .pm-preview-card {
-    background: #ffffff;
+    background: #fff;
     border: 1px solid #e8e4dc;
     border-radius: 14px;
-    padding: 28px 30px;
+    padding: 28px 32px;
     max-width: 720px;
 }
 
-.pm-preview-arabic {
-    text-align: right;
-    font-size: 1rem;
-    color: #9ca3af;
-    margin-bottom: 6px;
-    direction: rtl;
-    font-family: 'Segoe UI', 'Tahoma', sans-serif;
+.pm-preview-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #f3f4f6;
 }
 
+.pm-preview-mosque-icon {
+    width: 64px;
+    height: 64px;
+    background: #f0fdf4;
+    border: 2px solid #bbf7d0;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a4731;
+    flex-shrink: 0;
+}
+
+.pm-preview-mosque-name,
 .pm-preview-name {
-    font-size: 1.7rem;
+    font-size: 1.4rem;
     font-weight: 700;
-    color: #0e3320;
+    color: #1a1a1a;
     line-height: 1.2;
     margin-bottom: 4px;
 }
 
-.pm-preview-tagline {
-    font-size: 0.92rem;
+.pm-preview-arabic {
+    font-size: 1.1rem;
     color: #4b5563;
+    direction: rtl;
+    text-align: right;
+    margin-bottom: 4px;
+    font-family: 'Amiri', 'Times New Roman', serif;
+}
+
+.pm-preview-tagline {
+    font-size: 0.88rem;
+    color: #6b7280;
     font-style: italic;
     margin-bottom: 14px;
 }
 
+.pm-preview-grid,
+.pm-preview-info-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.pm-preview-info-item {
+    background: #f9fafb;
+    border: 1px solid #f3f4f6;
+    border-left: 3px solid #f59e0b;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 14px;
+}
+
+.pm-preview-info-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #9ca3af;
+    margin-bottom: 4px;
+}
+
+.pm-preview-info-val,
+.pm-preview-info-value {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
 .pm-preview-desc {
-    font-size: 0.84rem;
+    font-size: 0.9rem;
     color: #4b5563;
     line-height: 1.7;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
+    padding: 16px;
+    background: #fafafa;
+    border-radius: 8px;
+    border-left: 3px solid #1a4731;
 }
 
 .pm-preview-divider {
@@ -372,62 +645,45 @@
     margin: 18px 0;
 }
 
-/* Info grid */
-.pm-preview-info-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.pm-preview-info-item {
-    border-left: 3px solid #f59e0b;
-    padding: 8px 12px;
-    background: #fafaf9;
-    border-radius: 0 6px 6px 0;
-}
-
-.pm-preview-info-label {
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: #9ca3af;
-    margin-bottom: 3px;
-}
-
-.pm-preview-info-value {
-    font-size: 0.86rem;
-    font-weight: 700;
-    color: #1a1a1a;
-}
-
-/* Program section in preview */
+.pm-preview-section-title,
 .pm-preview-prog-label {
-    font-size: 0.67rem;
+    font-size: 0.8rem;
     font-weight: 700;
-    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: #9ca3af;
+    letter-spacing: 0.06em;
+    color: #6b7280;
     margin-bottom: 10px;
+    margin-top: 20px;
 }
 
+.pm-preview-tags,
 .pm-preview-prog-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
 
+.pm-preview-tag {
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+}
+
+.pm-preview-tag.green,
 .pm-preview-prog-tag {
     display: flex;
     align-items: center;
     gap: 5px;
-    padding: 5px 12px;
     background: #f0fdf4;
+    color: #166534;
     border: 1px solid #bbf7d0;
+    padding: 5px 12px;
     border-radius: 100px;
     font-size: 0.78rem;
-    color: #1a4731;
     font-weight: 500;
 }
 
@@ -438,34 +694,41 @@
 }
 
 /* ============================================================
-   STICKY FOOTER
+   STICKY FOOTER ACTIONS
    ============================================================ */
 .pm-footer {
     position: fixed;
     bottom: 0;
-    left: 160px; /* matches --sidebar-w */
+    left: var(--sidebar-w, 220px);
     right: 0;
-    background: #ffffff;
+    background: #fff;
     border-top: 1px solid #e8e4dc;
-    padding: 12px 28px;
+    padding: 14px 28px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     z-index: 90;
-    transition: left 0.22s ease;
+    transition: left 0.25s ease;
 }
 
 .pm-footer.preview-hidden { display: none; }
 
-/* When sidebar is collapsed */
-.ba2-main.expanded ~ .pm-footer,
-body.pm-sidebar-collapsed .pm-footer { left: 52px; }
+body.sidebar-collapsed .pm-footer,
+body.pm-sidebar-collapsed .pm-footer {
+    left: 60px;
+}
 
 .pm-footer-status {
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     color: #9ca3af;
 }
 
+.pm-footer-status--dirty {
+    color: #f59e0b;
+    font-weight: 600;
+}
+
+.pm-footer-actions,
 .pm-footer-btns {
     display: flex;
     align-items: center;
@@ -473,50 +736,107 @@ body.pm-sidebar-collapsed .pm-footer { left: 52px; }
 }
 
 .pm-btn-reset {
-    padding: 8px 18px;
-    font-size: 0.84rem;
+    padding: 9px 20px;
+    font-size: 0.85rem;
     font-weight: 600;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
     color: #374151;
-    background: #ffffff;
+    background: #fff;
     border: 1px solid #d1d5db;
     border-radius: 8px;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: background 0.18s, border-color 0.18s;
 }
-.pm-btn-reset:hover { background: #f9fafb; }
+
+.pm-btn-reset:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
 
 .pm-btn-save {
     padding: 9px 22px;
-    font-size: 0.84rem;
+    font-size: 0.85rem;
     font-weight: 700;
-    font-family: 'Poppins', sans-serif;
-    color: #ffffff;
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    color: #fff;
     background: #1a4731;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: background 0.18s;
 }
-.pm-btn-save:hover { background: #0e3320; }
+
+.pm-btn-save:hover {
+    background: #0e3320;
+}
 
 /* ============================================================
    RESPONSIVE
    ============================================================ */
-@media (max-width: 900px) {
-    .pm-grid-3 { grid-template-columns: 1fr 1fr; }
-    .pm-preview-info-grid { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 1024px) {
+    .pm-grid-3 {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .pm-preview-grid,
+    .pm-preview-info-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .pm-checkbox-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 768px) {
-    .pm-content { padding: 16px 14px 90px; }
-    .pm-grid-2 { grid-template-columns: 1fr; }
-    .pm-grid-3 { grid-template-columns: 1fr; }
-    .pm-footer { left: 52px; }
-    .pm-preview-card { padding: 18px 16px; }
-    .pm-preview-info-grid { grid-template-columns: 1fr 1fr; }
+    .pm-content {
+        padding: 16px 14px 90px;
+    }
+
+    .pm-section,
+    .pm-card {
+        padding: 18px 16px;
+    }
+
+    .pm-grid-2,
+    .pm-grid-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .pm-checkbox-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .pm-preview-grid,
+    .pm-preview-info-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .pm-preview-card {
+        padding: 18px 16px;
+    }
+
+    .pm-footer {
+        left: 60px;
+    }
 }
 
 @media (max-width: 480px) {
-    .pm-preview-info-grid { grid-template-columns: 1fr; }
+    .pm-tabs {
+        gap: 0;
+    }
+
+    .pm-tab {
+        padding: 10px 12px;
+        font-size: 0.8rem;
+    }
+
+    .pm-checkbox-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pm-preview-grid,
+    .pm-preview-info-grid {
+        grid-template-columns: 1fr;
+    }
 }

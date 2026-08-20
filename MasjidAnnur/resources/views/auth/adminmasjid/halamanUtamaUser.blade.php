@@ -5,13 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $mosque->mosque_name ?? 'Masjid' }} — Halaman Utama</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,ital@9..144,300..700,0;9..144,400..600,1&family=Inter:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/adminmasjid/halamanUtamaUser.css') }}">
 </head>
 <body>
+
         <div class="hu-praybar-times">
             @php
-                $prayers = [
+                // TODO: ganti sumber data ini ke tabel jadwal_shalat per masjid kalau modul
+                // "Jadwal Shalat" di sidebar sudah tidak berstatus "dev".
+                $prayers = $prayers ?? [
                     ['name' => 'Subuh',   'time' => '04:32', 'active' => false],
                     ['name' => 'Dzuhur',  'time' => '12:05', 'active' => false],
                     ['name' => 'Ashar',   'time' => '15:21', 'active' => false],
@@ -27,12 +30,12 @@
             @endforeach
         </div>
     </div>
+    @endif
 
-     <!-- NAVBAR -->
+    {{-- NAVBAR --}}
     <header class="hu-navbar" id="huNavbar">
         <div class="hu-navbar-inner">
 
-            <!-- Brand -->
             <a href="#" class="hu-brand">
                 <div class="hu-brand-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -43,22 +46,20 @@
                 </div>
                 <div class="hu-brand-text">
                     <span class="hu-brand-name">{{ $mosque->mosque_name ?? 'Masjid Ar-Rahman' }}</span>
-                    <span class="hu-brand-city">{{ $mosque->city ?? 'Bandung' }}</span>
+                    <span class="hu-brand-city">{{ $mosque->city ?? '' }}</span>
                 </div>
             </a>
 
-            <!-- Nav links -->
             <nav class="hu-nav">
                 <a href="#beranda"  class="hu-nav-link active">Beranda</a>
                 <a href="#profil"   class="hu-nav-link">Profil</a>
-                <a href="#shalat"   class="hu-nav-link">Waktu Shalat</a>
+                @if($modOn('jadwal_shalat'))<a href="#shalat" class="hu-nav-link">Waktu Shalat</a>@endif
                 <a href="#program"  class="hu-nav-link">Program</a>
-                <a href="#acara"    class="hu-nav-link">Acara</a>
-                <a href="#donasi"   class="hu-nav-link">Donasi</a>
+                @if($modOn('kegiatan'))<a href="#acara" class="hu-nav-link">Acara</a>@endif
+                @if($modOn('donasi'))<a href="#donasi" class="hu-nav-link">Donasi</a>@endif
                 <a href="#kontak"   class="hu-nav-link">Hubungi</a>
             </nav>
 
-            <!-- Ganti Masjid -->
             <button class="hu-ganti-btn" id="huGantiBtn">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                      stroke-width="1.8" stroke="currentColor" width="14" height="14">
@@ -74,7 +75,6 @@
                 </svg>
             </button>
 
-            {{-- Hamburger --}}
             <button class="hu-hamburger" id="huHamburger" aria-label="Menu">
                 <span></span><span></span><span></span>
             </button>
@@ -82,34 +82,49 @@
         </div>
     </header>
 
- <!-- INFO TICKER  -->
+    {{-- INFO TICKER (modul: pengumuman) --}}
+    @if($modOn('pengumuman'))
     <div class="hu-ticker">
         <span class="hu-ticker-label">INFO</span>
         <div class="hu-ticker-wrap">
             <div class="hu-ticker-track" id="huTickerTrack">
-                <span class="hu-ticker-text">Santunan anak yatim setiap Jumat pertama dalam bulan</span>
+                @php
+                    // TODO: ganti ke data tabel pengumuman (halaman "Pengumuman" di sidebar)
+                    $announcements = $announcements ?? [
+                        'Santunan anak yatim setiap Jumat pertama dalam bulan',
+                        "Kajian Fiqih setiap Senin ba'da Isya",
+                        'Pendaftaran TPA/TPQ dibuka sampai akhir bulan',
+                    ];
+                @endphp
+                @foreach($announcements as $info)
+                <span class="hu-ticker-text">{{ $info }}</span>
                 <span class="hu-ticker-dot">●</span>
-                <span class="hu-ticker-text">Kajian Fiqih setiap Senin ba'da Isya</span>
-                <span class="hu-ticker-dot">●</span>
-                <span class="hu-ticker-text">Pendaftaran TPA/TPQ dibuka sampai akhir bulan</span>
-                <span class="hu-ticker-dot">●</span>
+                @endforeach
             </div>
         </div>
     </div>
+    @endif
 
-  
-    <section class="hu-hero" id="beranda">
+    {{-- HERO — semua isi dari tab "Hero / Banner" di editor --}}
+    <section class="hu-hero" id="beranda"
+        style="background-color: {{ $mosque->hero_bg_color ?? '#0e3320' }};
+               color: {{ $mosque->hero_text_color ?? '#ffffff' }};
+               @if(!empty($mosque->hero_image)) background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url('{{ asset('storage/'.$mosque->hero_image) }}'); background-size: cover; background-position: center; @endif">
         <div class="hu-hero-overlay"></div>
         <div class="hu-hero-content">
-            <div class="hu-hero-arabic">{{ $mosque->arabic_name ?? 'مسجد الرحمن' }}</div>
-            <h1 class="hu-hero-title">{{ $mosque->mosque_name ?? 'Masjid Ar-Rahman' }}</h1>
+            <div class="hu-hero-arabic">{{ $mosque->arabic_name ?? '' }}</div>
+            <h1 class="hu-hero-title">{{ $mosque->hero_title ?? $mosque->mosque_name ?? 'Selamat Datang' }}</h1>
             <p class="hu-hero-tagline">
-                {{ $mosque->tagline ?? 'Rahmat untuk Semua' }}
-                @if(!empty($mosque->city)) — {{ $mosque->city }} @endif
+                {{ $mosque->hero_subtitle ?? '' }}
+                @if(!empty($mosque->hero_desc)) — {{ $mosque->hero_desc }} @endif
             </p>
             <div class="hu-hero-btns">
-                <a href="#donasi" class="hu-btn-primary">Donasi Sekarang</a>
-                <a href="#profil" class="hu-btn-outline">Tentang Kami</a>
+                @if(!empty($mosque->btn_primary))
+                <a href="{{ $mosque->btn_primary_url ?? '#donasi' }}" class="hu-btn-primary">{{ $mosque->btn_primary }}</a>
+                @endif
+                @if(!empty($mosque->btn_secondary))
+                <a href="{{ $mosque->btn_secondary_url ?? '#profil' }}" class="hu-btn-outline">{{ $mosque->btn_secondary }}</a>
+                @endif
             </div>
         </div>
         <div class="hu-hero-scroll">
@@ -121,7 +136,7 @@
         </div>
     </section>
 
-
+    {{-- PROFIL — semua isi dari tab "Tentang Masjid" di editor --}}
     <section class="hu-section hu-profil-section" id="profil">
         <div class="hu-container">
             <div class="hu-profil-v2-grid">
@@ -129,25 +144,22 @@
                 <div class="hu-profil-v2-left">
                     <div class="hu-profil-v2-tag">§ 01 — Profil Masjid</div>
                     <h2 class="hu-profil-v2-title">
-                        Rumah Ibadah<br>
-                        <em>untuk Semua</em>
+                        {{ $mosque->about_name ?? $mosque->mosque_name ?? 'Rumah Ibadah' }}
                     </h2>
                     <p class="hu-profil-v2-desc">
-                        {{ $mosque->description ?? 'Masjid ini hadir membawa misi rahmat Islam yang menjangkau seluruh lapisan masyarakat. Berfokus pada pendidikan, sosial, dan pemberdayaan ekonomi umat.' }}
+                        {{ $mosque->about_history ?? $mosque->about_vision ?? 'Belum ada deskripsi. Isi di tab "Tentang Masjid" pada editor landing page.' }}
                     </p>
 
-                    <div class="hu-profil-v2-divider">
-                        <span>✦</span>
-                    </div>
+                    <div class="hu-profil-v2-divider"><span>✦</span></div>
 
                     <div class="hu-profil-v2-stats">
                         <div class="hu-profil-v2-stat">
                             <div class="hu-profil-v2-stat-label">Tahun Berdiri</div>
-                            <div class="hu-profil-v2-stat-val">{{ $mosque->founded ?? '—' }}</div>
+                            <div class="hu-profil-v2-stat-val">{{ $mosque->about_founded ?? '—' }}</div>
                         </div>
                         <div class="hu-profil-v2-stat">
                             <div class="hu-profil-v2-stat-label">Kapasitas</div>
-                            <div class="hu-profil-v2-stat-val">{{ $mosque->capacity ?? '—' }}</div>
+                            <div class="hu-profil-v2-stat-val">{{ $mosque->about_capacity ?? '—' }}</div>
                         </div>
                         <div class="hu-profil-v2-stat">
                             <div class="hu-profil-v2-stat-label">Imam Besar</div>
@@ -165,27 +177,27 @@
                 <div class="hu-profil-v2-right">
                     <div class="hu-profil-v2-images">
                         <div class="hu-profil-v2-img hu-img-tall">
-                            <img src="https://images.unsplash.com/photo-1585846888147-1a2b4e1e7fa4?w=500&q=80"
-                                 alt="Al-Quran" loading="lazy">
+                            <img src="{{ !empty($mosque->about_photo) ? asset('storage/'.$mosque->about_photo) : 'https://images.unsplash.com/photo-1585846888147-1a2b4e1e7fa4?w=500&q=80' }}"
+                                 alt="Foto Masjid" loading="lazy">
                         </div>
                         <div class="hu-profil-v2-img hu-img-short">
                             <img src="https://images.unsplash.com/photo-1564769625905-50e93615e769?w=500&q=80"
                                  alt="Masjid" loading="lazy">
                         </div>
                     </div>
+                    @if(!empty($mosque->about_vision))
                     <div class="hu-profil-v2-ayat">
-                        <div class="hu-profil-v2-arabic">إِنَّمَا يَعْمُرُ مَسَاجِدَ اللَّهِ مَنْ آمَنَ بِاللَّهِ</div>
-                        <div class="hu-profil-v2-trans">
-                            "Sesungguhnya yang memakmurkan masjid Allah hanyalah orang-orang yang beriman..."
-                            — QS. At-Taubah: 18
-                        </div>
+                        <div class="hu-profil-v2-trans">{{ $mosque->about_vision }}</div>
                     </div>
+                    @endif
                 </div>
 
             </div>
         </div>
     </section>
 
+    {{-- JADWAL SHALAT (grid besar) — modul: jadwal_shalat --}}
+    @if($modOn('jadwal_shalat'))
     <section class="hu-section hu-section-dark" id="shalat">
         <div class="hu-container">
             <div class="hu-section-head hu-section-head-light">
@@ -197,15 +209,15 @@
                 <div class="hu-shalat-card {{ $p['active'] ? 'active' : '' }}">
                     <div class="hu-shalat-name">{{ $p['name'] }}</div>
                     <div class="hu-shalat-time">{{ $p['time'] }}</div>
-                    @if($p['active'])
-                    <div class="hu-shalat-now">Waktu Sekarang</div>
-                    @endif
+                    @if($p['active'])<div class="hu-shalat-now">Waktu Sekarang</div>@endif
                 </div>
                 @endforeach
             </div>
         </div>
     </section>
+    @endif
 
+    {{-- PROGRAM — belum ada tab editor khusus untuk ini, masih pakai data $mosque->programs --}}
     <section class="hu-section hu-program-section" id="program">
         <div class="hu-container">
             <div class="hu-section-head">
@@ -215,11 +227,7 @@
             <div class="hu-program-v2-list">
                 @php
                     $programList = !empty($mosque->programs) ? $mosque->programs : [
-                        'Hafalan Quran 30 Juz',
-                        'Ekonomi Syariah',
-                        'Koperasi Masjid',
-                        'Kajian Tafsir',
-                        'Program Yatim',
+                        'Hafalan Quran 30 Juz', 'Ekonomi Syariah', 'Koperasi Masjid', 'Kajian Tafsir', 'Program Yatim',
                     ];
                 @endphp
                 @foreach($programList as $idx => $prog)
@@ -232,6 +240,8 @@
         </div>
     </section>
 
+    {{-- ACARA — modul: kegiatan --}}
+    @if($modOn('kegiatan'))
     <section class="hu-acara-section" id="acara">
         <div class="hu-container">
             <div class="hu-acara-v2-head">
@@ -243,10 +253,11 @@
             </div>
             <div class="hu-acara-v2-grid">
                 @php
-                    $acaraList = [
-                        ['bulan' => 'Agu', 'tanggal' => '17', 'judul' => 'Halaqah Quran Bersama',      'waktu' => '16:00 WIB', 'oleh' => 'Ustadz Yusuf Mansur',  'terbaru' => true],
-                        ['bulan' => 'Agu', 'tanggal' => '24', 'judul' => 'Bazar Produk UMKM Muslim',   'waktu' => '08:00 WIB', 'oleh' => 'Panitia Masjid',        'terbaru' => false],
-                        ['bulan' => 'Agu', 'tanggal' => '31', 'judul' => 'Khataman Quran & Doa Bersama','waktu' => '09:00 WIB', 'oleh' => 'Seluruh Santri',        'terbaru' => false],
+                    // TODO: ganti ke tabel kegiatan (halaman "Kegiatan & Acara" di sidebar)
+                    $acaraList = $acaraList ?? [
+                        ['bulan' => 'Agu', 'tanggal' => '17', 'judul' => 'Halaqah Quran Bersama',       'waktu' => '16:00 WIB', 'oleh' => 'Ustadz Yusuf Mansur', 'terbaru' => true],
+                        ['bulan' => 'Agu', 'tanggal' => '24', 'judul' => 'Bazar Produk UMKM Muslim',    'waktu' => '08:00 WIB', 'oleh' => 'Panitia Masjid',       'terbaru' => false],
+                        ['bulan' => 'Agu', 'tanggal' => '31', 'judul' => 'Khataman Quran & Doa Bersama','waktu' => '09:00 WIB', 'oleh' => 'Seluruh Santri',       'terbaru' => false],
                     ];
                 @endphp
                 @foreach($acaraList as $a)
@@ -256,9 +267,7 @@
                             <div class="hu-acara-v2-month">{{ $a['bulan'] }}</div>
                             <div class="hu-acara-v2-day">{{ $a['tanggal'] }}</div>
                         </div>
-                        @if($a['terbaru'])
-                        <span class="hu-acara-v2-badge">Terbaru</span>
-                        @endif
+                        @if($a['terbaru'])<span class="hu-acara-v2-badge">Terbaru</span>@endif
                     </div>
                     <div class="hu-acara-v2-judul">{{ $a['judul'] }}</div>
                     <div class="hu-acara-v2-meta">{{ $a['waktu'] }} · {{ $a['oleh'] }}</div>
@@ -268,32 +277,36 @@
             </div>
         </div>
     </section>
+    @endif
 
+    {{-- DONASI — modul: donasi --}}
+    @if($modOn('donasi'))
     <section class="hu-donasi-v2-section" id="donasi">
         <div class="hu-donasi-v2-inner">
-
-            {{-- Kiri: info donasi --}}
             <div class="hu-donasi-v2-left">
                 <div class="hu-section-tag hu-tag-amber-light">§ 04 — Donasi & Sedekah</div>
-                <h2 class="hu-donasi-v2-title">
-                    Investasi<br>
-                    <em>Terbaik Akhirat</em>
-                </h2>
+                <h2 class="hu-donasi-v2-title">Investasi<br><em>Terbaik Akhirat</em></h2>
                 <p class="hu-donasi-v2-desc">
-                    Setiap rupiah yang Anda donasikan akan digunakan untuk
-                    <strong>Pembangunan Aula Serbaguna</strong>. Mari bersama-sama memakmurkan masjid Allah.
+                    Setiap rupiah yang Anda donasikan akan digunakan untuk pembangunan dan operasional masjid.
+                    Mari bersama-sama memakmurkan masjid Allah.
                 </p>
+                @php
+                    // TODO: ganti ke tabel donasi (halaman "Donasi" di sidebar) saat sudah tersedia
+                    $donasiTerkumpul = $donasiTerkumpul ?? 387000000;
+                    $donasiTarget = $donasiTarget ?? 500000000;
+                    $donasiPct = $donasiTarget > 0 ? round($donasiTerkumpul / $donasiTarget * 100) : 0;
+                @endphp
                 <div class="hu-donasi-v2-progress-wrap">
                     <div class="hu-donasi-v2-progress-label">
                         <span>Terkumpul</span>
-                        <span class="hu-donasi-v2-pct">77%</span>
+                        <span class="hu-donasi-v2-pct">{{ $donasiPct }}%</span>
                     </div>
                     <div class="hu-donasi-v2-track">
-                        <div class="hu-donasi-v2-fill" style="width:77%"></div>
+                        <div class="hu-donasi-v2-fill" style="width:{{ $donasiPct }}%"></div>
                     </div>
                     <div class="hu-donasi-v2-amounts">
-                        <span>Rp 387.000.000</span>
-                        <span>Rp 500.000.000</span>
+                        <span>Rp {{ number_format($donasiTerkumpul, 0, ',', '.') }}</span>
+                        <span>Rp {{ number_format($donasiTarget, 0, ',', '.') }}</span>
                     </div>
                 </div>
             </div>
@@ -310,8 +323,7 @@
                     <div class="hu-donasi-v2-or">Atau masukkan nominal lain</div>
                     <div class="hu-donasi-v2-input-wrap">
                         <span class="hu-donasi-v2-prefix">Rp</span>
-                        <input type="number" id="donasiNominal" class="hu-donasi-v2-input"
-                               placeholder="0" min="1000">
+                        <input type="number" id="donasiNominal" class="hu-donasi-v2-input" placeholder="0" min="1000">
                     </div>
                     <div class="hu-donasi-v2-label-field">Nama (opsional)</div>
                     <input type="text" class="hu-donasi-v2-input-name" placeholder="Hamba Allah">
@@ -321,10 +333,11 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </section>
+    @endif
 
+    {{-- KONTAK — semua isi dari tab "Kontak & Sosial" di editor --}}
     <section class="hu-hubungi-section" id="kontak">
         <div class="hu-container">
             <div class="hu-section-head">
@@ -333,7 +346,6 @@
             </div>
 
             <div class="hu-hubungi-grid">
-                <!-- Alamat  -->
                 <div class="hu-hubungi-card">
                     <div class="hu-hubungi-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="20" height="20">
@@ -344,13 +356,14 @@
                     <div>
                         <div class="hu-hubungi-label">Alamat</div>
                         <div class="hu-hubungi-val">
-                            {{ $mosque->address ?? 'Jl. Sudirman No. 45, Cicendo,' }}<br>
-                            {{ $mosque->city ?? 'Bandung' }} {{ $mosque->postal_code ?? '40172' }}
+                            {{ $mosque->contact_address ?? '—' }}
+                            @if($modOn('peta_lokasi') && !empty($mosque->contact_maps))
+                                <br><a href="{{ $mosque->contact_maps }}" target="_blank" style="font-size:0.8rem;">Lihat di Google Maps →</a>
+                            @endif
                         </div>
                     </div>
                 </div>
 
-                 <!-- Telepon  -->
                 <div class="hu-hubungi-card">
                     <div class="hu-hubungi-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="20" height="20">
@@ -359,11 +372,10 @@
                     </div>
                     <div>
                         <div class="hu-hubungi-label">Telepon</div>
-                        <div class="hu-hubungi-val">{{ $mosque->phone ?? '+62 22 4210 5678' }}</div>
+                        <div class="hu-hubungi-val">{{ $mosque->contact_phone ?? '—' }}</div>
                     </div>
                 </div>
 
-               <!-- Email  -->
                 <div class="hu-hubungi-card">
                     <div class="hu-hubungi-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="20" height="20">
@@ -372,90 +384,88 @@
                     </div>
                     <div>
                         <div class="hu-hubungi-label">Email</div>
-                        <div class="hu-hubungi-val">{{ $mosque->email ?? 'info@ar-rahman-bdg.id' }}</div>
+                        <div class="hu-hubungi-val">{{ $mosque->contact_email ?? '—' }}</div>
                     </div>
                 </div>
             </div>
+
+            @if($mosque->social_ig || $mosque->social_fb || $mosque->social_yt || $mosque->social_wa)
+            <div class="hu-hubungi-social" style="display:flex;gap:14px;margin-top:24px;">
+                @if(!empty($mosque->social_ig))<a href="{{ $mosque->social_ig }}" target="_blank">Instagram</a>@endif
+                @if(!empty($mosque->social_fb))<a href="{{ $mosque->social_fb }}" target="_blank">Facebook</a>@endif
+                @if(!empty($mosque->social_yt))<a href="{{ $mosque->social_yt }}" target="_blank">YouTube</a>@endif
+                @if(!empty($mosque->social_wa))<a href="https://wa.me/{{ preg_replace('/\D/', '', $mosque->social_wa) }}" target="_blank">WhatsApp</a>@endif
+            </div>
+            @endif
         </div>
     </section>
-
 
     <footer class="hu-footer-v2">
         <div class="hu-footer-v2-inner">
             <div class="hu-footer-v2-grid">
 
                 <div class="hu-footer-v2-brand">
-                    <div class="hu-footer-v2-name">{{ $mosque->mosque_name ?? 'Masjid Ar-Rahman' }}</div>
+                    <div class="hu-footer-v2-name">{{ $mosque->mosque_name ?? '' }}</div>
                     <div class="hu-footer-v2-tagline">
-                        {{ $mosque->tagline ?? 'Melayani umat dengan sepenuh hati.' }}<br>
+                        {{ $mosque->hero_subtitle ?? '' }}<br>
                         Bersama kita makmurkan masjid Allah.
                     </div>
                 </div>
 
                 <div class="hu-footer-v2-arabic-col">
-                    <div class="hu-footer-v2-arabic">{{ $mosque->arabic_name ?? 'مسجد الرحمن' }}</div>
+                    <div class="hu-footer-v2-arabic">{{ $mosque->arabic_name ?? '' }}</div>
                 </div>
 
                 <div class="hu-footer-v2-col">
                     <div class="hu-footer-v2-col-title">Masjid Lainnya</div>
                     <a href="#" class="hu-footer-v2-link">Baitul Digital</a>
-                    <a href="#" class="hu-footer-v2-link hu-footer-v2-link-active">{{ $mosque->mosque_name ?? 'Masjid Ar-Rahman' }}</a>
-                    <a href="#" class="hu-footer-v2-link">Masjid Al-Aqsa</a>
+                    <a href="#" class="hu-footer-v2-link hu-footer-v2-link-active">{{ $mosque->mosque_name ?? '' }}</a>
                 </div>
 
                 <div class="hu-footer-v2-col">
                     <div class="hu-footer-v2-col-title">Tautan</div>
-                    <a href="#profil"   class="hu-footer-v2-link">Profil Masjid</a>
-                    <a href="#shalat"   class="hu-footer-v2-link">Jadwal Shalat</a>
-                    <a href="#program"  class="hu-footer-v2-link">Program</a>
-                    <a href="#donasi"   class="hu-footer-v2-link">Donasi</a>
-                    <a href="#kontak"   class="hu-footer-v2-link">Hubungi Kami</a>
+                    <a href="#profil" class="hu-footer-v2-link">Profil Masjid</a>
+                    @if($modOn('jadwal_shalat'))<a href="#shalat" class="hu-footer-v2-link">Jadwal Shalat</a>@endif
+                    <a href="#program" class="hu-footer-v2-link">Program</a>
+                    @if($modOn('donasi'))<a href="#donasi" class="hu-footer-v2-link">Donasi</a>@endif
+                    <a href="#kontak" class="hu-footer-v2-link">Hubungi Kami</a>
                 </div>
 
             </div>
 
             <div class="hu-footer-v2-bottom">
-                <span>© {{ date('Y') }} {{ $mosque->mosque_name ?? 'Masjid Ar-Rahman' }} · Semua Hak Dilindungi</span>
+                <span>© {{ date('Y') }} {{ $mosque->mosque_name ?? '' }} · Semua Hak Dilindungi</span>
                 <span>Platform Masjid Digital · Multitenant</span>
             </div>
         </div>
 
-        <button class="hu-kembali-btn" onclick="window.history.back()">
-            ← Kembali
-        </button>
+        <button class="hu-kembali-btn" onclick="window.history.back()">← Kembali</button>
     </footer>
 
     <button class="help-fab" aria-label="Kembali ke atas" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
     <script>
-        // Navbar scroll effect
         window.addEventListener('scroll', () => {
             const nb = document.getElementById('huNavbar');
             nb.classList.toggle('scrolled', window.scrollY > 60);
         });
 
-        // Hamburger
         document.getElementById('huHamburger').addEventListener('click', function () {
             document.querySelector('.hu-nav').classList.toggle('open');
             this.classList.toggle('active');
         });
 
-        // Active nav link on scroll
         const sections = document.querySelectorAll('section[id]');
         const navLinks = document.querySelectorAll('.hu-nav-link');
-
         window.addEventListener('scroll', () => {
             let current = '';
-            sections.forEach(s => {
-                if (window.scrollY >= s.offsetTop - 100) current = s.id;
-            });
+            sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) current = s.id; });
             navLinks.forEach(l => {
                 l.classList.remove('active');
                 if (l.getAttribute('href') === '#' + current) l.classList.add('active');
             });
         });
 
-        // Nominal donasi
         document.querySelectorAll('.hu-nominal-btn').forEach(btn => {
             btn.addEventListener('click', function () {
                 document.querySelectorAll('.hu-nominal-btn').forEach(b => b.classList.remove('selected'));
