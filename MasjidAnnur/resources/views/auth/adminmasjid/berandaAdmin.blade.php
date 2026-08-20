@@ -27,9 +27,6 @@
                 <div class="ba2-brand-name">{{ $mosque->mosque_name ?? 'SIM Masjid' }}</div>
                 <div class="ba2-brand-sub">{{ $mosque->city ?? 'Baitul Digital' }}</div>
             </div>
-            <button class="ba2-collapse-btn" id="ba2CollapseBtn" aria-label="Collapse">
-                <i class="fa-solid fa-chevron-left"></i>
-            </button>
         </div>
 
       {{-- Nav --}}

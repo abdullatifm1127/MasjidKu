@@ -10,30 +10,6 @@
 </head>
 <body>
 
-    {{--
-        CATATAN SINKRONISASI:
-        Semua field di bawah ini sekarang membaca langsung dari kolom yang
-        diisi lewat Editor Landing Page (landingPage.blade.php).
-        Nama field DISAMAKAN dengan nama <input name="..."> di form editor,
-        supaya perubahan admin langsung tampil di sini tanpa mapping tambahan.
-
-        Section yang punya toggle di tab "Modul Aktif" (jadwal_shalat, kegiatan,
-        donasi, peta_lokasi, pengumuman) dibungkus @if berdasarkan
-        $mosque->active_modules, jadi kalau admin matikan modulnya,
-        section otomatis hilang dari halaman publik.
-    --}}
-    @php
-        $modules = $mosque->active_modules ?? [];
-        $modOn = fn($key) => data_get($modules, $key, true); // default nyala kalau belum pernah diatur
-    @endphp
-
-    {{-- TOP BAR: JADWAL SHALAT (modul: jadwal_shalat) --}}
-    @if($modOn('jadwal_shalat'))
-    <div class="hu-praybar">
-        <div class="hu-praybar-left">
-            <span class="hu-praybar-label">Jadwal Shalat</span>
-            <span class="hu-praybar-date">— {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</span>
-        </div>
         <div class="hu-praybar-times">
             @php
                 // TODO: ganti sumber data ini ke tabel jadwal_shalat per masjid kalau modul
