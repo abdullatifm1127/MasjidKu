@@ -110,6 +110,35 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/admin/profil-masjid', [MosqueController::class, 'updateProfil'])
         ->name('admin.profil-masjid.update');
 });
+
+// Dashboard Admin Masjid (new)
+Route::get('/admin2/dashboard', function () {
+    return view('auth.adminmasjid.berandaAdmin');
+})->name('admin2.dashboard');
+
+Route::get('/admin2/landing-page', function () {
+    return view('admin.landingPage');
+})->name('admin2.landing-page');
+
+Route::get('/admin2/profil-masjid', function () {
+    return view('auth.adminmasjid.profilMasjid');
+})->name('admin2.profil-masjid');
+
+Route::get('/admin/landing-page', function () {
+    return view('admin.landingPage');
+})->name('admin.landing-page');
+
+Route::put('/admin/landing-page', function (\Illuminate\Http\Request $request) {
+    return redirect()->route('admin.landing-page')
+        ->with('success', 'Landing page berhasil disimpan.');
+})->name('admin.landing-page.update');
+
+Route::get('/admin/profil-masjid', [MosqueController::class, 'editProfil'])
+    ->name('admin.profil-masjid');
+
+Route::put('/admin/profil-masjid', [MosqueController::class, 'updateProfil'])
+    ->name('admin.profil-masjid.update');
+
 /*
 |--------------------------------------------------------------------------
 | Super Admin (Harus Login & Punya Akses)

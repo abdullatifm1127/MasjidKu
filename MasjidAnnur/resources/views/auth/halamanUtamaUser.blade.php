@@ -147,7 +147,7 @@
                 <div class="hu-profil-v2-right">
                     <div class="hu-profil-v2-images">
                         <div class="hu-profil-v2-img hu-img-tall">
-                            <img src="https://images.unsplash.com/photo-1585846888147-1a2b4e1e7fa4?w=500&q=80"
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7skeyX4a7nPzMZhaMJEkntS_hwmhPHlRzoBvUGvTIzj9RsfMwGy1T5240&s=10"
                                  alt="Al-Quran" loading="lazy">
                         </div>
                         <div class="hu-profil-v2-img hu-img-short">
