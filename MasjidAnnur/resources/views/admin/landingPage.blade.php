@@ -6,7 +6,7 @@
     <title>Landing Page - Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/landingPage.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/adminmasjid/landingPage.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body class="lp-body">
@@ -115,13 +115,22 @@
                 </div>
             </div>
             <div class="lp-topbar-right">
-                <a href="{{ url('/') }}" class="lp-btn-back">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    Kembali ke Publik
+                <a href="{{ url('/') }}" class="lp-btn-preview" target="_blank">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                         stroke-width="1.8" stroke="currentColor" width="14" height="14">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    Preview
                 </a>
-                <button class="lp-notif-btn" aria-label="Notifikasi">
-                    <i class="fa-solid fa-bell"></i>
-                    <span class="lp-notif-dot"></span>
+                <button class="lp-btn-save" id="lpSaveBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                         stroke-width="2" stroke="currentColor" width="15" height="15">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Simpan Perubahan
                 </button>
             </div>
         </header>
