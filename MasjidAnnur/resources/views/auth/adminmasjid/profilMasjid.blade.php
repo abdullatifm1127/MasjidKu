@@ -6,8 +6,8 @@
     <title>Profil Masjid - Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/berandaAdmin.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/profilMasjid.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/adminmasjid/berandaAdmin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/adminmasjid/profilMasjid.css') }}">
 </head>
 <body class="admin-page" id="adminBody">
     

@@ -22,9 +22,9 @@
     <h1>Masuk ke <span class="hi">Panel Kendali</span> Utama</h1>
     <p class="lede">Khusus untuk administrator tertinggi platform MasjidKu. Kelola seluruh masjid, pengguna, dan konfigurasi sistem dari sini.</p>
  
-    <div class="card">
-     <form action="{{ route('login') }}" method="POST" id="loginForm">
-    @csrf <!-- Token keamanan wajib di Laravel -->
+  <div class="card">
+     <form action="{{ route('superadmin.login.process') }}" method="POST" id="loginForm">
+    @csrf<!-- Token keamanan wajib di Laravel -->
     
     <div class="field">
         <label for="username">Username atau email</label>

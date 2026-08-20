@@ -7,9 +7,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MosqueController;
 use App\Http\Controllers\SuperAdmin\PenggunaController;
 use App\Http\Controllers\SuperAdmin\BerandaSuperAdminController;
-use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\SuperAdmin\PengaturanController;
-
+use App\Http\Controllers\adminmasjid\LandingPageController;
+use App\Http\Controllers\Auth\LoginController;
 /*
 |--------------------------------------------------------------------------
 | Halaman Utama
@@ -23,18 +23,27 @@ Route::get('/', function () {
     return view('auth.halamanUtama', compact('userMosque'));
 })->name('home');
 
-// Halaman Publik Masjid
+/*
+|--------------------------------------------------------------------------
+| Halaman Publik Masjid (Menggunakan Slug)
+|--------------------------------------------------------------------------
+*/
+Route::get('/masjid/{slug}', function ($slug) {
+    $mosque = Mosque::where('slug', $slug)->where('status', 'approved')->firstOrFail();
+    return view('auth.adminmasjid.halamanUtamaUser', compact('mosque'));
+})->name('masjid.publik');
 
 Route::middleware(['auth'])->get('/masjidUser', function () {
     $mosque = Mosque::where('user_id', Auth::id())->first();  
     if (!$mosque) {
         return redirect()->route('daftar.masjid')->with('error', 'Anda belum mendaftarkan masjid.');
     }
-    return view('auth.adminmasjid.halamanUtamaUser', compact('mosque'));
-})->name('masjid.publik');
+    return redirect()->route('masjid.publik', $mosque->slug);
+})->name('masjid.user.redirect');
+
 /*
 |--------------------------------------------------------------------------
-| Authentication
+| Authentication (General User)
 |--------------------------------------------------------------------------
 */
 Route::get('/login', function () {
@@ -56,23 +65,19 @@ Route::post('/logout', [AuthController::class, 'logout'])
 
 /*
 |--------------------------------------------------------------------------
-| Halaman yang membutuhkan Login (Protected Routes)
+| Super Admin Authentication Routes
 |--------------------------------------------------------------------------
 */
-Route::middleware('auth')->group(function () {
-    Route::get('/daftar-masjid', [MosqueController::class, 'create'])
-        ->name('daftar.masjid');
+Route::get('/superadmin/login', function () {
+    return view('auth.superadmin.halamanloginsuperadmin');
+})->name('superadmin.login');
 
-    Route::post('/daftar-masjid', [MosqueController::class, 'store'])
-        ->name('daftar.masjid.store');
-
-    Route::get('/dashboard', [MosqueController::class, 'dashboard'])
-        ->name('dashboard');
-});
+Route::post('/superadmin/login', [LoginController::class, 'login'])
+    ->name('superadmin.login.process');
 
 /*
 |--------------------------------------------------------------------------
-| Halaman Waiting
+| Halaman Waiting & Forgot Password
 |--------------------------------------------------------------------------
 */
 Route::get('/waiting', function () {
@@ -82,11 +87,6 @@ Route::get('/waiting', function () {
     return view('mosque.waiting');
 })->name('waiting');
 
-/*
-|--------------------------------------------------------------------------
-| Forgot Password
-|--------------------------------------------------------------------------
-*/
 Route::get('/forgot-password', function () {
     return view('auth.login');
 })->name('password.request');
@@ -97,12 +97,24 @@ Route::get('/forgot-password', function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
+    Route::get('/daftar-masjid', [MosqueController::class, 'create'])
+        ->name('daftar.masjid');
+
+    Route::post('/daftar-masjid', [MosqueController::class, 'store'])
+        ->name('daftar.masjid.store');
+
+    Route::get('/dashboard', [MosqueController::class, 'dashboard'])
+        ->name('dashboard');
+
     Route::get('/admin/dashboard', [MosqueController::class, 'dashboard'])
         ->name('admin.dashboard');
 
-    Route::get('/admin/landing-page', function () {
-        return view('admin.landingPage');
-    })->name('admin.landing-page');
+    // Rute Landing Page Admin Masjid (Menggunakan Controller)
+    Route::get('/admin/landing-page', [LandingPageController::class, 'index'])
+        ->name('admin.landing-page');
+
+    Route::put('/admin/landing-page', [LandingPageController::class, 'update'])
+        ->name('admin.landing-page.update');
 
     Route::get('/admin/profil-masjid', [MosqueController::class, 'editProfil'])
         ->name('admin.profil-masjid');
@@ -110,13 +122,13 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/admin/profil-masjid', [MosqueController::class, 'updateProfil'])
         ->name('admin.profil-masjid.update');
 });
+
 /*
 |--------------------------------------------------------------------------
-| Super Admin (Harus Login & Punya Akses)
+| Super Admin Panel (Harus Login & Punya Akses)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(function () {
-    
     Route::get('/dashboard', [BerandaSuperAdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/verifikasi', [MosqueController::class, 'verifikasi'])->name('verifikasi');
     
@@ -146,6 +158,7 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
             'phone'         => 'nullable|string|max:30',
             'status'        => 'required|in:approved,pending',
         ]);
+        
         Mosque::create(array_merge($validated, ['user_id' => 1]));
         return redirect()->route('superadmin.manajemen-masjid')->with('success', 'Masjid berhasil ditambahkan.');
     })->name('manajemen-masjid.store');

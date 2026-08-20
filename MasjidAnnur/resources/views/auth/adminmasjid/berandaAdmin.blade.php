@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin - Masjid Annur</title>
+    <title>Dashboard Admin - {{ $mosque->mosque_name ?? 'Masjid' }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/adminmasjid/berandaAdmin.css') }}">
@@ -14,7 +14,7 @@
     <aside class="ba-sidebar" id="baSidebar">
 
         {{-- Brand --}}
-        <a href="{{ url('/') }}" class="ba-brand">
+        <a href="{{ route('masjid.publik', $mosque->slug) }}" class="ba-brand">
             <div class="ba-brand-icon">
                 {{-- Mosque / building SVG --}}
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -24,8 +24,8 @@
                 </svg>
             </div>
             <div class="ba-brand-text">
-                <strong>Nama Masjid</strong>
-                <span>Baitul Digital</span>
+                <strong>{{ $mosque->mosque_name }}</strong>
+                <span>{{ $mosque->city }}</span>
             </div>
         </a>
 
@@ -112,8 +112,8 @@
         <div class="ba-user">
             <div class="ba-user-avatar">AM</div>
             <div class="ba-user-info">
-                <div class="ba-user-name">Admin Masjid</div>
-                <div class="ba-user-email">admin@baituldigital.id</div>
+                <div class="ba-user-name">{{ Auth::user()->name }}</div>
+                <div class="ba-user-email">{{ Auth::user()->email }}</div>
             </div>
         </div>
 
@@ -134,11 +134,11 @@
                 </button>
                 <div>
                     <div class="ba-page-title">Dashboard</div>
-                    <div class="ba-page-sub">Selamat datang di panel admin Nama Masjid</div>
+                    <div class="ba-page-sub">Selamat datang di panel admin {{ $mosque->mosque_name }}</div>
                 </div>
             </div>
             <div class="ba-topbar-right">
-                <a href="{{ url('/') }}" class="ba-btn-public">
+                <a href="{{ route('masjid.publik', $mosque->slug) }}" class="ba-btn-public">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                          stroke-width="2" stroke="currentColor" width="14" height="14">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -261,7 +261,7 @@
                             $modules = [
                                 ['icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3"/>', 'name' => 'Landing Page',      'status' => 'aktif'],
                                 ['icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21"/>', 'name' => 'Profil Masjid',      'status' => 'aktif'],
-                                ['icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>', 'name' => 'Jadwal Shalat',     'status' => 'segera'],
+                                ['icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>', 'name' => 'Jadwal Shalat',    'status' => 'segera'],
                                 ['icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09"/>', 'name' => 'Pengumuman',        'status' => 'segera'],
                                 ['icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25"/>', 'name' => 'Kegiatan &amp; Acara', 'status' => 'segera'],
                                 ['icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75"/>', 'name' => 'Donasi',           'status' => 'segera'],
@@ -289,7 +289,7 @@
 
             {{-- Info Banner --}}
             <div class="ba-banner">
-                <div class="ba-banner-title">Nama Masjid — Baitul Digital</div>
+                <div class="ba-banner-title">{{ $mosque->mosque_name }} — {{ $mosque->city }}</div>
                 <div class="ba-banner-sub">Sistem Informasi Masjid versi 1.0 · Modul aktif: Landing Page, Profil Masjid</div>
                 <div class="ba-banner-tags">
                     <span class="ba-banner-tag active">Modul Landing Page &#10003;</span>

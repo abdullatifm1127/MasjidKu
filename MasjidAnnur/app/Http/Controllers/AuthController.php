@@ -24,7 +24,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'last_active_at' => Carbon::now(), // <--- 2. Tambahkan ini saat register jika langsung login
+            'last_active_at' => Carbon::now(),
         ]);
 
         Auth::login($user);
@@ -34,7 +34,7 @@ class AuthController extends Controller
         return redirect()->route('home');
     }
 
-    // Proses Login
+    // Proses Login Reguler (Admin Masjid / User)
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -48,30 +48,24 @@ class AuthController extends Controller
 
             $user = Auth::user();
 
-            // <--- 3. UPDATE 'last_active_at' DI SINI SAAT LOGIN BERHASIL --->
             \App\Models\User::where('id', $user->id)->update([
                 'last_active_at' => Carbon::now(),
             ]);
-            // -------------------------------------------------------------
 
             $mosque = Mosque::where('user_id', $user->id)->first();
 
-            // Belum mendaftarkan masjid
             if (!$mosque) {
                 return redirect()->route('daftar.masjid');
             }
 
-            // Menunggu verifikasi admin
             if ($mosque->status === 'pending') {
                 return redirect()->route('waiting');
             }
 
-            // Sudah disetujui admin
             if ($mosque->status === 'approved') {
                 return redirect()->route('dashboard');
             }
 
-            // Ditolak admin
             if ($mosque->status === 'rejected') {
                 return redirect()->route('home')
                     ->with('error', 'Pendaftaran masjid ditolak admin.');
@@ -84,6 +78,43 @@ class AuthController extends Controller
             'email' => 'Email atau password salah.',
         ])->onlyInput('email');
     }
+
+    // --- TAMBAHKAN METHOD INI UNTUK LOGIN SUPER ADMIN ---
+    public function superAdminLogin(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
+
+            $user = Auth::user();
+
+            // Update waktu aktif terakhir
+            User::where('id', $user->id)->update([
+    'last_active_at' => Carbon::now(),
+]);
+
+            // Validasi apakah user benar-benar superadmin (sesuaikan pengecekan role di database Anda)
+            // Contoh jika menggunakan kolom 'role' atau 'is_superadmin':
+            if (isset($user->role) && $user->role === 'superadmin') {
+                return redirect()->route('superadmin.dashboard');
+            }
+
+            // Jika bukan superadmin, keluarkan dan berikan pesan error
+            Auth::logout();
+            return back()->withErrors([
+                'email' => 'Akses ditolak. Akun Anda bukan Super Admin.',
+            ])->onlyInput('email');
+        }
+
+        return back()->withErrors([
+            'email' => 'Email atau kata sandi Super Admin salah.',
+        ])->onlyInput('email');
+    }
+    // ----------------------------------------------------
 
     // Logout
     public function logout(Request $request)
