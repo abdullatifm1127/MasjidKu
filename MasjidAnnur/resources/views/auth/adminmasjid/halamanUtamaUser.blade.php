@@ -9,13 +9,6 @@
     <link rel="stylesheet" href="{{ asset('css/adminmasjid/halamanUtamaUser.css') }}">
 </head>
 <body>
-
-  <!-- TOP BAR: JADWAL SHALAT  -->
-    <div class="hu-praybar">
-        <div class="hu-praybar-left">
-            <span class="hu-praybar-label">Jadwal Shalat</span>
-            <span class="hu-praybar-date">— Senin, 17 Agustus 2026</span>
-        </div>
         <div class="hu-praybar-times">
             @php
                 $prayers = [

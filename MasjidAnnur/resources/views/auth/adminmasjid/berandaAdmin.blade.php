@@ -21,9 +21,6 @@
                 <div class="ba2-brand-name">SIM Masjid</div>
                 <div class="ba2-brand-sub">Baitul Digital</div>
             </div>
-            <button class="ba2-collapse-btn" id="ba2CollapseBtn" aria-label="Collapse">
-                <i class="fa-solid fa-chevron-left"></i>
-            </button>
         </div>
 
         {{-- Nav --}}

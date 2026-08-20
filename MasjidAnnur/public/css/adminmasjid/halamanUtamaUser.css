@@ -457,9 +457,6 @@ body {
 
 .hu-section-head-light { }
 
-/* =============================================================
-   PROFIL V2 — Premium layout (sesuai screenshot)
-   ============================================================= */
 .hu-profil-section {
     background: #faf8f3;
 }
@@ -601,9 +598,6 @@ body {
     text-align: left;
 }
 
-/* =============================================================
-   PROFIL SECTION (old — kept for info cards in kontak)
-   ============================================================= */
 
 .hu-profil-desc {
     font-size: 1rem;
@@ -665,9 +659,6 @@ body {
     color: var(--text);
 }
 
-/* =============================================================
-   JADWAL SHALAT
-   ============================================================= */
 .hu-shalat-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -715,10 +706,6 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.06em;
 }
-
-/* =============================================================
-   PROGRAM
-   ============================================================= */
 .hu-program-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -750,9 +737,6 @@ body {
     color: var(--text);
 }
 
-/* =============================================================
-   FASILITAS
-   ============================================================= */
 .hu-fasilitas-wrap {
     display: flex;
     flex-wrap: wrap;
@@ -776,9 +760,6 @@ body {
     color: var(--green);
 }
 
-/* =============================================================
-   ACARA
-   ============================================================= */
 .hu-acara-list {
     display: flex;
     flex-direction: column;
@@ -850,9 +831,6 @@ body {
 
 .hu-acara-btn:hover { background: #bbf7d0; }
 
-/* =============================================================
-   DONASI
-   ============================================================= */
 .hu-donasi-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -927,9 +905,6 @@ body {
 
 .hu-donasi-btn:hover { background: #b45309; }
 
-/* =============================================================
-   KONTAK
-   ============================================================= */
 .hu-kontak-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -982,11 +957,9 @@ body {
 
 .hu-map-icon { font-size: 2.5rem; }
 .hu-map-text { font-size: 0.9rem; font-weight: 600; color: var(--text-mid); }
-.hu-map-sub  { font-size: 0.8rem; color: var(--text-light); }
+.hu-map-sub  { font-size: 0.8rem; color: var(--text-light); 
+}
 
-/* =============================================================
-   FOOTER
-   ============================================================= */
 .hu-footer {
     background: #0f1923;
     color: rgba(255,255,255,0.7);
@@ -1048,9 +1021,6 @@ body {
     text-align: center;
 }
 
-/* =============================================================
-   HELP FAB
-   ============================================================= */
 .help-fab {
     position: fixed;
     bottom: 24px;
@@ -1074,9 +1044,6 @@ body {
 
 .help-fab:hover { background: var(--green-mid); }
 
-/* =============================================================
-   RESPONSIVE
-   ============================================================= */
 @media (max-width: 1024px) {
     .hu-profil-grid      { grid-template-columns: 1fr; }
     .hu-profil-v2-grid   { grid-template-columns: 1fr; gap: 40px; }
@@ -1121,9 +1088,6 @@ body {
     .hu-acara-item     { flex-wrap: wrap; }
 }
 
-/* =============================================================
-   PROGRAM V2 — pill list style
-   ============================================================= */
 .hu-program-section {
     background: #f5f0e8;
     padding: 72px 0;
@@ -1178,9 +1142,6 @@ body {
     letter-spacing: 0.05em;
 }
 
-/* =============================================================
-   ACARA V2 — card grid
-   ============================================================= */
 .hu-acara-section {
     background: #faf8f3;
     padding: 72px 0;
@@ -1513,9 +1474,6 @@ body {
     .hu-donasi-v2-inner { padding: 48px 16px; }
 }
 
-/* =============================================================
-   HUBUNGI KAMI V2
-   ============================================================= */
 .hu-hubungi-section {
     background: #fff;
     padding: 72px 0 64px;
@@ -1572,9 +1530,6 @@ body {
     line-height: 1.6;
 }
 
-/* =============================================================
-   FOOTER V2
-   ============================================================= */
 .hu-footer-v2 {
     background: #1a2a3a;
     position: relative;
