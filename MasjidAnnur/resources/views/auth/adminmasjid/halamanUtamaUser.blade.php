@@ -10,21 +10,6 @@
 </head>
 <body>
 
-<<<<<<< HEAD
-    {{--
-        CATATAN SINKRONISASI (diperbarui):
-        Section "Profil" di bawah sekarang membaca langsung dari kolom
-        Profil Masjid (mosque_name, founded, capacity, description, imam_name)
-        — bukan lagi dari field about_name/about_founded/about_capacity/about_history
-        yang dulu terpisah di editor Landing Page. Hanya about_photo dan about_vision
-        yang masih dipakai (diedit dari halaman Profil Masjid), karena keduanya
-        memang belum punya tempat lain.
-
-        Section yang punya toggle di tab "Modul Aktif" (jadwal_shalat, kegiatan,
-        donasi, peta_lokasi, pengumuman) dibungkus @if berdasarkan
-        $mosque->active_modules, jadi kalau admin matikan modulnya,
-        section otomatis hilang dari halaman publik.
-    --}}
     @php
         $modules = $mosque->active_modules ?? [];
         $modOn = fn($key) => data_get($modules, $key, true); // default nyala kalau belum pernah diatur
@@ -37,8 +22,7 @@
             <span class="hu-praybar-label">Jadwal Shalat</span>
             <span class="hu-praybar-date">— {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</span>
         </div>
-=======
->>>>>>> b64b4cc3d0764b0e64ed96ca13ef59817e292172
+
         <div class="hu-praybar-times">
             @php
                 $prayers = $prayers ?? [
