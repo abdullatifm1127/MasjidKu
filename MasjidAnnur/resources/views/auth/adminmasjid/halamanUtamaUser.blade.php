@@ -10,6 +10,7 @@
 </head>
 <body>
 
+<<<<<<< HEAD
     {{--
         CATATAN SINKRONISASI (diperbarui):
         Section "Profil" di bawah sekarang membaca langsung dari kolom
@@ -36,6 +37,8 @@
             <span class="hu-praybar-label">Jadwal Shalat</span>
             <span class="hu-praybar-date">— {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</span>
         </div>
+=======
+>>>>>>> b64b4cc3d0764b0e64ed96ca13ef59817e292172
         <div class="hu-praybar-times">
             @php
                 $prayers = $prayers ?? [

@@ -53,7 +53,7 @@ body.ba2-body {
 }
 
 .ba2-brand-avatar {
-    width: 100px; height: 32px;
+    width: 40px; height: 32px;
     border-radius: 8px;
     background: var(--gold);
     color: #1a3a1a;
@@ -66,16 +66,6 @@ body.ba2-body {
 .ba2-brand-name { font-size: 0.82rem; font-weight: 700; color: #fff; white-space: nowrap; }
 .ba2-brand-sub  { font-size: 0.64rem; color: rgba(255,255,255,0.4); white-space: nowrap; }
 .ba2-sidebar.collapsed .ba2-brand-info { display: none; }
-
-.ba2-collapse-btn {
-    background: none; border: none; cursor: pointer;
-    color: rgba(255,255,255,0.5);
-    font-size: 0.65rem; padding: 4px;
-    transition: color 0.16s, transform var(--transition);
-    flex-shrink: 0;
-}
-.ba2-collapse-btn:hover { color: #fff; }
-.ba2-sidebar.collapsed .ba2-collapse-btn { transform: rotate(180deg); }
 
 /* Nav */
 .ba2-nav {
