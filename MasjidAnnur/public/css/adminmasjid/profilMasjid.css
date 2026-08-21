@@ -1,12 +1,3 @@
-/* ============================================================
-   profilMasjid.css  —  Profil Masjid Admin Page
-   Inherits sidebar/layout from berandaAdmin.css (ba2-* classes)
-   Conflict-resolved / merged version
-   ============================================================ */
-
-/* ============================================================
-   CONTENT AREA
-   ============================================================ */
 .pm-content {
     padding: 24px 28px 100px; /* room for sticky footer */
     flex: 1;
