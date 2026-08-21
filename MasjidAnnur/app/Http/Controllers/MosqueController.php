@@ -154,25 +154,30 @@ class MosqueController extends Controller
 
     /**
      * Halaman edit Profil Masjid (admin).
+     *
+     * Profil Masjid adalah SATU-SATUNYA sumber data teks & foto profil masjid.
+     * Landing Page editor tidak lagi punya field duplikat untuk ini —
+     * ia hanya membaca data dari sini untuk ditampilkan di halaman publik.
      */
     public function editProfil()
-{
-    // Mengambil data masjid berdasarkan user yang sedang login
-    $mosque = Mosque::where('user_id', Auth::id())->first();
+    {
+        $mosque = Mosque::where('user_id', Auth::id())->first();
 
-    if (!$mosque) {
-        return redirect()->route('daftar.masjid')->with('error', 'Anda belum mendaftarkan masjid.');
+        if (!$mosque) {
+            return redirect()->route('daftar.masjid')->with('error', 'Anda belum mendaftarkan masjid.');
+        }
+
+        return view('auth.adminmasjid.profilMasjid', compact('mosque'));
     }
-
-    return view('auth.adminmasjid.profilMasjid', compact('mosque'));
-}
 
     /**
      * Simpan perubahan Profil Masjid (admin).
      */
     public function updateProfil(Request $request)
     {
-        $mosque = Mosque::first();
+        // FIX: sebelumnya Mosque::first() -> selalu meng-update masjid PERTAMA
+        // di database, bukan masjid milik user yang sedang login.
+        $mosque = Mosque::where('user_id', Auth::id())->first();
 
         if (!$mosque) {
             return redirect()->route('admin.profil-masjid')
@@ -186,6 +191,11 @@ class MosqueController extends Controller
             'founded'           => 'nullable|integer|min:1000|max:' . date('Y'),
             'capacity'          => 'nullable|string|max:100',
             'description'       => 'nullable|string',
+
+            // Dipindahkan ke sini dari editor Landing Page (dulu about_vision, about_photo)
+            'vision'            => 'nullable|string',
+            'photo'             => 'nullable|image|max:2048',
+            'photo_secondary'   => 'nullable|image|max:2048', // Tambahkan ini
 
             'organization_name' => 'nullable|string|max:255',
             'imam_name'         => 'required|string|max:255',
@@ -212,13 +222,14 @@ class MosqueController extends Controller
             'programs.*'        => 'string',
         ]);
 
-        $mosque->update([
+        $updateData = [
             'mosque_name'       => $validated['mosque_name'],
             'arabic_name'       => $validated['arabic_name'] ?? null,
             'tagline'           => $validated['tagline'] ?? null,
             'founded'           => $validated['founded'] ?? null,
             'capacity'          => $validated['capacity'] ?? null,
             'description'       => $validated['description'] ?? null,
+            'about_vision'      => $validated['vision'] ?? null,
 
             'organization_name' => $validated['organization_name'] ?? null,
             'imam_name'         => $validated['imam_name'],
@@ -244,12 +255,23 @@ class MosqueController extends Controller
 
             'has_online_donation'  => $request->has('has_online_donation'),
             'has_prayer_schedule'  => $request->has('has_prayer_schedule'),
-        ]);
+        ];
+
+        if ($request->hasFile('photo')) {
+            $updateData['about_photo'] = $request->file('photo')->store('mosque/about', 'public');
+        }
+
+        if ($request->hasFile('photo_secondary')) {
+            // Masukkan path hasil upload ke array updateData
+            $updateData['about_photo_secondary'] = $request->file('photo_secondary')->store('mosque/about', 'public');
+        }
+
+        // Lakukan update ke database
+        $mosque->update($updateData);
 
         return redirect()->route('admin.profil-masjid')
             ->with('success', 'Profil masjid berhasil disimpan.');
     }
-
     /**
      * Halaman Verifikasi Super Admin (Menampilkan semua pendaftaran & statistik).
      */
@@ -265,36 +287,34 @@ class MosqueController extends Controller
         $totalSemua = $pendaftaran->count();
 
         return view('auth.superadmin.verifSuperAdmin', compact(
-            'pendaftaran', 
-            'totalPending', 
-            'totalApproved', 
-            'totalRejected', 
+            'pendaftaran',
+            'totalPending',
+            'totalApproved',
+            'totalRejected',
             'totalSemua'
         ));
     }
 
     public function manajemenMasjid()
-{
-    $masjids = Mosque::latest()->get();
-
-    $totalSemua = $masjids->count();
-    $totalAktif = Mosque::where('status', 'approved')->count();
-    $totalPending = Mosque::where('status', 'pending')->count();
-    $totalNonaktif = Mosque::where('status', 'rejected')->count();
-
-    return view('auth.superadmin.manajemenMasjidSuperAdmin', compact(
-        'masjids', 
-        'totalSemua', 
-        'totalAktif', 
-        'totalPending', 
-        'totalNonaktif'
-    ));
-}
-    public function landingPage()
     {
-        $user = Auth::user();
-        $mosque = Mosque::where('user_id', $user->id)->first();
+        $masjids = Mosque::latest()->get();
 
-        return view('admin.landingPage', compact('mosque'));
+        $totalSemua = $masjids->count();
+        $totalAktif = Mosque::where('status', 'approved')->count();
+        $totalPending = Mosque::where('status', 'pending')->count();
+        $totalNonaktif = Mosque::where('status', 'rejected')->count();
+
+        return view('auth.superadmin.manajemenMasjidSuperAdmin', compact(
+            'masjids',
+            'totalSemua',
+            'totalAktif',
+            'totalPending',
+            'totalNonaktif'
+        ));
     }
+
+    // Catatan: method landingPage() lama dihapus dari sini.
+    // Landing Page sekarang sepenuhnya ditangani oleh
+    // App\Http\Controllers\adminmasjid\LandingPageController,
+    // supaya tidak ada dua controller yang bentrok menangani rute yang sama.
 }

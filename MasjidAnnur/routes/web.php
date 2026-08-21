@@ -30,7 +30,11 @@ Route::get('/', function () {
 */
 Route::get('/masjid/{slug}', function ($slug) {
     $mosque = Mosque::where('slug', $slug)->where('status', 'approved')->firstOrFail();
-    return view('auth.adminmasjid.halamanUtamaUser', compact('mosque'));
+    
+    // Ambil data landing page yang berelasi dengan masjid ini
+    $landingPage = \App\Models\LandingPage::where('mosque_id', $mosque->id)->first();
+
+    return view('auth.adminmasjid.halamanUtamaUser', compact('mosque', 'landingPage'));
 })->name('masjid.publik');
 
 Route::middleware(['auth'])->get('/masjidUser', function () {

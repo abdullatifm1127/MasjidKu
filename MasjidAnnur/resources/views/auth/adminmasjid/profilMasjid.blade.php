@@ -13,8 +13,6 @@
 <body class="ba2-body" id="ba2Body">
 
     {{-- ===== SIDEBAR ===== --}}
-    {{-- Struktur & class disamakan persis dengan berandaAdmin.blade.php (prefix ba2-*)
-         supaya mewarisi style dari berandaAdmin.css dengan benar. --}}
     <aside class="ba2-sidebar" id="ba2Sidebar">
 
         {{-- Brand --}}
@@ -151,7 +149,7 @@
                 </button>
             </div>
 
-            <form id="pmForm" method="POST" action="{{ route('admin.profil-masjid.update') }}">
+            <form id="pmForm" method="POST" action="{{ route('admin.profil-masjid.update') }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -184,6 +182,7 @@
                                        value="{{ old('arabic_name', $mosque->arabic_name ?? '') }}"
                                        placeholder="الاسم بالعربية"
                                        dir="rtl">
+                                <span style="font-size:0.72rem;color:var(--text-light);">Nama ini juga otomatis tampil di Hero Landing Page.</span>
                             </div>
                         </div>
 
@@ -215,14 +214,33 @@
                         </div>
 
                         <div class="pm-field">
-                            <label class="pm-label" for="description">DESKRIPSI / TENTANG MASJID</label>
+                            <label class="pm-label" for="description">DESKRIPSI / SEJARAH SINGKAT</label>
                             <textarea id="description" name="description"
                                       class="pm-textarea"
                                       rows="4"
                                       placeholder="Ceritakan sedikit tentang masjid ini...">{{ old('description', $mosque->description ?? '') }}</textarea>
                         </div>
-                    </div>
-                </div>
+
+                        <div class="pm-field">
+                            <label class="pm-label" for="vision">VISI &amp; MISI</label>
+                            <textarea id="vision" name="vision"
+                                      class="pm-textarea"
+                                      rows="3"
+                                      placeholder="Visi dan misi masjid Anda...">{{ old('vision', $mosque->about_vision ?? '') }}</textarea>
+                        </div>
+
+                       <div class="pm-field">
+    <label class="pm-label" for="photo">FOTO MASJID</label>
+    <input type="file" id="photo" name="photo" accept="image/*" class="pm-input">
+    <span style="font-size:0.72rem;color:var(--text-light);">PNG, JPG, WebP · Maks. 2MB · Ditampilkan di section Profil pada Landing Page.</span>
+</div>
+
+<!-- Tambahkan bagian ini di bawahnya untuk Foto Kedua -->
+<div class="pm-field" style="margin-top: 15px;">
+    <label class="pm-label" for="photo_secondary">FOTO KEDUA (PENDUKUNG)</label>
+    <input type="file" id="photo_secondary" name="photo_secondary" accept="image/*" class="pm-input">
+    <span style="font-size:0.72rem;color:var(--text-light);">PNG, JPG, WebP · Maks. 2MB · Ditampilkan di kotak sebelah kanan Landing Page.</span>
+</div>
 
                 {{-- ===== TAB: PENGURUS ===== --}}
                 <div class="pm-tab-content" id="tab-pengurus">
@@ -437,6 +455,11 @@
                                    value="{{ old('website', $mosque->website ?? '') }}"
                                    placeholder="https://masjid.id">
                         </div>
+
+                        <span style="font-size:0.78rem;color:var(--text-light);">
+                            Ini alamat/telepon/email internal. Kontak yang tampil di halaman publik diatur
+                            terpisah di <a href="{{ route('admin.landing-page') }}">Landing Page → tab Kontak &amp; Sosial</a>.
+                        </span>
                     </div>
                 </div>
 
@@ -615,7 +638,7 @@
     <button class="ba2-fab" aria-label="Bantuan">?</button>
 
     <script>
-        // ---- Sidebar toggle (disamakan dengan berandaAdmin.blade.php) ----
+        // ---- Sidebar toggle ----
         document.getElementById('ba2CollapseBtn').addEventListener('click', () => {
             document.getElementById('ba2Sidebar').classList.toggle('collapsed');
             document.getElementById('ba2Main').classList.toggle('expanded');
@@ -635,7 +658,6 @@
                 const target = document.getElementById('tab-' + tab.dataset.tab);
                 if (target) target.classList.add('active');
 
-                // Sembunyikan footer di tab preview
                 if (tab.dataset.tab === 'preview') {
                     footer.style.display = 'none';
                 } else {

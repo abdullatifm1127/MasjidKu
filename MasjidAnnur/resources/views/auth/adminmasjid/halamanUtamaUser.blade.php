@@ -11,11 +11,13 @@
 <body>
 
     {{--
-        CATATAN SINKRONISASI:
-        Semua field di bawah ini sekarang membaca langsung dari kolom yang
-        diisi lewat Editor Landing Page (landingPage.blade.php).
-        Nama field DISAMAKAN dengan nama <input name="..."> di form editor,
-        supaya perubahan admin langsung tampil di sini tanpa mapping tambahan.
+        CATATAN SINKRONISASI (diperbarui):
+        Section "Profil" di bawah sekarang membaca langsung dari kolom
+        Profil Masjid (mosque_name, founded, capacity, description, imam_name)
+        — bukan lagi dari field about_name/about_founded/about_capacity/about_history
+        yang dulu terpisah di editor Landing Page. Hanya about_photo dan about_vision
+        yang masih dipakai (diedit dari halaman Profil Masjid), karena keduanya
+        memang belum punya tempat lain.
 
         Section yang punya toggle di tab "Modul Aktif" (jadwal_shalat, kegiatan,
         donasi, peta_lokasi, pengumuman) dibungkus @if berdasarkan
@@ -36,8 +38,6 @@
         </div>
         <div class="hu-praybar-times">
             @php
-                // TODO: ganti sumber data ini ke tabel jadwal_shalat per masjid kalau modul
-                // "Jadwal Shalat" di sidebar sudah tidak berstatus "dev".
                 $prayers = $prayers ?? [
                     ['name' => 'Subuh',   'time' => '04:32', 'active' => false],
                     ['name' => 'Dzuhur',  'time' => '12:05', 'active' => false],
@@ -113,7 +113,6 @@
         <div class="hu-ticker-wrap">
             <div class="hu-ticker-track" id="huTickerTrack">
                 @php
-                    // TODO: ganti ke data tabel pengumuman (halaman "Pengumuman" di sidebar)
                     $announcements = $announcements ?? [
                         'Santunan anak yatim setiap Jumat pertama dalam bulan',
                         "Kajian Fiqih setiap Senin ba'da Isya",
@@ -129,38 +128,47 @@
     </div>
     @endif
 
-    {{-- HERO — semua isi dari tab "Hero / Banner" di editor --}}
-    <section class="hu-hero" id="beranda"
-        style="background-color: {{ $mosque->hero_bg_color ?? '#0e3320' }};
-               color: {{ $mosque->hero_text_color ?? '#ffffff' }};
-               @if(!empty($mosque->hero_image)) background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url('{{ asset('storage/'.$mosque->hero_image) }}'); background-size: cover; background-position: center; @endif">
-        <div class="hu-hero-overlay"></div>
-        <div class="hu-hero-content">
-            <div class="hu-hero-arabic">{{ $mosque->arabic_name ?? '' }}</div>
-            <h1 class="hu-hero-title">{{ $mosque->hero_title ?? $mosque->mosque_name ?? 'Selamat Datang' }}</h1>
-            <p class="hu-hero-tagline">
-                {{ $mosque->hero_subtitle ?? '' }}
-                @if(!empty($mosque->hero_desc)) — {{ $mosque->hero_desc }} @endif
-            </p>
-            <div class="hu-hero-btns">
-                @if(!empty($mosque->btn_primary))
-                <a href="{{ $mosque->btn_primary_url ?? '#donasi' }}" class="hu-btn-primary">{{ $mosque->btn_primary }}</a>
-                @endif
-                @if(!empty($mosque->btn_secondary))
-                <a href="{{ $mosque->btn_secondary_url ?? '#profil' }}" class="hu-btn-outline">{{ $mosque->btn_secondary }}</a>
-                @endif
-            </div>
+ {{-- HERO — menggunakan hero_image sesuai form editor landing page --}}
+<section class="hu-hero" id="beranda" style="position: relative; overflow: hidden; color: {{ $landingPage->hero_text_color ?? $mosque->hero_text_color ?? '#ffffff' }};">
+    
+    {{-- Cek hero_image, bukan hero_background --}}
+    @if(!empty($landingPage->hero_image))
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); z-index: 2;"></div>
+            <img src="{{ asset('storage/' . $landingPage->hero_image) }}" alt="Hero Background" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1;">
         </div>
-        <div class="hu-hero-scroll">
-            <span>SCROLL</span>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                 stroke-width="2" stroke="currentColor" width="16" height="16">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
-            </svg>
-        </div>
-    </section>
+    @else
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: {{ $landingPage->hero_bg_color ?? '#0e3320' }}; z-index: 1;"></div>
+    @endif
 
-    {{-- PROFIL — semua isi dari tab "Tentang Masjid" di editor --}}
+    <div class="hu-hero-overlay" style="position: relative; z-index: 3;"></div>
+    
+    <div class="hu-hero-content" style="position: relative; z-index: 4;">
+        <div class="hu-hero-arabic">{{ $mosque->arabic_name ?? '' }}</div>
+        <h1 class="hu-hero-title">{{ $landingPage->hero_title ?? $mosque->mosque_name ?? 'Selamat Datang' }}</h1>
+        <p class="hu-hero-tagline">
+            {{ $landingPage->hero_subtitle ?? $mosque->tagline ?? '' }}
+            @if(!empty($landingPage->hero_desc)) — {{ $landingPage->hero_desc }} @endif
+        </p>
+        <div class="hu-hero-btns">
+            @if(!empty($landingPage->btn_primary))
+            <a href="{{ $landingPage->btn_primary_url ?? '#donasi' }}" class="hu-btn-primary">{{ $landingPage->btn_primary }}</a>
+            @endif
+            @if(!empty($landingPage->btn_secondary))
+            <a href="{{ $landingPage->btn_secondary_url ?? '#profil' }}" class="hu-btn-outline">{{ $landingPage->btn_secondary }}</a>
+            @endif
+        </div>
+    </div>
+    
+    <div class="hu-hero-scroll" style="position: relative; z-index: 4;">
+        <span>SCROLL</span>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+             stroke-width="2" stroke="currentColor" width="16" height="16">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
+        </svg>
+    </div>
+</section>
+   {{-- PROFIL — sekarang murni dari kolom Profil Masjid --}}
     <section class="hu-section hu-profil-section" id="profil">
         <div class="hu-container">
             <div class="hu-profil-v2-grid">
@@ -168,10 +176,10 @@
                 <div class="hu-profil-v2-left">
                     <div class="hu-profil-v2-tag">§ 01 — Profil Masjid</div>
                     <h2 class="hu-profil-v2-title">
-                        {{ $mosque->about_name ?? $mosque->mosque_name ?? 'Rumah Ibadah' }}
+                        {{ $mosque->mosque_name ?? 'Rumah Ibadah' }}
                     </h2>
                     <p class="hu-profil-v2-desc">
-                        {{ $mosque->about_history ?? $mosque->about_vision ?? 'Belum ada deskripsi. Isi di tab "Tentang Masjid" pada editor landing page.' }}
+                        {{ $mosque->description ?? 'Belum ada deskripsi. Isi di halaman "Profil Masjid" pada panel admin.' }}
                     </p>
 
                     <div class="hu-profil-v2-divider"><span>✦</span></div>
@@ -179,11 +187,11 @@
                     <div class="hu-profil-v2-stats">
                         <div class="hu-profil-v2-stat">
                             <div class="hu-profil-v2-stat-label">Tahun Berdiri</div>
-                            <div class="hu-profil-v2-stat-val">{{ $mosque->about_founded ?? '—' }}</div>
+                            <div class="hu-profil-v2-stat-val">{{ $mosque->founded ?? '—' }}</div>
                         </div>
                         <div class="hu-profil-v2-stat">
                             <div class="hu-profil-v2-stat-label">Kapasitas</div>
-                            <div class="hu-profil-v2-stat-val">{{ $mosque->about_capacity ?? '—' }}</div>
+                            <div class="hu-profil-v2-stat-val">{{ $mosque->capacity ?? '—' }}</div>
                         </div>
                         <div class="hu-profil-v2-stat">
                             <div class="hu-profil-v2-stat-label">Imam Besar</div>
@@ -200,15 +208,21 @@
 
                 <div class="hu-profil-v2-right">
                     <div class="hu-profil-v2-images">
+                        <!-- Kotak Gambar Pertama (Tall) -->
                         <div class="hu-profil-v2-img hu-img-tall">
-                            <img src="{{ !empty($mosque->about_photo) ? asset('storage/'.$mosque->about_photo) : 'https://images.unsplash.com/photo-1585846888147-1a2b4e1e7fa4?w=500&q=80' }}"
-                                 alt="Foto Masjid" loading="lazy">
+                            @if(!empty($mosque->about_photo))
+                                <img src="{{ asset('storage/'.$mosque->about_photo) }}" alt="Foto Masjid" loading="lazy">
+                            @endif
                         </div>
+                        
+                        <!-- Kotak Gambar Kedua (Short) -->
                         <div class="hu-profil-v2-img hu-img-short">
-                            <img src="https://images.unsplash.com/photo-1564769625905-50e93615e769?w=500&q=80"
-                                 alt="Masjid" loading="lazy">
+                            @if(!empty($mosque->about_photo_secondary))
+                                <img src="{{ asset('storage/'.$mosque->about_photo_secondary) }}" alt="Masjid" loading="lazy">
+                            @endif
                         </div>
                     </div>
+                    
                     @if(!empty($mosque->about_vision))
                     <div class="hu-profil-v2-ayat">
                         <div class="hu-profil-v2-trans">{{ $mosque->about_vision }}</div>
@@ -241,7 +255,7 @@
     </section>
     @endif
 
-    {{-- PROGRAM — belum ada tab editor khusus untuk ini, masih pakai data $mosque->programs --}}
+    {{-- PROGRAM --}}
     <section class="hu-section hu-program-section" id="program">
         <div class="hu-container">
             <div class="hu-section-head">
@@ -277,7 +291,6 @@
             </div>
             <div class="hu-acara-v2-grid">
                 @php
-                    // TODO: ganti ke tabel kegiatan (halaman "Kegiatan & Acara" di sidebar)
                     $acaraList = $acaraList ?? [
                         ['bulan' => 'Agu', 'tanggal' => '17', 'judul' => 'Halaqah Quran Bersama',       'waktu' => '16:00 WIB', 'oleh' => 'Ustadz Yusuf Mansur', 'terbaru' => true],
                         ['bulan' => 'Agu', 'tanggal' => '24', 'judul' => 'Bazar Produk UMKM Muslim',    'waktu' => '08:00 WIB', 'oleh' => 'Panitia Masjid',       'terbaru' => false],
@@ -315,7 +328,6 @@
                     Mari bersama-sama memakmurkan masjid Allah.
                 </p>
                 @php
-                    // TODO: ganti ke tabel donasi (halaman "Donasi" di sidebar) saat sudah tersedia
                     $donasiTerkumpul = $donasiTerkumpul ?? 387000000;
                     $donasiTarget = $donasiTarget ?? 500000000;
                     $donasiPct = $donasiTarget > 0 ? round($donasiTerkumpul / $donasiTarget * 100) : 0;
@@ -361,7 +373,7 @@
     </section>
     @endif
 
-    {{-- KONTAK — semua isi dari tab "Kontak & Sosial" di editor --}}
+    {{-- KONTAK — semua isi dari tab "Kontak & Sosial" di editor Landing Page --}}
     <section class="hu-hubungi-section" id="kontak">
         <div class="hu-container">
             <div class="hu-section-head">
@@ -380,7 +392,7 @@
                     <div>
                         <div class="hu-hubungi-label">Alamat</div>
                         <div class="hu-hubungi-val">
-                            {{ $mosque->contact_address ?? '—' }}
+                            {{ $mosque->contact_address ?? $mosque->address ?? '—' }}
                             @if($modOn('peta_lokasi') && !empty($mosque->contact_maps))
                                 <br><a href="{{ $mosque->contact_maps }}" target="_blank" style="font-size:0.8rem;">Lihat di Google Maps →</a>
                             @endif
@@ -396,7 +408,7 @@
                     </div>
                     <div>
                         <div class="hu-hubungi-label">Telepon</div>
-                        <div class="hu-hubungi-val">{{ $mosque->contact_phone ?? '—' }}</div>
+                        <div class="hu-hubungi-val">{{ $mosque->contact_phone ?? $mosque->phone ?? '—' }}</div>
                     </div>
                 </div>
 
@@ -408,7 +420,7 @@
                     </div>
                     <div>
                         <div class="hu-hubungi-label">Email</div>
-                        <div class="hu-hubungi-val">{{ $mosque->contact_email ?? '—' }}</div>
+                        <div class="hu-hubungi-val">{{ $mosque->contact_email ?? $mosque->email ?? '—' }}</div>
                     </div>
                 </div>
             </div>
@@ -431,7 +443,7 @@
                 <div class="hu-footer-v2-brand">
                     <div class="hu-footer-v2-name">{{ $mosque->mosque_name ?? '' }}</div>
                     <div class="hu-footer-v2-tagline">
-                        {{ $mosque->hero_subtitle ?? '' }}<br>
+                        {{ $mosque->hero_subtitle ?? $mosque->tagline ?? '' }}<br>
                         Bersama kita makmurkan masjid Allah.
                     </div>
                 </div>
