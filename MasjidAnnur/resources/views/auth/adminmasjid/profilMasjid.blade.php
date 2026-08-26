@@ -229,18 +229,19 @@
                                       placeholder="Visi dan misi masjid Anda...">{{ old('vision', $mosque->about_vision ?? '') }}</textarea>
                         </div>
 
-                    <div class="pm-field">
-                    <label class="pm-label" for="photo">FOTO MASJID</label>
-                    <input type="file" id="photo" name="photo" accept="image/*" class="pm-input">
-                    <span style="font-size:0.72rem;color:var(--text-light);">PNG, JPG, WebP · Maks. 2MB · Ditampilkan di section Profil pada Landing Page.</span>
-                </div>
+                        <div class="pm-field">
+                            <label class="pm-label" for="photo">FOTO MASJID</label>
+                            <input type="file" id="photo" name="photo" accept="image/*" class="pm-input">
+                            <span style="font-size:0.72rem;color:var(--text-light);">PNG, JPG, WebP · Maks. 2MB · Ditampilkan di section Profil pada Landing Page.</span>
+                        </div>
 
-                <!-- Tambahkan bagian ini di bawahnya untuk Foto Kedua -->
-                <div class="pm-field" style="margin-top: 15px;">
-                    <label class="pm-label" for="photo_secondary">FOTO KEDUA (PENDUKUNG)</label>
-                    <input type="file" id="photo_secondary" name="photo_secondary" accept="image/*" class="pm-input">
-                    <span style="font-size:0.72rem;color:var(--text-light);">PNG, JPG, WebP · Maks. 2MB · Ditampilkan di kotak sebelah kanan Landing Page.</span>
-                </div>
+                        <div class="pm-field" style="margin-top: 15px;">
+                            <label class="pm-label" for="photo_secondary">FOTO KEDUA (PENDUKUNG)</label>
+                            <input type="file" id="photo_secondary" name="photo_secondary" accept="image/*" class="pm-input">
+                            <span style="font-size:0.72rem;color:var(--text-light);">PNG, JPG, WebP · Maks. 2MB · Ditampilkan di kotak sebelah kanan Landing Page.</span>
+                        </div>
+                    </div><!-- /.pm-section -->
+                </div><!-- /#tab-identitas -->
 
                 {{-- ===== TAB: PENGURUS ===== --}}
                 <div class="pm-tab-content" id="tab-pengurus">
@@ -325,8 +326,8 @@
                                        placeholder="Nama bendahara">
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </div><!-- /.pm-section -->
+                </div><!-- /#tab-pengurus -->
 
                 {{-- ===== TAB: LOKASI & KONTAK ===== --}}
                 <div class="pm-tab-content" id="tab-lokasi">
@@ -412,7 +413,7 @@
                                        placeholder="12345">
                             </div>
                         </div>
-                    </div>
+                    </div><!-- /.pm-section -->
 
                     <div class="pm-section">
                         <div class="pm-section-title">
@@ -460,8 +461,8 @@
                             Ini alamat/telepon/email internal. Kontak yang tampil di halaman publik diatur
                             terpisah di <a href="{{ route('admin.landing-page') }}">Landing Page → tab Kontak &amp; Sosial</a>.
                         </span>
-                    </div>
-                </div>
+                    </div><!-- /.pm-section -->
+                </div><!-- /#tab-lokasi -->
 
                 {{-- ===== TAB: PROGRAM ===== --}}
                 <div class="pm-tab-content" id="tab-program">
@@ -486,7 +487,7 @@
                                 </label>
                             @endforeach
                         </div>
-                    </div>
+                    </div><!-- /.pm-section -->
 
                     <div class="pm-section">
                         <div class="pm-section-title">
@@ -509,7 +510,7 @@
                                 </label>
                             @endforeach
                         </div>
-                    </div>
+                    </div><!-- /.pm-section -->
 
                     <div class="pm-section">
                         <div class="pm-section-title">
@@ -541,8 +542,8 @@
                                 </label>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </div><!-- /.pm-section -->
+                </div><!-- /#tab-program -->
 
                 {{-- ===== TAB: PREVIEW ===== --}}
                 <div class="pm-tab-content" id="tab-preview">
@@ -618,8 +619,8 @@
                             @endforeach
                         </div>
                         @endif
-                    </div>
-                </div>
+                    </div><!-- /.pm-preview-card -->
+                </div><!-- /#tab-preview -->
 
                 {{-- ===== FOOTER ACTIONS ===== --}}
                 <div class="pm-footer" id="pmFooter">

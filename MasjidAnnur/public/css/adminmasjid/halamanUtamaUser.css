@@ -80,6 +80,7 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
 .hu-tag-amber-light { background: rgba(255,255,255,0.12); color: var(--brass-light); border: 1px solid rgba(231,205,142,0.4); }
 .hu-tag-light       { background: rgba(255,255,255,0.1);  color: var(--brass-light); border: 1px solid rgba(231,205,142,0.35); }
 
+
 /* Plain uppercase eyebrow label (no pill), used above section titles e.g. "KEGIATAN & PROGRAM" */
 .hu-tag-amber {
     background: transparent;
@@ -461,6 +462,16 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
 .hu-shalat-card.active .hu-shalat-time { color: #241705; }
 
 /* =========================================================================
+   PROGRAM + FASILITAS (2 kolom bersebelahan)
+   ========================================================================= */
+.hu-progfas-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+}
+.hu-progfas-col-head { margin-bottom: 24px; }
+
+/* =========================================================================
    PROGRAM UNGGULAN
    ========================================================================= */
 .hu-program-section { background: #f5f0e8; padding: 72px 0; }
@@ -483,25 +494,24 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
 .hu-program-v2-name { font-family: var(--font-display); font-size: 1.3rem; font-weight: 500; }
 
 /* =========================================================================
-   FASILITAS
+   FASILITAS (list bernomor, sama seperti Program Unggulan)
    ========================================================================= */
-.hu-fasilitas-wrap {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
+.hu-fasilitas-wrap { display: flex; flex-direction: column; }
+.hu-fasilitas-item {
+    display: flex; align-items: baseline; gap: 22px;
+    padding: 24px 4px;
+    border-bottom: 1px solid var(--line);
+    transition: padding-left 0.25s ease, color 0.25s ease;
 }
-.hu-fasilitas-tag {
-    padding: 8px 18px;
-    background: #fff;
-    border: 1.5px solid var(--line);
-    border-radius: 999px;
-    font-size: 0.84rem;
-    font-weight: 500;
-    color: var(--ink-soft);
-    transition: border-color 0.16s, color 0.16s;
+.hu-fasilitas-item:first-child { border-top: 1px solid var(--line); }
+.hu-fasilitas-item:hover { padding-left: 14px; color: var(--emerald-800); }
+.hu-fasilitas-num {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--brass-deep);
+    letter-spacing: 0.05em;
 }
-.hu-fasilitas-tag:hover { border-color: var(--brass); color: var(--brass-deep); }
+.hu-fasilitas-name { font-family: var(--font-display); font-size: 1.3rem; font-weight: 500; }
 
 /* =========================================================================
    ACARA
@@ -730,6 +740,7 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
    RESPONSIVE
    ========================================================================= */
 @media (max-width: 980px) {
+    .hu-progfas-grid     { grid-template-columns: 1fr; gap: 48px; }
     .hu-profil-v2-grid   { grid-template-columns: 1fr; gap: 40px; }
     .hu-profil-v2-images { max-width: 420px; }
     .hu-donasi-v2-inner  { grid-template-columns: 1fr; }

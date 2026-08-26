@@ -221,49 +221,74 @@
         </div>
     </section>
 
-    {{-- JADWAL SHALAT (grid besar) — modul: jadwal_shalat --}}
-    @if($modOn('jadwal_shalat'))
-    <section class="hu-section hu-section-dark" id="shalat">
-        <div class="hu-container">
-            <div class="hu-section-head hu-section-head-light">
-                <div class="hu-section-tag hu-tag-light">Hari Ini</div>
-                <h2 class="hu-section-title hu-title-light">Jadwal Waktu Shalat</h2>
-            </div>
-            <div class="hu-shalat-grid">
-                @foreach($prayers as $p)
-                <div class="hu-shalat-card {{ $p['active'] ? 'active' : '' }}">
-                    <div class="hu-shalat-name">{{ $p['name'] }}</div>
-                    <div class="hu-shalat-time">{{ $p['time'] }}</div>
-                    @if($p['active'])<div class="hu-shalat-now">Waktu Sekarang</div>@endif
-                </div>
-                @endforeach
-            </div>
+  {{-- JADWAL SHALAT (grid besar) — modul: jadwal_shalat --}}
+@if($modOn('jadwal_shalat'))
+<section class="hu-section hu-section-dark" id="shalat">
+    <div class="hu-container">
+        <div class="hu-section-head hu-section-head-light">
+            <div class="hu-section-tag hu-tag-light">Hari Ini</div>
+            <h2 class="hu-section-title hu-title-light">Jadwal Waktu Shalat</h2>
         </div>
-    </section>
-    @endif
 
-    {{-- PROGRAM --}}
-    <section class="hu-section hu-program-section" id="program">
-        <div class="hu-container">
-            <div class="hu-section-head">
-                <div class="hu-section-tag hu-tag-amber">Kegiatan & Program</div>
-                <h2 class="hu-section-title hu-title-dark">Program Unggulan</h2>
+        <div class="hu-shalat-grid">
+            @foreach($prayers as $p)
+            <div class="hu-shalat-card {{ $p['active'] ? 'active' : '' }}">
+                <div class="hu-shalat-name">{{ $p['name'] }}</div>
+                <div class="hu-shalat-time">{{ $p['time'] }}</div>
+                @if($p['active'])<div class="hu-shalat-now">Waktu Sekarang</div>@endif
             </div>
-            <div class="hu-program-v2-list">
-                @php
-                    $programList = !empty($mosque->programs) ? $mosque->programs : [
-                        'Hafalan Quran 30 Juz', 'Ekonomi Syariah', 'Koperasi Masjid', 'Kajian Tafsir', 'Program Yatim',
-                    ];
-                @endphp
-                @foreach($programList as $idx => $prog)
-                <div class="hu-program-v2-item">
-                    <span class="hu-program-v2-num">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</span>
-                    <span class="hu-program-v2-name">{{ $prog }}</span>
-                </div>
-                @endforeach
-            </div>
+            @endforeach
         </div>
-    </section>
+    </div>
+</section>
+@endif
+  {{-- PROGRAM & FASILITAS — bersebelahan --}}
+<section class="hu-section hu-program-section" id="program">
+    <div class="hu-container">
+        <div class="hu-progfas-grid">
+
+            {{-- KOLOM KIRI: PROGRAM --}}
+            <div>
+                <div class="hu-section-head hu-progfas-col-head">
+                    <div class="hu-section-tag hu-tag-amber">Kegiatan & Program</div>
+                    <h2 class="hu-section-title hu-title-dark">Program Unggulan</h2>
+                </div>
+                <div class="hu-program-v2-list">
+                    @php
+                        $programList = !empty($mosque->programs) ? $mosque->programs : [
+                            'Hafalan Quran 30 Juz', 'Ekonomi Syariah', 'Koperasi Masjid', 'Kajian Tafsir', 'Program Yatim',
+                        ];
+                    @endphp
+                    @foreach($programList as $idx => $prog)
+                    <div class="hu-program-v2-item">
+                        <span class="hu-program-v2-num">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                        <span class="hu-program-v2-name">{{ $prog }}</span>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- KOLOM KANAN: FASILITAS --}}
+            @if(!empty($mosque->facilities))
+            <div>
+                <div class="hu-section-head hu-progfas-col-head">
+                    <div class="hu-section-tag hu-tag-amber">Fasilitas Masjid</div>
+                    <h2 class="hu-section-title hu-title-dark">Fasilitas Dan Layanan</h2>
+                </div>
+                <div class="hu-fasilitas-wrap">
+                    @foreach($mosque->facilities as $idx => $f)
+                    <div class="hu-fasilitas-item">
+                        <span class="hu-fasilitas-num">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                        <span class="hu-fasilitas-name">{{ $f }}</span>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+        </div>
+    </div>
+</section>
 
     {{-- ACARA — modul: kegiatan --}}
     @if($modOn('kegiatan'))
@@ -271,7 +296,7 @@
         <div class="hu-container">
             <div class="hu-acara-v2-head">
                 <div>
-                    <div class="hu-section-tag hu-tag-amber">Agenda</div>
+                    <div class="hu-section-tag hu-tag-amber">Acara</div>
                     <h2 class="hu-section-title hu-title-dark">Acara Mendatang</h2>
                 </div>
                 <a href="#" class="hu-acara-lihat">Lihat semua →</a>

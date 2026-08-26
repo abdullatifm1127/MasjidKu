@@ -10,6 +10,7 @@ use App\Http\Controllers\SuperAdmin\BerandaSuperAdminController;
 use App\Http\Controllers\SuperAdmin\PengaturanController;
 use App\Http\Controllers\adminmasjid\LandingPageController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\PublicMosqueController;
 /*
 |--------------------------------------------------------------------------
 | Halaman Utama
@@ -45,6 +46,7 @@ Route::middleware(['auth'])->get('/masjidUser', function () {
     return redirect()->route('masjid.publik', $mosque->slug);
 })->name('masjid.user.redirect');
 
+Route::get('/masjid/{slug}', [PublicMosqueController::class, 'show'])->name('masjid.show');
 /*
 |--------------------------------------------------------------------------
 | Authentication (General User)
