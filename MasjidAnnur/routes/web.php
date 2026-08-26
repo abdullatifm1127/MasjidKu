@@ -11,6 +11,10 @@ use App\Http\Controllers\SuperAdmin\PengaturanController;
 use App\Http\Controllers\adminmasjid\LandingPageController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\PublicMosqueController;
+
+
+
+Route::get('/masjid/{slug}', [PublicMosqueController::class, 'show'])->name('masjid.show');
 /*
 |--------------------------------------------------------------------------
 | Halaman Utama
@@ -26,27 +30,24 @@ Route::get('/', function () {
 
 /*
 |--------------------------------------------------------------------------
-| Halaman Publik Masjid (Menggunakan Slug)
+| Halaman Publik Masjid & Jadwal Sholat (Menggunakan Controller)
 |--------------------------------------------------------------------------
 */
-Route::get('/masjid/{slug}', function ($slug) {
-    $mosque = Mosque::where('slug', $slug)->where('status', 'approved')->firstOrFail();
-    
-    // Ambil data landing page yang berelasi dengan masjid ini
-    $landingPage = \App\Models\LandingPage::where('mosque_id', $mosque->id)->first();
+Route::get('/masjid/{slug}', [PublicMosqueController::class, 'show'])->name('masjid.show');
 
-    return view('auth.adminmasjid.halamanUtamaUser', compact('mosque', 'landingPage'));
-})->name('masjid.publik');
+// Alias tambahan agar jika ada bagian lain yang memanggil route('masjid.publik') tetap mengarah ke controller yang sama
+Route::get('/masjid/{slug}', [PublicMosqueController::class, 'show'])->name('masjid.publik');
 
 Route::middleware(['auth'])->get('/masjidUser', function () {
-    $mosque = Mosque::where('user_id', Auth::id())->first();  
+    $mosque = \App\Models\Mosque::where('user_id', Auth::id())->first();  
     if (!$mosque) {
         return redirect()->route('daftar.masjid')->with('error', 'Anda belum mendaftarkan masjid.');
     }
     return redirect()->route('masjid.publik', $mosque->slug);
 })->name('masjid.user.redirect');
 
-Route::get('/masjid/{slug}', [PublicMosqueController::class, 'show'])->name('masjid.show');
+
+
 /*
 |--------------------------------------------------------------------------
 | Authentication (General User)
