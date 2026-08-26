@@ -10,21 +10,6 @@
 </head>
 <body>
 
-<<<<<<< HEAD
-    {{--
-        CATATAN SINKRONISASI (diperbarui):
-        Section "Profil" di bawah sekarang membaca langsung dari kolom
-        Profil Masjid (mosque_name, founded, capacity, description, imam_name)
-        — bukan lagi dari field about_name/about_founded/about_capacity/about_history
-        yang dulu terpisah di editor Landing Page. Hanya about_photo dan about_vision
-        yang masih dipakai (diedit dari halaman Profil Masjid), karena keduanya
-        memang belum punya tempat lain.
-
-        Section yang punya toggle di tab "Modul Aktif" (jadwal_shalat, kegiatan,
-        donasi, peta_lokasi, pengumuman) dibungkus @if berdasarkan
-        $mosque->active_modules, jadi kalau admin matikan modulnya,
-        section otomatis hilang dari halaman publik.
-    --}}
     @php
         $modules = $mosque->active_modules ?? [];
         $modOn = fn($key) => data_get($modules, $key, true); // default nyala kalau belum pernah diatur
@@ -37,8 +22,7 @@
             <span class="hu-praybar-label">Jadwal Shalat</span>
             <span class="hu-praybar-date">— {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</span>
         </div>
-=======
->>>>>>> b64b4cc3d0764b0e64ed96ca13ef59817e292172
+
         <div class="hu-praybar-times">
             @php
                 $prayers = $prayers ?? [
@@ -177,7 +161,7 @@
             <div class="hu-profil-v2-grid">
 
                 <div class="hu-profil-v2-left">
-                    <div class="hu-profil-v2-tag">§ 01 — Profil Masjid</div>
+                    <div class="hu-profil-v2-tag">Profil Masjid</div>
                     <h2 class="hu-profil-v2-title">
                         {{ $mosque->mosque_name ?? 'Rumah Ibadah' }}
                     </h2>
@@ -262,7 +246,7 @@
     <section class="hu-section hu-program-section" id="program">
         <div class="hu-container">
             <div class="hu-section-head">
-                <div class="hu-section-tag hu-tag-amber">§ 02 — Kegiatan & Program</div>
+                <div class="hu-section-tag hu-tag-amber">Kegiatan & Program</div>
                 <h2 class="hu-section-title hu-title-dark">Program Unggulan</h2>
             </div>
             <div class="hu-program-v2-list">
@@ -287,7 +271,7 @@
         <div class="hu-container">
             <div class="hu-acara-v2-head">
                 <div>
-                    <div class="hu-section-tag hu-tag-amber">§ 03 — Agenda</div>
+                    <div class="hu-section-tag hu-tag-amber">Agenda</div>
                     <h2 class="hu-section-title hu-title-dark">Acara Mendatang</h2>
                 </div>
                 <a href="#" class="hu-acara-lihat">Lihat semua →</a>
@@ -324,7 +308,7 @@
     <section class="hu-donasi-v2-section" id="donasi">
         <div class="hu-donasi-v2-inner">
             <div class="hu-donasi-v2-left">
-                <div class="hu-section-tag hu-tag-amber-light">§ 04 — Donasi & Sedekah</div>
+                <div class="hu-section-tag hu-tag-amber-light">Donasi & Sedekah</div>
                 <h2 class="hu-donasi-v2-title">Investasi<br><em>Terbaik Akhirat</em></h2>
                 <p class="hu-donasi-v2-desc">
                     Setiap rupiah yang Anda donasikan akan digunakan untuk pembangunan dan operasional masjid.
@@ -380,7 +364,7 @@
     <section class="hu-hubungi-section" id="kontak">
         <div class="hu-container">
             <div class="hu-section-head">
-                <div class="hu-section-tag hu-tag-amber">§ 05 — Kontak & Lokasi</div>
+                <div class="hu-section-tag hu-tag-amber">Kontak & Lokasi</div>
                 <h2 class="hu-section-title hu-title-dark">Hubungi Kami</h2>
             </div>
 
