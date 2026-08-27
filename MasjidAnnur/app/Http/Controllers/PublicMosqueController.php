@@ -28,10 +28,19 @@ class PublicMosqueController extends Controller
 
         $prayers = $prayerTimeService->forMosque($mosque);
 
+        // Kirim model Acara asli (bukan array hasil map) supaya blade bisa
+        // akses $a->photo, $a->title, $a->event_date, dst secara langsung.
+        $acaras = $mosque->acaras()
+            ->where('event_date', '>=', now()->toDateString())
+            ->orderBy('event_date', 'asc')
+            ->take(3)
+            ->get();
+
         return view('auth.adminmasjid.halamanUtamaUser', [
             'mosque'      => $mosque,
             'landingPage' => $landingPage,
             'prayers'     => $prayers,
+            'acaras'      => $acaras,
         ]);
     }
 }

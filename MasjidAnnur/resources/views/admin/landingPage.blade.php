@@ -60,9 +60,9 @@
                 <span class="lp-nav-label">Pengumuman</span>
                 <span class="lp-nav-badge">3</span>
             </a>
-            <a href="#" class="lp-nav-item">
-                <span class="lp-nav-label">Kegiatan &amp; Acara</span>
-                <span class="lp-nav-soon">dev</span>
+            <a href="{{ route('admin.acara') }}" class="lp-nav-item">
+    <span class="lp-nav-label">Kegiatan &amp; Acara</span>
+</a>
             </a>
             <a href="#" class="lp-nav-item">
                 <span class="lp-nav-label">Donasi</span>
@@ -240,7 +240,7 @@
                             <img src="{{ asset('storage/'.$mosque->hero_image) }}" alt="Hero saat ini" style="max-height:100px;border-radius:8px;margin-bottom:8px;display:block;">
                         @endif
                         <input type="file" name="hero_image" accept="image/*" class="lp-input">
-                        <span style="font-size:0.72rem;color:var(--text-light);">PNG, JPG, WebP · Maks. 2MB · Rekomendasi 1920×600</span>
+                        <span style="font-size:0.72rem;color:var(--text-light);">PNG, JPG, AVIF, WebP · Maks. 2MB · Rekomendasi 1920×600</span>
                     </div>
 
                     <div class="lp-grid-2">

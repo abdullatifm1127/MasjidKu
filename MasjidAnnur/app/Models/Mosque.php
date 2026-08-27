@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str; // 1. Tambahkan import Str di sini
 
 class Mosque extends Model
@@ -99,5 +100,13 @@ class Mosque extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Satu masjid punya banyak acara/kegiatan.
+     */
+    public function acaras(): HasMany
+    {
+        return $this->hasMany(acara::class);
     }
 }

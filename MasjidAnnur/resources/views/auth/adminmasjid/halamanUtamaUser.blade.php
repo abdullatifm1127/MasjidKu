@@ -64,6 +64,7 @@
             <nav class="hu-nav">
                 <a href="#beranda"  class="hu-nav-link active">Beranda</a>
                 <a href="#profil"   class="hu-nav-link">Profil</a>
+                @if(!empty($mosque->facilities))<a href="#fasilitas" class="hu-nav-link">Fasilitas</a>@endif
                 @if($modOn('jadwal_shalat'))<a href="#shalat" class="hu-nav-link">Waktu Shalat</a>@endif
                 <a href="#program"  class="hu-nav-link">Program</a>
                 @if($modOn('kegiatan'))<a href="#acara" class="hu-nav-link">Acara</a>@endif
@@ -221,28 +222,28 @@
         </div>
     </section>
 
-  {{-- JADWAL SHALAT (grid besar) — modul: jadwal_shalat --}}
-@if($modOn('jadwal_shalat'))
-<section class="hu-section hu-section-dark" id="shalat">
-    <div class="hu-container">
-        <div class="hu-section-head hu-section-head-light">
-            <div class="hu-section-tag hu-tag-light">Hari Ini</div>
-            <h2 class="hu-section-title hu-title-light">Jadwal Waktu Shalat</h2>
-        </div>
-
-        <div class="hu-shalat-grid">
-            @foreach($prayers as $p)
-            <div class="hu-shalat-card {{ $p['active'] ? 'active' : '' }}">
-                <div class="hu-shalat-name">{{ $p['name'] }}</div>
-                <div class="hu-shalat-time">{{ $p['time'] }}</div>
-                @if($p['active'])<div class="hu-shalat-now">Waktu Sekarang</div>@endif
+    {{-- JADWAL SHALAT (grid besar) — modul: jadwal_shalat --}}
+    @if($modOn('jadwal_shalat'))
+    <section class="hu-section hu-section-dark" id="shalat">
+        <div class="hu-container">
+            <div class="hu-section-head hu-section-head-light">
+                <div class="hu-section-tag hu-tag-light">Hari Ini</div>
+                <h2 class="hu-section-title hu-title-light">Jadwal Waktu Shalat</h2>
             </div>
-            @endforeach
+            <div class="hu-shalat-grid">
+                @foreach($prayers as $p)
+                <div class="hu-shalat-card {{ $p['active'] ? 'active' : '' }}">
+                    <div class="hu-shalat-name">{{ $p['name'] }}</div>
+                    <div class="hu-shalat-time">{{ $p['time'] }}</div>
+                    @if($p['active'])<div class="hu-shalat-now">Waktu Sekarang</div>@endif
+                </div>
+                @endforeach
+            </div>
         </div>
-    </div>
-</section>
-@endif
-  {{-- PROGRAM & FASILITAS — bersebelahan --}}
+    </section>
+    @endif
+
+   {{-- PROGRAM & FASILITAS — bersebelahan --}}
 <section class="hu-section hu-program-section" id="program">
     <div class="hu-container">
         <div class="hu-progfas-grid">
@@ -290,39 +291,43 @@
     </div>
 </section>
 
+
     {{-- ACARA — modul: kegiatan --}}
     @if($modOn('kegiatan'))
     <section class="hu-acara-section" id="acara">
         <div class="hu-container">
             <div class="hu-acara-v2-head">
                 <div>
-                    <div class="hu-section-tag hu-tag-amber">Acara</div>
+                    <div class="hu-section-tag hu-tag-amber">Agenda</div>
                     <h2 class="hu-section-title hu-title-dark">Acara Mendatang</h2>
                 </div>
                 <a href="#" class="hu-acara-lihat">Lihat semua →</a>
             </div>
             <div class="hu-acara-v2-grid">
-                @php
-                    $acaraList = $acaraList ?? [
-                        ['bulan' => 'Agu', 'tanggal' => '17', 'judul' => 'Halaqah Quran Bersama',       'waktu' => '16:00 WIB', 'oleh' => 'Ustadz Yusuf Mansur', 'terbaru' => true],
-                        ['bulan' => 'Agu', 'tanggal' => '24', 'judul' => 'Bazar Produk UMKM Muslim',    'waktu' => '08:00 WIB', 'oleh' => 'Panitia Masjid',       'terbaru' => false],
-                        ['bulan' => 'Agu', 'tanggal' => '31', 'judul' => 'Khataman Quran & Doa Bersama','waktu' => '09:00 WIB', 'oleh' => 'Seluruh Santri',       'terbaru' => false],
-                    ];
-                @endphp
-                @foreach($acaraList as $a)
+                @forelse(($acaras ?? collect()) as $a)
                 <div class="hu-acara-v2-card">
+                    @if(!empty($a->photo))
+                    <div class="hu-acara-v2-photo">
+                        <img src="{{ asset('storage/'.$a->photo) }}" alt="{{ $a->title }}" loading="lazy">
+                    </div>
+                    @endif
                     <div class="hu-acara-v2-top">
                         <div class="hu-acara-v2-date">
-                            <div class="hu-acara-v2-month">{{ $a['bulan'] }}</div>
-                            <div class="hu-acara-v2-day">{{ $a['tanggal'] }}</div>
+                            <div class="hu-acara-v2-month">{{ \Illuminate\Support\Carbon::parse($a->event_date)->translatedFormat('M') }}</div>
+                            <div class="hu-acara-v2-day">{{ \Illuminate\Support\Carbon::parse($a->event_date)->format('d') }}</div>
                         </div>
-                        @if($a['terbaru'])<span class="hu-acara-v2-badge">Terbaru</span>@endif
+                        @if($a->is_featured)<span class="hu-acara-v2-badge">Terbaru</span>@endif
                     </div>
-                    <div class="hu-acara-v2-judul">{{ $a['judul'] }}</div>
-                    <div class="hu-acara-v2-meta">{{ $a['waktu'] }} · {{ $a['oleh'] }}</div>
+                    <div class="hu-acara-v2-judul">{{ $a->title }}</div>
+                    <div class="hu-acara-v2-meta">
+                        {{ $a->event_time ?? '-' }}
+                        @if($a->organizer) · {{ $a->organizer }} @endif
+                    </div>
                     <a href="#" class="hu-acara-v2-link">Detail Acara →</a>
                 </div>
-                @endforeach
+                @empty
+                <p style="color:var(--ink-soft);grid-column:1/-1;">Belum ada acara mendatang.</p>
+                @endforelse
             </div>
         </div>
     </section>
@@ -473,6 +478,7 @@
                 <div class="hu-footer-v2-col">
                     <div class="hu-footer-v2-col-title">Tautan</div>
                     <a href="#profil" class="hu-footer-v2-link">Profil Masjid</a>
+                    @if(!empty($mosque->facilities))<a href="#fasilitas" class="hu-footer-v2-link">Fasilitas</a>@endif
                     @if($modOn('jadwal_shalat'))<a href="#shalat" class="hu-footer-v2-link">Jadwal Shalat</a>@endif
                     <a href="#program" class="hu-footer-v2-link">Program</a>
                     @if($modOn('donasi'))<a href="#donasi" class="hu-footer-v2-link">Donasi</a>@endif

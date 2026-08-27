@@ -23,72 +23,78 @@ class PrayerTimeService
     ];
 
     /**
-     * Pemetaan provinsi -> zona waktu PHP/IANA.
-     * Key sudah dinormalisasi lowercase + tanpa spasi/strip lewat normalizeProvince().
-     *
-     * WIB = Asia/Jakarta (UTC+7)
-     * WITA = Asia/Makassar (UTC+8)
-     * WIT = Asia/Jayapura (UTC+9)
+     * Daftar kota/kabupaten yang masuk WITA (UTC+8).
+     * Key sudah dinormalisasi lowercase tanpa spasi/strip via normalizeCity().
+     * Mencakup kota/kabupaten di: Bali, NTB, NTT, Kalsel, Kaltim, Kaltara,
+     * Sulut, Sulteng, Sulsel, Sultra, Sulbar, Gorontalo.
      */
-    protected array $provinceTimezones = [
-        // ===== WIB =====
-        'aceh'                        => 'Asia/Jakarta',
-        'sumaterautara'                => 'Asia/Jakarta',
-        'sumateraselatan'               => 'Asia/Jakarta',
-        'sumaterabarat'                 => 'Asia/Jakarta',
-        'bengkulu'                      => 'Asia/Jakarta',
-        'riau'                          => 'Asia/Jakarta',
-        'kepulauanriau'                 => 'Asia/Jakarta',
-        'jambi'                         => 'Asia/Jakarta',
-        'lampung'                       => 'Asia/Jakarta',
-        'bangkabelitung'                => 'Asia/Jakarta',
-        'kepulauanbangkabelitung'       => 'Asia/Jakarta',
-        'banten'                        => 'Asia/Jakarta',
-        'dkijakarta'                    => 'Asia/Jakarta',
-        'jakarta'                       => 'Asia/Jakarta',
-        'jawabarat'                     => 'Asia/Jakarta',
-        'jawatengah'                    => 'Asia/Jakarta',
-        'diyogyakarta'                  => 'Asia/Jakarta',
-        'yogyakarta'                    => 'Asia/Jakarta',
-        'jawatimur'                     => 'Asia/Jakarta',
-        'kalimantanbarat'               => 'Asia/Jakarta',
-        'kalimantantengah'              => 'Asia/Jakarta',
+    protected array $witaCities = [
+        // Bali
+        'denpasar', 'badung', 'gianyar', 'tabanan', 'klungkung', 'bangli', 'karangasem', 'buleleng', 'jembrana',
+        // NTB
+        'mataram', 'lombokbarat', 'lomboktengah', 'lomboktimur', 'lombokutara', 'sumbawa', 'sumbawabarat', 'dompu', 'bima', 'kotabima',
+        // NTT
+        'kupang', 'kotakupang', 'timortengahselatan', 'timortengahutara', 'belu', 'malaka', 'alor', 'floristimur',
+        'sikka', 'ende', 'nagekeo', 'ngada', 'manggarai', 'manggaraibarat', 'manggaraitimur',
+        'sumbabarat', 'sumbatengah', 'sumbatimur', 'sumbabaratdaya', 'rotendao', 'saburaijua', 'lembata',
+        // Kalimantan Selatan
+        'banjarmasin', 'banjarbaru', 'banjar', 'baritokuala', 'tapin', 'hulusungaiselatan', 'hulusungaitengah',
+        'hulusungaiutara', 'tabalong', 'tanahlaut', 'tanahbumbu', 'kotabaru', 'balangan',
+        // Kalimantan Timur
+        'samarinda', 'balikpapan', 'bontang', 'kutaikartanegara', 'kutaitimur', 'kutaibarat', 'paser', 'penajampaserutara', 'berau', 'mahakamulu',
+        // Kalimantan Utara
+        'tarakan', 'bulungan', 'malinau', 'nunukan', 'tanatidung',
+        // Sulawesi Utara
+        'manado', 'bitung', 'tomohon', 'kotamobagu', 'minahasa', 'minahasautara', 'minahasaselatan',
+        'minahasatenggara', 'bolaangmongondow', 'sangihe', 'talaud', 'sitaro',
+        // Sulawesi Tengah
+        'palu', 'poso', 'donggala', 'banggai', 'banggaikepulauan', 'banggailaut', 'buol', 'tolitoli',
+        'parigimoutong', 'sigi', 'morowali', 'morowaliutara', 'tojounauna',
+        // Sulawesi Selatan
+        'makassar', 'palopo', 'parepare', 'gowa', 'takalar', 'jeneponto', 'bantaeng', 'bulukumba', 'selayar',
+        'sinjai', 'maros', 'pangkajene', 'barru', 'soppeng', 'wajo', 'sidenrengrappang', 'pinrang', 'enrekang',
+        'luwu', 'luwuutara', 'luwutimur', 'tanatoraja', 'torajautara',
+        // Sulawesi Tenggara
+        'kendari', 'baubau', 'konawe', 'konaweselatan', 'konaweutara', 'konawekepulauan', 'kolaka',
+        'kolakautara', 'kolakatimur', 'muna', 'munabarat', 'buton', 'butonutara', 'butonselatan',
+        'butontengah', 'wakatobi', 'bombana',
+        // Sulawesi Barat
+        'mamuju', 'majene', 'polewalimandar', 'mamasa', 'pasangkayu', 'mamujutengah',
+        // Gorontalo
+        'gorontalo', 'kotagorontalo', 'boalemo', 'bonebolango', 'gorontalotutara', 'pohuwato',
+    ];
 
-        // ===== WITA =====
-        'bali'                          => 'Asia/Makassar',
-        'nusatenggarabarat'             => 'Asia/Makassar',
-        'nusatenggaratimur'             => 'Asia/Makassar',
-        'kalimantanselatan'             => 'Asia/Makassar',
-        'kalimantantimur'               => 'Asia/Makassar',
-        'kalimantanutara'               => 'Asia/Makassar',
-        'sulawesiutara'                 => 'Asia/Makassar',
-        'sulawesitengah'                => 'Asia/Makassar',
-        'sulawesiselatan'               => 'Asia/Makassar',
-        'sulawesitenggara'              => 'Asia/Makassar',
-        'sulawesibarat'                 => 'Asia/Makassar',
-        'gorontalo'                     => 'Asia/Makassar',
-
-        // ===== WIT =====
-        'maluku'                        => 'Asia/Jayapura',
-        'malukuutara'                   => 'Asia/Jayapura',
-        'papua'                         => 'Asia/Jayapura',
-        'papuabarat'                    => 'Asia/Jayapura',
-        'papuabaratdaya'                => 'Asia/Jayapura',
-        'papuatengah'                   => 'Asia/Jayapura',
-        'papuapegunungan'               => 'Asia/Jayapura',
-        'papuaselatan'                  => 'Asia/Jayapura',
+    /**
+     * Daftar kota/kabupaten yang masuk WIT (UTC+9).
+     * Mencakup kota/kabupaten di: Maluku, Maluku Utara, dan seluruh provinsi Papua.
+     */
+    protected array $witCities = [
+        // Maluku
+        'ambon', 'malukutengah', 'buru', 'buruselatan', 'serambagianbarat', 'serambagiantimur',
+        'kepulauanaru', 'malukutenggara', 'malukutenggarabarat', 'kepulauantanimbar', 'tual',
+        // Maluku Utara
+        'ternate', 'tidorekepulauan', 'halmaherabarat', 'halmaheratengah', 'halmaheratimur',
+        'halmaherautara', 'halmaheraselatan', 'kepulauansula', 'pulaumorotai', 'pulautaliabu',
+        // Papua (semua provinsi hasil pemekaran)
+        'jayapura', 'kotajayapura', 'merauke', 'biaknumfor', 'nabire', 'jayawijaya', 'yahukimo',
+        'pegununganbintang', 'bovendigoel', 'mappi', 'asmat', 'yapen', 'sarmi', 'keerom', 'waropen',
+        'supiori', 'mamberamoraya', 'mamberamotengah', 'yalimo', 'puncakjaya', 'puncak', 'dogiyai',
+        'intanjaya', 'deiyai', 'nduga', 'lannyjaya', 'tolikara', 'paniai', 'mimika',
+        'manokwari', 'sorong', 'kotasorong', 'sorongselatan', 'sorongbaratdaya', 'maybrat', 'tambrauw',
+        'raja ampat', 'rajaampat', 'fakfak', 'kaimana', 'teluk bintuni', 'telukbintuni', 'telukwondama',
+        'pegununganarfak',
     ];
 
     /**
      * Ambil jadwal shalat HARI INI untuk satu masjid, berdasarkan $mosque->city
-     * dan zona waktu yang mengikuti $mosque->province.
+     * (dipakai juga untuk menentukan timezone WIB/WITA/WIT).
      * Sudah termasuk flag 'active' untuk kartu yang sedang berjalan.
      *
      * @return array<int, array{name:string, time:string, active:bool}>
      */
     public function forMosque(Mosque $mosque): array
     {
-        $timezone = $this->resolveTimezone($mosque->province);
+        $timezone = $this->resolveTimezone($mosque->city);
         $cityId   = $this->resolveCityId($mosque->city);
 
         if (!$cityId) {
@@ -113,28 +119,37 @@ class PrayerTimeService
     }
 
     /**
-     * Tentukan timezone IANA berdasarkan nama provinsi masjid.
-     * Default ke Asia/Jakarta (WIB) kalau provinsi tidak dikenali/kosong.
+     * Tentukan timezone IANA langsung dari nama kota/kabupaten masjid.
+     * Default ke Asia/Jakarta (WIB) kalau kota tidak dikenali/kosong —
+     * aman karena mayoritas kota di Indonesia memang WIB.
      */
-    protected function resolveTimezone(?string $province): string
+    protected function resolveTimezone(?string $city): string
     {
-        if (empty($province)) {
+        if (empty($city)) {
             return 'Asia/Jakarta';
         }
 
-        $key = $this->normalizeProvince($province);
+        $key = $this->normalizeCity($city);
 
-        return $this->provinceTimezones[$key] ?? 'Asia/Jakarta';
+        if (in_array($key, $this->witaCities, true)) {
+            return 'Asia/Makassar';
+        }
+
+        if (in_array($key, $this->witCities, true)) {
+            return 'Asia/Jayapura';
+        }
+
+        return 'Asia/Jakarta';
     }
 
     /**
-     * Normalisasi nama provinsi supaya cocok dengan key di $provinceTimezones,
-     * terlepas dari variasi penulisan (spasi, huruf besar/kecil, tanda hubung).
+     * Normalisasi nama kota supaya cocok dengan key di $witaCities / $witCities,
+     * terlepas dari variasi penulisan ("Kota Makassar", "kab. Sorong", dll).
      */
-    protected function normalizeProvince(string $province): string
+    protected function normalizeCity(string $city): string
     {
-        $value = Str::lower($province);
-        $value = str_replace(['provinsi', 'prov.', 'prov '], '', $value);
+        $value = Str::lower($city);
+        $value = str_replace(['kota ', 'kabupaten ', 'kab.', 'kab '], '', $value);
         $value = preg_replace('/[^a-z]/', '', $value); // buang spasi, titik, strip, dll
 
         return $value;
@@ -174,7 +189,7 @@ class PrayerTimeService
 
     /**
      * Ambil jadwal shalat hari ini untuk id kota tertentu.
-     * Tanggal "hari ini" dihitung berdasarkan timezone masjid itu sendiri,
+     * Tanggal "hari ini" dihitung berdasarkan timezone kota masjid itu sendiri,
      * supaya masjid di WIT tidak salah ambil tanggal saat mendekati tengah malam.
      * Di-cache 1 hari (reset otomatis tiap hari berganti, per kota+timezone).
      */
@@ -211,7 +226,7 @@ class PrayerTimeService
 
     /**
      * Tandai satu item sebagai 'active' = waktu shalat terakhir yang sudah lewat hari ini,
-     * dihitung memakai timezone masjid tersebut (bukan timezone server).
+     * dihitung memakai timezone kota masjid tersebut (bukan timezone server).
      * Kalau belum masuk Subuh, dianggap masih waktu Isya (item terakhir).
      */
     protected function withActiveFlag(array $prayers, string $timezone): array

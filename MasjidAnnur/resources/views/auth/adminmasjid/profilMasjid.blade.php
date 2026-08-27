@@ -232,13 +232,13 @@
                         <div class="pm-field">
                             <label class="pm-label" for="photo">FOTO MASJID</label>
                             <input type="file" id="photo" name="photo" accept="image/*" class="pm-input">
-                            <span style="font-size:0.72rem;color:var(--text-light);">PNG, JPG, WebP · Maks. 2MB · Ditampilkan di section Profil pada Landing Page.</span>
+                            <span style="font-size:0.72rem;color:var(--text-light);">PNG, JPG, AVIF, WebP · Maks. 2MB · Ditampilkan di section Profil pada Landing Page.</span>
                         </div>
 
                         <div class="pm-field" style="margin-top: 15px;">
                             <label class="pm-label" for="photo_secondary">FOTO KEDUA (PENDUKUNG)</label>
                             <input type="file" id="photo_secondary" name="photo_secondary" accept="image/*" class="pm-input">
-                            <span style="font-size:0.72rem;color:var(--text-light);">PNG, JPG, WebP · Maks. 2MB · Ditampilkan di kotak sebelah kanan Landing Page.</span>
+                            <span style="font-size:0.72rem;color:var(--text-light);">PNG, JPG, AVIF, WebP · Maks. 2MB · Ditampilkan di kotak sebelah kanan Landing Page.</span>
                         </div>
                     </div><!-- /.pm-section -->
                 </div><!-- /#tab-identitas -->
