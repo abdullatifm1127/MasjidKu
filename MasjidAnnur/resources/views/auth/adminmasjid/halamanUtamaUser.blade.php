@@ -479,6 +479,7 @@
                     <a href="#profil" class="hu-footer-v2-link">Profil Masjid</a>
                     @if($modOn('jadwal_shalat'))<a href="#shalat" class="hu-footer-v2-link">Jadwal Shalat</a>@endif
                     <a href="#program" class="hu-footer-v2-link">Program & Fasilitas</a>
+                    @if($modOn('kegiatan'))<a href="#acara" class="hu-footer-v2-link">Acara</a>@endif
                     @if($modOn('donasi'))<a href="#donasi" class="hu-footer-v2-link">Donasi</a>@endif
                     <a href="#kontak" class="hu-footer-v2-link">Hubungi Kami</a>
                 </div>
