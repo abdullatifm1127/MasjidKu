@@ -19,8 +19,11 @@
                 <span class="lp-brand-name">SIM Masjid</span>
                 <span class="lp-brand-sub">Baitul Digital</span>
             </div>
+            <!-- Tombol Toggle di dalam Brand (jika dipakai di CSS Anda) -->
             <button class="lp-sidebar-toggle" id="lpSidebarToggle" aria-label="Collapse sidebar" type="button">
-                <i class="fa-solid fa-chevron-left"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
             </button>
         </div>
 
@@ -61,8 +64,7 @@
                 <span class="lp-nav-badge">3</span>
             </a>
             <a href="{{ route('admin.acara') }}" class="lp-nav-item">
-    <span class="lp-nav-label">Kegiatan &amp; Acara</span>
-</a>
+                <span class="lp-nav-label">Kegiatan &amp; Acara</span>
             </a>
             <a href="#" class="lp-nav-item">
                 <span class="lp-nav-label">Donasi</span>
@@ -178,8 +180,6 @@
                                value="{{ old('hero_title', $mosque->hero_title ?? '') }}">
                     </div>
 
-                    {{-- Nama Arab & Nama Masjid sekarang murni dari Profil Masjid,
-                         supaya tidak ada dua tempat yang bisa mengubah data yang sama. --}}
                     <div class="lp-field">
                         <label class="lp-label">Nama Masjid (Arab)</label>
                         <input class="lp-input" type="text" value="{{ $mosque->arabic_name ?? '(belum diisi)' }}" dir="rtl" disabled
@@ -262,7 +262,7 @@
                 </div>
             </div>
 
-            {{-- ===== TAB: TENTANG (sekarang read-only, sumber data ada di Profil Masjid) ===== --}}
+            {{-- ===== TAB: TENTANG ===== --}}
             <div class="lp-panel" id="lpTab-tentang">
                 <div class="lp-card">
                     <div class="lp-card-title"><span class="lp-card-bar"></span>Tentang Masjid</div>
@@ -295,6 +295,9 @@
                         <label class="lp-label">Visi &amp; Misi</label>
                         <textarea class="lp-textarea" rows="3" disabled style="background:#f3f4f6;">{{ $mosque->about_vision ?? '(belum diisi)' }}</textarea>
                     </div>
+                </div>
+            </div>
+
             {{-- ===== TAB: KONTAK & SOSIAL ===== --}}
             <div class="lp-panel" id="lpTab-kontak">
                 <div class="lp-card">
@@ -411,14 +414,36 @@
 
     <script>
     document.addEventListener("DOMContentLoaded", function () {
+        const lpSidebar = document.getElementById('lpSidebar');
+        const lpBody = document.getElementById('lpBody');
         const lpToggle = document.getElementById('lpToggle');
-        if (lpToggle) {
-            lpToggle.addEventListener('click', () => {
-                document.getElementById('lpSidebar')?.classList.toggle('collapsed');
-                document.getElementById('lpBody')?.classList.toggle('lp-sidebar-collapsed');
-            });
+        const lpSidebarToggle = document.getElementById('lpSidebarToggle');
+
+        // 1. Cek status tersimpan di localStorage saat halaman dimuat
+        const isCollapsed = localStorage.getItem("lp_sidebar_collapsed") === "true";
+        if (isCollapsed) {
+            lpSidebar?.classList.add('collapsed');
+            lpBody?.classList.add('lp-sidebar-collapsed');
         }
 
+        // 2. Fungsi Toggle Sidebar (Top button & Brand button)
+        function toggleSidebarFunc() {
+            lpSidebar?.classList.toggle('collapsed');
+            lpBody?.classList.toggle('lp-sidebar-collapsed');
+
+            // Simpan state ke localStorage
+            const collapsedStatus = lpSidebar?.classList.contains('collapsed');
+            localStorage.setItem("lp_sidebar_collapsed", collapsedStatus);
+        }
+
+        if (lpToggle) {
+            lpToggle.addEventListener('click', toggleSidebarFunc);
+        }
+        if (lpSidebarToggle) {
+            lpSidebarToggle.addEventListener('click', toggleSidebarFunc);
+        }
+
+        // Tab Navigation Logic
         document.querySelectorAll('.lp-tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 document.querySelectorAll('.lp-tab').forEach(t => t.classList.remove('active'));
@@ -428,6 +453,7 @@
             });
         });
 
+        // Color Picker Sync
         document.querySelectorAll('input[type="color"]').forEach(colorInput => {
             const sibling = colorInput.parentElement.querySelector('input[type="text"]');
             if (sibling) {

@@ -141,7 +141,11 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
     top: 0;
     z-index: 50;
     background: rgba(251, 247, 236, 0.86);
+    
+    /* Tambahkan baris ini di atasnya */
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
+    
     border-bottom: 1px solid transparent;
     transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }

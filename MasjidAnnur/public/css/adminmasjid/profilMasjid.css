@@ -312,7 +312,10 @@
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     transition: border-color 0.18s, background 0.18s;
-    user-select: none;
+    
+    /* Tambahkan -webkit-user-select agar Safari lama mendukung & garis merah hilang */
+    -webkit-user-select: none; /* Safari / iOS Safari */
+    user-select: none;         /* Standar modern */
 }
 
 .pm-checkbox-item:hover {

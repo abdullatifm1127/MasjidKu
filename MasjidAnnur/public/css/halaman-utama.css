@@ -275,11 +275,12 @@ button.btn-nav-outline:hover {
 .hero-visual { display: flex; justify-content: center; }
 
 .hero-card {
-    background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255, 255, 255, 0.08);
+    -webkit-backdrop-filter: blur(12px); /* Untuk Safari/iOS lama */
+    backdrop-filter: blur(12px);         /* Standar modern */
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 20px;
-    box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
     overflow: hidden;
     width: 100%;
     max-width: 360px;
