@@ -114,7 +114,7 @@ class AcaraController extends Controller
             'event_time'   => 'nullable|string|max:50',
             'organizer'    => 'nullable|string|max:255',
             'description'  => 'nullable|string',
-            'photo'        => 'nullable|image|max:2048',
+            'photo'        => 'nullable|mimes:jpeg,png,jpg,webp,avif|max:2048',
             'is_featured'  => 'nullable|boolean',
         ]);
 

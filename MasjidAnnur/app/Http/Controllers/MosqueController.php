@@ -192,10 +192,9 @@ class MosqueController extends Controller
             'capacity'          => 'nullable|string|max:100',
             'description'       => 'nullable|string',
 
-            // Dipindahkan ke sini dari editor Landing Page (dulu about_vision, about_photo)
-            'vision'            => 'nullable|string',
-            'photo'             => 'nullable|image|max:2048',
-            'photo_secondary'   => 'nullable|image|max:2048', // Tambahkan ini
+           'vision'            => 'nullable|string',
+            'photo'             => 'nullable|mimes:jpeg,png,jpg,webp,avif|max:2048',
+            'photo_secondary'   => 'nullable|mimes:jpeg,png,jpg,webp,avif|max:2048',
 
             'organization_name' => 'nullable|string|max:255',
             'imam_name'         => 'required|string|max:255',

@@ -64,9 +64,8 @@
             <nav class="hu-nav">
                 <a href="#beranda"  class="hu-nav-link active">Beranda</a>
                 <a href="#profil"   class="hu-nav-link">Profil</a>
-                @if(!empty($mosque->facilities))<a href="#fasilitas" class="hu-nav-link">Fasilitas</a>@endif
                 @if($modOn('jadwal_shalat'))<a href="#shalat" class="hu-nav-link">Waktu Shalat</a>@endif
-                <a href="#program"  class="hu-nav-link">Program</a>
+                <a href="#program"  class="hu-nav-link">Program & Fasilitas</a>
                 @if($modOn('kegiatan'))<a href="#acara" class="hu-nav-link">Acara</a>@endif
                 @if($modOn('donasi'))<a href="#donasi" class="hu-nav-link">Donasi</a>@endif
                 <a href="#kontak"   class="hu-nav-link">Hubungi</a>
@@ -478,9 +477,8 @@
                 <div class="hu-footer-v2-col">
                     <div class="hu-footer-v2-col-title">Tautan</div>
                     <a href="#profil" class="hu-footer-v2-link">Profil Masjid</a>
-                    @if(!empty($mosque->facilities))<a href="#fasilitas" class="hu-footer-v2-link">Fasilitas</a>@endif
                     @if($modOn('jadwal_shalat'))<a href="#shalat" class="hu-footer-v2-link">Jadwal Shalat</a>@endif
-                    <a href="#program" class="hu-footer-v2-link">Program</a>
+                    <a href="#program" class="hu-footer-v2-link">Program & Fasilitas</a>
                     @if($modOn('donasi'))<a href="#donasi" class="hu-footer-v2-link">Donasi</a>@endif
                     <a href="#kontak" class="hu-footer-v2-link">Hubungi Kami</a>
                 </div>

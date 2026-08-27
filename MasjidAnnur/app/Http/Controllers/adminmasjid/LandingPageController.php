@@ -46,7 +46,7 @@ public function update(Request $request)
         'btn_primary_url'   => 'nullable|string|max:255',
         'btn_secondary'     => 'nullable|string|max:100',
         'btn_secondary_url' => 'nullable|string|max:255',
-        'hero_image'        => 'nullable|image|max:2048',
+        'hero_image'        => 'nullable|mimes:jpeg,png,jpg,webp,avif|max:2048',
         'hero_bg_color'     => 'nullable|string|max:20',
         'hero_text_color'   => 'nullable|string|max:20',
         'contact_address'   => 'nullable|string',

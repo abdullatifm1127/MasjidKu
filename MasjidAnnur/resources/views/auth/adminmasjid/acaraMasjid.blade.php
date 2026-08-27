@@ -165,7 +165,7 @@
 
                         <label class="ac-label">Foto Acara (opsional)</label>
                         <input type="file" name="photo" accept="image/*" class="ac-input">
-                        <span class="ac-hint">PNG, JPG, WebP · Maks. 2MB · Ditampilkan di kartu acara pada halaman publik.</span>
+                        <span class="ac-hint">PNG, JPG, WebP, AVIF · Maks. 2MB · Ditampilkan di kartu acara pada halaman publik.</span>
 
                         <label class="ac-checkbox">
                             <input type="checkbox" name="is_featured" value="1">
