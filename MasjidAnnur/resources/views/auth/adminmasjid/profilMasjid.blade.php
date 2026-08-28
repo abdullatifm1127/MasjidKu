@@ -28,39 +28,34 @@
                 <div class="ba2-brand-name">{{ $mosque->mosque_name ?? 'SIM Masjid' }}</div>
                 <div class="ba2-brand-sub">{{ $mosque->city ?? 'Baitul Digital' }}</div>
             </div>
-            <button class="ba2-collapse-btn" id="ba2CollapseBtn" aria-label="Collapse">
-                <i class="fa-solid fa-chevron-left"></i>
-            </button>
         </div>
 
         {{-- Nav --}}
         <nav class="ba2-nav">
-            <a href="{{ route('admin.dashboard') }}" class="ba2-nav-item">
+            <a href="{{ route('admin.dashboard') }}" class="ba2-nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
                 <span class="ba2-nav-label">Dashboard</span>
             </a>
-            <a href="{{ route('admin.landing-page') }}" class="ba2-nav-item">
+            <a href="{{ route('admin.landing-page') }}" class="ba2-nav-item {{ request()->routeIs('admin.landing-page') ? 'active' : '' }}">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-globe"></i></span>
                 <span class="ba2-nav-label">Landing Page</span>
             </a>
-            <a href="{{ route('admin.profil-masjid') }}" class="ba2-nav-item active">
+            <a href="{{ route('admin.profil-masjid') }}" class="ba2-nav-item {{ request()->routeIs('admin.profil-masjid') ? 'active' : '' }}">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-mosque"></i></span>
                 <span class="ba2-nav-label">Profil Masjid</span>
             </a>
-            <a href="#" class="ba2-nav-item">
+            <a href="{{ route('admin.jadwal-sholat') }}" class="ba2-nav-item {{ request()->routeIs('admin.jadwal-sholat') ? 'active' : '' }}">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-clock"></i></span>
                 <span class="ba2-nav-label">Jadwal Shalat</span>
-                <span class="ba2-nav-soon">dev</span>
             </a>
             <a href="#" class="ba2-nav-item">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-bullhorn"></i></span>
                 <span class="ba2-nav-label">Pengumuman</span>
                 <span class="ba2-nav-badge">3</span>
             </a>
-            <a href="#" class="ba2-nav-item">
+            <a href="{{ route('admin.acara') }}" class="ba2-nav-item {{ request()->routeIs('admin.acara*') ? 'active' : '' }}">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
                 <span class="ba2-nav-label">Kegiatan &amp; Acara</span>
-                <span class="ba2-nav-soon">dev</span>
             </a>
             <a href="#" class="ba2-nav-item">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
@@ -639,12 +634,6 @@
     <button class="ba2-fab" aria-label="Bantuan">?</button>
 
     <script>
-        // ---- Sidebar toggle ----
-        document.getElementById('ba2CollapseBtn').addEventListener('click', () => {
-            document.getElementById('ba2Sidebar').classList.toggle('collapsed');
-            document.getElementById('ba2Main').classList.toggle('expanded');
-        });
-
         // ---- Tab switching ----
         const tabs   = document.querySelectorAll('.pm-tab');
         const panels = document.querySelectorAll('.pm-tab-content');

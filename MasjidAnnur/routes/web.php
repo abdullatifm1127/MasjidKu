@@ -13,6 +13,7 @@ use App\Http\Controllers\adminmasjid\ProgramController;
 use App\Http\Controllers\adminmasjid\AcaraController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\PublicMosqueController;
+use App\Http\Controllers\adminmasjid\JadwalSholatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -126,15 +127,18 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/admin/profil-masjid', [MosqueController::class, 'updateProfil'])
         ->name('admin.profil-masjid.update');
 
-<<<<<<< HEAD
+
     Route::get('/admin/beranda', function () {
         return view('auth.adminmasjid.berandaAdmin');
     })->name('admin.beranda');
 
-    Route::get('/admin/jadwal-sholat', function () {
-        return view('auth.adminmasjid.jadwalSholat');
-    })->name('admin.jadwal-sholat');
-=======
+  // Di dalam group middleware 'auth' admin:
+Route::get('/admin/jadwal-sholat', [JadwalSholatController::class, 'index'])
+    ->name('admin.jadwal-sholat');
+    // Jika nanti ada form update jadwal shalat, tambahkan juga route PUT-nya:
+Route::put('/admin/jadwal-sholat', [JadwalSholatController::class, 'update'])
+    ->name('admin.jadwal-sholat.update');
+
     // ===== Program Unggulan =====
     Route::get('/admin/program', [ProgramController::class, 'index'])
         ->name('admin.program');
@@ -154,7 +158,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::delete('/admin/acara/{acara}', [AcaraController::class, 'destroy'])
         ->name('admin.acara.destroy');
->>>>>>> origin/main
+
 });
 
 /*

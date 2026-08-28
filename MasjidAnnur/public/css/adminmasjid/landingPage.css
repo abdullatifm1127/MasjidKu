@@ -1,7 +1,7 @@
 *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-    --sidebar-w:        200px;
+    --sidebar-w:        160px;
     --sidebar-w-mini:   52px;
     --sidebar-bg:       #0e3320;
     --green:            #1a4731;
@@ -43,23 +43,6 @@ body.lp-body {
 }
 
 .lp-sidebar.collapsed { width: var(--sidebar-w-mini); }
-
-/* Toggle button */
-.lp-sidebar-toggle {
-    position: absolute;
-    top: 18px; right: -11px;
-    width: 22px; height: 22px;
-    background: var(--gold);
-    color: #1a1a1a;
-    border: none; border-radius: 50%;
-    font-size: 0.58rem; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    z-index: 10;
-    transition: transform var(--transition);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-}
-
-.lp-sidebar.collapsed .lp-sidebar-toggle { transform: rotate(180deg); }
 
 /* Brand */
 .lp-brand {
