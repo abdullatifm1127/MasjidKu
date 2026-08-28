@@ -1,12 +1,3 @@
-/* ============================================================
-   profilMasjid.css  —  Profil Masjid Admin Page
-   Inherits sidebar/layout from berandaAdmin.css (ba2-* classes)
-   Conflict-resolved / merged version
-   ============================================================ */
-
-/* ============================================================
-   CONTENT AREA
-   ============================================================ */
 .pm-content {
     padding: 24px 28px 100px; /* room for sticky footer */
     flex: 1;
@@ -321,7 +312,10 @@
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     transition: border-color 0.18s, background 0.18s;
-    user-select: none;
+    
+    /* Tambahkan -webkit-user-select agar Safari lama mendukung & garis merah hilang */
+    -webkit-user-select: none; /* Safari / iOS Safari */
+    user-select: none;         /* Standar modern */
 }
 
 .pm-checkbox-item:hover {

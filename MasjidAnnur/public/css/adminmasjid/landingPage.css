@@ -161,7 +161,9 @@ body.lp-body {
     transition: margin-left var(--transition);
 }
 
-body.lp-sidebar-collapsed .lp-main { margin-left: var(--sidebar-w-mini); }
+body.lp-sidebar-collapsed .lp-main { 
+    margin-left: var(--sidebar-w-mini); 
+}
 
 /* Topbar */
 .lp-topbar {
@@ -353,7 +355,9 @@ body.lp-sidebar-collapsed .lp-main { margin-left: var(--sidebar-w-mini); }
     z-index: 90; transition: left var(--transition);
 }
 
-body.lp-sidebar-collapsed .lp-footer { left: var(--sidebar-w-mini); }
+body.lp-sidebar-collapsed .lp-footer { 
+    left: var(--sidebar-w-mini); 
+}
 
 .lp-footer-status { font-size: 0.78rem; color: var(--text-light); }
 

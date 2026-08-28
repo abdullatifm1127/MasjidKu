@@ -9,7 +9,11 @@ use App\Http\Controllers\SuperAdmin\PenggunaController;
 use App\Http\Controllers\SuperAdmin\BerandaSuperAdminController;
 use App\Http\Controllers\SuperAdmin\PengaturanController;
 use App\Http\Controllers\adminmasjid\LandingPageController;
+use App\Http\Controllers\adminmasjid\ProgramController;
+use App\Http\Controllers\adminmasjid\AcaraController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\PublicMosqueController;
+
 /*
 |--------------------------------------------------------------------------
 | Halaman Utama
@@ -25,16 +29,16 @@ Route::get('/', function () {
 
 /*
 |--------------------------------------------------------------------------
-| Halaman Publik Masjid (Menggunakan Slug)
+| Halaman Publik Masjid & Jadwal Sholat (Menggunakan Controller)
 |--------------------------------------------------------------------------
 */
-Route::get('/masjid/{slug}', function ($slug) {
-    $mosque = Mosque::where('slug', $slug)->where('status', 'approved')->firstOrFail();
-    return view('auth.adminmasjid.halamanUtamaUser', compact('mosque'));
-})->name('masjid.publik');
+Route::get('/masjid/{slug}', [PublicMosqueController::class, 'show'])->name('masjid.show');
+
+// Alias tambahan agar jika ada bagian lain yang memanggil route('masjid.publik') tetap mengarah ke controller yang sama
+Route::get('/masjid/{slug}', [PublicMosqueController::class, 'show'])->name('masjid.publik');
 
 Route::middleware(['auth'])->get('/masjidUser', function () {
-    $mosque = Mosque::where('user_id', Auth::id())->first();  
+    $mosque = \App\Models\Mosque::where('user_id', Auth::id())->first();
     if (!$mosque) {
         return redirect()->route('daftar.masjid')->with('error', 'Anda belum mendaftarkan masjid.');
     }
@@ -122,6 +126,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/admin/profil-masjid', [MosqueController::class, 'updateProfil'])
         ->name('admin.profil-masjid.update');
 
+<<<<<<< HEAD
     Route::get('/admin/beranda', function () {
         return view('auth.adminmasjid.berandaAdmin');
     })->name('admin.beranda');
@@ -129,6 +134,27 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/jadwal-sholat', function () {
         return view('auth.adminmasjid.jadwalSholat');
     })->name('admin.jadwal-sholat');
+=======
+    // ===== Program Unggulan =====
+    Route::get('/admin/program', [ProgramController::class, 'index'])
+        ->name('admin.program');
+
+    Route::put('/admin/program', [ProgramController::class, 'update'])
+        ->name('admin.program.update');
+
+    // ===== Acara / Kegiatan =====
+    Route::get('/admin/acara', [AcaraController::class, 'index'])
+        ->name('admin.acara');
+
+    Route::post('/admin/acara', [AcaraController::class, 'store'])
+        ->name('admin.acara.store');
+
+    Route::put('/admin/acara/{acara}', [AcaraController::class, 'update'])
+        ->name('admin.acara.update');
+
+    Route::delete('/admin/acara/{acara}', [AcaraController::class, 'destroy'])
+        ->name('admin.acara.destroy');
+>>>>>>> origin/main
 });
 
 /*
@@ -139,7 +165,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(function () {
     Route::get('/dashboard', [BerandaSuperAdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/verifikasi', [MosqueController::class, 'verifikasi'])->name('verifikasi');
-    
+
     Route::put('/verifikasi/{id}/approve', function ($id) {
         $mosque = Mosque::findOrFail($id);
         $mosque->update(['status' => 'approved']);
@@ -153,7 +179,7 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
     })->name('verifikasi.reject');
 
     Route::get('/manajemen-masjid', [MosqueController::class, 'manajemenMasjid'])->name('manajemen-masjid');
-    
+
     Route::post('/manajemen-masjid', function (\Illuminate\Http\Request $request) {
         $validated = $request->validate([
             'mosque_name'   => 'required|string|max:255',
@@ -166,7 +192,7 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
             'phone'         => 'nullable|string|max:30',
             'status'        => 'required|in:approved,pending',
         ]);
-        
+
         Mosque::create(array_merge($validated, ['user_id' => 1]));
         return redirect()->route('superadmin.manajemen-masjid')->with('success', 'Masjid berhasil ditambahkan.');
     })->name('manajemen-masjid.store');

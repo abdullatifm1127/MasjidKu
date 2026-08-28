@@ -11,8 +11,6 @@
 <body class="lp-body" id="lpBody">
 
     {{-- ===== SIDEBAR ===== --}}
-    {{-- PENTING: id harus "lpSidebar" (huruf S besar) karena dipakai persis
-         seperti ini oleh JavaScript di bawah: getElementById('lpSidebar') --}}
     <aside class="lp-sidebar" id="lpSidebar">
 
         <div class="lp-brand">
@@ -21,8 +19,11 @@
                 <span class="lp-brand-name">SIM Masjid</span>
                 <span class="lp-brand-sub">Baitul Digital</span>
             </div>
+            <!-- Tombol Toggle di dalam Brand (jika dipakai di CSS Anda) -->
             <button class="lp-sidebar-toggle" id="lpSidebarToggle" aria-label="Collapse sidebar" type="button">
-                <i class="fa-solid fa-chevron-left"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
             </button>
         </div>
 
@@ -62,9 +63,8 @@
                 <span class="lp-nav-label">Pengumuman</span>
                 <span class="lp-nav-badge">3</span>
             </a>
-            <a href="#" class="lp-nav-item">
+            <a href="{{ route('admin.acara') }}" class="lp-nav-item">
                 <span class="lp-nav-label">Kegiatan &amp; Acara</span>
-                <span class="lp-nav-soon">dev</span>
             </a>
             <a href="#" class="lp-nav-item">
                 <span class="lp-nav-label">Donasi</span>
@@ -181,17 +181,19 @@
                     </div>
 
                     <div class="lp-field">
-                        <label class="lp-label">Nama Masjid (Arab) — opsional</label>
-                        <input class="lp-input" type="text" name="arabic_name" dir="rtl"
-                               placeholder="مسجد الرحمن"
-                               value="{{ old('arabic_name', $mosque->arabic_name ?? '') }}">
+                        <label class="lp-label">Nama Masjid (Arab)</label>
+                        <input class="lp-input" type="text" value="{{ $mosque->arabic_name ?? '(belum diisi)' }}" dir="rtl" disabled
+                               style="background:#f3f4f6;color:var(--text-mid);">
+                        <span style="font-size:0.72rem;color:var(--text-light);">
+                            Diambil dari <a href="{{ route('admin.profil-masjid') }}">Profil Masjid</a>. Ubah di sana untuk memperbarui.
+                        </span>
                     </div>
 
                     <div class="lp-field">
                         <label class="lp-label">Sub-judul / Tagline</label>
                         <input class="lp-input" type="text" name="hero_subtitle"
                                placeholder="cth. Masjid Rahmatan Lil Alamin"
-                               value="{{ old('hero_subtitle', $mosque->hero_subtitle ?? '') }}">
+                               value="{{ old('hero_subtitle', $mosque->hero_subtitle ?? $mosque->tagline ?? '') }}">
                     </div>
 
                     <div class="lp-field">
@@ -238,7 +240,7 @@
                             <img src="{{ asset('storage/'.$mosque->hero_image) }}" alt="Hero saat ini" style="max-height:100px;border-radius:8px;margin-bottom:8px;display:block;">
                         @endif
                         <input type="file" name="hero_image" accept="image/*" class="lp-input">
-                        <span style="font-size:0.72rem;color:var(--text-light);">PNG, JPG, WebP · Maks. 2MB · Rekomendasi 1920×600</span>
+                        <span style="font-size:0.72rem;color:var(--text-light);">PNG, JPG, AVIF, WebP · Maks. 2MB · Rekomendasi 1920×600</span>
                     </div>
 
                     <div class="lp-grid-2">
@@ -265,47 +267,33 @@
                 <div class="lp-card">
                     <div class="lp-card-title"><span class="lp-card-bar"></span>Tentang Masjid</div>
 
-                    <div class="lp-field">
-                        <label class="lp-label">Nama Masjid</label>
-                        <input class="lp-input" type="text" name="about_name" value="{{ old('about_name', $mosque->about_name ?? '') }}">
-                    </div>
-
-                    <div class="lp-field">
-                        <label class="lp-label">Imam Besar — opsional</label>
-                        <input class="lp-input" type="text" name="imam_name"
-                               placeholder="cth. KH. Ahmad Syafi'i"
-                               value="{{ old('imam_name', $mosque->imam_name ?? '') }}">
+                    <div style="background:#f3f4f6;border-radius:10px;padding:14px 16px;font-size:0.85rem;color:var(--text-mid);margin-bottom:16px;">
+                        Konten section "Tentang Masjid" di halaman publik sekarang diambil langsung dari
+                        <strong>Profil Masjid</strong>, supaya tidak ada dua tempat mengedit data yang sama.
+                        <a href="{{ route('admin.profil-masjid') }}" style="font-weight:600;">Edit di Profil Masjid →</a>
                     </div>
 
                     <div class="lp-grid-2">
                         <div class="lp-field">
-                            <label class="lp-label">Tahun Berdiri</label>
-                            <input class="lp-input" type="text" name="about_founded" value="{{ old('about_founded', $mosque->about_founded ?? '') }}">
+                            <label class="lp-label">Nama Masjid</label>
+                            <input class="lp-input" type="text" value="{{ $mosque->mosque_name ?? '(belum diisi)' }}" disabled style="background:#f3f4f6;">
                         </div>
                         <div class="lp-field">
-                            <label class="lp-label">Kapasitas Jamaah</label>
-                            <input class="lp-input" type="text" name="about_capacity" value="{{ old('about_capacity', $mosque->about_capacity ?? '') }}">
+                            <label class="lp-label">Tahun Berdiri</label>
+                            <input class="lp-input" type="text" value="{{ $mosque->founded ?? '(belum diisi)' }}" disabled style="background:#f3f4f6;">
                         </div>
                     </div>
-
                     <div class="lp-field">
-                        <label class="lp-label">Sejarah Singkat</label>
-                        <textarea class="lp-textarea" name="about_history" rows="4"
-                                  placeholder="Ceritakan sejarah singkat berdirinya masjid...">{{ old('about_history', $mosque->about_history ?? '') }}</textarea>
+                        <label class="lp-label">Kapasitas Jamaah</label>
+                        <input class="lp-input" type="text" value="{{ $mosque->capacity ?? '(belum diisi)' }}" disabled style="background:#f3f4f6;">
                     </div>
-
+                    <div class="lp-field">
+                        <label class="lp-label">Deskripsi / Sejarah Singkat</label>
+                        <textarea class="lp-textarea" rows="4" disabled style="background:#f3f4f6;">{{ $mosque->description ?? '(belum diisi)' }}</textarea>
+                    </div>
                     <div class="lp-field">
                         <label class="lp-label">Visi &amp; Misi</label>
-                        <textarea class="lp-textarea" name="about_vision" rows="3"
-                                  placeholder="Visi dan misi masjid Anda...">{{ old('about_vision', $mosque->about_vision ?? '') }}</textarea>
-                    </div>
-
-                    <div class="lp-field">
-                        <label class="lp-label">Foto Masjid — opsional</label>
-                        @if(!empty($mosque->about_photo))
-                            <img src="{{ asset('storage/'.$mosque->about_photo) }}" alt="Foto masjid saat ini" style="max-height:100px;border-radius:8px;margin-bottom:8px;display:block;">
-                        @endif
-                        <input type="file" name="about_photo" accept="image/*" class="lp-input">
+                        <textarea class="lp-textarea" rows="3" disabled style="background:#f3f4f6;">{{ $mosque->about_vision ?? '(belum diisi)' }}</textarea>
                     </div>
                 </div>
             </div>
@@ -313,21 +301,29 @@
             {{-- ===== TAB: KONTAK & SOSIAL ===== --}}
             <div class="lp-panel" id="lpTab-kontak">
                 <div class="lp-card">
-                    <div class="lp-card-title"><span class="lp-card-bar"></span>Informasi Kontak</div>
+                    <div class="lp-card-title"><span class="lp-card-bar"></span>Informasi Kontak Publik</div>
+                    <span style="font-size:0.78rem;color:var(--text-light);display:block;margin-bottom:12px;">
+                        Ini kontak yang tampil untuk pengunjung publik — boleh berbeda dari kontak internal di Profil Masjid.
+                    </span>
 
                     <div class="lp-field">
                         <label class="lp-label">Alamat Lengkap</label>
-                        <textarea class="lp-textarea" name="contact_address" rows="2">{{ old('contact_address', $mosque->contact_address ?? '') }}</textarea>
+                        <textarea class="lp-textarea" name="contact_address" rows="2"
+                                  placeholder="{{ $mosque->address ?? '' }}">{{ old('contact_address', $mosque->contact_address ?? '') }}</textarea>
                     </div>
 
                     <div class="lp-grid-2">
                         <div class="lp-field">
                             <label class="lp-label">Nomor Telepon</label>
-                            <input class="lp-input" type="tel" name="contact_phone" value="{{ old('contact_phone', $mosque->contact_phone ?? '') }}">
+                            <input class="lp-input" type="tel" name="contact_phone"
+                                   placeholder="{{ $mosque->phone ?? '' }}"
+                                   value="{{ old('contact_phone', $mosque->contact_phone ?? '') }}">
                         </div>
                         <div class="lp-field">
                             <label class="lp-label">Email</label>
-                            <input class="lp-input" type="email" name="contact_email" value="{{ old('contact_email', $mosque->contact_email ?? '') }}">
+                            <input class="lp-input" type="email" name="contact_email"
+                                   placeholder="{{ $mosque->email ?? '' }}"
+                                   value="{{ old('contact_email', $mosque->contact_email ?? '') }}">
                         </div>
                     </div>
 
@@ -418,14 +414,36 @@
 
     <script>
     document.addEventListener("DOMContentLoaded", function () {
+        const lpSidebar = document.getElementById('lpSidebar');
+        const lpBody = document.getElementById('lpBody');
         const lpToggle = document.getElementById('lpToggle');
-        if (lpToggle) {
-            lpToggle.addEventListener('click', () => {
-                document.getElementById('lpSidebar')?.classList.toggle('collapsed');
-                document.getElementById('lpBody')?.classList.toggle('lp-sidebar-collapsed');
-            });
+        const lpSidebarToggle = document.getElementById('lpSidebarToggle');
+
+        // 1. Cek status tersimpan di localStorage saat halaman dimuat
+        const isCollapsed = localStorage.getItem("lp_sidebar_collapsed") === "true";
+        if (isCollapsed) {
+            lpSidebar?.classList.add('collapsed');
+            lpBody?.classList.add('lp-sidebar-collapsed');
         }
 
+        // 2. Fungsi Toggle Sidebar (Top button & Brand button)
+        function toggleSidebarFunc() {
+            lpSidebar?.classList.toggle('collapsed');
+            lpBody?.classList.toggle('lp-sidebar-collapsed');
+
+            // Simpan state ke localStorage
+            const collapsedStatus = lpSidebar?.classList.contains('collapsed');
+            localStorage.setItem("lp_sidebar_collapsed", collapsedStatus);
+        }
+
+        if (lpToggle) {
+            lpToggle.addEventListener('click', toggleSidebarFunc);
+        }
+        if (lpSidebarToggle) {
+            lpSidebarToggle.addEventListener('click', toggleSidebarFunc);
+        }
+
+        // Tab Navigation Logic
         document.querySelectorAll('.lp-tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 document.querySelectorAll('.lp-tab').forEach(t => t.classList.remove('active'));
@@ -435,6 +453,7 @@
             });
         });
 
+        // Color Picker Sync
         document.querySelectorAll('input[type="color"]').forEach(colorInput => {
             const sibling = colorInput.parentElement.querySelector('input[type="text"]');
             if (sibling) {

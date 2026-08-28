@@ -1,3 +1,6 @@
+/* =========================================================================
+   DESIGN TOKENS
+   ========================================================================= */
 :root {
     --ink: #1C2620;
     --ink-soft: #4B5A50;
@@ -23,6 +26,9 @@
     --radius-card: 22px;
 }
 
+/* =========================================================================
+   RESET & BASE
+   ========================================================================= */
 * { box-sizing: border-box; }
 
 html { scroll-behavior: smooth; }
@@ -53,7 +59,9 @@ a { color: inherit; text-decoration: none; }
     padding: 0 28px;
 }
 
-/* ---------- utilitas tipografi ---------- */
+/* =========================================================================
+   TYPOGRAPHY & SECTION UTILITIES
+   ========================================================================= */
 h1, h2, h3 { font-family: var(--font-display); margin: 0; }
 
 .hu-section-tag {
@@ -69,9 +77,22 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
     border-radius: 999px;
     margin-bottom: 14px;
 }
-.hu-tag-amber       { background: var(--emerald-100); color: var(--emerald-800); }
 .hu-tag-amber-light { background: rgba(255,255,255,0.12); color: var(--brass-light); border: 1px solid rgba(231,205,142,0.4); }
-.hu-tag-light        { background: rgba(255,255,255,0.1); color: var(--brass-light); border: 1px solid rgba(231,205,142,0.35); }
+.hu-tag-light       { background: rgba(255,255,255,0.1);  color: var(--brass-light); border: 1px solid rgba(231,205,142,0.35); }
+
+
+/* Plain uppercase eyebrow label (no pill), used above section titles e.g. "KEGIATAN & PROGRAM" */
+.hu-tag-amber {
+    background: transparent;
+    color: var(--brass);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0;
+    margin-bottom: 12px;
+    display: inline-block;
+}
 
 .hu-section-title {
     font-size: clamp(1.7rem, 2.6vw, 2.4rem);
@@ -87,9 +108,9 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
 
 .hu-section { padding: 88px 0; }
 
-/* ===================================================================
-   TOP BAR — JADWAL SHALAT
-   =================================================================== */
+/* =========================================================================
+   TOP BAR — JADWAL SHALAT MINI
+   ========================================================================= */
 .hu-praybar {
     background: var(--emerald-900);
     color: #fff;
@@ -112,15 +133,19 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
 .hu-prayer.active { opacity: 1; font-weight: 700; }
 .hu-prayer.active .hu-prayer-time { color: #fff; }
 
-/* ===================================================================
+/* =========================================================================
    NAVBAR
-   =================================================================== */
+   ========================================================================= */
 .hu-navbar {
     position: sticky;
     top: 0;
     z-index: 50;
     background: rgba(251, 247, 236, 0.86);
+    
+    /* Tambahkan baris ini di atasnya */
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
+    
     border-bottom: 1px solid transparent;
     transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
@@ -188,9 +213,9 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
 .hu-hamburger.active span:nth-child(2) { opacity: 0; }
 .hu-hamburger.active span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
-/* ===================================================================
+/* =========================================================================
    INFO TICKER
-   =================================================================== */
+   ========================================================================= */
 .hu-ticker {
     display: flex;
     align-items: stretch;
@@ -225,9 +250,9 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
     to   { transform: translateX(-50%); }
 }
 
-/* ===================================================================
+/* =========================================================================
    HERO
-   =================================================================== */
+   ========================================================================= */
 .hu-hero {
     position: relative;
     min-height: 84vh;
@@ -308,24 +333,20 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
 .hu-hero-scroll {
     position: absolute;
     bottom: 26px; left: 50%;
-    transform: translateX(-50%);
     display: flex; flex-direction: column; align-items: center; gap: 6px;
     font-size: 0.68rem; letter-spacing: 0.18em;
     color: rgba(255,255,255,0.7);
     margin-top: 8px;
-}
-
-.hu-section-head-light { }
-
-.hu-profil-section {
-    background: #faf8f3;
     animation: hu-bob 2.4s ease-in-out infinite;
 }
-@keyframes hu-bob { 0%,100% { transform: translate(-50%,0); } 50% { transform: translate(-50%,6px); } }
+@keyframes hu-bob {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%      { transform: translateX(-50%) translateY(6px); }
+}
 @keyframes hu-rise { from { opacity: 0; transform: translateY(18px);} to { opacity: 1; transform: translateY(0);} }
 
-/* tepi arcade riwaq — pembatas bergerigi khas lengkungan masjid, dipakai
-   di beberapa titik transisi antarbagian sebagai elemen tanda tangan */
+/* Tepi arcade riwaq — pembatas bergerigi khas lengkungan masjid, dipakai
+   sebagai elemen tanda tangan di transisi bawah hero */
 .hu-hero::after {
     content: "";
     position: absolute;
@@ -340,10 +361,11 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
     mask-repeat: repeat-x;
 }
 
-/* ===================================================================
+/* =========================================================================
    PROFIL MASJID
-   =================================================================== */
-.hu-profil-section { padding-top: 100px; }
+   ========================================================================= */
+.hu-profil-section { padding-top: 100px; background: #faf8f3; }
+
 .hu-profil-v2-grid {
     display: grid;
     grid-template-columns: 1fr 0.92fr;
@@ -398,84 +420,23 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
     font-size: 0.92rem;
     line-height: 1.7;
 }
+/* Inherits the light text color from .hu-profil-v2-ayat above — do not
+   override with a dark color here or it becomes unreadable on the dark bg */
+.hu-profil-v2-trans {
+    font-style: italic;
+    line-height: 1.6;
+    text-align: left;
+}
 
-/* ===================================================================
+/* =========================================================================
    JADWAL SHALAT (grid gelap)
-   =================================================================== */
+   ========================================================================= */
 .hu-section-dark {
     background: var(--emerald-900);
     background-image: radial-gradient(60% 90% at 100% 0%, rgba(231,205,142,0.08), transparent 60%);
     position: relative;
 }
 
-.hu-profil-v2-trans {
-    font-size: 0.8rem;
-    color: #6b7280;
-    font-style: italic;
-    line-height: 1.6;
-    text-align: left;
-}
-
-
-.hu-profil-desc {
-    font-size: 1rem;
-    color: var(--text-mid);
-    line-height: 1.8;
-    margin-bottom: 32px;
-}
-
-.hu-profil-stats {
-    display: flex;
-    gap: 32px;
-    flex-wrap: wrap;
-}
-
-.hu-stat-val {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: var(--green);
-    line-height: 1;
-    margin-bottom: 4px;
-}
-
-.hu-stat-label {
-    font-size: 0.78rem;
-    color: var(--text-light);
-    font-weight: 500;
-}
-
-.hu-profil-info {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.hu-info-card {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 16px 18px;
-    background: var(--gray);
-    border-radius: 10px;
-    border-left: 3px solid var(--green);
-}
-
-.hu-info-icon { font-size: 1.2rem; flex-shrink: 0; }
-
-.hu-info-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-light);
-    margin-bottom: 3px;
-}
-
-.hu-info-val {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--text);
-}
 .hu-shalat-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -500,424 +461,25 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
     text-transform: uppercase;
     letter-spacing: 0.06em;
 }
-.hu-program-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-}
-
-.hu-program-card {
-    background: var(--gray);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px 16px;
-    text-align: center;
-    transition: box-shadow 0.18s, transform 0.18s;
-}
-
-.hu-program-card:hover {
-    box-shadow: 0 4px 16px rgba(26,71,49,0.12);
-    transform: translateY(-2px);
-}
-
-.hu-program-icon {
-    font-size: 1.8rem;
-    margin-bottom: 10px;
-}
-
-.hu-program-name {
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: var(--text);
-}
-
-.hu-fasilitas-wrap {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-}
-
-.hu-fasilitas-tag {
-    padding: 8px 18px;
-    background: #fff;
-    border: 1.5px solid var(--border);
-    border-radius: 100px;
-    font-size: 0.84rem;
-    font-weight: 500;
-    color: var(--text-mid);
-    transition: border-color 0.16s, color 0.16s;
-}
-
-.hu-fasilitas-tag:hover {
-    border-color: var(--green);
-    color: var(--green);
-}
-
-.hu-acara-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    max-width: 720px;
-    margin: 0 auto;
-}
-
-.hu-acara-item {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 18px 22px;
-    background: var(--gray);
-    border-radius: var(--radius);
-    border-left: 4px solid var(--green);
-    transition: box-shadow 0.16s;
-}
-
-.hu-acara-item:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-
-.hu-acara-date {
-    text-align: center;
-    min-width: 48px;
-    flex-shrink: 0;
-}
-
-.hu-acara-day {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--green);
-    line-height: 1;
-}
-
-.hu-acara-month {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--text-light);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-}
-
-.hu-acara-info { flex: 1; }
-
-.hu-acara-title {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 4px;
-}
-
-.hu-acara-meta {
-    font-size: 0.8rem;
-    color: var(--text-light);
-}
-
-.hu-acara-btn {
-    padding: 7px 16px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--green);
-    background: var(--green-light);
-    border-radius: 8px;
-    text-decoration: none;
-    white-space: nowrap;
-    flex-shrink: 0;
-    transition: background 0.16s;
-}
-
-.hu-acara-btn:hover { background: #bbf7d0; }
-
-.hu-donasi-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-}
-
-.hu-donasi-card {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: var(--radius);
-    padding: 28px 22px;
-    text-align: center;
-    backdrop-filter: blur(4px);
-}
-
-.hu-donasi-icon { font-size: 2rem; margin-bottom: 12px; }
-
-.hu-donasi-judul {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 20px;
-}
-
-.hu-donasi-progress-wrap {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-}
-
-.hu-donasi-progress-bar {
-    flex: 1;
-    height: 8px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 100px;
-    overflow: hidden;
-}
-
-.hu-donasi-progress-fill {
-    height: 100%;
-    background: var(--amber-bg);
-    border-radius: 100px;
-    transition: width 0.5s ease;
-}
-
-.hu-donasi-pct {
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: var(--amber-bg);
-    white-space: nowrap;
-    min-width: 32px;
-}
-
-.hu-donasi-nominal {
-    font-size: 0.78rem;
-    color: rgba(255,255,255,0.6);
-    margin-bottom: 18px;
-}
-
-.hu-donasi-btn {
-    display: inline-block;
-    padding: 10px 24px;
-    background: var(--amber-bg);
-    color: #fff;
-    font-size: 0.84rem;
-    font-weight: 700;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: background 0.18s;
-}
-
-.hu-donasi-btn:hover { background: #b45309; }
-
-.hu-kontak-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 48px;
-    align-items: start;
-}
-
-.hu-kontak-info {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.hu-kontak-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-}
-
-.hu-kontak-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
-
-.hu-kontak-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-light);
-    margin-bottom: 3px;
-}
-
-.hu-kontak-val {
-    font-size: 0.9rem;
-    color: var(--text);
-    line-height: 1.6;
-}
-
-.hu-kontak-map { }
-
-.hu-map-placeholder {
-    background: var(--gray);
-    border: 2px dashed var(--border);
-    border-radius: var(--radius);
-    height: 280px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.hu-map-icon { font-size: 2.5rem; }
-.hu-map-text { font-size: 0.9rem; font-weight: 600; color: var(--text-mid); }
-.hu-map-sub  { font-size: 0.8rem; color: var(--text-light); 
-}
-
-.hu-footer {
-    background: #0f1923;
-    color: rgba(255,255,255,0.7);
-    padding: 56px 0 0;
-}
-
-.hu-footer-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    gap: 48px;
-    padding-bottom: 40px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-}
-
-.hu-footer-name {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 4px;
-}
-
-.hu-footer-arabic {
-    font-family: 'Amiri', serif;
-    font-size: 1rem;
-    color: var(--amber-bg);
-    direction: rtl;
-    margin-bottom: 8px;
-}
-
-.hu-footer-tagline {
-    font-size: 0.82rem;
-    color: rgba(255,255,255,0.45);
-}
-
-.hu-footer-link-title {
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: rgba(255,255,255,0.45);
-    margin-bottom: 14px;
-}
-
-.hu-footer-links a {
-    display: block;
-    font-size: 0.84rem;
-    color: rgba(255,255,255,0.65);
-    text-decoration: none;
-    margin-bottom: 8px;
-    transition: color 0.16s;
-}
-
-.hu-footer-links a:hover { color: #fff; }
-
-.hu-footer-bottom {
-    padding: 18px 0;
-    font-size: 0.76rem;
-    color: rgba(255,255,255,0.3);
-    text-align: center;
-}
-
-.help-fab {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    width: 44px;
-    height: 44px;
-    background: var(--green);
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
-    z-index: 300;
-    transition: background 0.2s;
-}
-
-.help-fab:hover { background: var(--green-mid); }
-
-@media (max-width: 1024px) {
-    .hu-profil-grid      { grid-template-columns: 1fr; }
-    .hu-profil-v2-grid   { grid-template-columns: 1fr; gap: 40px; }
-    .hu-shalat-grid      { grid-template-columns: repeat(3, 1fr); }
-    .hu-program-grid     { grid-template-columns: repeat(3, 1fr); }
-    .hu-donasi-grid      { grid-template-columns: 1fr 1fr; }
-    .hu-kontak-grid      { grid-template-columns: 1fr; }
-    .hu-footer-grid      { grid-template-columns: 1fr 1fr; }
-}
-
-@media (max-width: 768px) {
-    .hu-praybar        { padding: 0 16px; }
-    .hu-praybar-date   { display: none; }
-    .hu-prayer         { min-width: 52px; padding: 0 10px; }
-
-    .hu-navbar-inner   { padding: 0 16px; gap: 12px; }
-    .hu-nav            { display: none; position: absolute; top: 60px; left: 0; right: 0; background: #fff; flex-direction: column; padding: 16px; border-bottom: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .hu-nav.open       { display: flex; }
-    .hu-hamburger      { display: flex; }
-    .hu-ganti-btn      { display: none; }
-
-    .hu-ticker-label   { margin-left: 16px; }
-
-    .hu-hero-content   { padding: 0 24px 56px; }
-    .hu-section        { padding: 48px 0; }
-    .hu-container      { padding: 0 16px; }
-
-    .hu-shalat-grid    { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .hu-program-grid   { grid-template-columns: repeat(2, 1fr); }
-    .hu-donasi-grid    { grid-template-columns: 1fr; }
-    .hu-footer-grid    { grid-template-columns: 1fr; gap: 28px; }
-}
-
-@media (max-width: 480px) {
-    .hu-praybar-times  { gap: 0; }
-    .hu-prayer         { min-width: 44px; padding: 0 6px; }
-    .hu-prayer-name    { font-size: 0.58rem; }
-    .hu-prayer-time    { font-size: 0.78rem; }
-
-    .hu-shalat-grid    { grid-template-columns: 1fr 1fr; }
-    .hu-program-grid   { grid-template-columns: 1fr 1fr; }
-    .hu-acara-item     { flex-wrap: wrap; }
-}
-
-.hu-program-section {
-    background: #f5f0e8;
-    padding: 72px 0;
-}
-
-.hu-tag-amber {
-    background: transparent;
-    color: #c9a05a;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 0;
-    margin-bottom: 12px;
-    display: inline-block;
-}
-
-.hu-title-dark { color: #1a2a3a; }
-
-.hu-program-v2-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
-    margin-top: 8px;
-    margin-top: 10px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em;
-    color: var(--emerald-900); background: var(--brass-light);
-    display: inline-block; padding: 4px 10px; border-radius: 999px;
-}
 .hu-shalat-card.active { background: var(--brass); border-color: var(--brass); }
 .hu-shalat-card.active .hu-shalat-name,
 .hu-shalat-card.active .hu-shalat-time { color: #241705; }
 
-/* ===================================================================
+/* =========================================================================
+   PROGRAM + FASILITAS (2 kolom bersebelahan)
+   ========================================================================= */
+.hu-progfas-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+}
+.hu-progfas-col-head { margin-bottom: 24px; }
+
+/* =========================================================================
    PROGRAM UNGGULAN
-   =================================================================== */
+   ========================================================================= */
+.hu-program-section { background: #f5f0e8; padding: 72px 0; }
+
 .hu-program-v2-list { display: flex; flex-direction: column; }
 .hu-program-v2-item {
     display: flex; align-items: baseline; gap: 22px;
@@ -930,55 +492,38 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
 .hu-program-v2-num {
     font-size: 0.65rem;
     font-weight: 800;
-    color: #c9a05a;
-    letter-spacing: 0.05em;
-}
-
-.hu-acara-section {
-    background: #faf8f3;
-    padding: 72px 0;
-}
-
-.hu-acara-v2-head {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 36px;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.hu-acara-lihat {
-    font-size: 0.84rem;
-    font-weight: 600;
-    color: #1a2a3a;
-    text-decoration: none;
-    white-space: nowrap;
-    padding-bottom: 2px;
-    border-bottom: 1px solid #1a2a3a;
-    transition: color 0.16s;
-}
-
-.hu-acara-lihat:hover { color: #1a4731; border-color: #1a4731; }
-
-.hu-acara-v2-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-
-    font-family: var(--font-display);
-    font-size: 1.1rem;
     color: var(--brass-deep);
-    min-width: 34px;
+    letter-spacing: 0.05em;
 }
 .hu-program-v2-name { font-family: var(--font-display); font-size: 1.3rem; font-weight: 500; }
 
-/* ===================================================================
+/* =========================================================================
+   FASILITAS (list bernomor, sama seperti Program Unggulan)
+   ========================================================================= */
+.hu-fasilitas-wrap { display: flex; flex-direction: column; }
+.hu-fasilitas-item {
+    display: flex; align-items: baseline; gap: 22px;
+    padding: 24px 4px;
+    border-bottom: 1px solid var(--line);
+    transition: padding-left 0.25s ease, color 0.25s ease;
+}
+.hu-fasilitas-item:first-child { border-top: 1px solid var(--line); }
+.hu-fasilitas-item:hover { padding-left: 14px; color: var(--emerald-800); }
+.hu-fasilitas-num {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--brass-deep);
+    letter-spacing: 0.05em;
+}
+.hu-fasilitas-name { font-family: var(--font-display); font-size: 1.3rem; font-weight: 500; }
+
+/* =========================================================================
    ACARA
-   =================================================================== */
+   ========================================================================= */
 .hu-acara-section { padding: 88px 0; background: var(--parchment-deep); }
 .hu-acara-v2-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 40px; gap: 16px; flex-wrap: wrap; }
 .hu-acara-lihat { font-weight: 600; font-size: 0.88rem; color: var(--emerald-800); border-bottom: 1.5px solid var(--brass); padding-bottom: 2px; }
+.hu-acara-lihat:hover { color: var(--brass-deep); }
 .hu-acara-v2-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
 .hu-acara-v2-card {
     background: var(--parchment);
@@ -989,6 +534,11 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
     transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 .hu-acara-v2-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-soft); }
+
+/* Thumbnail foto acara, muncul di atas tanggal/badge kalau admin upload foto */
+.hu-acara-v2-photo { border-radius: 14px; overflow: hidden; aspect-ratio: 16/10; margin-bottom: 18px; }
+.hu-acara-v2-photo img { width: 100%; height: 100%; object-fit: cover; }
+
 .hu-acara-v2-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; }
 .hu-acara-v2-date {
     width: 56px; height: 56px;
@@ -1010,9 +560,9 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
 .hu-acara-v2-link { display: inline-block; margin-top: 18px; font-size: 0.85rem; font-weight: 600; color: var(--emerald-800); }
 .hu-acara-v2-link:hover { color: var(--brass-deep); }
 
-/* ===================================================================
+/* =========================================================================
    DONASI
-   =================================================================== */
+   ========================================================================= */
 .hu-donasi-v2-section {
     background: var(--emerald-900);
     color: #fff;
@@ -1048,138 +598,11 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
 }
 .hu-donasi-v2-card-title { font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; margin-bottom: 18px; }
 .hu-donasi-v2-nominals { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
 .hu-nominal-btn {
-    padding: 11px 8px;
-    font-size: 0.84rem;
-    font-weight: 600;
-    font-family: var(--font);
-    color: #1a2a3a;
-    background: #fff;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.16s;
-}
-
-.hu-nominal-btn:hover,
-.hu-nominal-btn.selected {
-    background: #1a2a3a;
-    color: #fff;
-    border-color: #1a2a3a;
-}
-
-.hu-donasi-v2-or {
-    font-size: 0.75rem;
-    color: #9ca3af;
-    margin-bottom: 8px;
-}
-
-.hu-donasi-v2-input-wrap {
-    display: flex;
-    align-items: center;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 14px;
-}
-
-.hu-donasi-v2-prefix {
-    padding: 10px 12px;
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: #6b7280;
-    background: #f9fafb;
-    border-right: 1px solid #e5e7eb;
-    flex-shrink: 0;
-}
-
-.hu-donasi-v2-input {
-    flex: 1;
-    padding: 10px 12px;
-    font-size: 0.88rem;
-    font-family: var(--font);
-    border: none;
-    outline: none;
-    color: #1a2a3a;
-}
-
-.hu-donasi-v2-label-field {
-    font-size: 0.75rem;
-    color: #6b7280;
-    margin-bottom: 6px;
-}
-
-.hu-donasi-v2-input-name {
-    width: 100%;
-    padding: 10px 12px;
-    font-size: 0.88rem;
-    font-family: var(--font);
-    border: 1.5px solid #e5e7eb;
-    border-radius: 8px;
-    outline: none;
-    color: #1a2a3a;
-    margin-bottom: 16px;
-    transition: border-color 0.18s;
-}
-
-.hu-donasi-v2-input-name:focus { border-color: #1a4731; }
-.hu-donasi-v2-input-name::placeholder { color: #9ca3af; }
-
-.hu-donasi-v2-submit {
-    width: 100%;
-    padding: 13px;
-    font-size: 0.92rem;
-    font-weight: 700;
-    font-family: var(--font);
-    color: #fff;
-    background: #1a2a3a;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-bottom: 12px;
-    transition: background 0.18s;
-}
-
-.hu-donasi-v2-submit:hover { background: #0f1923; }
-
-.hu-donasi-v2-note {
-    font-size: 0.72rem;
-    color: #9ca3af;
-    text-align: center;
-    line-height: 1.5;
-}
-
-/* Responsive additions */
-@media (max-width: 1024px) {
-    .hu-donasi-v2-inner { grid-template-columns: 1fr; gap: 36px; }
-    .hu-acara-v2-grid   { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 640px) {
-    .hu-acara-v2-grid   { grid-template-columns: 1fr; }
-    .hu-donasi-v2-inner { padding: 48px 16px; }
-}
-
-.hu-hubungi-section {
-    background: #fff;
-    padding: 72px 0 64px;
-}
-
-.hu-hubungi-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-top: 8px;
-}
-
-.hu-hubungi-card {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 22px 20px;
-    border: 1.5px solid #e8e2d5;
     font-family: var(--font-body);
-    font-weight: 600; font-size: 0.88rem;
+    font-weight: 600;
+    font-size: 0.88rem;
     padding: 13px 10px;
     border-radius: 12px;
     border: 1.5px solid var(--line);
@@ -1190,6 +613,7 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
 }
 .hu-nominal-btn:hover { border-color: var(--brass); }
 .hu-nominal-btn.selected { background: var(--emerald-900); border-color: var(--emerald-900); color: #fff; }
+
 .hu-donasi-v2-or { text-align: center; font-size: 0.78rem; color: var(--ink-soft); margin: 16px 0 10px; }
 .hu-donasi-v2-input-wrap { display: flex; align-items: center; border: 1.5px solid var(--line); border-radius: 12px; overflow: hidden; }
 .hu-donasi-v2-prefix { padding: 13px 12px; background: var(--parchment-deep); font-weight: 600; color: var(--ink-soft); }
@@ -1203,6 +627,8 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
     width: 100%; padding: 13px 12px; border-radius: 12px; border: 1.5px solid var(--line);
     font-family: var(--font-body); font-size: 0.92rem; color: var(--ink);
 }
+.hu-donasi-v2-input-name:focus { border-color: var(--emerald-700); outline: none; }
+.hu-donasi-v2-input-name::placeholder { color: var(--ink-soft); opacity: 0.7; }
 .hu-donasi-v2-submit {
     width: 100%; margin-top: 20px; padding: 15px; border: none; border-radius: 999px;
     background: var(--brass); color: #241705; font-weight: 700; font-size: 0.95rem;
@@ -1211,9 +637,10 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
 .hu-donasi-v2-submit:hover { background: var(--brass-light); transform: translateY(-1px); }
 .hu-donasi-v2-note { text-align: center; font-size: 0.72rem; color: var(--ink-soft); margin-top: 14px; }
 
-/* ===================================================================
+/* =========================================================================
    HUBUNGI KAMI
-   =================================================================== */
+   ========================================================================= */
+.hu-hubungi-section { background: #fff; padding: 72px 0 64px; }
 .hu-hubungi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .hu-hubungi-card {
     display: flex; gap: 16px; align-items: flex-start;
@@ -1231,29 +658,10 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
     display: grid; place-items: center;
 }
 .hu-hubungi-label { font-size: 0.74rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
-.hu-hubungi-val { font-size: 0.95rem; font-weight: 500; line-height: 1.5; }
+.hu-hubungi-val { font-size: 0.9rem; font-weight: 500; color: var(--ink); line-height: 1.6; }
 .hu-hubungi-val a { color: var(--emerald-800); font-weight: 600; }
 
-.hu-hubungi-social {
-    display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap;
-}
-.hu-hubungi-val {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #1a2a3a;
-    line-height: 1.6;
-}
-
-.hu-footer-v2 {
-    background: #1a2a3a;
-    position: relative;
-}
-
-.hu-footer-v2-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 56px 32px 0;
-}
+.hu-hubungi-social { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
 .hu-hubungi-social a {
     font-size: 0.84rem; font-weight: 600;
     padding: 9px 18px;
@@ -1264,9 +672,24 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
 }
 .hu-hubungi-social a:hover { border-color: var(--brass); color: var(--brass-deep); background: var(--brass-light); }
 
-/* ===================================================================
+.hu-map-placeholder {
+    background: var(--parchment-deep);
+    border: 2px dashed var(--line);
+    border-radius: var(--radius-card);
+    height: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.hu-map-icon { font-size: 2.5rem; }
+.hu-map-text { font-size: 0.9rem; font-weight: 600; color: var(--ink); }
+.hu-map-sub  { font-size: 0.8rem; color: var(--ink-soft); }
+
+/* =========================================================================
    FOOTER
-   =================================================================== */
+   ========================================================================= */
 .hu-footer-v2 { background: var(--emerald-900); color: rgba(255,255,255,0.8); position: relative; }
 .hu-footer-v2-inner { max-width: 1160px; margin: 0 auto; padding: 72px 28px 32px; }
 .hu-footer-v2-grid {
@@ -1303,6 +726,9 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
 }
 .hu-kembali-btn:hover { background: rgba(255,255,255,0.18); }
 
+/* =========================================================================
+   FLOATING HELP BUTTON
+   ========================================================================= */
 .help-fab {
     position: fixed;
     bottom: 26px; right: 26px;
@@ -1319,22 +745,27 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
 }
 .help-fab:hover { transform: translateY(-3px); background: var(--emerald-700); }
 
-/* ===================================================================
+/* =========================================================================
    RESPONSIVE
-   =================================================================== */
+   ========================================================================= */
 @media (max-width: 980px) {
-    .hu-profil-v2-grid { grid-template-columns: 1fr; gap: 40px; }
+    .hu-progfas-grid     { grid-template-columns: 1fr; gap: 48px; }
+    .hu-profil-v2-grid   { grid-template-columns: 1fr; gap: 40px; }
     .hu-profil-v2-images { max-width: 420px; }
-    .hu-donasi-v2-inner { grid-template-columns: 1fr; }
-    .hu-shalat-grid { grid-template-columns: repeat(3, 1fr); }
-    .hu-acara-v2-grid { grid-template-columns: repeat(2, 1fr); }
-    .hu-hubungi-grid { grid-template-columns: 1fr 1fr; }
-    .hu-footer-v2-grid { grid-template-columns: 1fr 1fr; }
+    .hu-donasi-v2-inner  { grid-template-columns: 1fr; }
+    .hu-shalat-grid      { grid-template-columns: repeat(3, 1fr); }
+    .hu-acara-v2-grid    { grid-template-columns: repeat(2, 1fr); }
+    .hu-hubungi-grid     { grid-template-columns: 1fr 1fr; }
+    .hu-footer-v2-grid   { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 720px) {
-    .hu-praybar { justify-content: flex-start; padding: 10px 18px; }
-    .hu-praybar-times { gap: 14px; overflow-x: auto; }
+    .hu-praybar         { justify-content: flex-start; padding: 10px 18px; }
+    .hu-praybar-date    { display: none; }
+    .hu-praybar-times   { gap: 14px; overflow-x: auto; }
+    .hu-prayer          { min-width: 52px; padding: 0 10px; }
+
+    .hu-navbar-inner    { padding: 0 16px; gap: 12px; }
     .hu-nav {
         position: absolute; top: 100%; left: 0; right: 0;
         flex-direction: column; align-items: stretch; gap: 2px;
@@ -1343,17 +774,30 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
         padding: 10px 20px 16px;
         display: none;
     }
-    .hu-nav.open { display: flex; }
-    .hu-ganti-btn span { display: none; }
-    .hu-hamburger { display: flex; }
-    .hu-section { padding: 64px 0; }
-    .hu-hero-content { padding: 100px 22px 72px; }
-    .hu-shalat-grid { grid-template-columns: repeat(2, 1fr); }
-    .hu-acara-v2-grid { grid-template-columns: 1fr; }
-    .hu-hubungi-grid { grid-template-columns: 1fr; }
-    .hu-footer-v2-grid { grid-template-columns: 1fr; gap: 28px; }
+    .hu-nav.open        { display: flex; }
+    .hu-ganti-btn span   { display: none; }
+    .hu-hamburger        { display: flex; }
+
+    .hu-ticker-label     { margin-left: 16px; }
+
+    .hu-hero-content     { padding: 100px 22px 72px; }
+    .hu-section          { padding: 64px 0; }
+
+    .hu-shalat-grid      { grid-template-columns: repeat(2, 1fr); }
+    .hu-acara-v2-grid    { grid-template-columns: 1fr; }
+    .hu-hubungi-grid     { grid-template-columns: 1fr; }
+    .hu-footer-v2-grid   { grid-template-columns: 1fr; gap: 28px; }
     .hu-donasi-v2-nominals { grid-template-columns: 1fr 1fr; }
-    .hu-kembali-btn { position: static; margin-top: 20px; display: inline-block; }
+    .hu-kembali-btn      { position: static; margin-top: 20px; display: inline-block; }
+}
+
+@media (max-width: 480px) {
+    .hu-praybar-times   { gap: 0; }
+    .hu-prayer          { min-width: 44px; padding: 0 6px; }
+    .hu-prayer-name     { font-size: 0.58rem; }
+    .hu-prayer-time     { font-size: 0.78rem; }
+
+    .hu-shalat-grid     { grid-template-columns: 1fr 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {
