@@ -121,6 +121,14 @@ Route::middleware(['auth'])->group(function () {
 
     Route::put('/admin/profil-masjid', [MosqueController::class, 'updateProfil'])
         ->name('admin.profil-masjid.update');
+
+    Route::get('/admin/beranda', function () {
+        return view('auth.adminmasjid.berandaAdmin');
+    })->name('admin.beranda');
+
+    Route::get('/admin/jadwal-sholat', function () {
+        return view('auth.adminmasjid.jadwalSholat');
+    })->name('admin.jadwal-sholat');
 });
 
 /*

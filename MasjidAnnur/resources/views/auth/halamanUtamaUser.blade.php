@@ -87,7 +87,7 @@
             <h1 class="hu-hero-title">{{ $mosque->mosque_name ?? 'Masjid Ar-Rahman' }}</h1>
             <p class="hu-hero-tagline">
                 {{ $mosque->tagline ?? 'Rahmat untuk Semua' }}
-                @if(!empty($mosque->city)) — {{ $mosque->city }} @endif
+                @if(!empty($mosque->city)) — {{ $mosque->city }}
             </p>
             <div class="hu-hero-btns">
                 <a href="#donasi" class="hu-btn-primary">Donasi Sekarang</a>
@@ -194,7 +194,7 @@
                     <div class="hu-shalat-time">{{ $p['time'] }}</div>
                     @if($p['active'])
                     <div class="hu-shalat-now">Waktu Sekarang</div>
-                    @endif
+                
                 </div>
                 @endforeach
             </div>
@@ -253,7 +253,7 @@
                         </div>
                         @if($a['terbaru'])
                         <span class="hu-acara-v2-badge">Terbaru</span>
-                        @endif
+                  
                     </div>
                     <div class="hu-acara-v2-judul">{{ $a['judul'] }}</div>
                     <div class="hu-acara-v2-meta">{{ $a['waktu'] }} · {{ $a['oleh'] }}</div>
