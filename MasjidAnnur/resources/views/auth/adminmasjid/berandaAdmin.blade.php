@@ -43,21 +43,20 @@
                 <span class="ba2-nav-icon"><i class="fa-solid fa-mosque"></i></span>
                 <span class="ba2-nav-label">Profil Masjid</span>
             </a>
-            <a href="#" class="ba2-nav-item">
-                <span class="ba2-nav-icon"><i class="fa-solid fa-clock"></i></span>
-                <span class="ba2-nav-label">Jadwal Shalat</span>
-                <span class="ba2-nav-soon">dev</span>
+            <a href="{{ route('admin.jadwal-sholat') }}" class="ba2-nav-item {{ request()->routeIs('admin.jadwal-sholat') ? 'active' : '' }}">
+            <span class="ba2-nav-icon"><i class="fa-solid fa-clock"></i></span>
+            <span class="ba2-nav-label">Jadwal Shalat</span>
+            <span class="ba2-nav-soon">dev</span>
             </a>
             <a href="#" class="ba2-nav-item">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-bullhorn"></i></span>
                 <span class="ba2-nav-label">Pengumuman</span>
                 <span class="ba2-nav-badge">3</span>
             </a>
-            <a href="#" class="ba2-nav-item">
-                <span class="ba2-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
-                <span class="ba2-nav-label">Kegiatan &amp; Acara</span>
-                <span class="ba2-nav-soon">dev</span>
-            </a>
+          <a href="{{ route('admin.acara') }}" class="ba2-nav-item {{ request()->routeIs('admin.acara*') ? 'active' : '' }}">
+    <span class="ba2-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
+    <span class="ba2-nav-label">Kegiatan &amp; Acara</span>
+</a>
             <a href="#" class="ba2-nav-item">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
                 <span class="ba2-nav-label">Donasi</span>
@@ -112,125 +111,122 @@
         {{-- Content --}}
         <main class="ba2-content">
 
-            {{-- ===== STATS CARDS ===== --}}
-            <div class="ba2-stats-grid">
-                <div class="ba2-stat-card">
-                    <div class="ba2-stat-top">
-                        <span class="ba2-stat-icon"><i class="fa-solid fa-users" style="color:#6366f1;font-size:1.3rem;"></i></span>
-                        <span class="ba2-stat-badge green">+38</span>
-                    </div>
-                    <div class="ba2-stat-value">2.412</div>
-                    <div class="ba2-stat-label">Total Jamaah</div>
+           {{-- ===== STATS CARDS ===== --}}
+        <div class="ba2-stats-grid">
+            <div class="ba2-stat-card">
+                <div class="ba2-stat-top">
+                    <span class="ba2-stat-icon"><i class="fa-solid fa-users" style="color:#6366f1;font-size:1.3rem;"></i></span>
+                    <span class="ba2-stat-badge green">Aktif</span>
                 </div>
+                <div class="ba2-stat-value">{{ $totalJamaah ?? 0 }}</div>
+                <div class="ba2-stat-label">Total Jamaah</div>
+            </div>
 
-                <div class="ba2-stat-card">
-                    <div class="ba2-stat-top">
-                        <span class="ba2-stat-icon"><i class="fa-solid fa-credit-card" style="color:#0ea5e9;font-size:1.3rem;"></i></span>
-                        <span class="ba2-stat-badge blue">+15%</span>
-                    </div>
-                    <div class="ba2-stat-value">Rp 12,4 Jt</div>
-                    <div class="ba2-stat-label">Donasi Bulan Ini</div>
+            <div class="ba2-stat-card">
+                <div class="ba2-stat-top">
+                    <span class="ba2-stat-icon"><i class="fa-solid fa-credit-card" style="color:#0ea5e9;font-size:1.3rem;"></i></span>
+                    <span class="ba2-stat-badge blue">Bulan Ini</span>
                 </div>
+                <div class="ba2-stat-value">Rp {{ number_format($totalDonasiBulanIni ?? 0, 0, ',', '.') }}</div>
+                <div class="ba2-stat-label">Donasi Bulan Ini</div>
+            </div>
 
-                <div class="ba2-stat-card">
-                    <div class="ba2-stat-top">
-                        <span class="ba2-stat-icon"><i class="fa-solid fa-calendar-days" style="color:#f59e0b;font-size:1.3rem;"></i></span>
-                        <span class="ba2-stat-badge amber">bulan ini</span>
-                    </div>
-                    <div class="ba2-stat-value">3</div>
-                    <div class="ba2-stat-label">Acara Aktif</div>
+            <div class="ba2-stat-card">
+                <div class="ba2-stat-top">
+                    <span class="ba2-stat-icon"><i class="fa-solid fa-calendar-days" style="color:#f59e0b;font-size:1.3rem;"></i></span>
+                    <span class="ba2-stat-badge amber">Agenda</span>
                 </div>
+                <div class="ba2-stat-value">{{ $totalAcara ?? 0 }}</div>
+                <div class="ba2-stat-label">Acara Aktif</div>
+            </div>
 
-                <div class="ba2-stat-card">
-                    <div class="ba2-stat-top">
-                        <span class="ba2-stat-icon"><i class="fa-solid fa-bullhorn" style="color:#ef4444;font-size:1.3rem;"></i></span>
-                        <span class="ba2-stat-badge red">2 belum dibaca</span>
+            <div class="ba2-stat-card">
+                <div class="ba2-stat-top">
+                    <span class="ba2-stat-icon"><i class="fa-solid fa-bullhorn" style="color:#ef4444;font-size:1.3rem;"></i></span>
+                    <span class="ba2-stat-badge red">Informasi</span>
+                </div>
+                <div class="ba2-stat-value">{{ $totalPengumuman ?? 0 }}</div>
+                <div class="ba2-stat-label">Pengumuman</div>
+            </div>
+        </div>
+
+        {{-- ===== ROW: AKTIVITAS + STATUS MODUL ===== --}}
+        <div class="ba2-row-2">
+            {{-- Aktivitas --}}
+            <div class="ba2-card">
+                <div class="ba2-card-head">
+                    <span class="ba2-card-title">Aktivitas Terkini</span>
+                    <span class="ba2-card-meta">Sistem</span>
+                </div>
+                <div class="ba2-card-body">
+                   @php
+                    $aktivitas = [
+                        ['color' => 'green',  'teks' => 'Sistem dashboard masjid berhasil dimuat', 'waktu' => 'Baru saja'],
+                        ['color' => 'blue',   'teks' => 'Modul Jadwal Shalat dan Acara diaktifkan', 'waktu' => 'Hari ini'],
+                    ];
+                    @endphp    
+                    @foreach($aktivitas as $a)
+                    <div class="ba2-activity-item">
+                        <span class="ba2-dot {{ $a['color'] }}"></span>
+                        <span class="ba2-activity-text">{{ $a['teks'] }}</span>
+                        <span class="ba2-activity-time">{{ $a['waktu'] }}</span>
                     </div>
-                    <div class="ba2-stat-value">7</div>
-                    <div class="ba2-stat-label">Pengumuman</div>
+                    @endforeach
                 </div>
             </div>
 
-            {{-- ===== ROW: AKTIVITAS + STATUS MODUL ===== --}}
-            <div class="ba2-row-2">
-                {{-- Aktivitas --}}
-                <div class="ba2-card">
-                    <div class="ba2-card-head">
-                        <span class="ba2-card-title">Aktivitas Terkini</span>
-                        <span class="ba2-card-meta">Hari ini</span>
-                    </div>
-                    <div class="ba2-card-body">
-                        @php
-                            $aktivitas = [
-                                ['color' => 'green',  'teks' => 'Donasi baru dari Hamba Allah — Rp 250.000', 'waktu' => '09:32'],
-                                ['color' => 'blue',   'teks' => 'Jamaah baru terdaftar: Ahmad Fulan',         'waktu' => '08:15'],
-                                ['color' => 'amber',  'teks' => 'Pengumuman "Jadwal Ramadan" dipublikasikan', 'waktu' => 'Kemarin'],
-                                ['color' => 'purple', 'teks' => 'Acara "Kajian Fiqih" diperbarui',             'waktu' => 'Kemarin'],
-                                ['color' => 'gray',   'teks' => 'Profil masjid diperbarui oleh Admin',         'waktu' => '3 hari lalu'],
-                            ];
-                        @endphp
-                        @foreach($aktivitas as $a)
-                        <div class="ba2-activity-item">
-                            <span class="ba2-dot {{ $a['color'] }}"></span>
-                            <span class="ba2-activity-text">{{ $a['teks'] }}</span>
-                            <span class="ba2-activity-time">{{ $a['waktu'] }}</span>
-                        </div>
-                        @endforeach
-                    </div>
+            {{-- Status Modul --}}
+            <div class="ba2-card">
+                <div class="ba2-card-head">
+                    <span class="ba2-card-title">Status Modul</span>
                 </div>
-
-                {{-- Status Modul --}}
-                <div class="ba2-card">
-                    <div class="ba2-card-head">
-                        <span class="ba2-card-title">Status Modul</span>
+                <div class="ba2-card-body">
+                    @php
+                        $moduls = [
+                            ['icon' => 'fa-globe',          'name' => 'Landing Page',    'status' => 'aktif'],
+                            ['icon' => 'fa-mosque',         'name' => 'Profil Masjid',   'status' => 'aktif'],
+                            ['icon' => 'fa-clock',          'name' => 'Jadwal Shalat',   'status' => 'aktif'], // Diubah jadi aktif
+                            ['icon' => 'fa-bullhorn',       'name' => 'Pengumuman',      'status' => 'segera'],
+                            ['icon' => 'fa-calendar-days',  'name' => 'Kegiatan & Acara','status' => 'aktif'], // Diubah jadi aktif
+                            ['icon' => 'fa-hand-holding-dollar','name' => 'Donasi',      'status' => 'segera'],
+                            ['icon' => 'fa-users',          'name' => 'Data Jamaah',     'status' => 'segera'],
+                        ];
+                    @endphp
+                    @foreach($moduls as $m)
+                    <div class="ba2-modul-item">
+                        <span class="ba2-modul-icon"><i class="fa-solid {{ $m['icon'] }}"></i></span>
+                        <span class="ba2-modul-name">{{ $m['name'] }}</span>
+                        <span class="ba2-modul-status {{ $m['status'] }}">
+                            {{ $m['status'] === 'aktif' ? 'Aktif' : 'Segera' }}
+                        </span>
                     </div>
-                    <div class="ba2-card-body">
-                        @php
-                            $moduls = [
-                                ['icon' => 'fa-globe',           'name' => 'Landing Page',     'status' => 'aktif'],
-                                ['icon' => 'fa-mosque',          'name' => 'Profil Masjid',    'status' => 'aktif'],
-                                ['icon' => 'fa-clock',           'name' => 'Jadwal Shalat',    'status' => 'segera'],
-                                ['icon' => 'fa-bullhorn',        'name' => 'Pengumuman',       'status' => 'segera'],
-                                ['icon' => 'fa-calendar-days',   'name' => 'Kegiatan & Acara', 'status' => 'segera'],
-                                ['icon' => 'fa-hand-holding-dollar','name' => 'Donasi',        'status' => 'segera'],
-                                ['icon' => 'fa-users',           'name' => 'Data Jamaah',      'status' => 'segera'],
-                            ];
-                        @endphp
-                        @foreach($moduls as $m)
-                        <div class="ba2-modul-item">
-                            <span class="ba2-modul-icon"><i class="fa-solid {{ $m['icon'] }}"></i></span>
-                            <span class="ba2-modul-name">{{ $m['name'] }}</span>
-                            <span class="ba2-modul-status {{ $m['status'] }}">
-                                {{ $m['status'] === 'aktif' ? 'Aktif' : 'Segera' }}
-                            </span>
-                        </div>
-                        @endforeach
-                    </div>
+                    @endforeach
                 </div>
             </div>
+        </div>
 
-            {{-- ===== BANNER ===== --}}
-            <div class="ba2-banner">
-                <div class="ba2-banner-title">{{ $mosque->mosque_name ?? 'SIM Masjid' }} — {{ $mosque->city ?? 'Baitul Digital' }}</div>
-                <div class="ba2-banner-sub">Sistem Informasi Masjid versi 1.0 · Modul aktif: Landing Page, Profil Masjid</div>
-                <div class="ba2-banner-tags">
-                    <span class="ba2-banner-tag active">Modul Landing Page ✓</span>
-                    <span class="ba2-banner-tag active">Modul Profil Masjid ✓</span>
-                    <span class="ba2-banner-tag soon">Modul Donasi (coming soon)</span>
-                    <span class="ba2-banner-tag soon">Modul Berita (coming soon)</span>
-                </div>
+        {{-- ===== BANNER ===== --}}
+        <div class="ba2-banner">
+            <div class="ba2-banner-title">{{ $mosque->mosque_name ?? 'SIM Masjid' }} — {{ $mosque->city ?? 'Indonesia' }}</div>
+            <div class="ba2-banner-sub">Sistem Informasi Masjid versi 1.0 · Modul aktif: Landing Page, Profil Masjid, Jadwal Shalat, Kegiatan & Acara</div>
+            <div class="ba2-banner-tags">
+                <span class="ba2-banner-tag active">Modul Landing Page ✓</span>
+                <span class="ba2-banner-tag active">Modul Profil Masjid ✓</span>
+                <span class="ba2-banner-tag active">Modul Jadwal Shalat ✓</span>
+                <span class="ba2-banner-tag active">Modul Kegiatan & Acara ✓</span>
             </div>
+        </div>
 
-        </main>
-    </div>
+    </main>
+</div>
 
-    <button class="ba2-fab" aria-label="Bantuan">?</button>
+<button class="ba2-fab" aria-label="Bantuan">?</button>
 
-    <script>
-        document.getElementById('ba2CollapseBtn').addEventListener('click', () => {
-            document.getElementById('ba2Sidebar').classList.toggle('collapsed');
-            document.getElementById('ba2Main').classList.toggle('expanded');
-        });
-    </script>
+<script>
+    document.getElementById('ba2CollapseBtn').addEventListener('click', () => {
+        document.getElementById('ba2Sidebar').classList.toggle('collapsed');
+        document.getElementById('ba2Main').classList.toggle('expanded');
+    });
+</script>
 </body>
 </html>

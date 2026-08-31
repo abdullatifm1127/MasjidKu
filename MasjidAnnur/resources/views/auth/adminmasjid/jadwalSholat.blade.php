@@ -16,30 +16,33 @@
     <aside class="ba2-sidebar" id="ba2Sidebar">
 
         <div class="ba2-brand">
-            <div class="ba2-brand-avatar">A</div>
-            <div class="ba2-brand-info">
-                <div class="ba2-brand-name">SIM Masjid</div>
-                <div class="ba2-brand-sub">Baitul Digital</div>
+            <div class="ba2-brand-avatar">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                     stroke-width="1.8" stroke="currentColor" width="20" height="20">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z"/>
+                </svg>
             </div>
-            <button class="ba2-collapse-btn" id="ba2CollapseBtn" aria-label="Collapse">
-                <i class="fa-solid fa-chevron-left"></i>
-            </button>
+            <div class="ba2-brand-info">
+                <div class="ba2-brand-name">{{ $mosque->mosque_name ?? 'SIM Masjid' }}</div>
+                <div class="ba2-brand-sub">{{ $mosque->city ?? 'Baitul Digital' }}</div>
+            </div>
         </div>
 
         <nav class="ba2-nav">
-            <a href="{{ route('admin2.dashboard') }}" class="ba2-nav-item">
+           <a href="{{ route('admin.dashboard') }}" class="ba2-nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
                 <span class="ba2-nav-label">Dashboard</span>
             </a>
-            <a href="{{ route('admin2.landing-page') }}" class="ba2-nav-item">
+            <a href="{{ route('admin.landing-page') }}" class="ba2-nav-item {{ request()->routeIs('admin.landing-page') ? 'active' : '' }}">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-globe"></i></span>
                 <span class="ba2-nav-label">Landing Page</span>
             </a>
-            <a href="{{ route('admin2.profil-masjid') }}" class="ba2-nav-item">
+            <a href="{{ route('admin.profil-masjid') }}" class="ba2-nav-item {{ request()->routeIs('admin.profil-masjid') ? 'active' : '' }}">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-mosque"></i></span>
                 <span class="ba2-nav-label">Profil Masjid</span>
             </a>
-            <a href="{{ route('admin2.jadwal-sholat') }}" class="ba2-nav-item active">
+            <a href="{{ route('admin.jadwal-sholat') }}" class="ba2-nav-item {{ request()->routeIs('admin.jadwal-sholat') ? 'active' : '' }}">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-clock"></i></span>
                 <span class="ba2-nav-label">Jadwal Shalat</span>
             </a>
@@ -48,10 +51,9 @@
                 <span class="ba2-nav-label">Pengumuman</span>
                 <span class="ba2-nav-badge">3</span>
             </a>
-            <a href="#" class="ba2-nav-item">
+            <a href="{{ route('admin.acara') }}" class="ba2-nav-item {{ request()->routeIs('admin.acara*') ? 'active' : '' }}">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
                 <span class="ba2-nav-label">Kegiatan &amp; Acara</span>
-                <span class="ba2-nav-soon">dev</span>
             </a>
             <a href="#" class="ba2-nav-item">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
@@ -66,10 +68,10 @@
         </nav>
 
         <div class="ba2-user">
-            <div class="ba2-user-avatar">A</div>
+            <div class="ba2-user-avatar">{{ substr(auth()->user()->name ?? 'A', 0, 2) }}</div>
             <div class="ba2-user-info">
-                <div class="ba2-user-name">Admin Masjid</div>
-                <div class="ba2-user-email">admin@baituldigital.id</div>
+                <div class="ba2-user-name">{{ auth()->user()->name ?? 'Admin Masjid' }}</div>
+                <div class="ba2-user-email">{{ auth()->user()->email ?? 'admin@baituldigital.id' }}</div>
             </div>
         </div>
 
@@ -113,11 +115,5 @@
 
     <button class="ba2-fab" aria-label="Bantuan">?</button>
 
-    <script>
-        document.getElementById('ba2CollapseBtn').addEventListener('click', function () {
-            document.getElementById('ba2Sidebar').classList.toggle('collapsed');
-            document.getElementById('ba2Main').classList.toggle('expanded');
-        });
-    </script>
 </body>
 </html>

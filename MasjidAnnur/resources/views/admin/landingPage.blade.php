@@ -6,6 +6,7 @@
     <title>Editor Landing Page - Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/adminmasjid/landingPage.css') }}">
 </head>
 <body class="lp-body" id="lpBody">
@@ -14,70 +15,66 @@
     <aside class="lp-sidebar" id="lpSidebar">
 
         <div class="lp-brand">
-            <div class="lp-brand-avatar">AM</div>
-            <div class="lp-brand-info">
-                <span class="lp-brand-name">SIM Masjid</span>
-                <span class="lp-brand-sub">Baitul Digital</span>
-            </div>
-            <!-- Tombol Toggle di dalam Brand (jika dipakai di CSS Anda) -->
-            <button class="lp-sidebar-toggle" id="lpSidebarToggle" aria-label="Collapse sidebar" type="button">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            <div class="lp-brand-avatar">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                     stroke-width="1.8" stroke="currentColor" width="20" height="20">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z"/>
                 </svg>
-            </button>
-        </div>
+            </div>
+            <div class="lp-brand-info">
+                <span class="lp-brand-name">{{ $mosque->mosque_name ?? 'SIM Masjid' }}</span>
+                <span class="lp-brand-sub">{{ $mosque->city ?? 'Baitul Digital' }}</span>
+            </div>
+            </div>
 
         <nav class="lp-nav">
-            <a href="{{ route('admin.dashboard') }}" class="lp-nav-item">
-                <span class="lp-nav-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="18" height="18">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/>
-                    </svg>
-                </span>
+            <a href="{{ route('admin.dashboard') }}" class="lp-nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                <span class="lp-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
                 <span class="lp-nav-label">Dashboard</span>
             </a>
 
-            <a href="{{ route('admin.landing-page') }}" class="lp-nav-item active">
-                <span class="lp-nav-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="18" height="18">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253"/>
-                    </svg>
-                </span>
+            <a href="{{ route('admin.landing-page') }}" class="lp-nav-item {{ request()->routeIs('admin.landing-page') ? 'active' : '' }}">
+                <span class="lp-nav-icon"><i class="fa-solid fa-globe"></i></span>
                 <span class="lp-nav-label">Landing Page</span>
             </a>
 
-            <a href="{{ route('admin.profil-masjid') }}" class="lp-nav-item">
-                <span class="lp-nav-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="18" height="18">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21"/>
-                    </svg>
-                </span>
+            <a href="{{ route('admin.profil-masjid') }}" class="lp-nav-item {{ request()->routeIs('admin.profil-masjid') ? 'active' : '' }}">
+                <span class="lp-nav-icon"><i class="fa-solid fa-mosque"></i></span>
                 <span class="lp-nav-label">Profil Masjid</span>
             </a>
 
-            <a href="#" class="lp-nav-item">
+            <a href="{{ route('admin.jadwal-sholat') }}" class="lp-nav-item {{ request()->routeIs('admin.jadwal-sholat') ? 'active' : '' }}">
+                <span class="lp-nav-icon"><i class="fa-solid fa-clock"></i></span>
                 <span class="lp-nav-label">Jadwal Shalat</span>
-                <span class="lp-nav-soon">dev</span>
             </a>
+
             <a href="#" class="lp-nav-item">
+                <span class="lp-nav-icon"><i class="fa-solid fa-bullhorn"></i></span>
                 <span class="lp-nav-label">Pengumuman</span>
                 <span class="lp-nav-badge">3</span>
             </a>
-            <a href="{{ route('admin.acara') }}" class="lp-nav-item">
+
+           <a href="{{ route('admin.acara') }}" class="lp-nav-item {{ request()->routeIs('admin.acara*') ? 'active' : '' }}">
+                <span class="lp-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
                 <span class="lp-nav-label">Kegiatan &amp; Acara</span>
             </a>
+
             <a href="#" class="lp-nav-item">
+                <span class="lp-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
                 <span class="lp-nav-label">Donasi</span>
                 <span class="lp-nav-soon">dev</span>
             </a>
+
             <a href="#" class="lp-nav-item">
+                <span class="lp-nav-icon"><i class="fa-solid fa-users"></i></span>
                 <span class="lp-nav-label">Data Jamaah</span>
                 <span class="lp-nav-soon">dev</span>
             </a>
         </nav>
 
         <div class="lp-user">
-            <div class="lp-user-avatar">AM</div>
+            <div class="lp-user-avatar">{{ substr(auth()->user()->name ?? 'A', 0, 2) }}</div>
             <div class="lp-user-info">
                 <div class="lp-user-name">{{ auth()->user()->name ?? 'Admin Masjid' }}</div>
                 <div class="lp-user-email">{{ auth()->user()->email ?? '' }}</div>
