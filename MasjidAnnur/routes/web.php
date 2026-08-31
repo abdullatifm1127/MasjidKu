@@ -11,6 +11,9 @@ use App\Http\Controllers\SuperAdmin\PengaturanController;
 use App\Http\Controllers\adminmasjid\LandingPageController;
 use App\Http\Controllers\adminmasjid\ProgramController;
 use App\Http\Controllers\adminmasjid\AcaraController;
+use App\Http\Controllers\adminmasjid\PengumumanController;
+use App\Http\Controllers\adminmasjid\DonasiController;
+use App\Http\Controllers\adminmasjid\JamaahController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\PublicMosqueController;
 use App\Http\Controllers\adminmasjid\JadwalSholatController;
@@ -127,10 +130,13 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/admin/profil-masjid', [MosqueController::class, 'updateProfil'])
         ->name('admin.profil-masjid.update');
 
-
     Route::get('/admin/beranda', function () {
         return view('auth.adminmasjid.berandaAdmin');
     })->name('admin.beranda');
+
+    Route::get('/admin/jadwal-sholat', function () {
+        return view('auth.adminmasjid.jadwalSholat');
+    })->name('admin.jadwal-sholat');
 
   // Di dalam group middleware 'auth' admin:
 Route::get('/admin/jadwal-sholat', [JadwalSholatController::class, 'index'])
@@ -158,6 +164,60 @@ Route::put('/admin/jadwal-sholat', [JadwalSholatController::class, 'update'])
 
     Route::delete('/admin/acara/{acara}', [AcaraController::class, 'destroy'])
         ->name('admin.acara.destroy');
+
+    // ===== Pengumuman =====
+    Route::get('/admin/pengumuman', [PengumumanController::class, 'index'])
+        ->name('admin.pengumuman');
+
+    Route::post('/admin/pengumuman', [PengumumanController::class, 'store'])
+        ->name('admin.pengumuman.store');
+
+    Route::get('/admin/pengumuman/{pengumuman}/edit', [PengumumanController::class, 'edit'])
+        ->name('admin.pengumuman.edit');
+
+    Route::put('/admin/pengumuman/{pengumuman}', [PengumumanController::class, 'update'])
+        ->name('admin.pengumuman.update');
+
+    Route::delete('/admin/pengumuman/{pengumuman}', [PengumumanController::class, 'destroy'])
+        ->name('admin.pengumuman.destroy');
+
+    Route::patch('/admin/pengumuman/{pengumuman}/toggle-status', [PengumumanController::class, 'toggleStatus'])
+        ->name('admin.pengumuman.toggle-status');
+
+    // ===== Donasi =====
+    Route::get('/admin/donasi', [DonasiController::class, 'index'])
+        ->name('admin.donasi');
+
+    Route::post('/admin/donasi', [DonasiController::class, 'store'])
+        ->name('admin.donasi.store');
+
+    Route::get('/admin/donasi/{donasi}/edit', [DonasiController::class, 'edit'])
+        ->name('admin.donasi.edit');
+
+    Route::put('/admin/donasi/{donasi}', [DonasiController::class, 'update'])
+        ->name('admin.donasi.update');
+
+    Route::delete('/admin/donasi/{donasi}', [DonasiController::class, 'destroy'])
+        ->name('admin.donasi.destroy');
+
+    Route::patch('/admin/donasi/{donasi}/toggle-status', [DonasiController::class, 'toggleStatus'])
+        ->name('admin.donasi.toggle-status');
+
+    // ===== Data Jamaah =====
+    Route::get('/admin/jamaah', [JamaahController::class, 'index'])
+        ->name('admin.jamaah');
+
+    Route::post('/admin/jamaah', [JamaahController::class, 'store'])
+        ->name('admin.jamaah.store');
+
+    Route::get('/admin/jamaah/{jamaah}/edit', [JamaahController::class, 'edit'])
+        ->name('admin.jamaah.edit');
+
+    Route::put('/admin/jamaah/{jamaah}', [JamaahController::class, 'update'])
+        ->name('admin.jamaah.update');
+
+    Route::delete('/admin/jamaah/{jamaah}', [JamaahController::class, 'destroy'])
+        ->name('admin.jamaah.destroy');
 
 });
 
