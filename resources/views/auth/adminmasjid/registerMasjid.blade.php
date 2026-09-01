@@ -313,11 +313,30 @@
                 </div>
             </div>
 
-            {{-- ─── PANEL 4 : Konfirmasi ─── --}}
+            {{-- ─── PANEL 4 : Konfirmasi & Pemilihan Paket ─── --}}
             <div class="rm-panel" id="rmP4" style="display:none;">
                 <div class="rm-card">
-                    <h2 class="rm-card-title">Konfirmasi Pendaftaran</h2>
-                    <p class="rm-card-subtitle">Periksa kembali data sebelum mengirim pendaftaran masjid.</p>
+                    <h2 class="rm-card-title">Konfirmasi & Pilihan Paket</h2>
+                    <p class="rm-card-subtitle">Pilih jenis paket layanan website masjid Anda.</p>
+
+                    {{-- PILIHAN PAKET DITAMBAHKAN DI SINI --}}
+                    <div style="margin-bottom: 24px;">
+                        <label style="font-weight: 600; display: block; margin-bottom: 12px; color: #1e293b;">Pilih Paket Pendaftaran & Website:</label>
+                        
+                        <div style="display: flex; gap: 16px;">
+                            <label style="border: 1px solid #cbd5e1; padding: 16px; border-radius: 8px; flex: 1; cursor: pointer; background: #fff;">
+                                <input type="radio" name="package_type" value="default" checked style="margin-right: 6px;"> 
+                                <strong style="color: #1e293b;">Web Default</strong> 
+                                <p style="font-size: 0.85rem; color: #64748b; margin-top: 6px; margin-bottom: 0;">Standar, tanpa fitur donasi kustom.</p>
+                            </label>
+
+                            <label style="border: 1px solid #cbd5e1; padding: 16px; border-radius: 8px; flex: 1; cursor: pointer; background: #fff;">
+                                <input type="radio" name="package_type" value="custom_donation" style="margin-right: 6px;"> 
+                                <strong style="color: #1e293b;">Kustom Tampilan & Menu Donasi</strong>
+                                <p style="font-size: 0.85rem; color: #64748b; margin-top: 6px; margin-bottom: 0;">Bisa ubah tampilan web & aktifkan menu donasi.</p>
+                            </label>
+                        </div>
+                    </div>
 
                     <div class="rm-confirm-box">
                         Data masjid dan pengurus yang Anda masukkan akan dikirim ke sistem kami

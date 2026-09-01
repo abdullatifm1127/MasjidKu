@@ -43,6 +43,10 @@ class Mosque extends Model
         'status',
         'slug', // 2. Tambahkan 'slug' ke dalam fillable
 
+        // ===== TAMBAHKAN DUA BARIS INI =====
+        'payment_proof',
+        'payment_status',
+
         // ===== Profil Masjid tambahan (foto & visi-misi) =====
         'about_photo',
         'about_vision',

@@ -14,7 +14,7 @@ use App\Http\Controllers\adminmasjid\AcaraController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\PublicMosqueController;
 use App\Http\Controllers\adminmasjid\JadwalSholatController;
-
+use App\Http\Controllers\PaymentMasjid\PaymentController;
 /*
 |--------------------------------------------------------------------------
 | Halaman Utama
@@ -30,12 +30,19 @@ Route::get('/', function () {
 
 /*
 |--------------------------------------------------------------------------
-| Halaman Publik Masjid & Jadwal Sholat (Menggunakan Controller)
+| Halaman Pembayaran (Diletakkan di ATAS rute dynamic {slug})
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
+    Route::get('/masjid/pembayaran', [PaymentController::class, 'index'])->name('masjid.payment');
+    Route::post('/masjid/pembayaran/upload', [PaymentController::class, 'store'])->name('masjid.payment.upload');
+});
+/*
+|--------------------------------------------------------------------------
+| Halaman Publik Masjid & Jadwal Sholat
 |--------------------------------------------------------------------------
 */
 Route::get('/masjid/{slug}', [PublicMosqueController::class, 'show'])->name('masjid.show');
-
-// Alias tambahan agar jika ada bagian lain yang memanggil route('masjid.publik') tetap mengarah ke controller yang sama
 Route::get('/masjid/{slug}', [PublicMosqueController::class, 'show'])->name('masjid.publik');
 
 Route::middleware(['auth'])->get('/masjidUser', function () {
@@ -85,12 +92,7 @@ Route::post('/superadmin/login', [LoginController::class, 'login'])
 | Halaman Waiting & Forgot Password
 |--------------------------------------------------------------------------
 */
-Route::get('/waiting', function () {
-    if (!Auth::check()) {
-        return redirect()->route('login');
-    }
-    return view('mosque.waiting');
-})->name('waiting');
+Route::get('/waiting', [MosqueController::class, 'waiting'])->name('waiting');
 
 Route::get('/forgot-password', function () {
     return view('auth.login');
@@ -114,7 +116,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/dashboard', [MosqueController::class, 'dashboard'])
         ->name('admin.dashboard');
 
-    // Rute Landing Page Admin Masjid (Menggunakan Controller)
     Route::get('/admin/landing-page', [LandingPageController::class, 'index'])
         ->name('admin.landing-page');
 
@@ -127,17 +128,15 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/admin/profil-masjid', [MosqueController::class, 'updateProfil'])
         ->name('admin.profil-masjid.update');
 
-
     Route::get('/admin/beranda', function () {
         return view('auth.adminmasjid.berandaAdmin');
     })->name('admin.beranda');
 
-  // Di dalam group middleware 'auth' admin:
-Route::get('/admin/jadwal-sholat', [JadwalSholatController::class, 'index'])
-    ->name('admin.jadwal-sholat');
-    // Jika nanti ada form update jadwal shalat, tambahkan juga route PUT-nya:
-Route::put('/admin/jadwal-sholat', [JadwalSholatController::class, 'update'])
-    ->name('admin.jadwal-sholat.update');
+    Route::get('/admin/jadwal-sholat', [JadwalSholatController::class, 'index'])
+        ->name('admin.jadwal-sholat');
+        
+    Route::put('/admin/jadwal-sholat', [JadwalSholatController::class, 'update'])
+        ->name('admin.jadwal-sholat.update');
 
     // ===== Program Unggulan =====
     Route::get('/admin/program', [ProgramController::class, 'index'])
@@ -158,7 +157,6 @@ Route::put('/admin/jadwal-sholat', [JadwalSholatController::class, 'update'])
 
     Route::delete('/admin/acara/{acara}', [AcaraController::class, 'destroy'])
         ->name('admin.acara.destroy');
-
 });
 
 /*
@@ -171,11 +169,14 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
     Route::get('/verifikasi', [MosqueController::class, 'verifikasi'])->name('verifikasi');
 
     Route::put('/verifikasi/{id}/approve', function ($id) {
-        $mosque = Mosque::findOrFail($id);
-        $mosque->update(['status' => 'approved']);
-        return redirect()->route('superadmin.verifikasi')->with('success', 'Pendaftaran berhasil disetujui.');
-    })->name('verifikasi.approve');
+    $mosque = Mosque::findOrFail($id);
+    $mosque->update([
+        'status' => 'approved',
+        'payment_status' => 'approved', // <-- Tambahkan baris ini
+    ]);
+    return redirect()->route('superadmin.verifikasi')->with('success', 'Pendaftaran dan pembayaran berhasil disetujui.');
 
+})->name('verifikasi.approve');
     Route::put('/verifikasi/{id}/reject', function ($id) {
         $mosque = Mosque::findOrFail($id);
         $mosque->update(['status' => 'rejected']);

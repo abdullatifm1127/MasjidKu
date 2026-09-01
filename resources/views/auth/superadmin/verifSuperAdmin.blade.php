@@ -124,7 +124,8 @@
                 </div>
             </div>
 
-            {{-- ===== DAFTAR PENDAFTARAN ===== --}}
+
+{{-- ===== DAFTAR PENDAFTARAN ===== --}}
             <div id="vfList">
                 @foreach($pendaftaran as $p)
                 @php
@@ -190,6 +191,33 @@
                             </div>
                         </div>
 
+                        {{-- ===== TAMBAHAN: INFORMASI PEMBAYARAN & BUKTI TRANSFER ===== --}}
+                        <div class="vf-payment-info" style="margin: 12px 0; padding: 10px 12px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+                            <div>
+                                <span style="color: #64748b; font-weight: 500;">Pembayaran:</span>
+                                @if($p->payment_status === 'pending')
+                                    <span style="color: #d97706; font-weight: 600; background: #fef3c7; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-left: 6px;">
+                                        <i class="fa-solid fa-clock"></i> Sudah Transfer (Menunggu Verifikasi)
+                                    </span>
+                                @elseif($p->payment_status === 'paid' || $filterStatus === 'disetujui')
+                                    <span style="color: #059669; font-weight: 600; background: #d1fae5; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-left: 6px;">
+                                        <i class="fa-solid fa-check"></i> Lunas / Disetujui
+                                    </span>
+                                @else
+                                    <span style="color: #dc2626; font-weight: 600; background: #fee2e2; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-left: 6px;">
+                                        <i class="fa-solid fa-xmark"></i> Belum Bayar
+                                    </span>
+                                @endif
+                            </div>
+
+                            @if(!empty($p->payment_proof))
+                                <a href="{{ asset('storage/' . $p->payment_proof) }}" target="_blank" style="color: #0284c7; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="fa-solid fa-image"></i> Lihat Bukti Transfer
+                                </a>
+                            @endif
+                        </div>
+                        {{-- ========================================================== --}}
+
                         <div class="vf-tags">
                             @if(is_array($p->programs))
                                 @foreach(array_slice($p->programs, 0, 4) as $prog)
@@ -250,6 +278,9 @@
                     </div>
                 </div>
                 @endforeach
+            </div>
+
+
 
                 {{-- Empty state --}}
                 <div class="vf-empty" id="vfEmpty" style="display:none;">
@@ -317,7 +348,8 @@
             document.getElementById('vfEmpty').style.display = visible === 0 ? 'flex' : 'none';
         }
 
-        // ---- Detail modal ----
+        
+       // ---- Detail modal ----
         const detailData = @json($pendaftaran ?? []);
 
         function vfOpenDetail(id) {
@@ -327,8 +359,29 @@
             document.getElementById('vfModalTitle').textContent = 'Detail — ' + d.mosque_name;
 
             const statusMap = { pending: '⏳ Menunggu', approved: '✓ Disetujui', rejected: '✕ Ditolak', disetujui: '✓ Disetujui', ditolak: '✕ Ditolak' };
-            const programTags = (d.programs || []).map(p => `<span class="vf-tag">${p}</span>`).join('');
             
+            // Logika pemetaan status pembayaran untuk modal
+            let paymentBadgeText = '<span style="color: #dc2626; font-weight: 600;">Belum Bayar</span>';
+            if (d.payment_status === 'pending') {
+                paymentBadgeText = '<span style="color: #d97706; font-weight: 600; background: #fef3c7; padding: 2px 6px; border-radius: 4px;">Sudah Transfer (Menunggu Verifikasi)</span>';
+            } else if (d.payment_status === 'paid' || d.status === 'approved' || d.status === 'disetujui') {
+                paymentBadgeText = '<span style="color: #059669; font-weight: 600; background: #d1fae5; padding: 2px 6px; border-radius: 4px;">Lunas / Disetujui</span>';
+            }
+
+            // Logika pengecekan file bukti transfer
+            let paymentProofSection = '<div style="color: #9ca3af; font-style: italic; font-size: 0.9rem;">Belum mengunggah bukti pembayaran.</div>';
+            if (d.payment_proof) {
+                paymentProofSection = `
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <a href="/storage/${d.payment_proof}" target="_blank" style="color: #0284c7; font-weight: 600; text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-external-link-alt"></i> Buka Gambar Ukuran Penuh
+                        </a>
+                        <img src="/storage/${d.payment_proof}" alt="Bukti Transfer" style="max-width: 100%; max-height: 220px; border-radius: 8px; border: 1px solid #cbd5e1; object-fit: contain; background: #f8fafc; padding: 4px;">
+                    </div>
+                `;
+            }
+
+            const programTags = (d.programs || []).map(p => `<span class="vf-tag">${p}</span>`).join('');
             const formattedDate = d.created_at ? new Date(d.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
 
             document.getElementById('vfModalBody').innerHTML = `
@@ -346,9 +399,14 @@
                     <div class="vf-modal-field"><div class="vf-info-label">Email</div><div class="vf-info-val">${d.email}</div></div>
                     <div class="vf-modal-field"><div class="vf-info-label">Telepon</div><div class="vf-info-val">${d.phone ?? '-'}</div></div>
                     <div class="vf-modal-field"><div class="vf-info-label">Tanggal Daftar</div><div class="vf-info-val">${formattedDate}</div></div>
+                    <div class="vf-modal-field"><div class="vf-info-label">Status Pembayaran</div><div class="vf-info-val">${paymentBadgeText}</div></div>
                 </div>
+
                 <div class="vf-info-label" style="margin:16px 0 8px">Program Kegiatan</div>
-                <div class="vf-tags">${programTags}</div>
+                <div class="vf-tags" style="margin-bottom: 16px;">${programTags}</div>
+
+                <div class="vf-info-label" style="margin:16px 0 8px">Bukti Transfer Pembayaran</div>
+                <div>${paymentProofSection}</div>
             `;
 
             document.getElementById('vfModalOverlay').classList.add('active');

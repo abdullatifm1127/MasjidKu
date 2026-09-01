@@ -52,9 +52,9 @@
                 <span class="lp-nav-badge">3</span>
             </a>
             <a href="{{ route('admin.acara') }}" class="lp-nav-item {{ request()->routeIs('admin.acara.*') ? 'active' : '' }}">
-    <span class="lp-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
-    <span class="lp-nav-label">Kegiatan &amp; Acara</span>
-</a>
+                <span class="lp-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
+                <span class="lp-nav-label">Kegiatan &amp; Acara</span>
+            </a>
             <a href="#" class="lp-nav-item">
                 <span class="lp-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
                 <span class="lp-nav-label">Donasi</span>

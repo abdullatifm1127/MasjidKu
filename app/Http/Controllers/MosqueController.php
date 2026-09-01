@@ -30,7 +30,7 @@ class MosqueController extends Controller
         return view('auth.adminmasjid.registerMasjid');
     }
 
-    /**
+   /**
      * Menyimpan data masjid.
      */
     public function store(Request $request)
@@ -80,6 +80,9 @@ class MosqueController extends Controller
             'has_online_donation' => 'nullable',
             'has_prayer_schedule' => 'nullable',
 
+            // TAMBAHAN VALIDASI PAKET
+            'package_type' => 'required|in:default,custom_donation',
+
             'description' => 'nullable|string',
             'agree' => 'required|accepted',
         ]);
@@ -122,36 +125,50 @@ class MosqueController extends Controller
             'has_online_donation' => $request->has('has_online_donation'),
             'has_prayer_schedule' => $request->has('has_prayer_schedule'),
 
+            // SIMPAN PILIHAN PAKET
+            'package_type' => $validated['package_type'],
+
             'description' => $validated['description'] ?? null,
         ]);
 
-        return redirect()
-            ->route('waiting')
-            ->with('success', 'Masjid berhasil didaftarkan dan menunggu verifikasi admin.');
+       return redirect()
+            ->route('masjid.payment')
+            ->with('success', 'Pendaftaran berhasil! Silakan selesaikan pembayaran aktivasi.');
     }
 
-    /**
-     * Dashboard masjid.
-     */
-    public function dashboard()
-    {
-        // Mengambil data masjid milik user yang sedang login
-        $mosque = Mosque::where('user_id', Auth::id())->first();
+public function dashboard()
+{
+    $mosque = Mosque::where('user_id', Auth::id())->first();
 
-        // Jika belum mendaftarkan masjid, arahkan ke form pendaftaran
-        if (!$mosque) {
-            return redirect()->route('daftar.masjid');
-        }
-
-        // Jika statusnya masih pending, arahkan ke halaman waiting
-        if ($mosque->status === 'pending') {
-            return redirect()->route('waiting');
-        }
-
-        // Jika sudah approved, tampilkan halaman beranda admin
-        return view('auth.adminmasjid.berandaAdmin', compact('mosque'));
+    if (!$mosque) {
+        return redirect()->route('daftar.masjid');
     }
 
+    // Jika pembayaran masih unpaid/belum di-upload, lempar ke halaman pembayaran
+    if ($mosque->payment_status === 'unpaid') {
+        return redirect()->route('masjid.payment');
+    }
+
+    // Jika status akun ATAU status pembayaran belum approved total, lempar ke waiting
+    if ($mosque->status !== 'approved' || $mosque->payment_status !== 'approved') {
+        return redirect()->route('waiting');
+    }
+
+    // Lanjut ke dashboard jika sudah benar-benar approved total
+    $totalAcara = class_exists('\App\Models\Acara') ? \App\Models\Acara::where('mosque_id', $mosque->id)->count() : 0;
+    $totalPengumuman = class_exists('\App\Models\Pengumuman') ? \App\Models\Pengumuman::where('mosque_id', $mosque->id)->count() : 0;
+    
+    $totalJamaah = 0; 
+    $totalDonasiBulanIni = 0;
+
+    return view('auth.adminmasjid.berandaAdmin', compact(
+        'mosque', 
+        'totalAcara', 
+        'totalPengumuman', 
+        'totalJamaah', 
+        'totalDonasiBulanIni'
+    ));
+}
     /**
      * Halaman edit Profil Masjid (admin).
      *
@@ -311,6 +328,24 @@ class MosqueController extends Controller
             'totalNonaktif'
         ));
     }
+
+public function waiting()
+{
+    $mosque = Mosque::where('user_id', Auth::id())->first();
+
+    // Jika belum daftar masjid, arahkan ke form pendaftaran
+    if (!$mosque) {
+        return redirect()->route('daftar.masjid');
+    }
+
+    // Ubah pengecekan ini: Hanya izinkan masuk dashboard jika KEDUANYA sudah approved
+    if ($mosque->status === 'approved' && $mosque->payment_status === 'approved') {
+        return redirect()->route('dashboard');
+    }
+
+    // Jika salah satu (atau keduanya) masih pending, tetap tampilkan halaman waiting
+    return view('mosque.waiting', compact('mosque')); 
+}
 
     // Catatan: method landingPage() lama dihapus dari sini.
     // Landing Page sekarang sepenuhnya ditangani oleh
