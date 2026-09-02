@@ -113,4 +113,9 @@ class Mosque extends Model
     {
         return $this->hasMany(acara::class);
     }
+
+    public function subscriptions()
+{
+    return $this->hasMany(Subscription::class);
+}
 }

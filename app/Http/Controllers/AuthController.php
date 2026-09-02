@@ -33,8 +33,7 @@ class AuthController extends Controller
 
         return redirect()->route('home');
     }
-
-    // Proses Login Reguler (Admin Masjid / User)
+// Proses Login Reguler (Admin Masjid / User)
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -54,24 +53,19 @@ class AuthController extends Controller
 
             $mosque = Mosque::where('user_id', $user->id)->first();
 
+            // Jika belum daftar masjid, arahkan ke halaman daftar masjid
             if (!$mosque) {
                 return redirect()->route('daftar.masjid');
             }
 
-            if ($mosque->status === 'pending') {
+            // Jika statusnya masih pending, arahkan ke halaman waiting
+            if ($mosque->status === 'pending' || $mosque->status === 'Pending') {
                 return redirect()->route('waiting');
             }
 
-            if ($mosque->status === 'approved') {
-                return redirect()->route('dashboard');
-            }
-
-            if ($mosque->status === 'rejected') {
-                return redirect()->route('home')
-                    ->with('error', 'Pendaftaran masjid ditolak admin.');
-            }
-
-            return redirect()->route('home');
+            // Jika sudah Aktif / approved, langsung lempar ke dashboard admin.
+            // (Nanti middleware 'check.status' yang akan otomatis mengamankan jika berubah jadi nonaktif/pending lagi)
+            return redirect()->route('dashboard');
         }
 
         return back()->withErrors([

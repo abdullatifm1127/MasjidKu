@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Mosque;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Subscription;
 
 class MosqueController extends Controller
 {
@@ -30,7 +31,7 @@ class MosqueController extends Controller
         return view('auth.adminmasjid.registerMasjid');
     }
 
-   /**
+    /**
      * Menyimpan data masjid.
      */
     public function store(Request $request)
@@ -136,45 +137,42 @@ class MosqueController extends Controller
             ->with('success', 'Pendaftaran berhasil! Silakan selesaikan pembayaran aktivasi.');
     }
 
-public function dashboard()
-{
-    $mosque = Mosque::where('user_id', Auth::id())->first();
+    public function dashboard()
+    {
+        $mosque = Mosque::where('user_id', Auth::id())->first();
 
-    if (!$mosque) {
-        return redirect()->route('daftar.masjid');
+        if (!$mosque) {
+            return redirect()->route('daftar.masjid');
+        }
+
+        // Jika pembayaran masih unpaid/belum di-upload, lempar ke halaman pembayaran
+        if ($mosque->payment_status === 'unpaid') {
+            return redirect()->route('masjid.payment');
+        }
+
+        // Jika status akun ATAU status pembayaran belum approved total, lempar ke waiting
+        if ($mosque->status !== 'approved' || $mosque->payment_status !== 'approved') {
+            return redirect()->route('waiting');
+        }
+
+        // Lanjut ke dashboard jika sudah benar-benar approved total
+        $totalAcara = class_exists('\App\Models\Acara') ? \App\Models\Acara::where('mosque_id', $mosque->id)->count() : 0;
+        $totalPengumuman = class_exists('\App\Models\Pengumuman') ? \App\Models\Pengumuman::where('mosque_id', $mosque->id)->count() : 0;
+        
+        $totalJamaah = 0; 
+        $totalDonasiBulanIni = 0;
+
+        return view('auth.adminmasjid.berandaAdmin', compact(
+            'mosque', 
+            'totalAcara', 
+            'totalPengumuman', 
+            'totalJamaah', 
+            'totalDonasiBulanIni'
+        ));
     }
 
-    // Jika pembayaran masih unpaid/belum di-upload, lempar ke halaman pembayaran
-    if ($mosque->payment_status === 'unpaid') {
-        return redirect()->route('masjid.payment');
-    }
-
-    // Jika status akun ATAU status pembayaran belum approved total, lempar ke waiting
-    if ($mosque->status !== 'approved' || $mosque->payment_status !== 'approved') {
-        return redirect()->route('waiting');
-    }
-
-    // Lanjut ke dashboard jika sudah benar-benar approved total
-    $totalAcara = class_exists('\App\Models\Acara') ? \App\Models\Acara::where('mosque_id', $mosque->id)->count() : 0;
-    $totalPengumuman = class_exists('\App\Models\Pengumuman') ? \App\Models\Pengumuman::where('mosque_id', $mosque->id)->count() : 0;
-    
-    $totalJamaah = 0; 
-    $totalDonasiBulanIni = 0;
-
-    return view('auth.adminmasjid.berandaAdmin', compact(
-        'mosque', 
-        'totalAcara', 
-        'totalPengumuman', 
-        'totalJamaah', 
-        'totalDonasiBulanIni'
-    ));
-}
     /**
      * Halaman edit Profil Masjid (admin).
-     *
-     * Profil Masjid adalah SATU-SATUNYA sumber data teks & foto profil masjid.
-     * Landing Page editor tidak lagi punya field duplikat untuk ini —
-     * ia hanya membaca data dari sini untuk ditampilkan di halaman publik.
      */
     public function editProfil()
     {
@@ -192,8 +190,6 @@ public function dashboard()
      */
     public function updateProfil(Request $request)
     {
-        // FIX: sebelumnya Mosque::first() -> selalu meng-update masjid PERTAMA
-        // di database, bukan masjid milik user yang sedang login.
         $mosque = Mosque::where('user_id', Auth::id())->first();
 
         if (!$mosque) {
@@ -209,7 +205,7 @@ public function dashboard()
             'capacity'          => 'nullable|string|max:100',
             'description'       => 'nullable|string',
 
-           'vision'            => 'nullable|string',
+            'vision'            => 'nullable|string',
             'photo'             => 'nullable|mimes:jpeg,png,jpg,webp,avif|max:2048',
             'photo_secondary'   => 'nullable|mimes:jpeg,png,jpg,webp,avif|max:2048',
 
@@ -278,47 +274,45 @@ public function dashboard()
         }
 
         if ($request->hasFile('photo_secondary')) {
-            // Masukkan path hasil upload ke array updateData
             $updateData['about_photo_secondary'] = $request->file('photo_secondary')->store('mosque/about', 'public');
         }
 
-        // Lakukan update ke database
         $mosque->update($updateData);
 
         return redirect()->route('admin.profil-masjid')
             ->with('success', 'Profil masjid berhasil disimpan.');
     }
+
     /**
      * Halaman Verifikasi Super Admin (Menampilkan semua pendaftaran & statistik).
      */
     public function verifikasi()
-    {
-        // Ambil semua data masjid dari database
-        $pendaftaran = Mosque::latest()->get();
+{
+    // Tambahkan with('subscriptions') agar riwayat langganan ikut terbawa
+    $pendaftaran = Mosque::with('subscriptions')->latest()->get();
 
-        // Hitung jumlah masing-masing status secara dinamis
-        $totalPending = Mosque::where('status', 'pending')->count();
-        $totalApproved = Mosque::where('status', 'approved')->count();
-        $totalRejected = Mosque::where('status', 'rejected')->count();
-        $totalSemua = $pendaftaran->count();
+    $totalPending = Mosque::where('status', 'pending')->count();
+    $totalApproved = Mosque::where('status', 'approved')->count();
+    $totalRejected = Mosque::where('status', 'rejected')->count();
+    $totalSemua = $pendaftaran->count();
 
-        return view('auth.superadmin.verifSuperAdmin', compact(
-            'pendaftaran',
-            'totalPending',
-            'totalApproved',
-            'totalRejected',
-            'totalSemua'
-        ));
-    }
+    return view('auth.superadmin.verifSuperAdmin', compact(
+        'pendaftaran',
+        'totalPending',
+        'totalApproved',
+        'totalRejected',
+        'totalSemua'
+    ));
+}
 
     public function manajemenMasjid()
     {
         $masjids = Mosque::latest()->get();
 
         $totalSemua = $masjids->count();
-        $totalAktif = Mosque::where('status', 'approved')->count();
-        $totalPending = Mosque::where('status', 'pending')->count();
-        $totalNonaktif = Mosque::where('status', 'rejected')->count();
+        $totalAktif = Mosque::where('status', 'Aktif')->count();       
+        $totalPending = Mosque::where('status', 'Pending')->count();   
+        $totalNonaktif = Mosque::where('status', 'Nonaktif')->count(); 
 
         return view('auth.superadmin.manajemenMasjidSuperAdmin', compact(
             'masjids',
@@ -329,26 +323,58 @@ public function dashboard()
         ));
     }
 
-public function waiting()
+    public function waiting()
+    {
+        $mosque = Mosque::where('user_id', Auth::id())->first();
+
+        if (!$mosque) {
+            return redirect()->route('daftar.masjid');
+        }
+
+        if ($mosque->status === 'approved' && $mosque->payment_status === 'approved') {
+            return redirect()->route('dashboard');
+        }
+
+        return view('mosque.waiting', compact('mosque')); 
+    }
+public function storeRenewal(Request $request)
+    {
+        $request->validate([
+            'package' => 'required',
+            'payment_proof' => 'required|image|mimes:jpeg,png,jpg,avif|max:2048',
+        ]);
+
+        $mosque = Mosque::where('user_id', Auth::id())->first();
+
+        if (!$mosque) {
+            return redirect()->back()->with('error', 'Data masjid tidak ditemukan.');
+        }
+
+        list($amount, $durationMonths) = explode('_', $request->package);
+
+        // Upload file bukti bayar perpanjangan
+        $path = $request->file('payment_proof')->store('payment-proofs', 'public');
+
+        // Simpan ke tabel subscriptions sebagai riwayat
+        Subscription::create([
+            'mosque_id' => $mosque->id,
+            'amount' => $amount,
+            'payment_proof' => $path,
+            'status' => 'pending',
+        ]);
+
+        // PENTING: Ubah status & payment_status masjid menjadi pending agar muncul di verifikasi Super Admin
+        $mosque->update([
+            'status' => 'pending',
+            'payment_status' => 'pending', 
+            'payment_proof' => $path 
+        ]);
+
+        // DIUBAH KE BACK() AGAR KEMBALI KE HALAMAN INI DENGAN PESAN SUKSES
+        return redirect()->route('masjid.perpanjangan.create')->with('status', 'Terima kasih! Bukti perpanjangan berhasil dikirim dan sedang menunggu verifikasi Superadmin.');
+    }
+    public function createRenewal()
 {
-    $mosque = Mosque::where('user_id', Auth::id())->first();
-
-    // Jika belum daftar masjid, arahkan ke form pendaftaran
-    if (!$mosque) {
-        return redirect()->route('daftar.masjid');
-    }
-
-    // Ubah pengecekan ini: Hanya izinkan masuk dashboard jika KEDUANYA sudah approved
-    if ($mosque->status === 'approved' && $mosque->payment_status === 'approved') {
-        return redirect()->route('dashboard');
-    }
-
-    // Jika salah satu (atau keduanya) masih pending, tetap tampilkan halaman waiting
-    return view('mosque.waiting', compact('mosque')); 
+    return view('paymentmasjid.perpanjangan');
 }
-
-    // Catatan: method landingPage() lama dihapus dari sini.
-    // Landing Page sekarang sepenuhnya ditangani oleh
-    // App\Http\Controllers\adminmasjid\LandingPageController,
-    // supaya tidak ada dua controller yang bentrok menangani rute yang sama.
 }

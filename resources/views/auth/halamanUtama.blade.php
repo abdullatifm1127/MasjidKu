@@ -26,7 +26,7 @@
             </ul>
             <div class="navbar-actions">
          @auth
-    @php
+   @php
         $mosque = \App\Models\Mosque::where('user_id', Auth::id())->first();
     @endphp
 
@@ -34,14 +34,21 @@
         {{-- Belum daftar masjid --}}
         <a href="{{ route('daftar.masjid') }}" class="btn-nav-primary">Daftarkan Masjid</a>
     @elseif($mosque->status === 'pending')
-        {{-- Jika status pending, arahkan langsung ke halaman waiting, JANGAN ke daftar-masjid --}}
+        {{-- Jika status pending --}}
         <a href="{{ route('waiting') }}" class="btn-nav-primary" style="background-color: #d97706;">Menunggu Verifikasi</a>
+        
+        {{-- Tombol Perpanjangan (Opsional jika ingin diuji saat pending) --}}
+        <a href="{{ route('masjid.perpanjangan.create') }}" class="btn-nav-primary" style="background-color: #2563eb; margin-left: 5px;">Perpanjang</a>
+
     @elseif($mosque->status === 'approved')
         {{-- Sudah disetujui --}}
         <a href="{{ route('dashboard') }}" class="btn-nav-primary" style="background-color: #059669;">Dashboard Masjid</a>
+        
+        {{-- Tombol Perpanjangan Langganan untuk Masjid yang Approved --}}
+        <a href="{{ route('masjid.perpanjangan.create') }}" class="btn-nav-primary" style="background-color: #d97706; margin-left: 5px;">Perpanjang Langganan</a>
     @endif
 
-    <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+    <form method="POST" action="{{ route('logout') }}" style="display: inline; margin-left: 5px;">
         @csrf
         <button type="submit" class="btn-nav-outline">Logout</button>
     </form>
@@ -49,7 +56,6 @@
     <a href="{{ route('login') }}" class="btn-nav-outline">Masuk</a>
     <a href="{{ route('register') }}" class="btn-nav-primary">Daftar Akun</a>
 @endauth
-
         </div>
                     
             <button class="navbar-toggle" id="navToggle" aria-label="Buka menu">

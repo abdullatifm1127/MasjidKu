@@ -53,4 +53,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Mosque::class);
     }
+    // Relasi tunggal untuk memudahkan pengecekan status masjid aktif
+    public function mosque()
+    {
+        return $this->hasOne(Mosque::class, 'user_id'); 
+    }
 }

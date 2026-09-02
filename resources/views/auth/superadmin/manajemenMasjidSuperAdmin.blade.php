@@ -258,7 +258,7 @@
         </div>
     </div>
 
-    <script>
+   <script>
         // Sidebar toggle
         document.getElementById('saSidebarToggle').addEventListener('click', () => {
             document.getElementById('saSidebar').classList.toggle('collapsed');
@@ -295,9 +295,34 @@
             document.getElementById('mmEmpty').style.display = visible === 0 ? 'flex' : 'none';
         }
 
-        // Status select color update
+        // Status select color update & AJAX Database Update
         function mmChangeStatus(sel) {
             sel.className = 'mm-status-select ' + sel.value;
+            
+            const mosqueId = sel.dataset.id;
+            const newStatus = sel.value;
+
+            // Mengirim request AJAX ke server Laravel
+            fetch(`/superadmin/manajemen-masjid/${mosqueId}/update-status`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ status: newStatus })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Opsional: Bisa memuat ulang halaman secara otomatis jika ingin memperbarui angka di tab filter secara akurat
+                    location.reload(); 
+                } else {
+                    alert('Gagal memperbarui status masjid.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         }
 
         // Modal Tambah

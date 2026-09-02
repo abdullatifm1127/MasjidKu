@@ -37,15 +37,21 @@
             <p>Masuk ke akun pengurus masjid Anda</p>
         </div>
 
-        {{-- Session Status --}}
-        @if (session('status'))
-            <div style="margin-bottom:14px; font-size:0.88rem; color:#1a6640; background:#e8f5ee; padding:10px 14px; border-radius:8px;">
-                {{ session('status') }}
+        {{-- Kotak Pesan Error / Gagal Login --}}
+        @if (session('error'))
+            <div style="margin-bottom:14px; font-size:0.88rem; color:#842029; background:#f8d7da; padding:10px 14px; border-radius:8px; text-align:center;">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div style="margin-bottom:14px; font-size:0.88rem; color:#842029; background:#f8d7da; padding:10px 14px; border-radius:8px; text-align:center;">
+                {{ $errors->first() }}
             </div>
         @endif
 
         {{-- ===== FORM ===== --}}
-        <form class="ln-form" method="POST" action="{{ route('login') }}">
+       <form class="ln-form" method="POST" action="{{ route('login.process') }}">
             @csrf
 
             {{-- Alamat Email --}}
