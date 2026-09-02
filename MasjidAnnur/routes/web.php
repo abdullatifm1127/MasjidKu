@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use App\Models\Mosque;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MosqueController;
@@ -23,12 +24,25 @@ use App\Http\Controllers\adminmasjid\JadwalSholatController;
 | Halaman Utama
 |--------------------------------------------------------------------------
 */
-Route::get('/', function () {
+Route::get('/', function (\Illuminate\Http\Request $request) {
     $userMosque = null;
     if (Auth::check()) {
         $userMosque = Mosque::where('user_id', Auth::id())->first();
     }
-    return view('auth.halamanUtama', compact('userMosque'));
+
+    // Direktori masjid — hanya yang sudah approved
+    $query = Mosque::where('status', 'approved');
+    if ($request->filled('q')) {
+        $keyword = $request->q;
+        $query->where(function ($sub) use ($keyword) {
+            $sub->where('mosque_name', 'ilike', "%{$keyword}%")
+                ->orWhere('city', 'ilike', "%{$keyword}%")
+                ->orWhere('province', 'ilike', "%{$keyword}%");
+        });
+    }
+    $direktoriMasjid = $query->latest()->get();
+
+    return view('auth.halamanUtama', compact('userMosque', 'direktoriMasjid'));
 })->name('home');
 
 /*
@@ -196,7 +210,6 @@ Route::put('/admin/jadwal-sholat', [JadwalSholatController::class, 'update'])
 
     Route::put('/admin/donasi/{donasi}', [DonasiController::class, 'update'])
         ->name('admin.donasi.update');
-
     Route::delete('/admin/donasi/{donasi}', [DonasiController::class, 'destroy'])
         ->name('admin.donasi.destroy');
 
