@@ -20,6 +20,7 @@
             <ul class="navbar-menu" id="navMenu">
                 <li><a href="#beranda" class="nav-link active">Beranda</a></li>
                 <li><a href="#tentang" class="nav-link">Fitur</a></li>
+                <li><a href="#direktori" class="nav-link">Masjid</a></li>
                 <li><a href="#program" class="nav-link">Program</a></li>
                 <li><a href="#donasi" class="nav-link">Artikel</a></li>
                 <li><a href="#kontak" class="nav-link">Kontak</a></li>
@@ -138,6 +139,136 @@
                     <p>Kelola data anggota jamaah, pantau kehadiran, dan bangun komunitas masjid yang solid.</p>
                 </div>
             </div>
+        </div>
+    </section>
+
+    {{-- ===== DIREKTORI MASJID ===== --}}
+    <section class="direktori" id="direktori">
+        <div class="section-container">
+            <div class="dir-header">
+                <div class="dir-header-text">
+                    <span class="section-badge">DAFTAR MASJID</span>
+                    <h2>Temukan Masjid<br><em>di Sekitar Anda</em></h2>
+                </div>
+                <form method="GET" action="{{ url('/') }}#direktori" class="dir-search-form" id="dirSearchForm">
+                    <div class="dir-search-wrap">
+                        <svg class="dir-search-ico" xmlns="http://www.w3.org/2000/svg" fill="none"
+                             viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="15" height="15">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="m21 21-4.35-4.35m0 0A7.5 7.5 0 1 0 6.15 6.15a7.5 7.5 0 0 0 10.5 10.5Z"/>
+                        </svg>
+                        <input type="text" name="q" class="dir-search-input"
+                               placeholder="Cari nama atau kota…"
+                               value="{{ request('q') }}">
+                        @if(request('q'))
+                            <a href="{{ url('/') }}#direktori" class="dir-search-clear" title="Hapus pencarian">✕</a>
+                        @endif
+                    </div>
+                </form>
+            </div>
+
+            @php
+                $warna = ['#1a4731','#1a3a6e','#6b2a2a','#0d5c5c','#4a3100','#2a1a5e'];
+            @endphp
+
+            @if($direktoriMasjid->isEmpty())
+                <div class="dir-empty">
+                    <div class="dir-empty-ico">🕌</div>
+                    <p class="dir-empty-title">
+                        @if(request('q'))
+                            Tidak ada masjid yang cocok dengan "<strong>{{ request('q') }}</strong>"
+                        @else
+                            Belum ada masjid terdaftar
+                        @endif
+                    </p>
+                    <p class="dir-empty-sub">Jadilah yang pertama mendaftarkan masjid Anda.</p>
+                    <a href="{{ route('daftar.masjid') }}" class="btn-primary" style="margin-top:16px;">Daftarkan Masjid</a>
+                </div>
+            @else
+                <div class="dir-grid">
+                    @foreach($direktoriMasjid as $i => $m)
+                        @php
+                            $bg      = $warna[$i % count($warna)];
+                            $initial = mb_strtoupper(mb_substr($m->mosque_name, 0, 2));
+                            // Ambil donasi lunas dari model jika ada, fallback 0
+                            $totalDonasi = method_exists(\App\Models\Donasi::class, 'totalLunas')
+                                ? \App\Models\Donasi::totalLunas($m->id)
+                                : 0;
+                            $targetDonasi = 1000000000; // 1 Milyar sebagai default target
+                            $persen = $targetDonasi > 0 ? min(100, round($totalDonasi / $targetDonasi * 100)) : 0;
+                        @endphp
+                        <div class="dir-card">
+                            {{-- Gambar / hero banner --}}
+                            <div class="dir-card-img" style="background-color: {{ $bg }};">
+                                @if($m->hero_image)
+                                    <img src="{{ Storage::url($m->hero_image) }}"
+                                         alt="{{ $m->mosque_name }}"
+                                         class="dir-card-photo">
+                                @else
+                                    <span class="dir-card-initial">{{ $initial }}</span>
+                                @endif
+                                <span class="dir-card-city">{{ $m->city ?? 'Indonesia' }}</span>
+                            </div>
+
+                            {{-- Body --}}
+                            <div class="dir-card-body">
+                                <h3 class="dir-card-name">{{ $m->mosque_name }}</h3>
+                                <p class="dir-card-tagline">{{ Str::limit($m->tagline ?? $m->description ?? 'Masjid di Indonesia', 48) }}</p>
+
+                                <div class="dir-card-meta">
+                                    <div class="dir-meta-item">
+                                        <span class="dir-meta-label">Kapasitas</span>
+                                        @php
+                                            $kapasitas = $m->capacity
+                                                ? number_format((int) str_replace(['.', ','], ['', ''], $m->capacity), 0, ',', '.')
+                                                : null;
+                                        @endphp
+                                        <strong>{{ $kapasitas ? $kapasitas . ' orang' : '—' }}</strong>
+                                    </div>
+                                    <div class="dir-meta-item">
+                                        <span class="dir-meta-label">Sejak</span>
+                                        <strong>{{ $m->founded ?? '—' }}</strong>
+                                    </div>
+                                </div>
+
+                                {{-- Progress donasi --}}
+                                @if($totalDonasi > 0)
+                                    <div class="dir-card-prog">
+                                        <div class="dir-prog-label">
+                                            <span class="dir-prog-name">{{ Str::limit('Donasi Terkumpul', 32) }}</span>
+                                            <span class="dir-prog-pct">{{ $persen }}%</span>
+                                        </div>
+                                        <div class="dir-prog-bar">
+                                            <div class="dir-prog-fill" style="width: {{ $persen }}%; background: {{ $bg }};"></div>
+                                        </div>
+                                        <div class="dir-prog-amount">
+                                            Rp {{ number_format($totalDonasi, 0, ',', '.') }} terkumpul
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <a href="{{ route('masjid.publik', $m->slug) }}"
+                                   class="dir-card-btn"
+                                   style="background: {{ $bg }};">
+                                    Kunjungi Halaman →
+                                </a>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                {{-- Lihat semua --}}
+                @if($direktoriMasjid->count() >= 6 && !request('q'))
+                    <div class="dir-more">
+                        <a href="{{ url('/') }}?semua=1#direktori" class="dir-more-btn">
+                            Lihat Semua Masjid
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+                            </svg>
+                        </a>
+                    </div>
+                @endif
+            @endif
         </div>
     </section>
 
