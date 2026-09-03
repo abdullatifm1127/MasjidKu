@@ -61,20 +61,20 @@
                 </div>
             </a>
 
-           <nav class="hu-nav">
-                <a href="#beranda" class="hu-nav-link active">Beranda</a>
-                <a href="#profil" class="hu-nav-link">Profil</a>
-                @if($modOn('jadwal_shalat'))<a href="#shalat" class="hu-nav-link">Waktu Shalat</a>@endif
-                <a href="#program" class="hu-nav-link">Program & Fasilitas</a>
-                @if($modOn('kegiatan'))<a href="#acara" class="hu-nav-link">Acara</a>@endif
-                
-                {{-- MENU DONASI: Muncul jika modul aktif DAN paket bukan free / donasi diizinkan --}}
-                @if($modOn('donasi') && isset($mosque) && $mosque->package_type != 'free' && $mosque->has_online_donation)
-                    <a href="#donasi" class="hu-nav-link">Donasi</a>
-                @endif
-                
-                <a href="#kontak" class="hu-nav-link">Hubungi</a>
-            </nav>
+          <nav class="hu-nav">
+    <a href="#beranda" class="hu-nav-link active">Beranda</a>
+    <a href="#profil" class="hu-nav-link">Profil</a>
+    @if($modOn('jadwal_shalat'))<a href="#shalat" class="hu-nav-link">Waktu Shalat</a>@endif
+    <a href="#program" class="hu-nav-link">Program & Fasilitas</a>
+    @if($modOn('kegiatan'))<a href="#acara" class="hu-nav-link">Acara</a>@endif
+    
+    {{-- MENU DONASI: Muncul jika modul aktif DAN paket BUKAN free --}}
+@if(isset($mosque) && $mosque->package_type !== 'free')
+    <a href="{{ route('masjid.donasi.publik', $mosque->slug) }}" class="hu-nav-link">Donasi</a>
+@endif
+    
+    <a href="#kontak" class="hu-nav-link">Hubungi</a>
+</nav>
 
             <button class="hu-ganti-btn" id="huGantiBtn">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"

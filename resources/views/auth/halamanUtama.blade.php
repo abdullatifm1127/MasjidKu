@@ -36,16 +36,10 @@
     @elseif($mosque->status === 'pending')
         {{-- Jika status pending --}}
         <a href="{{ route('waiting') }}" class="btn-nav-primary" style="background-color: #d97706;">Menunggu Verifikasi</a>
-        
-        {{-- Tombol Perpanjangan (Opsional jika ingin diuji saat pending) --}}
-        <a href="{{ route('masjid.perpanjangan.create') }}" class="btn-nav-primary" style="background-color: #2563eb; margin-left: 5px;">Perpanjang</a>
 
     @elseif($mosque->status === 'approved')
         {{-- Sudah disetujui --}}
         <a href="{{ route('dashboard') }}" class="btn-nav-primary" style="background-color: #059669;">Dashboard Masjid</a>
-        
-        {{-- Tombol Perpanjangan Langganan untuk Masjid yang Approved --}}
-        <a href="{{ route('masjid.perpanjangan.create') }}" class="btn-nav-primary" style="background-color: #d97706; margin-left: 5px;">Perpanjang Langganan</a>
     @endif
 
     <form method="POST" action="{{ route('logout') }}" style="display: inline; margin-left: 5px;">

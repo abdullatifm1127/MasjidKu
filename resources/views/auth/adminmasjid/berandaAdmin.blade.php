@@ -29,7 +29,7 @@
             </div>
         </div>
 
-      {{-- Nav --}}
+     {{-- Nav --}}
         <nav class="ba2-nav">
             <a href="{{ route('admin.dashboard') }}" class="ba2-nav-item active">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
@@ -44,24 +44,37 @@
                 <span class="ba2-nav-label">Profil Masjid</span>
             </a>
             <a href="{{ route('admin.jadwal-sholat') }}" class="ba2-nav-item {{ request()->routeIs('admin.jadwal-sholat') ? 'active' : '' }}">
-            <span class="ba2-nav-icon"><i class="fa-solid fa-clock"></i></span>
-            <span class="ba2-nav-label">Jadwal Shalat</span>
-            <span class="ba2-nav-soon">dev</span>
+                <span class="ba2-nav-icon"><i class="fa-solid fa-clock"></i></span>
+                <span class="ba2-nav-label">Jadwal Shalat</span>
+                <span class="ba2-nav-soon">dev</span>
             </a>
             <a href="#" class="ba2-nav-item">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-bullhorn"></i></span>
                 <span class="ba2-nav-label">Pengumuman</span>
                 <span class="ba2-nav-badge">3</span>
             </a>
-          <a href="{{ route('admin.acara') }}" class="ba2-nav-item {{ request()->routeIs('admin.acara*') ? 'active' : '' }}">
-    <span class="ba2-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
-    <span class="ba2-nav-label">Kegiatan &amp; Acara</span>
-</a>
-            <a href="#" class="ba2-nav-item">
-                <span class="ba2-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
-                <span class="ba2-nav-label">Donasi</span>
-                <span class="ba2-nav-soon">dev</span>
+            <a href="{{ route('admin.acara') }}" class="ba2-nav-item {{ request()->routeIs('admin.acara*') ? 'active' : '' }}">
+                <span class="ba2-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
+                <span class="ba2-nav-label">Kegiatan &amp; Acara</span>
             </a>
+
+            {{-- MENU DONASI DINAMIS BERDASARKAN PAKET MASJID --}}
+@if(isset($mosque) && $mosque->package_type === 'free')
+    {{-- Jika Paket Free: Diarahkan langsung ke halaman perpanjangan/pilihan paket yang sudah Anda miliki --}}
+    <a href="{{ route('masjid.perpanjangan.create') }}" class="ba2-nav-item" style="opacity: 0.8;" title="Upgrade paket untuk membuka fitur donasi">
+        <span class="ba2-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+        <span class="ba2-nav-label">Donasi</span>
+        <span class="ba2-nav-soon" style="background: #e74c3c; color: white;">Locked</span>
+    </a>
+@else
+    {{-- Jika Paket Berbayar: Aktif dan mengarah ke menu donasi admin --}}
+    <a href="{{ route('admin.donasi') }}" class="ba2-nav-item">
+        <span class="ba2-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+        <span class="ba2-nav-label">Donasi</span>
+        <span class="ba2-nav-soon" style="background: #27ae60; color: white;">Aktif</span>
+    </a>
+@endif
+
             <a href="#" class="ba2-nav-item">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-users"></i></span>
                 <span class="ba2-nav-label">Data Jamaah</span>
@@ -69,6 +82,7 @@
             </a>
         </nav>
 
+        
         {{-- User footer --}}
         <div class="ba2-user">
             <div class="ba2-user-avatar">{{ substr(Auth::user()->name ?? 'A', 0, 2) }}</div>

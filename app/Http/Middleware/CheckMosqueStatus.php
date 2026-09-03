@@ -22,8 +22,8 @@ class CheckMosqueStatus
             // 2. Cari data masjid berdasarkan user_id
             $mosque = Mosque::where('user_id', $user->id)->first();
 
-            // 3. Ubah pengecekan status menjadi 'approved' sesuai database Anda
-            if ($mosque && $mosque->status !== 'approved') {
+            // 3. Izinkan masuk jika statusnya 'approved' ATAU paketnya 'free'
+            if ($mosque && $mosque->status !== 'approved' && $mosque->package_type !== 'free') {
                 auth()->logout();
                 return redirect()->route('login')
                     ->with('error', 'Akun masjid Anda masih berstatus Pending atau Nonaktif. Silakan tunggu persetujuan Superadmin.');

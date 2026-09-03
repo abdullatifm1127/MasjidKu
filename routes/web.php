@@ -17,6 +17,7 @@ use App\Http\Controllers\adminmasjid\JadwalSholatController;
 use App\Http\Controllers\PaymentMasjid\PaymentController;
 use App\Http\Controllers\SuperAdmin\MosqueManagementController;
 use App\Http\Controllers\Donasi\DonasiController;
+use App\Http\Controllers\adminmasjid\DonasiAdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,7 +34,7 @@ Route::get('/', function () {
 
 /*
 |--------------------------------------------------------------------------
-| Halaman Pembayaran (Diletakkan di ATAS rute dynamic {slug})
+| Halaman Pembayaran & Perpanjangan Langganan Masjid
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
@@ -41,25 +42,24 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/masjid/pembayaran/upload', [PaymentController::class, 'store'])->name('masjid.payment.upload');
 
     Route::delete('/masjid/batalkan', [MosqueController::class, 'cancelRegistration'])->name('masjid.cancel');
+
+    // Perpanjangan Langganan
+    Route::get('/masjid/perpanjangan', [MosqueController::class, 'createRenewal'])->name('masjid.perpanjangan.create');
+    Route::post('/masjid/perpanjangan', [MosqueController::class, 'storeRenewal'])->name('masjid.perpanjangan.store');
+
+    Route::delete('/masjid/unsubscribe', [MosqueController::class, 'unsubscribe'])->name('masjid.unsubscribe');
 });
 
-// ===== TAMBAHAN: Rute Perpanjangan Langganan Masjid =====
-    Route::get('/masjid/perpanjangan', [MosqueController::class, 'createRenewal'])
-    ->name('masjid.perpanjangan.create');
-
-Route::post('/masjid/perpanjangan', [MosqueController::class, 'storeRenewal'])
-    ->name('masjid.perpanjangan.store');
 /*
 |--------------------------------------------------------------------------
-| Halaman Publik Masjid & Jadwal Sholat
+| Halaman Publik Masjid, Jadwal Sholat & Donasi Publik
 |--------------------------------------------------------------------------
 */
 Route::get('/masjid/{slug}', [PublicMosqueController::class, 'show'])->name('masjid.show');
 Route::get('/masjid/{slug}', [PublicMosqueController::class, 'show'])->name('masjid.publik');
 
-// ===== TAMBAHAN: Halaman Donasi (publik, per masjid) =====
-Route::get('/masjid/{masjid:slug}/donasi', [DonasiController::class, 'index'])->name('donasi.index');
-Route::post('/masjid/{masjid:slug}/donasi', [DonasiController::class, 'store'])->name('donasi.store');
+// Halaman Publik Donasi (Berdasarkan Slug Masjid)
+Route::get('/masjid/{slug}/donasi', [PublicMosqueController::class, 'showDonasi'])->name('masjid.donasi.publik');
 
 Route::middleware(['auth'])->get('/masjidUser', function () {
     $mosque = \App\Models\Mosque::where('user_id', Auth::id())->first();
@@ -78,18 +78,15 @@ Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
-Route::post('/login', [AuthController::class, 'login'])
-    ->name('login.process');
+Route::post('/login', [AuthController::class, 'login'])->name('login.process');
 
 Route::get('/register', function () {
     return view('auth.registerAkun');
 })->name('register');
 
-Route::post('/register', [AuthController::class, 'register'])
-    ->name('register.process');
+Route::post('/register', [AuthController::class, 'register'])->name('register.process');
 
-Route::post('/logout', [AuthController::class, 'logout'])
-    ->name('logout');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 /*
 |--------------------------------------------------------------------------
@@ -100,8 +97,7 @@ Route::get('/superadmin/login', function () {
     return view('auth.superadmin.halamanloginsuperadmin');
 })->name('superadmin.login');
 
-Route::post('/superadmin/login', [LoginController::class, 'login'])
-    ->name('superadmin.login.process');
+Route::post('/superadmin/login', [LoginController::class, 'login'])->name('superadmin.login.process');
 
 /*
 |--------------------------------------------------------------------------
@@ -119,66 +115,50 @@ Route::get('/forgot-password', function () {
 | Admin Masjid (Harus Login & Status Aktif)
 |--------------------------------------------------------------------------
 */
-// Rute untuk mendaftarkan masjid (tidak pakai check.status agar user baru bisa akses)
 Route::middleware(['auth'])->group(function () {
-    Route::get('/daftar-masjid', [MosqueController::class, 'create'])
-        ->name('daftar.masjid');
-
-    Route::post('/daftar-masjid', [MosqueController::class, 'store'])
-        ->name('daftar.masjid.store');
+    Route::get('/daftar-masjid', [MosqueController::class, 'create'])->name('daftar.masjid');
+    Route::post('/daftar-masjid', [MosqueController::class, 'store'])->name('daftar.masjid.store');
 });
 
-// Semua halaman admin di bawah ini otomatis terkunci jika status masjid Pending / Nonaktif
 Route::middleware(['auth', 'check.status'])->group(function () {
-    Route::get('/dashboard', [MosqueController::class, 'dashboard'])
-        ->name('dashboard');
+    Route::get('/dashboard', [MosqueController::class, 'dashboard'])->name('dashboard');
+    Route::get('/admin/dashboard', [MosqueController::class, 'dashboard'])->name('admin.dashboard');
 
-    Route::get('/admin/dashboard', [MosqueController::class, 'dashboard'])
-        ->name('admin.dashboard');
+    // TAMBAHKAN RUTE FITUR TERKUNCI DI SINI
+    Route::get('/admin/fitur-terkunci', function () {
+        return view('auth.adminmasjid.fiturTerkunci');
+    })->name('admin.fitur.terkunci');
 
-    Route::get('/admin/landing-page', [LandingPageController::class, 'index'])
-        ->name('admin.landing-page');
+    Route::get('/admin/landing-page', [LandingPageController::class, 'index'])->name('admin.landing-page');
+    Route::put('/admin/landing-page', [LandingPageController::class, 'update'])->name('admin.landing-page.update');
 
-    Route::put('/admin/landing-page', [LandingPageController::class, 'update'])
-        ->name('admin.landing-page.update');
-
-    Route::get('/admin/profil-masjid', [MosqueController::class, 'editProfil'])
-        ->name('admin.profil-masjid');
-
-    Route::put('/admin/profil-masjid', [MosqueController::class, 'updateProfil'])
-        ->name('admin.profil-masjid.update');
+    Route::get('/admin/profil-masjid', [MosqueController::class, 'editProfil'])->name('admin.profil-masjid');
+    Route::put('/admin/profil-masjid', [MosqueController::class, 'updateProfil'])->name('admin.profil-masjid.update');
 
     Route::get('/admin/beranda', function () {
         return view('auth.adminmasjid.berandaAdmin');
     })->name('admin.beranda');
 
-    Route::get('/admin/jadwal-sholat', [JadwalSholatController::class, 'index'])
-        ->name('admin.jadwal-sholat');
-        
-    Route::put('/admin/jadwal-sholat', [JadwalSholatController::class, 'update'])
-        ->name('admin.jadwal-sholat.update');
+    Route::get('/admin/jadwal-sholat', [JadwalSholatController::class, 'index'])->name('admin.jadwal-sholat');
+    Route::put('/admin/jadwal-sholat', [JadwalSholatController::class, 'update'])->name('admin.jadwal-sholat.update');
 
-    // ===== Program Unggulan =====
-    Route::get('/admin/program', [ProgramController::class, 'index'])
-        ->name('admin.program');
+    // Program Unggulan
+    Route::get('/admin/program', [ProgramController::class, 'index'])->name('admin.program');
+    Route::put('/admin/program', [ProgramController::class, 'update'])->name('admin.program.update');
 
-    Route::put('/admin/program', [ProgramController::class, 'update'])
-        ->name('admin.program.update');
+    // Acara / Kegiatan
+    Route::get('/admin/acara', [AcaraController::class, 'index'])->name('admin.acara');
+    Route::post('/admin/acara', [AcaraController::class, 'store'])->name('admin.acara.store');
+    Route::put('/admin/acara/{acara}', [AcaraController::class, 'update'])->name('admin.acara.update');
+    Route::delete('/admin/acara/{acara}', [AcaraController::class, 'destroy'])->name('admin.acara.destroy');
 
-    // ===== Acara / Kegiatan =====
-    Route::get('/admin/acara', [AcaraController::class, 'index'])
-        ->name('admin.acara');
-
-    Route::post('/admin/acara', [AcaraController::class, 'store'])
-        ->name('admin.acara.store');
-
-    Route::put('/admin/acara/{acara}', [AcaraController::class, 'update'])
-        ->name('admin.acara.update');
-
-    Route::delete('/admin/acara/{acara}', [AcaraController::class, 'destroy'])
-        ->name('admin.acara.destroy');
-
+    // DONASI ADMIN (Otomatis beralih ke halaman pembayaran jika paket masih free)
+    Route::get('/admin/donasi', [DonasiAdminController::class, 'index'])->name('admin.donasi');
+    Route::put('/admin/donasi/pengaturan', [DonasiAdminController::class, 'updatePengaturan'])->name('admin.donasi.pengaturan');
+    Route::post('/admin/donasi/galeri', [DonasiAdminController::class, 'storeGaleri'])->name('admin.donasi.galeri.store');
+    Route::delete('/admin/donasi/galeri/{id}', [DonasiAdminController::class, 'destroyGaleri'])->name('admin.donasi.galeri.destroy');
 });
+
 /*
 |--------------------------------------------------------------------------
 | Super Admin Panel (Harus Login & Punya Akses)
@@ -188,16 +168,14 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
     Route::get('/dashboard', [BerandaSuperAdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/verifikasi', [MosqueController::class, 'verifikasi'])->name('verifikasi');
 
-   Route::put('/verifikasi/{id}/approve', function ($id) {
+    Route::put('/verifikasi/{id}/approve', function ($id) {
         $mosque = Mosque::findOrFail($id);
         
-        // 1. Update status masjid dan pembayaran utama
         $mosque->update([
             'status' => 'approved',
             'payment_status' => 'approved',
         ]);
 
-        // 2. Update otomatis tabel subscriptions berdasarkan mosque_id
         \App\Models\Subscription::where('mosque_id', $mosque->id)
             ->update(['status' => 'approved']);
 
@@ -211,11 +189,7 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
     })->name('verifikasi.reject');
 
     Route::get('/manajemen-masjid', [MosqueController::class, 'manajemenMasjid'])->name('manajemen-masjid');
-
-    // === TAMBAHAN BARIS INI UNTUK DROPDOWN STATUS MASJID ===
     Route::patch('/manajemen-masjid/{id}/update-status', [MosqueManagementController::class, 'updateStatus'])->name('manajemen-masjid.updateStatus');
-
-    // === TAMBAHAN ROUTE RIWAYAT PEMBAYARAN & PERPANJANGAN ===
     Route::get('/riwayat-pembayaran', [MosqueManagementController::class, 'paymentHistory'])->name('riwayat-pembayaran');
 
     Route::post('/manajemen-masjid', function (\Illuminate\Http\Request $request) {
@@ -243,5 +217,3 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
     Route::put('/pengaturan', [PengaturanController::class, 'update'])->name('pengaturan.update');
     Route::delete('/pengaturan/reset', [PengaturanController::class, 'reset'])->name('pengaturan.reset');
 });
-
-Route::post('/masjid/perpanjangan', [MosqueController::class, 'storeRenewal'])->name('masjid.perpanjangan.store');

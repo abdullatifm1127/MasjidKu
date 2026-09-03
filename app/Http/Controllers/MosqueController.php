@@ -382,8 +382,9 @@ class MosqueController extends Controller
         ]);
 
         $mosque->update([
-            'status' => 'pending',
-            'payment_status' => 'pending', 
+            'status' => 'approved',          // Ubah jadi approved agar langsung aktif
+            'payment_status' => 'approved', 
+            'package_type'   => 'paid',      // <--- TAMBAHKAN INI AGAR LANGSUNG BERBAYAR
             'payment_proof' => $path 
         ]);
 
