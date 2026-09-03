@@ -61,14 +61,19 @@
                 </div>
             </a>
 
-            <nav class="hu-nav">
-                <a href="#beranda"  class="hu-nav-link active">Beranda</a>
-                <a href="#profil"   class="hu-nav-link">Profil</a>
+           <nav class="hu-nav">
+                <a href="#beranda" class="hu-nav-link active">Beranda</a>
+                <a href="#profil" class="hu-nav-link">Profil</a>
                 @if($modOn('jadwal_shalat'))<a href="#shalat" class="hu-nav-link">Waktu Shalat</a>@endif
-                <a href="#program"  class="hu-nav-link">Program & Fasilitas</a>
+                <a href="#program" class="hu-nav-link">Program & Fasilitas</a>
                 @if($modOn('kegiatan'))<a href="#acara" class="hu-nav-link">Acara</a>@endif
-                @if($modOn('donasi'))<a href="#donasi" class="hu-nav-link">Donasi</a>@endif
-                <a href="#kontak"   class="hu-nav-link">Hubungi</a>
+                
+                {{-- MENU DONASI: Muncul jika modul aktif DAN paket bukan free / donasi diizinkan --}}
+                @if($modOn('donasi') && isset($mosque) && $mosque->package_type != 'free' && $mosque->has_online_donation)
+                    <a href="#donasi" class="hu-nav-link">Donasi</a>
+                @endif
+                
+                <a href="#kontak" class="hu-nav-link">Hubungi</a>
             </nav>
 
             <button class="hu-ganti-btn" id="huGantiBtn">
@@ -332,64 +337,64 @@
     </section>
     @endif
 
-    {{-- DONASI — modul: donasi --}}
-    @if($modOn('donasi'))
-    <section class="hu-donasi-v2-section" id="donasi">
-        <div class="hu-donasi-v2-inner">
-            <div class="hu-donasi-v2-left">
-                <div class="hu-section-tag hu-tag-amber-light">Donasi & Sedekah</div>
-                <h2 class="hu-donasi-v2-title">Investasi<br><em>Terbaik Akhirat</em></h2>
-                <p class="hu-donasi-v2-desc">
-                    Setiap rupiah yang Anda donasikan akan digunakan untuk pembangunan dan operasional masjid.
-                    Mari bersama-sama memakmurkan masjid Allah.
-                </p>
-                @php
-                    $donasiTerkumpul = $donasiTerkumpul ?? 387000000;
-                    $donasiTarget = $donasiTarget ?? 500000000;
-                    $donasiPct = $donasiTarget > 0 ? round($donasiTerkumpul / $donasiTarget * 100) : 0;
-                @endphp
-                <div class="hu-donasi-v2-progress-wrap">
-                    <div class="hu-donasi-v2-progress-label">
-                        <span>Terkumpul</span>
-                        <span class="hu-donasi-v2-pct">{{ $donasiPct }}%</span>
-                    </div>
-                    <div class="hu-donasi-v2-track">
-                        <div class="hu-donasi-v2-fill" style="width:{{ $donasiPct }}%"></div>
-                    </div>
-                    <div class="hu-donasi-v2-amounts">
-                        <span>Rp {{ number_format($donasiTerkumpul, 0, ',', '.') }}</span>
-                        <span>Rp {{ number_format($donasiTarget, 0, ',', '.') }}</span>
-                    </div>
+   {{-- DONASI — modul: donasi & paket berbayar --}}
+@if($modOn('donasi') && isset($mosque) && $mosque->package_type != 'free' && $mosque->has_online_donation)
+<section class="hu-donasi-v2-section" id="donasi">
+    <div class="hu-donasi-v2-inner">
+        <div class="hu-donasi-v2-left">
+            <div class="hu-section-tag hu-tag-amber-light">Donasi & Sedekah</div>
+            <h2 class="hu-donasi-v2-title">Investasi<br><em>Terbaik Akhirat</em></h2>
+            <p class="hu-donasi-v2-desc">
+                Setiap rupiah yang Anda donasikan akan digunakan untuk pembangunan dan operasional masjid.
+                Mari bersama-sama memakmurkan masjid Allah.
+            </p>
+            @php
+                $donasiTerkumpul = $donasiTerkumpul ?? 387000000;
+                $donasiTarget = $donasiTarget ?? 500000000;
+                $donasiPct = $donasiTarget > 0 ? round($donasiTerkumpul / $donasiTarget * 100) : 0;
+            @endphp
+            <div class="hu-donasi-v2-progress-wrap">
+                <div class="hu-donasi-v2-progress-label">
+                    <span>Terkumpul</span>
+                    <span class="hu-donasi-v2-pct">{{ $donasiPct }}%</span>
                 </div>
-            </div>
-
-            <div class="hu-donasi-v2-right">
-                <div class="hu-donasi-v2-card">
-                    <div class="hu-donasi-v2-card-title">Pilih Nominal Donasi</div>
-                    <div class="hu-donasi-v2-nominals">
-                        <button class="hu-nominal-btn" data-val="50000">Rp 50.000</button>
-                        <button class="hu-nominal-btn" data-val="100000">Rp 100.000</button>
-                        <button class="hu-nominal-btn" data-val="250000">Rp 250.000</button>
-                        <button class="hu-nominal-btn" data-val="500000">Rp 500.000</button>
-                    </div>
-                    <div class="hu-donasi-v2-or">Atau masukkan nominal lain</div>
-                    <div class="hu-donasi-v2-input-wrap">
-                        <span class="hu-donasi-v2-prefix">Rp</span>
-                        <input type="number" id="donasiNominal" class="hu-donasi-v2-input" placeholder="0" min="1000">
-                    </div>
-                    <div class="hu-donasi-v2-label-field">Nama (opsional)</div>
-                    <input type="text" class="hu-donasi-v2-input-name" placeholder="Hamba Allah">
-                   <a href="{{ route('donasi.index', $mosque->slug) }}" class="hu-donasi-v2-submit" style="text-decoration: none; display: inline-block; text-align: center;">
-    Donasi Sekarang
-</a>
-                    <div class="hu-donasi-v2-note">
-                        Pembayaran aman &amp; terpercaya · QRIS / Transfer Bank / Dompet Digital
-                    </div>
+                <div class="hu-donasi-v2-track">
+                    <div class="hu-donasi-v2-fill" style="width:{{ $donasiPct }}%"></div>
+                </div>
+                <div class="hu-donasi-v2-amounts">
+                    <span>Rp {{ number_format($donasiTerkumpul, 0, ',', '.') }}</span>
+                    <span>Rp {{ number_format($donasiTarget, 0, ',', '.') }}</span>
                 </div>
             </div>
         </div>
-    </section>
-    @endif
+
+        <div class="hu-donasi-v2-right">
+            <div class="hu-donasi-v2-card">
+                <div class="hu-donasi-v2-card-title">Pilih Nominal Donasi</div>
+                <div class="hu-donasi-v2-nominals">
+                    <button class="hu-nominal-btn" data-val="50000">Rp 50.000</button>
+                    <button class="hu-nominal-btn" data-val="100000">Rp 100.000</button>
+                    <button class="hu-nominal-btn" data-val="250000">Rp 250.000</button>
+                    <button class="hu-nominal-btn" data-val="500000">Rp 500.000</button>
+                </div>
+                <div class="hu-donasi-v2-or">Atau masukkan nominal lain</div>
+                <div class="hu-donasi-v2-input-wrap">
+                    <span class="hu-donasi-v2-prefix">Rp</span>
+                    <input type="number" id="donasiNominal" class="hu-donasi-v2-input" placeholder="0" min="1000">
+                </div>
+                <div class="hu-donasi-v2-label-field">Nama (opsional)</div>
+                <input type="text" class="hu-donasi-v2-input-name" placeholder="Hamba Allah">
+                <a href="{{ route('donasi.index', $mosque->slug) }}" class="hu-donasi-v2-submit" style="text-decoration: none; display: inline-block; text-align: center;">
+                    Donasi Sekarang
+                </a>
+                <div class="hu-donasi-v2-note">
+                    Pembayaran aman &amp; terpercaya · QRIS / Transfer Bank / Dompet Digital
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@endif
 
     {{-- KONTAK — semua isi dari tab "Kontak & Sosial" di editor Landing Page --}}
     <section class="hu-hubungi-section" id="kontak">

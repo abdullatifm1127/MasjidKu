@@ -275,7 +275,6 @@
                             </label>
                         @endforeach
                     </div>
-                    </div>
 
                     <div class="rm-group" style="margin-top:20px;">
                         <label>Deskripsi Masjid</label>

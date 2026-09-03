@@ -176,7 +176,10 @@
                             </td>
 
                             {{-- Masjid --}}
-                            <td class="pg-td-masjid">{{ $u->masjid ?? '-' }}</td>
+                        {{-- Masjid --}}
+                            <td class="pg-td-masjid">
+                                {{ $u->mosque->mosque_name ?? $u->masjid ?? '-' }}
+                            </td>
 
                             {{-- Terakhir aktif --}}
                             <td class="pg-td-aktif">
@@ -270,7 +273,7 @@
             document.getElementById('saMain').classList.toggle('expanded');
         });
 
-        // Buka modal edit
+       // Buka modal edit
        function pgOpenEdit(id) {
             const u = pgData.find(x => x.id === id);
             if (!u) return;
@@ -280,14 +283,16 @@
             document.getElementById('pgMethodContainer').innerHTML = '<input type="hidden" name="_method" value="PUT">';
             
             document.getElementById('pgUserId').value = u.id;
-            document.getElementById('pgFieldName').value = u.name; // <-- Pastikan u.name, bukan u.nama
+            document.getElementById('pgFieldName').value = u.name;
             document.getElementById('pgFieldEmail').value = u.email;
-            document.getElementById('pgFieldRole').value = u.role; // <-- Pastikan u.role, bukan u.peran
+            document.getElementById('pgFieldRole').value = u.role;
             document.getElementById('pgFieldMasjid').value = u.masjid ?? '';
             
             document.getElementById('pgPasswordReq').style.display = 'none';
             document.getElementById('pgSimpanBtn').textContent = 'Simpan Perubahan';
-            document.getElementById('pgModalForm').action = '/superadmin/pengguna/' + u.id;
+            
+            // PERBAIKAN UTAMA: Tambahkan /superadmin/ di sini agar sesuai dengan rute web Anda
+            document.getElementById('pgModalForm').action = "/superadmin/pengguna/" + u.id;
             
             openModal();
         }

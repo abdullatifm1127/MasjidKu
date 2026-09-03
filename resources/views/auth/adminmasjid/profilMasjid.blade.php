@@ -503,39 +503,7 @@
                         </div>
                     </div><!-- /.pm-section -->
 
-                    <div class="pm-section">
-                        <div class="pm-section-title">
-                            <span class="pm-section-bar"></span>
-                            Fitur Digital
-                        </div>
-
-                        <div class="pm-toggle-list">
-                            <div class="pm-toggle-item">
-                                <div>
-                                    <div class="pm-toggle-name">Donasi Online</div>
-                                    <div class="pm-toggle-desc">Aktifkan modul penerimaan donasi secara online</div>
-                                </div>
-                                <label class="pm-switch">
-                                    <input type="checkbox" name="has_online_donation" value="1"
-                                           {{ old('has_online_donation', $mosque->has_online_donation ?? false) ? 'checked' : '' }}>
-                                    <span class="pm-switch-track"></span>
-                                </label>
-                            </div>
-                            <div class="pm-toggle-item">
-                                <div>
-                                    <div class="pm-toggle-name">Jadwal Shalat</div>
-                                    <div class="pm-toggle-desc">Tampilkan jadwal shalat otomatis di halaman publik</div>
-                                </div>
-                                <label class="pm-switch">
-                                    <input type="checkbox" name="has_prayer_schedule" value="1"
-                                           {{ old('has_prayer_schedule', $mosque->has_prayer_schedule ?? false) ? 'checked' : '' }}>
-                                    <span class="pm-switch-track"></span>
-                                </label>
-                            </div>
-                        </div>
-                    </div><!-- /.pm-section -->
-                </div><!-- /#tab-program -->
-
+                    
                 {{-- ===== TAB: PREVIEW ===== --}}
                 <div class="pm-tab-content" id="tab-preview">
                     <div class="pm-preview-card">

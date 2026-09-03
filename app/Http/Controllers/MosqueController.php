@@ -288,12 +288,21 @@ class MosqueController extends Controller
             $updateData['about_photo_secondary'] = $request->file('photo_secondary')->store('mosque/about', 'public');
         }
 
+        // 1. Update data profil masjid di tabel mosques
         $mosque->update($updateData);
 
-        return redirect()->route('admin.profil-masjid')
-            ->with('success', 'Profil masjid berhasil disimpan.');
-    }
+        // 2. Sinkronisasi otomatis email ke tabel users (akun login admin masjid)
+        if ($mosque->user_id) {
+            $user = \App\Models\User::find($mosque->user_id);
+            if ($user) {
+                $user->email = $validated['email']; // Email login otomatis disamakan dengan email masjid
+                $user->save();
+            }
+        }
 
+        return redirect()->route('admin.profil-masjid')
+            ->with('success', 'Profil masjid dan email akun berhasil diperbarui.');
+    }
     /**
      * Halaman Verifikasi Super Admin.
      */
