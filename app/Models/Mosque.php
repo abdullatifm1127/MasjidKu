@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Str; // 1. Tambahkan import Str di sini
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Str;
 
 class Mosque extends Model
 {
@@ -42,42 +43,12 @@ class Mosque extends Model
         'description',
         'status',
         'package_type',
-        'slug', // 2. Tambahkan 'slug' ke dalam fillable
-
-        // ===== TAMBAHKAN DUA BARIS INI =====
+        'slug',
         'payment_proof',
         'payment_status',
-
-        // ===== Profil Masjid tambahan (foto & visi-misi) =====
         'about_photo',
         'about_vision',
         'about_photo_secondary',
-
-        // ===== Landing Page: Hero / Banner =====
-        'hero_title',
-        'hero_subtitle',
-        'hero_desc',
-        'hero_image',
-        'hero_bg_color',
-        'hero_text_color',
-        'btn_primary',
-        'btn_primary_url',
-        'btn_secondary',
-        'btn_secondary_url',
-
-        // ===== Landing Page: Kontak & Sosial (khusus tampilan publik) =====
-        'contact_address',
-        'contact_phone',
-        'contact_email',
-        'contact_maps',
-        'social_ig',
-        'social_fb',
-        'social_yt',
-        'social_wa',
-
-        // ===== Landing Page: Modul & status publish =====
-        'active_modules',
-        'is_published',
     ];
 
     protected $casts = [
@@ -85,11 +56,8 @@ class Mosque extends Model
         'programs' => 'array',
         'has_online_donation' => 'boolean',
         'has_prayer_schedule' => 'boolean',
-        'active_modules' => 'array',
-        'is_published' => 'boolean',
     ];
 
-    // 3. Tambahkan fungsi boot untuk otomatis membuat slug
     protected static function boot()
     {
         parent::boot();
@@ -107,16 +75,18 @@ class Mosque extends Model
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Satu masjid punya banyak acara/kegiatan.
-     */
-    public function acaras(): HasMany
+    public function landingPage(): HasOne
     {
-        return $this->hasMany(acara::class);
+        return $this->hasOne(LandingPage::class, 'mosque_id');
     }
 
-    public function subscriptions()
-{
-    return $this->hasMany(Subscription::class);
-}
+    public function acaras(): HasMany
+    {
+        return $this->hasMany(Acara::class);
+    }
+
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
 }

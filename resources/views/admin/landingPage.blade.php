@@ -160,236 +160,142 @@
             <div class="lp-tabs" id="lpTabs">
                 <button type="button" class="lp-tab active" data-tab="hero">Hero / Banner</button>
                 <button type="button" class="lp-tab" data-tab="tentang">Tentang Masjid</button>
-                <button type="button" class="lp-tab" data-tab="kontak">Kontak &amp; Sosial</button>
                 <button type="button" class="lp-tab" data-tab="modul">Modul Aktif</button>
                 <button type="button" class="lp-tab lp-tab-preview" data-tab="preview">Pratinjau</button>
             </div>
 
-            {{-- ===== TAB: HERO ===== --}}
-            <div class="lp-panel active" id="lpTab-hero">
-                <div class="lp-card">
-                    <div class="lp-card-title"><span class="lp-card-bar"></span>Konten Hero / Banner Utama</div>
+          {{-- ===== TAB: HERO ===== --}}
+<div class="lp-panel active" id="lpTab-hero">
+    {{-- Card 1: Konten Teks Utama --}}
+    <div class="lp-card">
+        <div class="lp-card-title"><span class="lp-card-bar"></span>Konten Hero / Banner Utama</div>
 
-                    <div class="lp-field">
-                        <label class="lp-label">Judul Utama</label>
-                        <input class="lp-input" type="text" name="hero_title"
-                               placeholder="cth. Selamat Datang di Masjid Al-Ikhlas"
-                               value="{{ old('hero_title', $mosque->hero_title ?? '') }}">
-                    </div>
+        <div class="lp-field">
+            <label class="lp-label">Judul Utama</label>
+            <input class="lp-input" type="text" name="hero_title"
+                   placeholder="cth. Selamat Datang di Masjid Al-Ikhlas"
+                   value="{{ old('hero_title', $landingPage->hero_title ?? '') }}"
+                   style="width: 100% !important; max-width: 100% !important; display: block !important; box-sizing: border-box;">
+        </div>
 
-                    <div class="lp-field">
-                        <label class="lp-label">Nama Masjid (Arab)</label>
-                        <input class="lp-input" type="text" value="{{ $mosque->arabic_name ?? '(belum diisi)' }}" dir="rtl" disabled
-                               style="background:#f3f4f6;color:var(--text-mid);">
-                        <span style="font-size:0.72rem;color:var(--text-light);">
-                            Diambil dari <a href="{{ route('admin.profil-masjid') }}">Profil Masjid</a>. Ubah di sana untuk memperbarui.
-                        </span>
-                    </div>
+        <div class="lp-field">
+            <label class="lp-label">Nama Masjid (Arab)</label>
+            <input class="lp-input" type="text" value="{{ $mosque->arabic_name ?? '(belum diisi)' }}" dir="rtl" disabled
+                   style="width: 100% !important; max-width: 100% !important; display: block !important; background: #f3f4f6; color: var(--text-mid); text-align: right; box-sizing: border-box;">
+            <span style="font-size: 0.72rem; color: var(--text-light); display: block; margin-top: 4px;">
+                Diambil dari <a href="{{ route('admin.profil-masjid') }}">Profil Masjid</a>. Ubah di sana untuk memperbarui.
+            </span>
+        </div>
 
-                    <div class="lp-field">
-                        <label class="lp-label">Sub-judul / Tagline</label>
-                        <input class="lp-input" type="text" name="hero_subtitle"
-                               placeholder="cth. Masjid Rahmatan Lil Alamin"
-                               value="{{ old('hero_subtitle', $mosque->hero_subtitle ?? $mosque->tagline ?? '') }}">
-                    </div>
+        <div class="lp-field">
+            <label class="lp-label">Sub-judul / Tagline</label>
+            <input class="lp-input" type="text" name="hero_subtitle"
+                   placeholder="cth. Masjid Rahmatan Lil Alamin"
+                   value="{{ old('hero_subtitle', $landingPage->hero_subtitle ?? $mosque->tagline ?? '') }}"
+                   style="width: 100% !important; max-width: 100% !important; display: block !important; box-sizing: border-box;">
+        </div>
 
-                    <div class="lp-field">
-                        <label class="lp-label">Deskripsi Singkat</label>
-                        <textarea class="lp-textarea" name="hero_desc" rows="3"
-                                  placeholder="Ceritakan tentang masjid Anda dalam 1–2 kalimat...">{{ old('hero_desc', $mosque->hero_desc ?? '') }}</textarea>
-                    </div>
+        <div class="lp-field">
+            <label class="lp-label">Deskripsi Singkat</label>
+            <textarea class="lp-textarea" name="hero_desc" rows="3"
+                      placeholder="Ceritakan tentang masjid Anda dalam 1–2 kalimat..."
+                      style="width: 100% !important; max-width: 100% !important; display: block !important; box-sizing: border-box;">{{ old('hero_desc', $landingPage->hero_desc ?? '') }}</textarea>
+        </div>
+    </div>
 
-                    <div class="lp-grid-2">
-                        <div class="lp-field">
-                            <label class="lp-label">Teks Tombol Utama</label>
-                            <input class="lp-input" type="text" name="btn_primary"
-                                   placeholder="cth. Donasi Sekarang"
-                                   value="{{ old('btn_primary', $mosque->btn_primary ?? '') }}">
-                        </div>
-                        <div class="lp-field">
-                            <label class="lp-label">Link Tombol Utama</label>
-                            <input class="lp-input" type="url" name="btn_primary_url"
-                                   placeholder="https://... atau #donasi" value="{{ old('btn_primary_url', $mosque->btn_primary_url ?? '') }}">
-                        </div>
-                    </div>
+    {{-- Card 2: Gambar Latar --}}
+    <div class="lp-card">
+        <div class="lp-card-title"><span class="lp-card-bar"></span>Gambar</div>
+        <div class="lp-field">
+            <label class="lp-label">Gambar Latar — opsional</label>
+            @if(!empty($landingPage->hero_image))
+                <img src="{{ asset('storage/'.$landingPage->hero_image) }}" alt="Hero saat ini" style="max-height:100px;border-radius:8px;margin-bottom:8px;display:block;">
+            @endif
+            <input type="file" name="hero_image" accept="image/*" class="lp-input"
+                   style="width: 100% !important; max-width: 100% !important; display: block !important; box-sizing: border-box;">
+            <span style="font-size: 0.72rem; color: var(--text-light); display: block; margin-top: 4px;">PNG, JPG, AVIF, WebP · Maks. 2MB · Rekomendasi 1920×600</span>
+        </div>
+    </div>
+</div>
 
-                    <div class="lp-grid-2">
-                        <div class="lp-field">
-                            <label class="lp-label">Teks Tombol Sekunder — opsional</label>
-                            <input class="lp-input" type="text" name="btn_secondary"
-                                   placeholder="cth. Program Kami"
-                                   value="{{ old('btn_secondary', $mosque->btn_secondary ?? '') }}">
-                        </div>
-                        <div class="lp-field">
-                            <label class="lp-label">Link Tombol Sekunder</label>
-                            <input class="lp-input" type="url" name="btn_secondary_url"
-                                   placeholder="https://... atau #profil" value="{{ old('btn_secondary_url', $mosque->btn_secondary_url ?? '') }}">
-                        </div>
-                    </div>
-                </div>
+           {{-- ===== TAB: TENTANG ===== --}}
+<div class="lp-panel" id="lpTab-tentang">
+    <div class="lp-card">
+        <div class="lp-card-title"><span class="lp-card-bar"></span>Tentang Masjid</div>
 
-                <div class="lp-card">
-                    <div class="lp-card-title"><span class="lp-card-bar"></span>Gambar &amp; Warna Hero</div>
+        <div style="background:#f3f4f6;border-radius:10px;padding:14px 16px;font-size:0.85rem;color:var(--text-mid);margin-bottom:16px;">
+            Konten section "Tentang Masjid" di halaman publik sekarang diambil langsung dari
+            <strong>Profil Masjid</strong>, supaya tidak ada dua tempat mengedit data yang sama.
+            <a href="{{ route('admin.profil-masjid') }}" style="font-weight:600;">Edit di Profil Masjid →</a>
+        </div>
 
-                    <div class="lp-field">
-                        <label class="lp-label">Gambar Latar — opsional</label>
-                        @if(!empty($mosque->hero_image))
-                            <img src="{{ asset('storage/'.$mosque->hero_image) }}" alt="Hero saat ini" style="max-height:100px;border-radius:8px;margin-bottom:8px;display:block;">
-                        @endif
-                        <input type="file" name="hero_image" accept="image/*" class="lp-input">
-                        <span style="font-size:0.72rem;color:var(--text-light);">PNG, JPG, AVIF, WebP · Maks. 2MB · Rekomendasi 1920×600</span>
-                    </div>
-
-                    <div class="lp-grid-2">
-                        <div class="lp-field">
-                            <label class="lp-label">Warna Latar Hero</label>
-                            <div style="display:flex;gap:8px;">
-                                <input type="color" name="hero_bg_color_picker" value="{{ old('hero_bg_color', $mosque->hero_bg_color ?? '#0e3320') }}">
-                                <input class="lp-input" type="text" name="hero_bg_color" value="{{ old('hero_bg_color', $mosque->hero_bg_color ?? '#0e3320') }}" style="max-width:130px;">
-                            </div>
-                        </div>
-                        <div class="lp-field">
-                            <label class="lp-label">Warna Teks Hero</label>
-                            <div style="display:flex;gap:8px;">
-                                <input type="color" name="hero_text_color_picker" value="{{ old('hero_text_color', $mosque->hero_text_color ?? '#ffffff') }}">
-                                <input class="lp-input" type="text" name="hero_text_color" value="{{ old('hero_text_color', $mosque->hero_text_color ?? '#ffffff') }}" style="max-width:130px;">
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div class="lp-grid-2">
+            <div class="lp-field">
+                <label class="lp-label">Nama Masjid</label>
+                <input class="lp-input" type="text" value="{{ $mosque->mosque_name ?? '(belum diisi)' }}" disabled 
+                       style="width: 100% !important; max-width: 100% !important; display: block !important; background: #f3f4f6; color: var(--text-mid); box-sizing: border-box;">
             </div>
-
-            {{-- ===== TAB: TENTANG ===== --}}
-            <div class="lp-panel" id="lpTab-tentang">
-                <div class="lp-card">
-                    <div class="lp-card-title"><span class="lp-card-bar"></span>Tentang Masjid</div>
-
-                    <div style="background:#f3f4f6;border-radius:10px;padding:14px 16px;font-size:0.85rem;color:var(--text-mid);margin-bottom:16px;">
-                        Konten section "Tentang Masjid" di halaman publik sekarang diambil langsung dari
-                        <strong>Profil Masjid</strong>, supaya tidak ada dua tempat mengedit data yang sama.
-                        <a href="{{ route('admin.profil-masjid') }}" style="font-weight:600;">Edit di Profil Masjid →</a>
-                    </div>
-
-                    <div class="lp-grid-2">
-                        <div class="lp-field">
-                            <label class="lp-label">Nama Masjid</label>
-                            <input class="lp-input" type="text" value="{{ $mosque->mosque_name ?? '(belum diisi)' }}" disabled style="background:#f3f4f6;">
-                        </div>
-                        <div class="lp-field">
-                            <label class="lp-label">Tahun Berdiri</label>
-                            <input class="lp-input" type="text" value="{{ $mosque->founded ?? '(belum diisi)' }}" disabled style="background:#f3f4f6;">
-                        </div>
-                    </div>
-                    <div class="lp-field">
-                        <label class="lp-label">Kapasitas Jamaah</label>
-                        <input class="lp-input" type="text" value="{{ $mosque->capacity ?? '(belum diisi)' }}" disabled style="background:#f3f4f6;">
-                    </div>
-                    <div class="lp-field">
-                        <label class="lp-label">Deskripsi / Sejarah Singkat</label>
-                        <textarea class="lp-textarea" rows="4" disabled style="background:#f3f4f6;">{{ $mosque->description ?? '(belum diisi)' }}</textarea>
-                    </div>
-                    <div class="lp-field">
-                        <label class="lp-label">Visi &amp; Misi</label>
-                        <textarea class="lp-textarea" rows="3" disabled style="background:#f3f4f6;">{{ $mosque->about_vision ?? '(belum diisi)' }}</textarea>
-                    </div>
-                </div>
+            <div class="lp-field">
+                <label class="lp-label">Tahun Berdiri</label>
+                <input class="lp-input" type="text" value="{{ $mosque->founded ?? '(belum diisi)' }}" disabled 
+                       style="width: 100% !important; max-width: 100% !important; display: block !important; background: #f3f4f6; color: var(--text-mid); box-sizing: border-box;">
             </div>
+        </div>
+        <div class="lp-field">
+            <label class="lp-label">Kapasitas Jamaah</label>
+            <input class="lp-input" type="text" value="{{ $mosque->capacity ?? '(belum diisi)' }}" disabled 
+                   style="width: 100% !important; max-width: 100% !important; display: block !important; background: #f3f4f6; color: var(--text-mid); box-sizing: border-box;">
+        </div>
+        <div class="lp-field">
+            <label class="lp-label">Deskripsi / Sejarah Singkat</label>
+            <textarea class="lp-textarea" rows="4" disabled 
+                      style="width: 100% !important; max-width: 100% !important; display: block !important; background: #f3f4f6; color: var(--text-mid); box-sizing: border-box;">{{ $mosque->description ?? '(belum diisi)' }}</textarea>
+        </div>
+        <div class="lp-field">
+            <label class="lp-label">Visi &amp; Misi</label>
+            <textarea class="lp-textarea" rows="3" disabled 
+                      style="width: 100% !important; max-width: 100% !important; display: block !important; background: #f3f4f6; color: var(--text-mid); box-sizing: border-box;">{{ $mosque->about_vision ?? '(belum diisi)' }}</textarea>
+        </div>
+    </div>
+</div>
 
-            {{-- ===== TAB: KONTAK & SOSIAL ===== --}}
-            <div class="lp-panel" id="lpTab-kontak">
-                <div class="lp-card">
-                    <div class="lp-card-title"><span class="lp-card-bar"></span>Informasi Kontak Publik</div>
-                    <span style="font-size:0.78rem;color:var(--text-light);display:block;margin-bottom:12px;">
-                        Ini kontak yang tampil untuk pengunjung publik — boleh berbeda dari kontak internal di Profil Masjid.
-                    </span>
+{{-- ===== TAB: MODUL ===== --}}
+<div class="lp-panel" id="lpTab-modul">
+    <div class="lp-card">
+        <div class="lp-card-title"><span class="lp-card-bar"></span>Modul yang Ditampilkan</div>
 
-                    <div class="lp-field">
-                        <label class="lp-label">Alamat Lengkap</label>
-                        <textarea class="lp-textarea" name="contact_address" rows="2"
-                                  placeholder="{{ $mosque->address ?? '' }}">{{ old('contact_address', $mosque->contact_address ?? '') }}</textarea>
-                    </div>
-
-                    <div class="lp-grid-2">
-                        <div class="lp-field">
-                            <label class="lp-label">Nomor Telepon</label>
-                            <input class="lp-input" type="tel" name="contact_phone"
-                                   placeholder="{{ $mosque->phone ?? '' }}"
-                                   value="{{ old('contact_phone', $mosque->contact_phone ?? '') }}">
-                        </div>
-                        <div class="lp-field">
-                            <label class="lp-label">Email</label>
-                            <input class="lp-input" type="email" name="contact_email"
-                                   placeholder="{{ $mosque->email ?? '' }}"
-                                   value="{{ old('contact_email', $mosque->contact_email ?? '') }}">
-                        </div>
-                    </div>
-
-                    <div class="lp-field">
-                        <label class="lp-label">Link Google Maps — opsional</label>
-                        <input class="lp-input" type="url" name="contact_maps"
-                               placeholder="https://maps.google.com/..." value="{{ old('contact_maps', $mosque->contact_maps ?? '') }}">
-                    </div>
+        @php
+            // Ambil data active_modules dari tabel landing_pages, bukan dari mosqeus
+            $activeModules = $landingPage->active_modules ?? [];
+            $moduls = [
+                ['key' => 'pengumuman',    'name' => 'Pengumuman',       'desc' => 'Tampilkan pengumuman terbaru masjid (ticker info)'],
+                ['key' => 'jadwal_shalat', 'name' => 'Jadwal Shalat',    'desc' => 'Widget jadwal shalat hari ini'],
+                ['key' => 'kegiatan',      'name' => 'Kegiatan & Acara', 'desc' => 'Daftar acara dan kegiatan mendatang'],
+                ['key' => 'donasi',        'name' => 'Donasi Online',    'desc' => 'Tombol dan form donasi online'],
+                ['key' => 'data_jamaah',   'name' => 'Data Jamaah',      'desc' => 'Statistik dan info jamaah terdaftar'],
+                ['key' => 'peta_lokasi',   'name' => 'Peta Lokasi',      'desc' => 'Tautan Google Maps di bagian Hubungi Kami'],
+            ];
+        @endphp
+        
+        @foreach($moduls as $mod)
+            @php 
+                // Jika data di database bernilai null (pertama kali), default-nya true (tercentang)
+                $isChecked = isset($activeModules[$mod['key']]) ? $activeModules[$mod['key']] : true; 
+            @endphp
+            <div class="lp-fitur-row">
+                <div class="lp-fitur-fields">
+                    <div style="font-weight:600;font-size:0.86rem;">{{ $mod['name'] }}</div>
+                    <div style="font-size:0.78rem;color:var(--text-light);">{{ $mod['desc'] }}</div>
                 </div>
-
-                <div class="lp-card">
-                    <div class="lp-card-title"><span class="lp-card-bar"></span>Media Sosial</div>
-
-                    <div class="lp-field">
-                        <label class="lp-label">Instagram</label>
-                        <input class="lp-input" type="url" name="social_ig"
-                               placeholder="https://instagram.com/masjidanda" value="{{ old('social_ig', $mosque->social_ig ?? '') }}">
-                    </div>
-                    <div class="lp-field">
-                        <label class="lp-label">Facebook</label>
-                        <input class="lp-input" type="url" name="social_fb"
-                               placeholder="https://facebook.com/masjidanda" value="{{ old('social_fb', $mosque->social_fb ?? '') }}">
-                    </div>
-                    <div class="lp-field">
-                        <label class="lp-label">YouTube</label>
-                        <input class="lp-input" type="url" name="social_yt"
-                               placeholder="https://youtube.com/@masjidanda" value="{{ old('social_yt', $mosque->social_yt ?? '') }}">
-                    </div>
-                    <div class="lp-field">
-                        <label class="lp-label">WhatsApp</label>
-                        <input class="lp-input" type="tel" name="social_wa"
-                               placeholder="+62 812 0000 0000" value="{{ old('social_wa', $mosque->social_wa ?? '') }}">
-                    </div>
-                </div>
+                <label style="margin-top:14px;">
+                    <input type="hidden" name="modul[{{ $mod['key'] }}]" value="0">
+                    <input type="checkbox" name="modul[{{ $mod['key'] }}]" value="1"
+                           {{ $isChecked ? 'checked' : '' }}>
+                </label>
             </div>
-
-            {{-- ===== TAB: MODUL ===== --}}
-            <div class="lp-panel" id="lpTab-modul">
-                <div class="lp-card">
-                    <div class="lp-card-title"><span class="lp-card-bar"></span>Modul yang Ditampilkan</div>
-
-                    @php
-                        $activeModules = $mosque->active_modules ?? [];
-                        $moduls = [
-                            ['key' => 'pengumuman',    'name' => 'Pengumuman',       'desc' => 'Tampilkan pengumuman terbaru masjid (ticker info)'],
-                            ['key' => 'jadwal_shalat', 'name' => 'Jadwal Shalat',    'desc' => 'Widget jadwal shalat hari ini'],
-                            ['key' => 'kegiatan',      'name' => 'Kegiatan & Acara', 'desc' => 'Daftar acara dan kegiatan mendatang'],
-                            ['key' => 'donasi',        'name' => 'Donasi Online',    'desc' => 'Tombol dan form donasi online'],
-                            ['key' => 'data_jamaah',   'name' => 'Data Jamaah',      'desc' => 'Statistik dan info jamaah terdaftar'],
-                            ['key' => 'peta_lokasi',   'name' => 'Peta Lokasi',      'desc' => 'Tautan Google Maps di bagian Hubungi Kami'],
-                        ];
-                    @endphp
-                    @foreach($moduls as $mod)
-                        @php $isChecked = $activeModules[$mod['key']] ?? true; @endphp
-                        <div class="lp-fitur-row">
-                            <div class="lp-fitur-fields">
-                                <div style="font-weight:600;font-size:0.86rem;">{{ $mod['name'] }}</div>
-                                <div style="font-size:0.78rem;color:var(--text-light);">{{ $mod['desc'] }}</div>
-                            </div>
-                            <label style="margin-top:14px;">
-                                <input type="hidden" name="modul[{{ $mod['key'] }}]" value="0">
-                                <input type="checkbox" name="modul[{{ $mod['key'] }}]" value="1"
-                                       {{ $isChecked ? 'checked' : '' }}>
-                            </label>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-
+        @endforeach
+    </div>
+</div>
             {{-- ===== TAB: PREVIEW ===== --}}
             <div class="lp-panel" id="lpTab-preview">
                 <div class="lp-card">

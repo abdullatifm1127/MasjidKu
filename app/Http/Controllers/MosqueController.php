@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Subscription;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str; // <-- Diperlukan untuk fungsi Str::slug()
 
 class MosqueController extends Controller
 {
@@ -31,123 +32,123 @@ class MosqueController extends Controller
 
         return view('auth.adminmasjid.registerMasjid');
     }
-/**
- * Menyimpan data masjid.
- */
-public function store(Request $request)
-{
-    // Cek pengaman ganda agar 1 akun tidak bisa daftar dua kali
-    $existingMosque = Mosque::where('user_id', Auth::id())->first();
-    if ($existingMosque) {
-        return redirect()->route('waiting')
-            ->with('error', 'Anda sudah mendaftarkan masjid sebelumnya.');
-    }
 
-    $validated = $request->validate([
-        'mosque_name' => 'required|string|max:255',
-        'arabic_name' => 'nullable|string|max:255',
-        'tagline' => 'nullable|string|max:255',
-        'founded' => 'required|integer|min:1000|max:' . date('Y'),
-        'capacity' => 'required|string|max:100',
+    /**
+     * Menyimpan data masjid.
+     */
+    public function store(Request $request)
+    {
+        // Cek pengaman ganda agar 1 akun tidak bisa daftar dua kali
+        $existingMosque = Mosque::where('user_id', Auth::id())->first();
+        if ($existingMosque) {
+            return redirect()->route('waiting')
+                ->with('error', 'Anda sudah mendaftarkan masjid sebelumnya.');
+        }
 
-        'address' => 'required|string',
-        'kelurahan' => 'required|string|max:255',
-        'kecamatan' => 'required|string|max:255',
-        'postal_code' => 'nullable|string|max:20',
-        'city' => 'required|string|max:255',
-        'province' => 'required|string|max:255',
+        $validated = $request->validate([
+            'mosque_name' => 'required|string|max:255',
+            'arabic_name' => 'nullable|string|max:255',
+            'tagline' => 'nullable|string|max:255',
+            'founded' => 'required|integer|min:1000|max:' . date('Y'),
+            'capacity' => 'required|string|max:100',
 
-        'phone' => 'required|string|max:30',
-        'email' => 'required|email|max:255',
-        'website' => 'nullable|string|max:255',
+            'address' => 'required|string',
+            'kelurahan' => 'required|string|max:255',
+            'kecamatan' => 'required|string|max:255',
+            'postal_code' => 'nullable|string|max:20',
+            'city' => 'required|string|max:255',
+            'province' => 'required|string|max:255',
 
-        'organization_name' => 'nullable|string|max:255',
+            'phone' => 'required|string|max:30',
+            'email' => 'required|email|max:255',
+            'website' => 'nullable|string|max:255',
 
-        'imam_name' => 'required|string|max:255',
-        'imam_phone' => 'nullable|string|max:30',
+            'organization_name' => 'nullable|string|max:255',
 
-        'chairman_name' => 'required|string|max:255',
-        'chairman_phone' => 'nullable|string|max:30',
+            'imam_name' => 'required|string|max:255',
+            'imam_phone' => 'nullable|string|max:30',
 
-        'secretary_name' => 'nullable|string|max:255',
-        'treasurer_name' => 'nullable|string|max:255',
+            'chairman_name' => 'required|string|max:255',
+            'chairman_phone' => 'nullable|string|max:30',
 
-        'facilities' => 'nullable|array',
-        'facilities.*' => 'string',
+            'secretary_name' => 'nullable|string|max:255',
+            'treasurer_name' => 'nullable|string|max:255',
 
-        'programs' => 'nullable|array',
-        'programs.*' => 'string',
+            'facilities' => 'nullable|array',
+            'facilities.*' => 'string',
 
-        'has_online_donation' => 'nullable',
-        'has_prayer_schedule' => 'nullable',
+            'programs' => 'nullable|array',
+            'programs.*' => 'string',
 
-        // VALIDASI PAKET (free / paid)
-        'package_type' => 'required|in:free,paid',
+            'has_online_donation' => 'nullable',
+            'has_prayer_schedule' => 'nullable',
 
-        'description' => 'nullable|string',
-        'agree' => 'required|accepted',
-    ]);
+            // VALIDASI PAKET (free / paid)
+            'package_type' => 'required|in:free,paid',
 
-    // Tentukan payment_status otomatis berdasarkan paket
-    $paymentStatus = ($validated['package_type'] === 'free') ? 'approved' : 'unpaid';
+            'description' => 'nullable|string',
+            'agree' => 'required|accepted',
+        ]);
 
-    $mosque = Mosque::create([
-        'user_id' => Auth::id(),
-        'status' => 'pending', // Status verifikasi akun masjid awal
+        // Tentukan payment_status otomatis berdasarkan paket
+        $paymentStatus = ($validated['package_type'] === 'free') ? 'approved' : 'unpaid';
 
-        'mosque_name' => $validated['mosque_name'],
-        'arabic_name' => $validated['arabic_name'] ?? null,
-        'tagline' => $validated['tagline'] ?? null,
-        'founded' => $validated['founded'] ?? null,
-        'capacity' => $validated['capacity'] ?? null,
+        $mosque = Mosque::create([
+            'user_id' => Auth::id(),
+            'status' => 'pending', // Status verifikasi akun masjid awal
+            'slug' => Str::slug($validated['mosque_name'] . '-' . $validated['city']), // <-- Otomatis buat slug saat daftar
 
-        'address' => $validated['address'],
-        'kelurahan' => $validated['kelurahan'],
-        'kecamatan' => $validated['kecamatan'],
-        'postal_code' => $validated['postal_code'] ?? null,
-        'city' => $validated['city'],
-        'province' => $validated['province'],
+            'mosque_name' => $validated['mosque_name'],
+            'arabic_name' => $validated['arabic_name'] ?? null,
+            'tagline' => $validated['tagline'] ?? null,
+            'founded' => $validated['founded'] ?? null,
+            'capacity' => $validated['capacity'] ?? null,
 
-        'phone' => $validated['phone'],
-        'email' => $validated['email'],
-        'website' => $validated['website'] ?? null,
+            'address' => $validated['address'],
+            'kelurahan' => $validated['kelurahan'],
+            'kecamatan' => $validated['kecamatan'],
+            'postal_code' => $validated['postal_code'] ?? null,
+            'city' => $validated['city'],
+            'province' => $validated['province'],
 
-        'organization_name' => $validated['organization_name'] ?? null,
+            'phone' => $validated['phone'],
+            'email' => $validated['email'],
+            'website' => $validated['website'] ?? null,
 
-        'imam_name' => $validated['imam_name'] ?? null,
-        'imam_phone' => $validated['imam_phone'] ?? null,
+            'organization_name' => $validated['organization_name'] ?? null,
 
-        'chairman_name' => $validated['chairman_name'] ?? null,
-        'chairman_phone' => $validated['chairman_phone'] ?? null,
+            'imam_name' => $validated['imam_name'] ?? null,
+            'imam_phone' => $validated['imam_phone'] ?? null,
 
-        'secretary_name' => $validated['secretary_name'] ?? null,
-        'treasurer_name' => $validated['treasurer_name'] ?? null,
+            'chairman_name' => $validated['chairman_name'] ?? null,
+            'chairman_phone' => $validated['chairman_phone'] ?? null,
 
-        'facilities' => $validated['facilities'] ?? [],
-        'programs' => $validated['programs'] ?? [],
+            'secretary_name' => $validated['secretary_name'] ?? null,
+            'treasurer_name' => $validated['treasurer_name'] ?? null,
 
-        'has_online_donation' => ($validated['package_type'] === 'paid'),
-        'has_prayer_schedule' => $request->has('has_prayer_schedule'),
+            'facilities' => $validated['facilities'] ?? [],
+            'programs' => $validated['programs'] ?? [],
 
-        'package_type' => $validated['package_type'],
-        'payment_status' => $paymentStatus, // Otomatis approved jika free, unpaid jika paid
+            'has_online_donation' => ($validated['package_type'] === 'paid'),
+            'has_prayer_schedule' => $request->has('has_prayer_schedule'),
 
-        'description' => $validated['description'] ?? null,
-    ]);
+            'package_type' => $validated['package_type'],
+            'payment_status' => $paymentStatus,
 
-    // REDIRECT BERDASARKAN JENIS PAKET
-    if ($validated['package_type'] === 'free') {
-        // Jika FREE, langsung ke halaman waiting / dashboard (tanpa perlu bayar)
+            'description' => $validated['description'] ?? null,
+        ]);
+
+        // REDIRECT BERDASARKAN JENIS PAKET
+        if ($validated['package_type'] === 'free') {
+            return redirect()
+                ->route('waiting')
+                ->with('success', 'Pendaftaran akun Free berhasil! Menunggu verifikasi Super Admin.');
+        }
+
         return redirect()
-            ->route('waiting')
-            ->with('success', 'Pendaftaran akun Free berhasil! Menunggu verifikasi Super Admin.');
+            ->route('masjid.payment')
+            ->with('success', 'Pendaftaran berhasil! Silakan selesaikan pembayaran aktivasi.');
     }
-
-    // Jika BERBAYAR (paid), arahkan ke halaman pembayaran
-    return redirect()
-        ->route('masjid.payment')
-        ->with('success', 'Pendaftaran berhasil! Silakan selesaikan pembayaran aktivasi.');
-}
 
     public function dashboard()
     {
@@ -157,17 +158,14 @@ public function store(Request $request)
             return redirect()->route('daftar.masjid');
         }
 
-        // Jika pembayaran masih unpaid/belum di-upload, lempar ke halaman pembayaran
         if ($mosque->payment_status === 'unpaid') {
             return redirect()->route('masjid.payment');
         }
 
-        // Jika status akun ATAU status pembayaran belum approved total, lempar ke waiting
         if ($mosque->status !== 'approved' || $mosque->payment_status !== 'approved') {
             return redirect()->route('waiting');
         }
 
-        // Lanjut ke dashboard jika sudah benar-benar approved total
         $totalAcara = class_exists('\App\Models\Acara') ? \App\Models\Acara::where('mosque_id', $mosque->id)->count() : 0;
         $totalPengumuman = class_exists('\App\Models\Pengumuman') ? \App\Models\Pengumuman::where('mosque_id', $mosque->id)->count() : 0;
         
@@ -249,6 +247,7 @@ public function store(Request $request)
         $updateData = [
             'mosque_name'       => $validated['mosque_name'],
             'arabic_name'       => $validated['arabic_name'] ?? null,
+            'slug'              => Str::slug($validated['mosque_name'] . '-' . $validated['city']), // <-- Slug otomatis diperbarui saat profil diubah!
             'tagline'           => $validated['tagline'] ?? null,
             'founded'           => $validated['founded'] ?? null,
             'capacity'          => $validated['capacity'] ?? null,
@@ -296,26 +295,25 @@ public function store(Request $request)
     }
 
     /**
-     * Halaman Verifikasi Super Admin (Menampilkan semua pendaftaran & statistik).
+     * Halaman Verifikasi Super Admin.
      */
     public function verifikasi()
-{
-    // Tambahkan with('subscriptions') agar riwayat langganan ikut terbawa
-    $pendaftaran = Mosque::with('subscriptions')->latest()->get();
+    {
+        $pendaftaran = Mosque::with('subscriptions')->latest()->get();
 
-    $totalPending = Mosque::where('status', 'pending')->count();
-    $totalApproved = Mosque::where('status', 'approved')->count();
-    $totalRejected = Mosque::where('status', 'rejected')->count();
-    $totalSemua = $pendaftaran->count();
+        $totalPending = Mosque::where('status', 'pending')->count();
+        $totalApproved = Mosque::where('status', 'approved')->count();
+        $totalRejected = Mosque::where('status', 'rejected')->count();
+        $totalSemua = $pendaftaran->count();
 
-    return view('auth.superadmin.verifSuperAdmin', compact(
-        'pendaftaran',
-        'totalPending',
-        'totalApproved',
-        'totalRejected',
-        'totalSemua'
-    ));
-}
+        return view('auth.superadmin.verifSuperAdmin', compact(
+            'pendaftaran',
+            'totalPending',
+            'totalApproved',
+            'totalRejected',
+            'totalSemua'
+        ));
+    }
 
     public function manajemenMasjid()
     {
@@ -349,7 +347,8 @@ public function store(Request $request)
 
         return view('mosque.waiting', compact('mosque')); 
     }
-public function storeRenewal(Request $request)
+
+    public function storeRenewal(Request $request)
     {
         $request->validate([
             'package' => 'required',
@@ -364,10 +363,8 @@ public function storeRenewal(Request $request)
 
         list($amount, $durationMonths) = explode('_', $request->package);
 
-        // Upload file bukti bayar perpanjangan
         $path = $request->file('payment_proof')->store('payment-proofs', 'public');
 
-        // Simpan ke tabel subscriptions sebagai riwayat
         Subscription::create([
             'mosque_id' => $mosque->id,
             'amount' => $amount,
@@ -375,24 +372,20 @@ public function storeRenewal(Request $request)
             'status' => 'pending',
         ]);
 
-        // PENTING: Ubah status & payment_status masjid menjadi pending agar muncul di verifikasi Super Admin
         $mosque->update([
             'status' => 'pending',
             'payment_status' => 'pending', 
             'payment_proof' => $path 
         ]);
 
-        // DIUBAH KE BACK() AGAR KEMBALI KE HALAMAN INI DENGAN PESAN SUKSES
         return redirect()->route('masjid.perpanjangan.create')->with('status', 'Terima kasih! Bukti perpanjangan berhasil dikirim dan sedang menunggu verifikasi Superadmin.');
     }
+
     public function createRenewal()
-{
-    return view('paymentmasjid.perpanjangan');
-}
-    /**
-     * Membatalkan pendaftaran masjid yang masih pending dan menghapus datanya
-     * agar user dapat mendaftar ulang dari awal.
-     */
+    {
+        return view('paymentmasjid.perpanjangan');
+    }
+
     public function cancelRegistration()
     {
         $mosque = Mosque::where('user_id', Auth::id())
@@ -400,12 +393,10 @@ public function storeRenewal(Request $request)
                         ->first();
 
         if ($mosque) {
-            // Hapus file bukti pembayaran jika ada di storage
             if ($mosque->payment_proof && Storage::disk('public')->exists($mosque->payment_proof)) {
                 Storage::disk('public')->delete($mosque->payment_proof);
             }
 
-            // Hapus data masjid dari database
             $mosque->delete();
         }
 

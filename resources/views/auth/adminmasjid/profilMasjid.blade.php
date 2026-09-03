@@ -452,10 +452,6 @@
                                    placeholder="https://masjid.id">
                         </div>
 
-                        <span style="font-size:0.78rem;color:var(--text-light);">
-                            Ini alamat/telepon/email internal. Kontak yang tampil di halaman publik diatur
-                            terpisah di <a href="{{ route('admin.landing-page') }}">Landing Page → tab Kontak &amp; Sosial</a>.
-                        </span>
                     </div><!-- /.pm-section -->
                 </div><!-- /#tab-lokasi -->
 
@@ -630,9 +626,9 @@
 
         </main>
     </div>
+<button class="ba2-fab" aria-label="Bantuan">?</button>
 
-    <button class="ba2-fab" aria-label="Bantuan">?</button>
-
+    {{-- LETAKKAN KODE JAVASCRIPT DI SINI (menggantikan tag <script> yang lama) --}}
     <script>
         // ---- Tab switching ----
         const tabs   = document.querySelectorAll('.pm-tab');
@@ -645,15 +641,30 @@
                 panels.forEach(p => p.classList.remove('active'));
                 tab.classList.add('active');
 
-                const target = document.getElementById('tab-' + tab.dataset.tab);
+                const tabName = tab.dataset.tab;
+                const target = document.getElementById('tab-' + tabName);
                 if (target) target.classList.add('active');
 
-                if (tab.dataset.tab === 'preview') {
+                // 1. Mengubah URL browser tanpa reload halaman (menambahkan #nama_tab)
+                history.pushState(null, null, '#' + tabName);
+
+                if (tabName === 'preview') {
                     footer.style.display = 'none';
                 } else {
                     footer.style.display = 'flex';
                 }
             });
+        });
+
+        // 2. Agar saat halaman dibuka/refresh dengan #hash di URL, tab langsung menyesuaikan
+        window.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash.replace('#', '');
+            if (hash) {
+                const targetTab = document.querySelector(`.pm-tab[data-tab="${hash}"]`);
+                if (targetTab) {
+                    targetTab.click(); 
+                }
+            }
         });
 
         // ---- Dirty state tracking ----

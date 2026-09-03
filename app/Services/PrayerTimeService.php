@@ -24,9 +24,6 @@ class PrayerTimeService
 
     /**
      * Daftar kota/kabupaten yang masuk WITA (UTC+8).
-     * Key sudah dinormalisasi lowercase tanpa spasi/strip via normalizeCity().
-     * Mencakup kota/kabupaten di: Bali, NTB, NTT, Kalsel, Kaltim, Kaltara,
-     * Sulut, Sulteng, Sulsel, Sultra, Sulbar, Gorontalo.
      */
     protected array $witaCities = [
         // Bali
@@ -66,7 +63,6 @@ class PrayerTimeService
 
     /**
      * Daftar kota/kabupaten yang masuk WIT (UTC+9).
-     * Mencakup kota/kabupaten di: Maluku, Maluku Utara, dan seluruh provinsi Papua.
      */
     protected array $witCities = [
         // Maluku
@@ -75,22 +71,17 @@ class PrayerTimeService
         // Maluku Utara
         'ternate', 'tidorekepulauan', 'halmaherabarat', 'halmaheratengah', 'halmaheratimur',
         'halmaherautara', 'halmaheraselatan', 'kepulauansula', 'pulaumorotai', 'pulautaliabu',
-        // Papua (semua provinsi hasil pemekaran)
+        // Papua
         'jayapura', 'kotajayapura', 'merauke', 'biaknumfor', 'nabire', 'jayawijaya', 'yahukimo',
         'pegununganbintang', 'bovendigoel', 'mappi', 'asmat', 'yapen', 'sarmi', 'keerom', 'waropen',
         'supiori', 'mamberamoraya', 'mamberamotengah', 'yalimo', 'puncakjaya', 'puncak', 'dogiyai',
         'intanjaya', 'deiyai', 'nduga', 'lannyjaya', 'tolikara', 'paniai', 'mimika',
         'manokwari', 'sorong', 'kotasorong', 'sorongselatan', 'sorongbaratdaya', 'maybrat', 'tambrauw',
-        'raja ampat', 'rajaampat', 'fakfak', 'kaimana', 'teluk bintuni', 'telukbintuni', 'telukwondama',
-        'pegununganarfak',
+        'rajaampat', 'fakfak', 'kaimana', 'telukbintuni', 'telukwondama', 'pegununganarfak',
     ];
 
     /**
      * Ambil jadwal shalat HARI INI untuk satu masjid, berdasarkan $mosque->city
-     * (dipakai juga untuk menentukan timezone WIB/WITA/WIT).
-     * Sudah termasuk flag 'active' untuk kartu yang sedang berjalan.
-     *
-     * @return array<int, array{name:string, time:string, active:bool}>
      */
     public function forMosque(Mosque $mosque): array
     {
@@ -119,9 +110,7 @@ class PrayerTimeService
     }
 
     /**
-     * Tentukan timezone IANA langsung dari nama kota/kabupaten masjid.
-     * Default ke Asia/Jakarta (WIB) kalau kota tidak dikenali/kosong —
-     * aman karena mayoritas kota di Indonesia memang WIB.
+     * Tentukan timezone IANA berdasarkan nama kota/kabupaten masjid.
      */
     protected function resolveTimezone(?string $city): string
     {
@@ -143,21 +132,19 @@ class PrayerTimeService
     }
 
     /**
-     * Normalisasi nama kota supaya cocok dengan key di $witaCities / $witCities,
-     * terlepas dari variasi penulisan ("Kota Makassar", "kab. Sorong", dll).
+     * Normalisasi nama kota supaya bersih dari kata kabupaten/kota.
      */
     protected function normalizeCity(string $city): string
     {
         $value = Str::lower($city);
         $value = str_replace(['kota ', 'kabupaten ', 'kab.', 'kab '], '', $value);
-        $value = preg_replace('/[^a-z]/', '', $value); // buang spasi, titik, strip, dll
+        $value = preg_replace('/[^a-z]/', '', $value);
 
         return $value;
     }
 
     /**
-     * Cari id kota di MyQuran API berdasarkan nama kota (mis. "Malang").
-     * Di-cache lama (30 hari) karena id kota tidak berubah-ubah.
+     * Cari ID kota di MyQuran API dengan pembersihan keyword yang lebih optimal.
      */
     protected function resolveCityId(?string $cityName): ?string
     {
@@ -165,20 +152,32 @@ class PrayerTimeService
             return null;
         }
 
-        $cacheKey = 'myquran_city_id_' . Str::slug($cityName, '_');
+        $cleanName = trim(str_ireplace(['Kota', 'Kabupaten', 'Kab.'], '', $cityName));
+        $cacheKey = 'myquran_city_id_' . Str::slug($cleanName, '_');
 
-        return Cache::remember($cacheKey, now()->addDays(30), function () use ($cityName) {
+        return Cache::remember($cacheKey, now()->addDays(30), function () use ($cleanName) {
             try {
                 $response = Http::timeout(6)
-                    ->get('https://api.myquran.com/v2/sholat/kota/cari/' . urlencode($cityName));
+                    ->get('https://api.myquran.com/v2/sholat/kota/cari/' . urlencode($cleanName));
 
                 if ($response->successful() && $response->json('status') === true) {
                     $results = $response->json('data', []);
-                    return $results[0]['id'] ?? null;
+                    
+                    if (!empty($results)) {
+                        // Cocokkan yang paling mirip jika ada banyak hasil
+                        foreach ($results as $res) {
+                            $lokasi = strtolower($res['lokasi'] ?? '');
+                            if (str_contains($lokasi, strtolower($cleanName)) || str_contains(strtolower($cleanName), $lokasi)) {
+                                return $res['id'] ?? null;
+                            }
+                        }
+                        // Fallback ambil hasil pertama jika tidak ada yang exact match
+                        return $results[0]['id'] ?? null;
+                    }
                 }
             } catch (\Throwable $e) {
                 Log::warning('PrayerTimeService: gagal cari kota', [
-                    'city' => $cityName,
+                    'city' => $cleanName,
                     'error' => $e->getMessage(),
                 ]);
             }
@@ -188,10 +187,7 @@ class PrayerTimeService
     }
 
     /**
-     * Ambil jadwal shalat hari ini untuk id kota tertentu.
-     * Tanggal "hari ini" dihitung berdasarkan timezone kota masjid itu sendiri,
-     * supaya masjid di WIT tidak salah ambil tanggal saat mendekati tengah malam.
-     * Di-cache 1 hari (reset otomatis tiap hari berganti, per kota+timezone).
+     * Ambil jadwal shalat hari ini untuk ID kota tertentu.
      */
     protected function fetchJadwal(string $cityId, string $timezone): ?array
     {
@@ -224,11 +220,6 @@ class PrayerTimeService
         });
     }
 
-    /**
-     * Tandai satu item sebagai 'active' = waktu shalat terakhir yang sudah lewat hari ini,
-     * dihitung memakai timezone kota masjid tersebut (bukan timezone server).
-     * Kalau belum masuk Subuh, dianggap masih waktu Isya (item terakhir).
-     */
     protected function withActiveFlag(array $prayers, string $timezone): array
     {
         $now = Carbon::now($timezone);
