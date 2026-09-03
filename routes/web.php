@@ -38,6 +38,8 @@ Route::get('/', function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/masjid/pembayaran', [PaymentController::class, 'index'])->name('masjid.payment');
     Route::post('/masjid/pembayaran/upload', [PaymentController::class, 'store'])->name('masjid.payment.upload');
+
+    Route::delete('/masjid/batalkan', [MosqueController::class, 'cancelRegistration'])->name('masjid.cancel');
 });
 
 // ===== TAMBAHAN: Rute Perpanjangan Langganan Masjid =====
@@ -196,7 +198,7 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
 
         return redirect()->route('superadmin.verifikasi')->with('success', 'Pendaftaran dan pembayaran berhasil disetujui.');
     })->name('verifikasi.approve');
-    
+
     Route::put('/verifikasi/{id}/reject', function ($id) {
         $mosque = Mosque::findOrFail($id);
         $mosque->update(['status' => 'rejected']);

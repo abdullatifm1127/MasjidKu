@@ -173,6 +173,24 @@
         .dropzone-hint { font-size: 0.76rem; color: #a89f8f; margin-top: 3px; }
         .preview-img { max-width: 100%; max-height: 160px; border-radius: 4px; margin-top: 12px; display: none; border: 1px solid var(--sand); }
         .error-text { color: #b3401f; font-size: 0.8rem; margin-top: 6px; display: none; }
+        
+        .btn-cancel-container {
+            text-align: center;
+            margin-top: 1.25rem;
+        }
+        .btn-cancel {
+            background: none;
+            border: none;
+            color: #b3401f;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-cancel:hover {
+            color: #802c14;
+        }
     </style>
 </head>
 <body>
@@ -192,13 +210,20 @@
             </div>
         @endif
 
-        <div class="bank-info">
-            <strong>Silakan transfer melalui rekening berikut:</strong>
-            Bank Syariah Indonesia (BSI)<br>
-            No. Rekening: <strong>7123-4567-8900</strong><br>
-            Atas Nama: <strong>Yayasan SIM Masjid Indonesia</strong><br>
-            Nominal Tagihan: <strong style="font-size: 1.05rem;">Rp 150.000</strong>
-        </div>
+       <div class="bank-info">
+    <strong>Silakan transfer melalui rekening berikut:</strong>
+    Bank Syariah Indonesia (BSI)<br>
+    No. Rekening: <strong>7123-4567-8900</strong><br>
+    Atas Nama: <strong>Yayasan SIM Masjid Indonesia</strong><br>
+    
+    {{-- Mengambil nominal harga dengan aman, baik format angka murni maupun format underscore --}}
+    @php
+        $rawPackage = $mosque->package_type ?? 0;
+        $nominal = str_contains($rawPackage, '_') ? explode('_', $rawPackage)[0] : $rawPackage;
+    @endphp
+
+    Nominal Tagihan: <strong style="font-size: 1.05rem;">Rp {{ number_format((int)$nominal, 0, ',', '.') }}</strong>
+</div>
 
         <form action="{{ route('masjid.payment.upload') }}" method="POST" enctype="multipart/form-data" id="payment-form">
             @csrf
@@ -228,6 +253,18 @@
                 Kirim Bukti Pembayaran
             </button>
         </form>
+
+        <!-- Tombol untuk membatalkan transaksi dan kembali ke form registrasi -->
+        <div class="btn-cancel-container">
+            <form action="{{ route('masjid.cancel') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan transaksi dan mengisi ulang data pendaftaran?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn-cancel">
+                    Batalkan Pendaftaran & Isi Ulang
+                </button>
+            </form>
+        </div>
+
         </div>
     </div>
 

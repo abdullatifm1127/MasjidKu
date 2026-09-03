@@ -41,6 +41,7 @@ class Mosque extends Model
         'has_prayer_schedule',
         'description',
         'status',
+        'package_type',
         'slug', // 2. Tambahkan 'slug' ke dalam fillable
 
         // ===== TAMBAHKAN DUA BARIS INI =====

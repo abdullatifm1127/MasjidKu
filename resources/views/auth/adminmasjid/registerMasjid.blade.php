@@ -28,7 +28,7 @@
         </a>
     </nav>
 
-    {{-- ===== MAIN ===== --}}
+   {{-- ===== MAIN ===== --}}
     <main class="rm-container">
 
         {{-- Progress Steps --}}
@@ -313,31 +313,40 @@
                 </div>
             </div>
 
-            {{-- ─── PANEL 4 : Konfirmasi & Pemilihan Paket ─── --}}
+           {{-- ─── PANEL 4 : Konfirmasi & Pilihan Paket ─── --}}
             <div class="rm-panel" id="rmP4" style="display:none;">
                 <div class="rm-card">
                     <h2 class="rm-card-title">Konfirmasi & Pilihan Paket</h2>
                     <p class="rm-card-subtitle">Pilih jenis paket layanan website masjid Anda.</p>
 
-                    {{-- PILIHAN PAKET DITAMBAHKAN DI SINI --}}
                     <div style="margin-bottom: 24px;">
-                        <label style="font-weight: 600; display: block; margin-bottom: 12px; color: #1e293b;">Pilih Paket Pendaftaran & Website:</label>
+                        <label style="font-weight: 600; display: block; margin-bottom: 12px; color: #1e293b;">Pilih Paket:</label>
                         
                         <div style="display: flex; gap: 16px;">
-                            <label style="border: 1px solid #cbd5e1; padding: 16px; border-radius: 8px; flex: 1; cursor: pointer; background: #fff;">
-                                <input type="radio" name="package_type" value="default" checked style="margin-right: 6px;"> 
-                                <strong style="color: #1e293b;">Web Default</strong> 
-                                <p style="font-size: 0.85rem; color: #64748b; margin-top: 6px; margin-bottom: 0;">Standar, tanpa fitur donasi kustom.</p>
+    
+                            {{-- Paket Free (Gratis) --}}
+                            <label style="border: 1px solid #cbd5e1; padding: 16px; border-radius: 8px; flex: 1; cursor: pointer; background: #fff; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <input type="radio" name="package_type" value="free" checked style="margin-right: 6px;" required> 
+                                    <strong style="color: #1e293b;">Paket Free</strong><br>
+                                    <span style="color: #64748b; font-weight: 700; font-size: 1.1rem; display: inline-block; margin-top: 4px;">Rp 0 (Gratis)</span>
+                                </div>
+                                <p style="font-size: 0.85rem; color: #64748b; margin-top: 8px; margin-bottom: 0;">Fitur standar website masjid. Fitur donasi online non-aktif.</p>
                             </label>
 
-                            <label style="border: 1px solid #cbd5e1; padding: 16px; border-radius: 8px; flex: 1; cursor: pointer; background: #fff;">
-                                <input type="radio" name="package_type" value="custom_donation" style="margin-right: 6px;"> 
-                                <strong style="color: #1e293b;">Kustom Tampilan & Menu Donasi</strong>
-                                <p style="font-size: 0.85rem; color: #64748b; margin-top: 6px; margin-bottom: 0;">Bisa ubah tampilan web & aktifkan menu donasi.</p>
-                            </label>
+                            {{-- Paket Berbayar (Premium) --}}
+                            <label style="border: 1px solid #cbd5e1; padding: 16px; border-radius: 8px; flex: 1; cursor: pointer; background: #fff; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <input type="radio" name="package_type" value="paid" style="margin-right: 6px;"> 
+                                    <strong style="color: #1e293b;">Paket Berbayar</strong><br>
+                                    <span style="color: #16a34a; font-weight: 700; font-size: 1.1rem; display: inline-block; margin-top: 4px;">Rp 100.000 / bln</span>
+                              </div>
+                              <p style="font-size: 0.85rem; color: #64748b; margin-top: 8px; margin-bottom: 0;">Mengaktifkan fitur donasi online penuh & dukungan prioritas.</p>
+                          </label>
+
                         </div>
                     </div>
-
+                    
                     <div class="rm-confirm-box">
                         Data masjid dan pengurus yang Anda masukkan akan dikirim ke sistem kami
                         untuk diproses dan diverifikasi. Proses verifikasi memakan waktu 1–3 hari kerja.
