@@ -1,0 +1,110 @@
+:root{
+  --green-950:#0d2a1f;
+  --green-900:#123528;
+  --green-800:#1a4433;
+  --gold-500:#c99a46;
+  --gold-600:#a97f36;
+  --cream-50:#faf4e4;
+  --cream-100:#f2ead4;
+  --ink-900:#1c2b23;
+  --ink-500:#5b6b62;
+  --line:#e4d9bd;
+}
+*{box-sizing:border-box;}
+.donasi-page{
+  margin:0;
+  background:var(--green-950);
+  color:var(--cream-50);
+  font-family:'Plus Jakarta Sans',sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.donasi-page h1,.donasi-page h2,.donasi-page h3{font-family:'Newsreader',serif;font-weight:500;margin:0;}
+.donasi-page .wrap{max-width:960px;margin:0 auto;padding:48px 24px 96px;}
+
+.donasi-page .top{display:flex;align-items:center;gap:14px;margin-bottom:36px;}
+.donasi-page .top .mark{width:40px;height:40px;border-radius:10px;background:var(--green-800);display:flex;align-items:center;justify-content:center;border:1px solid rgba(201,154,70,.35);}
+.donasi-page .top .mark svg{width:20px;height:20px;}
+.donasi-page .top .name{font-size:15px;color:var(--cream-100);opacity:.75;}
+.donasi-page .top .name b{color:var(--gold-500);font-weight:600;}
+
+.donasi-page .steps{display:flex;gap:10px;margin-bottom:40px;}
+.donasi-page .steps .s{flex:1;height:3px;border-radius:3px;background:rgba(250,244,228,.14);position:relative;overflow:hidden;}
+.donasi-page .steps .s.active,.donasi-page .steps .s.done{background:var(--gold-500);}
+
+.donasi-page .head{margin-bottom:34px;}
+.donasi-page .head .eyebrow{color:var(--gold-500);font-size:14px;margin-bottom:8px;}
+.donasi-page .head h1{font-size:32px;color:var(--cream-50);}
+.donasi-page .head p{margin-top:10px;color:rgba(250,244,228,.7);font-size:15px;max-width:52ch;line-height:1.6;}
+
+.donasi-page .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media (max-width:720px){.donasi-page .grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:480px){.donasi-page .grid{grid-template-columns:1fr;}}
+.donasi-page .cat{
+  text-align:left;background:transparent;border:1px solid rgba(250,244,228,.16);
+  border-radius:12px;padding:22px 18px;cursor:pointer;
+  transition:border-color .15s ease,background .15s ease;color:var(--cream-50);
+}
+.donasi-page .cat:hover{border-color:var(--gold-500);background:rgba(201,154,70,.06);}
+.donasi-page .cat .icon{width:30px;height:30px;color:var(--gold-500);margin-bottom:14px;}
+.donasi-page .cat h3{font-size:18px;color:var(--cream-50);margin-bottom:6px;}
+.donasi-page .cat p{font-size:13px;color:rgba(250,244,228,.6);line-height:1.5;margin:0;}
+
+.donasi-page .foot-link{margin-top:30px;font-size:13px;color:rgba(250,244,228,.55);}
+.donasi-page .foot-link a{color:var(--gold-500);text-decoration:none;border-bottom:1px solid rgba(201,154,70,.4);}
+
+.donasi-page .panel{background:var(--cream-50);color:var(--ink-900);border-radius:16px;padding:36px;}
+.donasi-page .panel h2{font-size:22px;margin-bottom:6px;}
+.donasi-page .panel .sub{color:var(--ink-500);font-size:14px;margin-bottom:26px;}
+
+.donasi-page .back{display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--gold-500);font-size:14px;cursor:pointer;padding:0;margin-bottom:22px;font-family:inherit;}
+.donasi-page .back svg{width:14px;height:14px;}
+
+.donasi-page .subtype-row{display:flex;gap:10px;margin-bottom:22px;}
+.donasi-page .subtype-row button{
+  flex:1;padding:12px;border-radius:10px;border:1px solid var(--line);
+  background:#fff;color:var(--ink-900);font-weight:600;font-size:14px;cursor:pointer;font-family:inherit;
+}
+.donasi-page .subtype-row button.active{border-color:var(--gold-600);background:var(--cream-100);}
+
+.donasi-page .field{margin-bottom:18px;}
+.donasi-page .field label{display:block;font-size:13px;color:var(--ink-500);margin-bottom:7px;}
+.donasi-page .field input{
+  width:100%;padding:12px 14px;border-radius:9px;border:1px solid var(--line);
+  font-size:15px;font-family:inherit;background:#fff;color:var(--ink-900);
+}
+.donasi-page .field input:focus{outline:none;border-color:var(--gold-600);}
+.donasi-page .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+.donasi-page .amount-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.donasi-page .amount-grid button{
+  padding:14px;border-radius:9px;border:1px solid var(--line);background:#fff;
+  font-weight:600;font-size:15px;color:var(--ink-900);cursor:pointer;font-family:inherit;
+}
+.donasi-page .amount-grid button.active{border-color:var(--gold-600);background:var(--cream-100);color:var(--ink-900);}
+
+.donasi-page .calc-note{background:var(--cream-100);border-radius:9px;padding:14px 16px;font-size:13px;color:var(--ink-500);line-height:1.6;margin-bottom:18px;}
+.donasi-page .calc-total{display:flex;justify-content:space-between;align-items:baseline;padding:14px 0;border-top:1px dashed var(--line);margin-top:4px;}
+.donasi-page .calc-total span:first-child{font-size:13px;color:var(--ink-500);}
+.donasi-page .calc-total span:last-child{font-size:22px;font-weight:600;font-family:'Newsreader',serif;}
+
+.donasi-page .cta{
+  width:100%;padding:16px;border-radius:10px;border:none;background:var(--gold-500);
+  color:var(--ink-900);font-weight:700;font-size:15px;cursor:pointer;margin-top:8px;font-family:inherit;
+  transition:background .15s ease;
+}
+.donasi-page .cta:hover{background:var(--gold-600);}
+.donasi-page .cta:disabled{opacity:.4;cursor:not-allowed;}
+
+.donasi-page .paymethods{display:flex;gap:10px;margin-bottom:22px;}
+.donasi-page .paymethods div{flex:1;border:1px solid var(--line);border-radius:9px;padding:14px;text-align:center;font-size:13px;font-weight:600;}
+.donasi-page .paymethods div.sel{border-color:var(--gold-600);background:var(--cream-100);}
+
+.donasi-page .summary-line{display:flex;justify-content:space-between;font-size:14px;padding:9px 0;border-bottom:1px solid var(--cream-100);}
+.donasi-page .summary-line b{font-weight:600;}
+
+.donasi-page .confirm-icon{width:56px;height:56px;border-radius:50%;background:var(--cream-100);display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
+.donasi-page .confirm-icon svg{width:26px;height:26px;color:var(--gold-600);}
+.donasi-page .receipt{background:var(--cream-100);border-radius:10px;padding:16px 18px;margin:18px 0;font-size:13px;color:var(--ink-500);}
+.donasi-page .receipt b{color:var(--ink-900);}
+
+.donasi-page .hidden{display:none;}

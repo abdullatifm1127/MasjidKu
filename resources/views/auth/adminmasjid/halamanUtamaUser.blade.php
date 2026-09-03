@@ -379,7 +379,9 @@
                     </div>
                     <div class="hu-donasi-v2-label-field">Nama (opsional)</div>
                     <input type="text" class="hu-donasi-v2-input-name" placeholder="Hamba Allah">
-                    <button class="hu-donasi-v2-submit">Donasi Sekarang</button>
+                   <a href="{{ route('donasi.index', $mosque->slug) }}" class="hu-donasi-v2-submit" style="text-decoration: none; display: inline-block; text-align: center;">
+    Donasi Sekarang
+</a>
                     <div class="hu-donasi-v2-note">
                         Pembayaran aman &amp; terpercaya · QRIS / Transfer Bank / Dompet Digital
                     </div>

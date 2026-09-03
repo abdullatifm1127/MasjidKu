@@ -16,6 +16,7 @@ use App\Http\Controllers\PublicMosqueController;
 use App\Http\Controllers\adminmasjid\JadwalSholatController;
 use App\Http\Controllers\PaymentMasjid\PaymentController;
 use App\Http\Controllers\SuperAdmin\MosqueManagementController;
+use App\Http\Controllers\Donasi\DonasiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,6 +56,10 @@ Route::post('/masjid/perpanjangan', [MosqueController::class, 'storeRenewal'])
 */
 Route::get('/masjid/{slug}', [PublicMosqueController::class, 'show'])->name('masjid.show');
 Route::get('/masjid/{slug}', [PublicMosqueController::class, 'show'])->name('masjid.publik');
+
+// ===== TAMBAHAN: Halaman Donasi (publik, per masjid) =====
+Route::get('/masjid/{masjid:slug}/donasi', [DonasiController::class, 'index'])->name('donasi.index');
+Route::post('/masjid/{masjid:slug}/donasi', [DonasiController::class, 'store'])->name('donasi.store');
 
 Route::middleware(['auth'])->get('/masjidUser', function () {
     $mosque = \App\Models\Mosque::where('user_id', Auth::id())->first();

@@ -275,29 +275,6 @@
                             </label>
                         @endforeach
                     </div>
-
-                    <p class="rm-section-title">Layanan Digital</p>
-                    <div>
-                        <div class="rm-toggle-row">
-                            <div>
-                                <div class="rm-toggle-label">💳 Donasi Online</div>
-                                <div class="rm-toggle-desc">Terima donasi melalui platform digital</div>
-                            </div>
-                            <label class="rm-toggle">
-                                <input type="checkbox" name="has_online_donation">
-                                <span class="rm-toggle-track"></span>
-                            </label>
-                        </div>
-                        <div class="rm-toggle-row">
-                            <div>
-                                <div class="rm-toggle-label">🕐 Jadwal Shalat</div>
-                                <div class="rm-toggle-desc">Tampilkan jadwal shalat di halaman masjid</div>
-                            </div>
-                            <label class="rm-toggle">
-                                <input type="checkbox" name="has_prayer_schedule">
-                                <span class="rm-toggle-track"></span>
-                            </label>
-                        </div>
                     </div>
 
                     <div class="rm-group" style="margin-top:20px;">
