@@ -151,40 +151,44 @@ class MosqueController extends Controller
     }
 
     public function dashboard()
-    {
-        $mosque = Mosque::where('user_id', Auth::id())->first();
+{
+    $mosque = Mosque::where('user_id', Auth::id())->first();
 
-        if (!$mosque) {
-            return redirect()->route('daftar.masjid');
-        }
-
-        // PERBAIKAN DI SINI: 
-        // Jangan langsung lempar ke payment jika user sudah upload bukti transfer (payment_proof ada isinya)
-        // atau jika Anda ingin mereka bebas akses dashboard meskipun statusnya belum approved penuh.
-        if ($mosque->payment_status === 'unpaid' && empty($mosque->payment_proof)) {
-            return redirect()->route('masjid.payment');
-        }
-
-        // Jika status utama masih pending tapi sudah ada bukti bayar, izinkan masuk dashboard
-        // (Jangan di-redirect ke halaman waiting jika sudah kirim bukti)
-        if ($mosque->status === 'pending' && empty($mosque->payment_proof)) {
-            return redirect()->route('waiting');
-        }
-
-        $totalAcara = class_exists('\App\Models\Acara') ? \App\Models\Acara::where('mosque_id', $mosque->id)->count() : 0;
-        $totalPengumuman = class_exists('\App\Models\Pengumuman') ? \App\Models\Pengumuman::where('mosque_id', $mosque->id)->count() : 0;
-        
-        $totalJamaah = 0; 
-        $totalDonasiBulanIni = 0;
-
-        return view('auth.adminmasjid.berandaAdmin', compact(
-            'mosque', 
-            'totalAcara', 
-            'totalPengumuman', 
-            'totalJamaah', 
-            'totalDonasiBulanIni'
-        ));
+    if (!$mosque) {
+        return redirect()->route('daftar.masjid');
     }
+
+    // Cek otomatis: kalau masa berlangganan sudah lewat, matikan donasi & balikin ke free
+    $mosque->checkAndExpireSubscription();
+    $mosque->refresh();
+
+    // PERBAIKAN DI SINI: 
+    // Jangan langsung lempar ke payment jika user sudah upload bukti transfer (payment_proof ada isinya)
+    // atau jika Anda ingin mereka bebas akses dashboard meskipun statusnya belum approved penuh.
+    if ($mosque->payment_status === 'unpaid' && empty($mosque->payment_proof)) {
+        return redirect()->route('masjid.payment');
+    }
+
+    // Jika status utama masih pending tapi sudah ada bukti bayar, izinkan masuk dashboard
+    // (Jangan di-redirect ke halaman waiting jika sudah kirim bukti)
+    if ($mosque->status === 'pending' && empty($mosque->payment_proof)) {
+        return redirect()->route('waiting');
+    }
+
+    $totalAcara = class_exists('\App\Models\Acara') ? \App\Models\Acara::where('mosque_id', $mosque->id)->count() : 0;
+    $totalPengumuman = class_exists('\App\Models\Pengumuman') ? \App\Models\Pengumuman::where('mosque_id', $mosque->id)->count() : 0;
+    
+    $totalJamaah = 0; 
+    $totalDonasiBulanIni = 0;
+
+    return view('auth.adminmasjid.berandaAdmin', compact(
+        'mosque', 
+        'totalAcara', 
+        'totalPengumuman', 
+        'totalJamaah', 
+        'totalDonasiBulanIni'
+    ));
+}
 
     /**
      * Halaman edit Profil Masjid (admin).
@@ -351,9 +355,17 @@ public function approveVerifikasi($id)
 
     if ($pendingSubscription) {
         $pendingSubscription->update(['status' => 'approved']);
+
+        // Hitung tanggal kedaluwarsa: 1 bulan = 28 hari, dikali jumlah bulan yang dibeli
+        $durationMonths = (int) ($pendingSubscription->duration_months ?? 1);
+        $daysPerMonth   = 28;
+        $expiresAt      = now()->addDays($daysPerMonth * $durationMonths);
+
         $mosque->update([
-            'payment_status'      => 'approved',
-            'has_online_donation' => true,
+            'payment_status'          => 'approved',
+            'has_online_donation'     => true,
+            'package_type'            => 'paid',
+            'subscription_expires_at' => $expiresAt, // <-- DITAMBAHKAN
         ]);
     }
 
@@ -378,6 +390,7 @@ public function rejectVerifikasi($id)
         $mosque->update([
             'payment_status'      => 'rejected',
             'has_online_donation' => false,
+            'package_type'        => 'free',
         ]);
     }
 
@@ -439,6 +452,7 @@ public function rejectVerifikasi($id)
         Subscription::create([
             'mosque_id' => $mosque->id,
             'amount' => $amount,
+            'duration_months' => $durationMonths, // <-- tambahkan
             'payment_proof' => $path,
             'status' => 'pending', // <--- Tetap pending untuk Super Admin
         ]);

@@ -49,6 +49,7 @@ class Mosque extends Model
         'about_photo',
         'about_vision',
         'about_photo_secondary',
+        'subscription_expires_at', // <-- DITAMBAHKAN
     ];
 
     protected $casts = [
@@ -56,6 +57,7 @@ class Mosque extends Model
         'programs' => 'array',
         'has_online_donation' => 'boolean',
         'has_prayer_schedule' => 'boolean',
+        'subscription_expires_at' => 'datetime', // <-- DITAMBAHKAN
     ];
 
     protected static function boot()
@@ -88,5 +90,23 @@ class Mosque extends Model
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);
+    }
+
+    /**
+     * Cek apakah masa berlangganan sudah lewat, kalau iya matikan otomatis.
+     * Dipanggil di dashboard() dan halaman donasi publik untuk pengecekan real-time,
+     * juga dipanggil oleh command harian (subscriptions:expire) sebagai jaring pengaman.
+     */
+    public function checkAndExpireSubscription(): void
+    {
+        if ($this->package_type === 'paid'
+            && $this->subscription_expires_at
+            && $this->subscription_expires_at->isPast()) {
+            $this->update([
+                'has_online_donation' => false,
+                'package_type'        => 'free',
+                'payment_status'      => 'expired',
+            ]);
+        }
     }
 }
