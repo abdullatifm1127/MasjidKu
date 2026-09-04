@@ -533,7 +533,6 @@
         </main>
     </div>
 
-    <button class="ba2-fab" aria-label="Bantuan">?</button>
 
     <script>
         // Collapse sidebar
