@@ -44,21 +44,22 @@ class PublicMosqueController extends Controller
 
     public function showDonasi(string $slug)
     {
-        $mosque = Mosque::where('slug', $slug)
-            ->where('status', 'approved')
-            ->firstOrFail();
+        // Hapus pengetatan ->where('status', 'approved') agar masjid yang baru memperpanjang/pending tetap bisa diakses publik
+        $mosque = Mosque::where('slug', $slug)->firstOrFail();
 
-        // 2. SESUAIKAN KOLOM MENJADI package_type
-        $hasDonationFeature = in_array($mosque->package_type ?? 'free', ['premium', 'pro', 'paid']);
+        // Pastikan paketnya bukan free
+        $hasDonationFeature = $mosque->package_type !== 'free';
         
         if (!$hasDonationFeature) {
-            // 3. SESUAIKAN NAMA RUTE REDIRECT KE RUTE YANG BENAR DI WEB.PHP ANDA
-            // Contoh jika nama rutenya 'masjid.detail' atau sesuaikan dengan rute beranda publik masjid Anda:
             return redirect()->route('masjid.detail', $slug); 
         }
 
         $zakatFitrahDefault = $mosque->zakat_fitrah_default ?? 45000;
-        $items = DonasiGaleri::where('mosque_id', $mosque->id)->latest('tanggal')->get();
+        
+        // Pastikan Model Donasi Galeri aman dari error jika tabelnya kosong
+        $items = class_exists('\App\Models\DonasiGaleri') 
+            ? \App\Models\DonasiGaleri::where('mosque_id', $mosque->id)->latest()->get() 
+            : collect();
 
         $categories = [
             'zakat' => ['title' => 'Zakat Fitrah & Mal'],

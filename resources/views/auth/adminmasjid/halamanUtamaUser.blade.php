@@ -68,10 +68,10 @@
     <a href="#program" class="hu-nav-link">Program & Fasilitas</a>
     @if($modOn('kegiatan'))<a href="#acara" class="hu-nav-link">Acara</a>@endif
     
-    {{-- MENU DONASI: Muncul jika modul aktif DAN paket BUKAN free --}}
-@if(isset($mosque) && $mosque->package_type !== 'free')
-    <a href="{{ route('masjid.donasi.publik', $mosque->slug) }}" class="hu-nav-link">Donasi</a>
-@endif
+    {{-- MENU DONASI: Disamakan seperti yang lain menggunakan ID section #donasi --}}
+    @if(isset($mosque) && $mosque->package_type !== 'free')
+        <a href="#donasi" class="hu-nav-link">Donasi</a>
+    @endif
     
     <a href="#kontak" class="hu-nav-link">Hubungi</a>
 </nav>
@@ -384,8 +384,8 @@
                 </div>
                 <div class="hu-donasi-v2-label-field">Nama (opsional)</div>
                 <input type="text" class="hu-donasi-v2-input-name" placeholder="Hamba Allah">
-                <a href="{{ route('donasi.index', $mosque->slug) }}" class="hu-donasi-v2-submit" style="text-decoration: none; display: inline-block; text-align: center;">
-                    Donasi Sekarang
+                <a href="{{ route('masjid.donasi.publik', $mosque->slug) }}" class="hu-donasi-v2-submit" style="text-decoration: none; display: inline-block; text-align: center;">
+                Donasi Sekarang
                 </a>
                 <div class="hu-donasi-v2-note">
                     Pembayaran aman &amp; terpercaya · QRIS / Transfer Bank / Dompet Digital

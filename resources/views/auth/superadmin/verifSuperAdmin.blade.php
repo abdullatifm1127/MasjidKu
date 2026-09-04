@@ -380,23 +380,24 @@
             const pPackage = (d.package || d.paket || d.type || d.plan || '').toLowerCase();
             const pAmount = Number(d.amount || d.harga || d.biaya || d.total || 0);
 
-            // LOGIKA DIPERBAIKI: Hanya anggap Free jika benar-benar ada kata free/gratis DAN tidak mengunggah bukti transfer
-          const isExplicitlyFree = pPackage.includes('free') || pPackage.includes('gratis') || pStatus.includes('free') || pStatus.includes('gratis');
-            const isFree = (isExplicitlyFree || pAmount === 0) && !d.payment_proof && pStatus !== 'pending' && pStatus !== 'paid';
+           // LOGIKA DIPERBAIKI: Hanya anggap Free jika benar-benar ada kata free/gratis DAN tidak mengunggah bukti transfer
+const isExplicitlyFree = pPackage.includes('free') || pPackage.includes('gratis') || pStatus.includes('free') || pStatus.includes('gratis');
+const isFree = (isExplicitlyFree || pAmount === 0) && !d.payment_proof && pStatus !== 'pending' && pStatus !== 'paid';
 
-            let paymentBadgeText = '<span style="color: #dc2626; font-weight: 600;">Belum Bayar</span>';
-            
-            // PRIORITAS 1: Cek apakah ini paket Free / Gratis terlebih dahulu
-            if (isFree) {
-                paymentBadgeText = '<span style="color: #0284c7; font-weight: 600; background: #e0f2fe; padding: 2px 6px; border-radius: 4px;">Paket Free / Gratis</span>';
-            } 
-            // PRIORITAS 2: Cek apakah sudah lunas atau sudah transfer
-            else if (pStatus === 'paid' || d.status === 'approved' || d.status === 'disetujui' || pStatus === 'lunas') {
-                paymentBadgeText = '<span style="color: #059669; font-weight: 600; background: #d1fae5; padding: 2px 6px; border-radius: 4px;">Lunas / Disetujui</span>';
-            } 
-            else if (pStatus === 'pending' || d.payment_proof) {
-                paymentBadgeText = '<span style="color: #d97706; font-weight: 600; background: #fef3c7; padding: 2px 6px; border-radius: 4px;">Sudah Transfer (Menunggu Verifikasi)</span>';
-            }
+let paymentBadgeText = '<span style="color: #dc2626; font-weight: 600;">Belum Bayar</span>';
+
+// PRIORITAS 1: Cek apakah ini paket Free / Gratis terlebih dahulu
+if (isFree) {
+    paymentBadgeText = '<span style="color: #0284c7; font-weight: 600; background: #e0f2fe; padding: 2px 6px; border-radius: 4px;">Paket Free / Gratis</span>';
+} 
+// PRIORITAS 2: JIKA ADA BUKTI TRANSFER ATAU PENDING, MAKA MUNCULKAN STATUS MENUNGGU VERIFIKASI DULU!
+else if (pStatus === 'pending' || d.payment_proof) {
+    paymentBadgeText = '<span style="color: #d97706; font-weight: 600; background: #fef3c7; padding: 2px 6px; border-radius: 4px;">Sudah Transfer (Menunggu Verifikasi)</span>';
+} 
+// PRIORITAS 3: Baru cek jika sudah lunas atau disetujui sepenuhnya
+else if (pStatus === 'paid' || d.status === 'approved' || d.status === 'disetujui' || pStatus === 'lunas') {
+    paymentBadgeText = '<span style="color: #059669; font-weight: 600; background: #d1fae5; padding: 2px 6px; border-radius: 4px;">Lunas / Disetujui</span>';
+}
 
             let paymentProofSection = '<div style="color: #9ca3af; font-style: italic; font-size: 0.9rem;">Belum mengunggah bukti pembayaran.</div>';
             if (d.payment_proof) {

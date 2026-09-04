@@ -158,11 +158,16 @@ class MosqueController extends Controller
             return redirect()->route('daftar.masjid');
         }
 
-        if ($mosque->payment_status === 'unpaid') {
+        // PERBAIKAN DI SINI: 
+        // Jangan langsung lempar ke payment jika user sudah upload bukti transfer (payment_proof ada isinya)
+        // atau jika Anda ingin mereka bebas akses dashboard meskipun statusnya belum approved penuh.
+        if ($mosque->payment_status === 'unpaid' && empty($mosque->payment_proof)) {
             return redirect()->route('masjid.payment');
         }
 
-        if ($mosque->status !== 'approved' || $mosque->payment_status !== 'approved') {
+        // Jika status utama masih pending tapi sudah ada bukti bayar, izinkan masuk dashboard
+        // (Jangan di-redirect ke halaman waiting jika sudah kirim bukti)
+        if ($mosque->status === 'pending' && empty($mosque->payment_proof)) {
             return redirect()->route('waiting');
         }
 
@@ -374,21 +379,26 @@ class MosqueController extends Controller
 
         $path = $request->file('payment_proof')->store('payment-proofs', 'public');
 
+        // 1. Catat ke tabel subscriptions agar masuk daftar verifikasi Super Admin
         Subscription::create([
             'mosque_id' => $mosque->id,
             'amount' => $amount,
             'payment_proof' => $path,
-            'status' => 'pending',
+            'status' => 'pending', // <--- Tetap pending untuk Super Admin
         ]);
 
+        // 2. Update data masjid:
+        // - 'status' => 'approved' (AGAR TETAP BISA AKSES DASHBOARD, TIDAK TERPENTAL)
+        // - 'payment_status' => 'pending' atau 'unpaid' (AGAR MODUL DONASI TERBACA MENUNGGU VERIFIKASI)
         $mosque->update([
-            'status' => 'approved',          // Ubah jadi approved agar langsung aktif
-            'payment_status' => 'approved', 
-            'package_type'   => 'paid',      // <--- TAMBAHKAN INI AGAR LANGSUNG BERBAYAR
-            'payment_proof' => $path 
+            'status'         => 'approved',          // Agar tetap di dashboard
+            'payment_status' => 'pending',           // <--- UBAH JADI PENDING AGAR DONASI MENUNGGU VERIFIKASI
+            'package_type'   => 'paid',
+            'has_online_donation' => true, // <--- TAMBAHKAN INI AGAR FITUR DONASI AKTIF          
+            'payment_proof'  => $path 
         ]);
 
-        return redirect()->route('masjid.perpanjangan.create')->with('status', 'Terima kasih! Bukti perpanjangan berhasil dikirim dan sedang menunggu verifikasi Superadmin.');
+        return redirect()->route('dashboard')->with('status', 'Bukti pembayaran berhasil dikirim. Modul donasi akan aktif setelah diverifikasi Superadmin.');
     }
 
     public function createRenewal()
@@ -413,4 +423,26 @@ class MosqueController extends Controller
         return redirect()->route('daftar.masjid')
                          ->with('success', 'Pendaftaran berhasil dibatalkan. Silakan isi kembali formulir pendaftaran masjid.');
     }
+
+    public function unsubscribe(Request $request)
+{
+    $mosque = Mosque::where('user_id', Auth::id())->first();
+
+    if (!$mosque) {
+        return redirect()->back()->with('error', 'Data masjid tidak ditemukan.');
+    }
+
+    // Pastikan status langsung approved agar lolos dari halaman waiting/middleware
+    $mosque->update([
+        'package_type'   => 'free',
+        'payment_status' => 'approved', 
+        'status'         => 'approved'  
+    ]);
+
+    \App\Models\Subscription::where('mosque_id', $mosque->id)->update([
+        'status' => 'approved' 
+    ]);
+
+    return redirect()->route('dashboard')->with('status', 'Anda telah berhenti berlangganan ke paket Free.');
+}
 }
