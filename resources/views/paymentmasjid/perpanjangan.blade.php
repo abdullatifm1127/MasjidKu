@@ -102,7 +102,7 @@
 
                         <!-- Tombol Aksi -->
                         <div class="d-flex justify-content-between align-items-center mt-4">
-                            <a href="{{ route('home') }}" class="btn btn-secondary px-4">Kembali</a>
+                            <a href="{{ url('/dashboard') }}" class="btn btn-secondary btn-sm px-3">← Kembali ke Dashboard</a>
                             <button type="submit" class="btn text-white fw-bold px-4" style="background-color: #d97706;">Kirim Bukti Perpanjangan</button>
                         </div>
                     </form>
