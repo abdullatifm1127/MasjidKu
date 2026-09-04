@@ -32,7 +32,7 @@
             <a href="{{ route('superadmin.verifikasi') }}" class="sa-nav-item active sa-nav-has-badge">
                 <span class="sa-nav-icon"><i class="fa-solid fa-shield-halved"></i></span>
                 <span class="sa-nav-label">Verifikasi Pendaftaran</span>
-                
+
                 @php
                     $pendingCount = \App\Models\Mosque::where('status', 'pending')->count();
                 @endphp
@@ -144,9 +144,16 @@
                     } else {
                         $filterStatus = 'pending';
                     }
+
+                    // Apakah ada pembayaran (renewal) yang masih menunggu verifikasi?
+                    $hasPendingPayment = strtolower(trim($p->payment_status ?? '')) === 'pending';
+
+                    // Dipakai untuk tab filter: kalau pembayarannya masih pending,
+                    // kartu tetap dianggap "pending" walau status pendaftaran masjid sudah approved
+                    $tabStatus = $hasPendingPayment ? 'pending' : $filterStatus;
                 @endphp
-                <div class="vf-card {{ $filterStatus }}"
-                     data-status="{{ $filterStatus }}"
+                <div class="vf-card {{ $tabStatus }}"
+                     data-status="{{ $tabStatus }}"
                      data-search="{{ strtolower(($p->mosque_name ?? '') .' '. ($p->city ?? '') .' '. ($p->email ?? '')) }}">
 
                     <div class="vf-card-inner">
@@ -201,13 +208,11 @@
                         <div class="vf-payment-info" style="margin: 12px 0; padding: 10px 12px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
                             <div>
                                 <span style="color: #64748b; font-weight: 500;">Pembayaran:</span>
-                                
+
                                 @php
                                     $pStatus = strtolower(trim($p->payment_status ?? $p->status_pembayaran ?? ''));
-                                    $pPackage = strtolower(trim($p->package ?? $p->paket ?? $p->type ?? $p->plan ?? $p->subscription_type ?? $p->jenis_pendaftaran ?? ''));
-                                    $pAmount = floatval($p->amount ?? $p->harga ?? $p->biaya ?? $p->total ?? 0);
-                                    
-                                    $isFree = str_contains($pPackage, 'free') || str_contains($pPackage, 'gratis') || str_contains($pPackage, 'coba') || str_contains($pStatus, 'free') || str_contains($pStatus, 'gratis') || $pAmount === 0 || ($pPackage === '' && $pStatus !== 'pending' && $pStatus !== 'paid' && empty($p->payment_proof));
+                                    $pPackageType = strtolower(trim($p->package_type ?? ''));
+                                    $isFree = $pPackageType === 'free';
                                 @endphp
 
                                 @if($isFree)
@@ -218,9 +223,13 @@
                                     <span style="color: #d97706; font-weight: 600; background: #fef3c7; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-left: 6px;">
                                         <i class="fa-solid fa-clock"></i> Sudah Transfer (Menunggu Verifikasi)
                                     </span>
-                                @elseif($pStatus === 'paid' || $filterStatus === 'disetujui')
+                                @elseif($pStatus === 'approved' || $pStatus === 'paid')
                                     <span style="color: #059669; font-weight: 600; background: #d1fae5; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-left: 6px;">
                                         <i class="fa-solid fa-check"></i> Lunas / Disetujui
+                                    </span>
+                                @elseif($pStatus === 'rejected' || $pStatus === 'ditolak')
+                                    <span style="color: #dc2626; font-weight: 600; background: #fee2e2; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-left: 6px;">
+                                        <i class="fa-solid fa-xmark"></i> Ditolak
                                     </span>
                                 @else
                                     <span style="color: #dc2626; font-weight: 600; background: #fee2e2; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-left: 6px;">
@@ -261,7 +270,7 @@
                                 Lihat Detail
                             </button>
 
-                            @if($filterStatus === 'pending')
+                            @if($filterStatus === 'pending' || $hasPendingPayment)
                                 <form method="POST"
                                       action="{{ route('superadmin.verifikasi.approve', $p->id) }}"
                                       style="display:inline;">
@@ -368,36 +377,36 @@
         // ---- Detail modal using safe JSON conversion ----
         const detailData = @json($pendaftaran);
 
-      function vfOpenDetail(id) {
+        function vfOpenDetail(id) {
             const d = detailData.find(x => x.id === id);
             if (!d) return;
 
             document.getElementById('vfModalTitle').textContent = 'Detail — ' + (d.mosque_name || '');
 
             const statusMap = { pending: '⏳ Menunggu', approved: '✓ Disetujui', rejected: '✕ Ditolak', disetujui: '✓ Disetujui', ditolak: '✕ Ditolak' };
-            
+
             const pStatus = (d.payment_status || d.status_pembayaran || '').toLowerCase();
-            const pPackage = (d.package || d.paket || d.type || d.plan || '').toLowerCase();
-            const pAmount = Number(d.amount || d.harga || d.biaya || d.total || 0);
+            const pPackageType = (d.package_type || '').toLowerCase();
+            const isFree = pPackageType === 'free';
 
-           // LOGIKA DIPERBAIKI: Hanya anggap Free jika benar-benar ada kata free/gratis DAN tidak mengunggah bukti transfer
-const isExplicitlyFree = pPackage.includes('free') || pPackage.includes('gratis') || pStatus.includes('free') || pStatus.includes('gratis');
-const isFree = (isExplicitlyFree || pAmount === 0) && !d.payment_proof && pStatus !== 'pending' && pStatus !== 'paid';
+            let paymentBadgeText = '<span style="color: #dc2626; font-weight: 600;">Belum Bayar</span>';
 
-let paymentBadgeText = '<span style="color: #dc2626; font-weight: 600;">Belum Bayar</span>';
-
-// PRIORITAS 1: Cek apakah ini paket Free / Gratis terlebih dahulu
-if (isFree) {
-    paymentBadgeText = '<span style="color: #0284c7; font-weight: 600; background: #e0f2fe; padding: 2px 6px; border-radius: 4px;">Paket Free / Gratis</span>';
-} 
-// PRIORITAS 2: JIKA ADA BUKTI TRANSFER ATAU PENDING, MAKA MUNCULKAN STATUS MENUNGGU VERIFIKASI DULU!
-else if (pStatus === 'pending' || d.payment_proof) {
-    paymentBadgeText = '<span style="color: #d97706; font-weight: 600; background: #fef3c7; padding: 2px 6px; border-radius: 4px;">Sudah Transfer (Menunggu Verifikasi)</span>';
-} 
-// PRIORITAS 3: Baru cek jika sudah lunas atau disetujui sepenuhnya
-else if (pStatus === 'paid' || d.status === 'approved' || d.status === 'disetujui' || pStatus === 'lunas') {
-    paymentBadgeText = '<span style="color: #059669; font-weight: 600; background: #d1fae5; padding: 2px 6px; border-radius: 4px;">Lunas / Disetujui</span>';
-}
+            // PRIORITAS 1: Free/Gratis — dicek dari package_type, bukan payment_status
+            if (isFree) {
+                paymentBadgeText = '<span style="color: #0284c7; font-weight: 600; background: #e0f2fe; padding: 2px 6px; border-radius: 4px;">Paket Free / Gratis</span>';
+            }
+            // PRIORITAS 2: Sudah lunas/disetujui
+            else if (pStatus === 'approved' || pStatus === 'paid' || pStatus === 'lunas' || pStatus === 'disetujui') {
+                paymentBadgeText = '<span style="color: #059669; font-weight: 600; background: #d1fae5; padding: 2px 6px; border-radius: 4px;">Lunas / Disetujui</span>';
+            }
+            // PRIORITAS 3: Masih pending / ada bukti tapi belum diverifikasi
+            else if (pStatus === 'pending' || d.payment_proof) {
+                paymentBadgeText = '<span style="color: #d97706; font-weight: 600; background: #fef3c7; padding: 2px 6px; border-radius: 4px;">Sudah Transfer (Menunggu Verifikasi)</span>';
+            }
+            // PRIORITAS 4: Ditolak
+            else if (pStatus === 'rejected' || pStatus === 'ditolak') {
+                paymentBadgeText = '<span style="color: #dc2626; font-weight: 600; background: #fee2e2; padding: 2px 6px; border-radius: 4px;">Ditolak</span>';
+            }
 
             let paymentProofSection = '<div style="color: #9ca3af; font-style: italic; font-size: 0.9rem;">Belum mengunggah bukti pembayaran.</div>';
             if (d.payment_proof) {
@@ -411,10 +420,8 @@ else if (pStatus === 'paid' || d.status === 'approved' || d.status === 'disetuju
                 `;
             }
 
-            // Bagian selanjutnya tetap sama seperti sebelumnya...
-
             let historyListHTML = '<div style="color: #64748b; font-size: 0.85rem; font-style: italic;">Belum ada riwayat transaksi lain untuk masjid ini.</div>';
-            
+
             if (d.subscriptions && d.subscriptions.length > 0) {
                 historyListHTML = `
                     <div style="max-height: 160px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
@@ -431,7 +438,7 @@ else if (pStatus === 'paid' || d.status === 'approved' || d.status === 'disetuju
                 d.subscriptions.forEach(sub => {
                     const subDate = new Date(sub.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
                     const formattedAmount = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(sub.amount || 0);
-                    
+
                     let badgeSubColor = 'color: #d97706;';
                     if (sub.status === 'paid' || sub.status === 'approved' || sub.status === 'disetujui') {
                         badgeSubColor = 'color: #059669; font-weight: 600;';
@@ -443,8 +450,8 @@ else if (pStatus === 'paid' || d.status === 'approved' || d.status === 'disetuju
                     const safeSubJson = JSON.stringify({id: d.id, date: subDate, amount: formattedAmount, status: sub.status, proof: safeProof}).replace(/"/g, '&quot;');
 
                     historyListHTML += `
-                        <tr style="border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.2s;" 
-                            onmouseover="this.style.background='#f8fafc'" 
+                        <tr style="border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.2s;"
+                            onmouseover="this.style.background='#f8fafc'"
                             onmouseout="this.style.background='transparent'"
                             onclick="showSubDetailObj(${safeSubJson})">
                             <td style="padding: 6px 8px;">${subDate}</td>
@@ -463,7 +470,7 @@ else if (pStatus === 'paid' || d.status === 'approved' || d.status === 'disetuju
                 programsArray = [];
             }
 
-            const programTags = programsArray.length > 0 
+            const programTags = programsArray.length > 0
                 ? programsArray.map(prog => `<span class="vf-tag" style="display:inline-block; margin-right:4px; margin-bottom:4px;">${prog}</span>`).join('')
                 : '<span style="color: #9ca3af; font-style: italic; font-size: 0.9rem;">Tidak ada program yang dipilih.</span>';
 
@@ -519,7 +526,7 @@ else if (pStatus === 'paid' || d.status === 'approved' || d.status === 'disetuju
                     <h3 style="font-size: 1.05rem; font-weight: 700; color: #1e293b; margin: 0;">Rincian Detail Transaksi</h3>
                     <button onclick="vfOpenDetail(${sub.id})" style="background: #e2e8f0; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; color: #334155;">← Kembali ke Profil</button>
                 </div>
-                
+
                 <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
                     <div>
                         <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 600;">Tanggal Transaksi</div>
@@ -545,7 +552,6 @@ else if (pStatus === 'paid' || d.status === 'approved' || d.status === 'disetuju
             document.getElementById('vfModalOverlay').classList.remove('active');
         });
 
-        // Tutup modal jika klik di luar box modal
         document.getElementById('vfModalOverlay').addEventListener('click', (e) => {
             if (e.target === document.getElementById('vfModalOverlay')) {
                 document.getElementById('vfModalOverlay').classList.remove('active');

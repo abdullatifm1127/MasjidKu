@@ -55,7 +55,7 @@ Route::middleware(['auth'])->group(function () {
 | Halaman Publik Masjid, Jadwal Sholat & Donasi Publik
 |--------------------------------------------------------------------------
 */
-Route::get('/masjid/{slug}', [PublicMosqueController::class, 'show'])->name('masjid.show');
+
 Route::get('/masjid/{slug}', [PublicMosqueController::class, 'show'])->name('masjid.publik');
 
 // Halaman Publik Donasi (Berdasarkan Slug Masjid)
@@ -168,25 +168,11 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
     Route::get('/dashboard', [BerandaSuperAdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/verifikasi', [MosqueController::class, 'verifikasi'])->name('verifikasi');
 
-    Route::put('/verifikasi/{id}/approve', function ($id) {
-        $mosque = Mosque::findOrFail($id);
-        
-        $mosque->update([
-            'status' => 'approved',
-            'payment_status' => 'approved',
-        ]);
+    Route::put('/verifikasi/{id}/approve', [MosqueController::class, 'approveVerifikasi'])
+        ->name('verifikasi.approve');
 
-        \App\Models\Subscription::where('mosque_id', $mosque->id)
-            ->update(['status' => 'approved']);
-
-        return redirect()->route('superadmin.verifikasi')->with('success', 'Pendaftaran dan pembayaran berhasil disetujui.');
-    })->name('verifikasi.approve');
-
-    Route::put('/verifikasi/{id}/reject', function ($id) {
-        $mosque = Mosque::findOrFail($id);
-        $mosque->update(['status' => 'rejected']);
-        return redirect()->route('superadmin.verifikasi')->with('error', 'Pendaftaran telah ditolak.');
-    })->name('verifikasi.reject');
+    Route::put('/verifikasi/{id}/reject', [MosqueController::class, 'rejectVerifikasi'])
+        ->name('verifikasi.reject');
 
     Route::get('/manajemen-masjid', [MosqueController::class, 'manajemenMasjid'])->name('manajemen-masjid');
     Route::patch('/manajemen-masjid/{id}/update-status', [MosqueManagementController::class, 'updateStatus'])->name('manajemen-masjid.updateStatus');

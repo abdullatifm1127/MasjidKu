@@ -308,26 +308,82 @@ class MosqueController extends Controller
         return redirect()->route('admin.profil-masjid')
             ->with('success', 'Profil masjid dan email akun berhasil diperbarui.');
     }
-    /**
-     * Halaman Verifikasi Super Admin.
-     */
     public function verifikasi()
-    {
-        $pendaftaran = Mosque::with('subscriptions')->latest()->get();
+{
+    $pendaftaran = Mosque::with(['subscriptions' => function ($query) {
+        $query->latest();
+    }])->latest()->get();
 
-        $totalPending = Mosque::where('status', 'pending')->count();
-        $totalApproved = Mosque::where('status', 'approved')->count();
-        $totalRejected = Mosque::where('status', 'rejected')->count();
-        $totalSemua = $pendaftaran->count();
+    $totalPendingRegistrasi = Mosque::where('status', 'pending')->count();
+    $totalPendingPembayaran = Subscription::where('status', 'pending')->count();
 
-        return view('auth.superadmin.verifSuperAdmin', compact(
-            'pendaftaran',
-            'totalPending',
-            'totalApproved',
-            'totalRejected',
-            'totalSemua'
-        ));
+    $totalPending  = $totalPendingRegistrasi + $totalPendingPembayaran;
+    $totalApproved = Mosque::where('status', 'approved')
+        ->where(function ($q) {
+            $q->whereNull('payment_status')->orWhere('payment_status', '!=', 'pending');
+        })->count();
+    $totalRejected = Mosque::where('status', 'rejected')->count();
+    $totalSemua    = $pendaftaran->count();
+
+    return view('auth.superadmin.verifSuperAdmin', compact(
+        'pendaftaran', 'totalPending', 'totalApproved', 'totalRejected', 'totalSemua'
+    ));
+}
+
+public function approveVerifikasi($id)
+{
+    $mosque = Mosque::findOrFail($id);
+
+    // Kasus 1: pendaftaran masjid baru masih pending
+    if ($mosque->status === 'pending') {
+        $mosque->status = 'approved';
+        if ($mosque->package_type === 'free') {
+            $mosque->payment_status = 'approved';
+        }
+        $mosque->save();
     }
+
+    // Kasus 2: cari SUBSCRIPTION YANG BENAR-BENAR PENDING (bukan sembarang row)
+    $pendingSubscription = $mosque->subscriptions()
+        ->where('status', 'pending')
+        ->latest()
+        ->first();
+
+    if ($pendingSubscription) {
+        $pendingSubscription->update(['status' => 'approved']);
+        $mosque->update([
+            'payment_status'      => 'approved',
+            'has_online_donation' => true,
+        ]);
+    }
+
+    return redirect()->route('superadmin.verifikasi')->with('success', 'Berhasil disetujui.');
+}
+
+public function rejectVerifikasi($id)
+{
+    $mosque = Mosque::findOrFail($id);
+
+    if ($mosque->status === 'pending') {
+        $mosque->update(['status' => 'rejected']);
+    }
+
+    $pendingSubscription = $mosque->subscriptions()
+        ->where('status', 'pending')
+        ->latest()
+        ->first();
+
+    if ($pendingSubscription) {
+        $pendingSubscription->update(['status' => 'rejected']);
+        $mosque->update([
+            'payment_status'      => 'rejected',
+            'has_online_donation' => false,
+        ]);
+    }
+
+    return redirect()->route('superadmin.verifikasi')->with('error', 'Ditolak.');
+}
+
 
     public function manajemenMasjid()
     {
