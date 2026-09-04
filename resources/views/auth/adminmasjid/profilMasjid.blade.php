@@ -142,6 +142,7 @@
                     </svg>
                     Preview
                 </button>
+                      
             </div>
 
             <form id="pmForm" method="POST" action="{{ route('admin.profil-masjid.update') }}" enctype="multipart/form-data">
@@ -238,6 +239,15 @@
                     </div><!-- /.pm-section -->
                 </div><!-- /#tab-identitas -->
 
+                {{-- ===== FOOTER ACTIONS ===== --}}
+                <div class="pm-footer" id="pmFooter">
+                    <span class="pm-footer-status" id="pmStatus">Perubahan belum disimpan</span>
+                    <div class="pm-footer-actions">
+                        <button type="button" class="pm-btn-reset" id="pmReset">Reset</button>
+                        <button type="submit" class="pm-btn-save">Simpan Perubahan</button>
+                    </div>
+                </div>
+
                 {{-- ===== TAB: PENGURUS ===== --}}
                 <div class="pm-tab-content" id="tab-pengurus">
                     <div class="pm-section">
@@ -323,6 +333,15 @@
                         </div>
                     </div><!-- /.pm-section -->
                 </div><!-- /#tab-pengurus -->
+
+                {{-- ===== FOOTER ACTIONS ===== --}}
+                <div class="pm-footer" id="pmFooter">
+                    <span class="pm-footer-status" id="pmStatus">Perubahan belum disimpan</span>
+                    <div class="pm-footer-actions">
+                        <button type="button" class="pm-btn-reset" id="pmReset">Reset</button>
+                        <button type="submit" class="pm-btn-save">Simpan Perubahan</button>
+                    </div>
+                </div>
 
                 {{-- ===== TAB: LOKASI & KONTAK ===== --}}
                 <div class="pm-tab-content" id="tab-lokasi">
@@ -451,9 +470,17 @@
                                    value="{{ old('website', $mosque->website ?? '') }}"
                                    placeholder="https://masjid.id">
                         </div>
-
                     </div><!-- /.pm-section -->
                 </div><!-- /#tab-lokasi -->
+
+                {{-- ===== FOOTER ACTIONS ===== --}}
+                <div class="pm-footer" id="pmFooter">
+                    <span class="pm-footer-status" id="pmStatus">Perubahan belum disimpan</span>
+                    <div class="pm-footer-actions">
+                        <button type="button" class="pm-btn-reset" id="pmReset">Reset</button>
+                        <button type="submit" class="pm-btn-save">Simpan Perubahan</button>
+                    </div>
+                </div>
 
                 {{-- ===== TAB: PROGRAM ===== --}}
                 <div class="pm-tab-content" id="tab-program">
@@ -596,12 +623,20 @@
     </div>
 <button class="ba2-fab" aria-label="Bantuan">?</button>
 
-    {{-- LETAKKAN KODE JAVASCRIPT DI SINI (menggantikan tag <script> yang lama) --}}
+   {{-- LETAKKAN KODE JAVASCRIPT INI --}}
     <script>
         // ---- Tab switching ----
         const tabs   = document.querySelectorAll('.pm-tab');
         const panels = document.querySelectorAll('.pm-tab-content');
         const footer = document.getElementById('pmFooter');
+
+        function updateFooterVisibility(tabName) {
+            if (tabName === 'preview') {
+                footer.classList.add('preview-hidden');
+            } else {
+                footer.classList.remove('preview-hidden');
+            }
+        }
 
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
@@ -613,50 +648,61 @@
                 const target = document.getElementById('tab-' + tabName);
                 if (target) target.classList.add('active');
 
-                // 1. Mengubah URL browser tanpa reload halaman (menambahkan #nama_tab)
+                // Mengubah URL browser tanpa reload halaman (#nama_tab)
                 history.pushState(null, null, '#' + tabName);
 
-                if (tabName === 'preview') {
-                    footer.style.display = 'none';
-                } else {
-                    footer.style.display = 'flex';
-                }
+                updateFooterVisibility(tabName);
             });
         });
 
-        // 2. Agar saat halaman dibuka/refresh dengan #hash di URL, tab langsung menyesuaikan
+        // Agar saat halaman dibuka/refresh, tab dan footer langsung menyesuaikan
         window.addEventListener('DOMContentLoaded', () => {
             const hash = window.location.hash.replace('#', '');
+            let activeTabName = '';
+
             if (hash) {
                 const targetTab = document.querySelector(`.pm-tab[data-tab="${hash}"]`);
                 if (targetTab) {
+                    activeTabName = hash;
                     targetTab.click(); 
                 }
+            } else {
+                // Cek tab mana yang aktif secara default di HTML
+                const currentActive = document.querySelector('.pm-tab.active');
+                if (currentActive) {
+                    activeTabName = currentActive.dataset.tab;
+                }
             }
+
+            // Atur visibilitas footer saat pertama kali load
+            updateFooterVisibility(activeTabName);
         });
 
         // ---- Dirty state tracking ----
-        const form   = document.getElementById('pmForm');
+        const form   = document.getElementById('pmForm'); // Pastikan form Anda memiliki id="pmForm"
         const status = document.getElementById('pmStatus');
         let isDirty  = false;
 
-        form.querySelectorAll('input, textarea, select').forEach(el => {
-            el.addEventListener('change', () => {
-                isDirty = true;
-                status.textContent = 'Ada perubahan yang belum disimpan';
-                status.classList.add('pm-footer-status--dirty');
+        if (form) {
+            form.querySelectorAll('input, textarea, select').forEach(el => {
+                el.addEventListener('change', () => {
+                    isDirty = true;
+                    status.textContent = 'Ada perubahan yang belum disimpan';
+                    status.classList.add('pm-footer-status--dirty');
+                });
             });
-        });
+        }
 
         // ---- Reset button ----
-        document.getElementById('pmReset').addEventListener('click', () => {
-            if (confirm('Reset semua perubahan yang belum disimpan?')) {
-                form.reset();
-                isDirty = false;
-                status.textContent = 'Perubahan belum disimpan';
-                status.classList.remove('pm-footer-status--dirty');
-            }
-        });
+        const btnReset = document.getElementById('pmReset');
+        if (btnReset) {
+            btnReset.addEventListener('click', () => {
+                if (confirm('Reset semua perubahan yang belum disimpan?')) {
+                    form.reset();
+                    isDirty = false;
+                    status.textContent = 'Perubahan belum disimpan';
+                    status.classList.remove('pm-footer-status--dirty');
+                }
+            });
+        }
     </script>
-</body>
-</html>
