@@ -94,6 +94,20 @@
 
         <main class="sa-content vf-content">
 
+            {{-- ===== NOTIFIKASI SUKSES / ERROR (mis. setelah hapus masjid) ===== --}}
+            @if (session('success'))
+                <div style="background:#d1fae5; border:1px solid #6ee7b7; color:#065f46; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-size:0.9rem; display:flex; justify-content:space-between; align-items:center;">
+                    <span><i class="fa-solid fa-circle-check"></i>&nbsp; {{ session('success') }}</span>
+                    <button type="button" onclick="this.closest('div').remove()" style="background:none; border:none; font-size:1rem; color:#065f46; cursor:pointer;">&times;</button>
+                </div>
+            @endif
+            @if (session('error'))
+                <div style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-size:0.9rem; display:flex; justify-content:space-between; align-items:center;">
+                    <span><i class="fa-solid fa-circle-exclamation"></i>&nbsp; {{ session('error') }}</span>
+                    <button type="button" onclick="this.closest('div').remove()" style="background:none; border:none; font-size:1rem; color:#991b1b; cursor:pointer;">&times;</button>
+                </div>
+            @endif
+
             {{-- ===== SUMMARY CARDS ===== --}}
             <div class="vf-summary-grid">
                 <div class="vf-summary-card amber">
@@ -262,47 +276,65 @@
                             @endif
                         </div>
 
-                        <div class="vf-actions">
-                            <button type="button"
-                                    class="vf-btn-detail"
-                                    onclick="vfOpenDetail({{ $p->id }})">
-                                <i class="fa-solid fa-eye"></i>
-                                Lihat Detail
-                            </button>
+                        <div class="vf-actions" style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px;">
+                            <div style="display:flex; flex-wrap:wrap; gap:10px;">
+                                <button type="button"
+                                        class="vf-btn-detail"
+                                        onclick="vfOpenDetail({{ $p->id }})">
+                                    <i class="fa-solid fa-eye"></i>
+                                    Lihat Detail
+                                </button>
 
-                            @if($filterStatus === 'pending' || $hasPendingPayment)
-                                <form method="POST"
-                                      action="{{ route('superadmin.verifikasi.approve', $p->id) }}"
-                                      style="display:inline;">
-                                    @csrf
-                                    @method('PUT')
-                                    <button type="submit" class="vf-btn-approve">
-                                        <i class="fa-solid fa-check"></i>
-                                        Setujui
-                                    </button>
-                                </form>
+                                @if($filterStatus === 'pending' || $hasPendingPayment)
+                                    <form method="POST"
+                                          action="{{ route('superadmin.verifikasi.approve', $p->id) }}"
+                                          style="display:inline;">
+                                        @csrf
+                                        @method('PUT')
+                                        <button type="submit" class="vf-btn-approve">
+                                            <i class="fa-solid fa-check"></i>
+                                            Setujui
+                                        </button>
+                                    </form>
 
-                                <form method="POST"
-                                      action="{{ route('superadmin.verifikasi.reject', $p->id) }}"
-                                      style="display:inline;">
-                                    @csrf
-                                    @method('PUT')
-                                    <button type="submit" class="vf-btn-reject">
+                                    <form method="POST"
+                                          action="{{ route('superadmin.verifikasi.reject', $p->id) }}"
+                                          style="display:inline;">
+                                        @csrf
+                                        @method('PUT')
+                                        <button type="submit" class="vf-btn-reject">
+                                            <i class="fa-solid fa-xmark"></i>
+                                            Tolak
+                                        </button>
+                                    </form>
+                                @elseif($filterStatus === 'disetujui')
+                                    <span class="vf-status-label green">
+                                        <i class="fa-solid fa-circle-check"></i>
+                                        Sudah disetujui
+                                    </span>
+                                @else
+                                    <span class="vf-status-label red">
                                         <i class="fa-solid fa-xmark"></i>
-                                        Tolak
-                                    </button>
-                                </form>
-                            @elseif($filterStatus === 'disetujui')
-                                <span class="vf-status-label green">
-                                    <i class="fa-solid fa-circle-check"></i>
-                                    Sudah disetujui
-                                </span>
-                            @else
-                                <span class="vf-status-label red">
-                                    <i class="fa-solid fa-xmark"></i>
-                                    Pendaftaran ditolak
-                                </span>
-                            @endif
+                                        Pendaftaran ditolak
+                                    </span>
+                                @endif
+                            </div>
+
+                            {{-- === TAMBAHAN: Tombol Hapus Masjid (selalu tampil, apapun statusnya) === --}}
+                            <form method="POST"
+                                  action="{{ route('superadmin.verifikasi.destroy', $p->id) }}"
+                                  style="display:inline;"
+                                  onsubmit="return confirm('Hapus data masjid \'{{ addslashes($p->mosque_name ?? 'ini') }}\' secara permanen? Tindakan ini tidak bisa dibatalkan.');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        style="display:inline-flex; align-items:center; gap:6px; background:#fff; border:1.5px solid #fecaca; color:#dc2626; font-weight:600; font-size:0.85rem; padding:8px 14px; border-radius:8px; cursor:pointer; transition:background .15s ease;"
+                                        onmouseover="this.style.background='#fee2e2'"
+                                        onmouseout="this.style.background='#fff'">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                    Hapus
+                                </button>
+                            </form>
                         </div>
 
                     </div>

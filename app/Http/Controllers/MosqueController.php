@@ -385,6 +385,35 @@ public function rejectVerifikasi($id)
     return redirect()->route('superadmin.verifikasi')->with('error', 'Ditolak.');
 }
 
+/**
+ * Hapus permanen data pendaftaran masjid dari daftar verifikasi Super Admin.
+ * Sekaligus membersihkan file bukti transfer & riwayat langganan terkait.
+ */
+public function destroyVerifikasi($id)
+{
+    $mosque = Mosque::findOrFail($id);
+    $mosqueName = $mosque->mosque_name;
+
+    // Hapus file bukti transfer pendaftaran (jika ada)
+    if ($mosque->payment_proof && Storage::disk('public')->exists($mosque->payment_proof)) {
+        Storage::disk('public')->delete($mosque->payment_proof);
+    }
+
+    // Hapus file bukti transfer dari setiap riwayat perpanjangan langganan
+    foreach ($mosque->subscriptions as $sub) {
+        if ($sub->payment_proof && Storage::disk('public')->exists($sub->payment_proof)) {
+            Storage::disk('public')->delete($sub->payment_proof);
+        }
+    }
+
+    // Hapus riwayat langganan, lalu hapus data masjidnya
+    $mosque->subscriptions()->delete();
+    $mosque->delete();
+
+    return redirect()->route('superadmin.verifikasi')
+        ->with('success', "Data masjid \"{$mosqueName}\" berhasil dihapus.");
+}
+
 
     public function manajemenMasjid()
     {
