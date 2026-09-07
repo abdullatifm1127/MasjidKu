@@ -57,11 +57,22 @@
                 <span class="ba2-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
                 <span class="ba2-nav-label">Kegiatan &amp; Acara</span>
             </a>
-            <a href="#" class="ba2-nav-item">
+             {{-- MENU DONASI DINAMIS BERDASARKAN PAKET MASJID --}}
+            @if(isset($mosque) && $mosque->package_type === 'free')
+            {{-- Jika Paket Free: Diarahkan langsung ke halaman perpanjangan/pilihan paket yang sudah Anda miliki --}}
+            <a href="{{ route('masjid.perpanjangan.create') }}" class="ba2-nav-item" style="opacity: 0.8;" title="Upgrade paket untuk membuka fitur donasi">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
                 <span class="ba2-nav-label">Donasi</span>
-                <span class="ba2-nav-soon">dev</span>
+                <span class="ba2-nav-soon" style="background: #e74c3c; color: white;">Locked</span>
             </a>
+            @else
+                {{-- Jika Paket Berbayar: Aktif dan mengarah ke menu donasi admin --}}
+                <a href="{{ route('admin.donasi') }}" class="ba2-nav-item">
+                    <span class="ba2-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+                    <span class="ba2-nav-label">Donasi</span>
+                    <span class="ba2-nav-soon" style="background: #27ae60; color: white;">Aktif</span>
+                </a>
+            @endif
             <a href="#" class="ba2-nav-item">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-users"></i></span>
                 <span class="ba2-nav-label">Data Jamaah</span>
