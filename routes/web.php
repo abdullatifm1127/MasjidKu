@@ -192,8 +192,8 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
         ->name('verifikasi.reject');
 
     // === TAMBAHAN: Hapus data masjid dari daftar verifikasi ===
-    Route::delete('/verifikasi/{id}', [MosqueController::class, 'destroyVerifikasi'])
-        ->name('verifikasi.destroy');
+   Route::delete('/verifikasi/{id}', [MosqueController::class, 'destroyVerifikasi'])
+    ->name('verifikasi.destroy');
 
     Route::get('/manajemen-masjid', [MosqueController::class, 'manajemenMasjid'])->name('manajemen-masjid');
     Route::patch('/manajemen-masjid/{id}/update-status', [MosqueManagementController::class, 'updateStatus'])->name('manajemen-masjid.updateStatus');

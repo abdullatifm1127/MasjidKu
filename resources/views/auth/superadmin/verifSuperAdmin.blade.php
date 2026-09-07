@@ -19,9 +19,6 @@
                 <strong>MasjidKu Admin</strong>
                 <span>Super Administrator</span>
             </div>
-            <button class="sa-sidebar-toggle" id="saSidebarToggle" aria-label="Collapse sidebar">
-                <i class="fa-solid fa-chevron-left"></i>
-            </button>
         </div>
 
         <nav class="sa-nav">
