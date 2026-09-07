@@ -77,11 +77,10 @@
             </a>
         @endif
 
-            <a href="#" class="lp-nav-item">
-                <span class="lp-nav-icon"><i class="fa-solid fa-users"></i></span>
-                <span class="lp-nav-label">Data Jamaah</span>
-                <span class="lp-nav-soon">dev</span>
-            </a>
+            <a href="{{ route('admin.jamaah') }}" class="lp-nav-item">
+    <span class="lp-nav-icon"><i class="fa-solid fa-users"></i></span>
+    <span class="lp-nav-label">Data Jamaah</span>
+</a>
         </nav>
 
         <div class="lp-user">

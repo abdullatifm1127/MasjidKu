@@ -59,13 +59,13 @@
             <a href="{{ route('admin.donasi') }}" class="ba2-nav-item {{ request()->routeIs('admin.donasi*') ? 'active' : '' }}">
             <span class="ba2-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
             <span class="ba2-nav-label">Donasi</span>
-        </a>
-
-            <a href="#" class="ba2-nav-item">
-                <span class="ba2-nav-icon"><i class="fa-solid fa-users"></i></span>
-                <span class="ba2-nav-label">Data Jamaah</span>
-                <span class="ba2-nav-soon">dev</span>
             </a>
+
+            <a href="{{ route('admin.jamaah') }}" class="ba2-nav-item">
+    <span class="ba2-nav-icon"><i class="fa-solid fa-users"></i></span>
+    <span class="ba2-nav-label">Data Jamaah</span>
+    <!-- Jika sudah siap digunakan, badge "dev" ini bisa dihapus atau diubah -->
+</a>
         </nav>
 
         <div class="ba2-user">

@@ -18,6 +18,7 @@ use App\Http\Controllers\PaymentMasjid\PaymentController;
 use App\Http\Controllers\SuperAdmin\MosqueManagementController;
 use App\Http\Controllers\Donasi\DonasiController;
 use App\Http\Controllers\adminmasjid\DonasiAdminController;
+use App\Http\Controllers\adminmasjid\JamaahController;
 
 /*
 |--------------------------------------------------------------------------
@@ -157,6 +158,22 @@ Route::middleware(['auth', 'check.status'])->group(function () {
     Route::put('/admin/donasi/pengaturan', [DonasiAdminController::class, 'updatePengaturan'])->name('admin.donasi.pengaturan');
     Route::post('/admin/donasi/galeri', [DonasiAdminController::class, 'storeGaleri'])->name('admin.donasi.galeri.store');
     Route::delete('/admin/donasi/galeri/{id}', [DonasiAdminController::class, 'destroyGaleri'])->name('admin.donasi.galeri.destroy');
+
+    // ===== Data Jamaah (Dimasukkan ke dalam Group Middleware Admin) =====
+    Route::get('/admin/jamaah', [JamaahController::class, 'index'])
+        ->name('admin.jamaah');
+
+    Route::post('/admin/jamaah', [JamaahController::class, 'store'])
+        ->name('admin.jamaah.store');
+
+    Route::get('/admin/jamaah/{jamaah}/edit', [JamaahController::class, 'edit'])
+        ->name('admin.jamaah.edit');
+
+    Route::put('/admin/jamaah/{jamaah}', [JamaahController::class, 'update'])
+        ->name('admin.jamaah.update');
+
+    Route::delete('/admin/jamaah/{jamaah}', [JamaahController::class, 'destroy'])
+        ->name('admin.jamaah.destroy');
 });
 
 /*
