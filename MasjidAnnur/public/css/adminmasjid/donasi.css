@@ -1,0 +1,587 @@
+/* =============================================================
+   DONASI — module CSS
+   Bergantung pada variabel & base dari berandaAdmin.css
+   Prefix kelas: dn-
+   ============================================================= */
+
+/* ---------------------------------------------------------------
+   STATS CARDS
+--------------------------------------------------------------- */
+.dn-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+.dn-stat-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.dn-stat-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+
+.dn-stat-card.green .dn-stat-icon { background: #dcfce7; color: #16a34a; }
+.dn-stat-card.blue  .dn-stat-icon { background: #dbeafe; color: #2563eb; }
+.dn-stat-card.amber .dn-stat-icon { background: #fef9c3; color: #ca8a04; }
+.dn-stat-card.red   .dn-stat-icon { background: #fee2e2; color: #dc2626; }
+
+.dn-stat-body { min-width: 0; flex: 1; }
+
+.dn-stat-label {
+    font-size: 0.74rem;
+    color: var(--text-light);
+    font-weight: 500;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dn-stat-value {
+    font-size: 1.22rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ---------------------------------------------------------------
+   LAYOUT DUA KOLOM
+--------------------------------------------------------------- */
+.dn-layout {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.dn-form-col,
+.dn-list-col {
+    min-width: 0;
+}
+
+/* ---------------------------------------------------------------
+   CARD
+--------------------------------------------------------------- */
+.dn-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.dn-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+}
+
+.dn-card-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dn-card-title i {
+    color: var(--sidebar-bg);
+    font-size: 0.85rem;
+}
+
+.dn-count-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-light);
+    background: #f3f4f6;
+    padding: 2px 10px;
+    border-radius: 100px;
+    white-space: nowrap;
+}
+
+.dn-card-body { padding: 18px; }
+
+/* ---------------------------------------------------------------
+   FORM
+--------------------------------------------------------------- */
+.dn-field { margin-bottom: 14px; }
+.dn-field:last-child { margin-bottom: 0; }
+
+.dn-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-mid);
+    margin-bottom: 5px;
+}
+
+.dn-label-hint {
+    font-size: 0.7rem;
+    font-weight: 400;
+    color: var(--text-light);
+}
+
+.dn-required { color: #ef4444; }
+
+.dn-input {
+    width: 100%;
+    padding: 8px 11px;
+    font-size: 0.84rem;
+    font-family: 'Poppins', sans-serif;
+    color: var(--text);
+    background: #fafaf8;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.16s, box-shadow 0.16s;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.dn-input:focus {
+    border-color: var(--sidebar-bg);
+    box-shadow: 0 0 0 3px rgba(14, 51, 32, 0.08);
+    background: #ffffff;
+}
+
+.dn-input.is-error {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.dn-textarea {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.55;
+}
+
+select.dn-input {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+    cursor: pointer;
+}
+
+.dn-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.dn-error-msg {
+    display: block;
+    font-size: 0.75rem;
+    color: #ef4444;
+    margin-top: 4px;
+}
+
+/* Input file */
+.dn-input-file {
+    width: 100%;
+    padding: 7px 10px;
+    font-size: 0.82rem;
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-mid);
+    background: #fafaf8;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.16s;
+}
+
+.dn-input-file:hover { border-color: var(--sidebar-bg); }
+.dn-input-file.is-error { border-color: #ef4444; }
+
+/* Bukti preview */
+.dn-bukti-preview {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.78rem;
+    color: var(--text-mid);
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 7px;
+    padding: 6px 10px;
+    margin-bottom: 6px;
+}
+
+.dn-bukti-preview i { color: #16a34a; }
+
+.dn-bukti-link {
+    color: #2563eb;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: auto;
+    transition: color 0.14s;
+}
+.dn-bukti-link:hover { color: #1d4ed8; text-decoration: underline; }
+
+/* Tombol submit */
+.dn-form-actions {
+    margin-top: 18px;
+    display: flex;
+    gap: 10px;
+}
+
+.dn-btn-submit {
+    flex: 1;
+    padding: 9px 16px;
+    background: var(--sidebar-bg);
+    color: #ffffff;
+    font-size: 0.84rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    transition: background 0.18s, transform 0.1s;
+}
+
+.dn-btn-submit:hover  { background: #0a2518; }
+.dn-btn-submit:active { transform: scale(0.98); }
+
+.dn-btn-cancel {
+    padding: 7px 13px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-mid);
+    background: #f3f4f6;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.16s;
+    white-space: nowrap;
+}
+.dn-btn-cancel:hover { background: #e5e7eb; }
+
+/* ---------------------------------------------------------------
+   FILTER TABS
+--------------------------------------------------------------- */
+.dn-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: #fafaf8;
+    overflow-x: auto;
+}
+.dn-tabs::-webkit-scrollbar { height: 0; }
+
+.dn-tab {
+    padding: 5px 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-mid);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 100px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.dn-tab:hover { background: #f3f4f6; color: var(--text); }
+.dn-tab.active {
+    background: var(--sidebar-bg);
+    color: #ffffff;
+    border-color: var(--sidebar-bg);
+}
+
+/* ---------------------------------------------------------------
+   LIST ITEM
+--------------------------------------------------------------- */
+.dn-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.dn-item {
+    padding: 14px 18px;
+    border-bottom: 1px solid #f5f5f7;
+    transition: background 0.14s;
+}
+.dn-item:last-child { border-bottom: none; }
+.dn-item:hover { background: #faf9f6; }
+
+/* Item head */
+.dn-item-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.dn-item-donatur {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+/* Avatar bulat */
+.dn-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--sidebar-bg);
+    color: #ffffff;
+    font-size: 0.84rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.dn-item-nama {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dn-item-hp {
+    font-size: 0.72rem;
+    color: var(--text-light);
+}
+
+.dn-item-jumlah {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--sidebar-bg);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Badges */
+.dn-item-badges {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+}
+
+/* Keterangan */
+.dn-item-ket {
+    font-size: 0.78rem;
+    color: var(--text-mid);
+    line-height: 1.5;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Meta */
+.dn-item-meta {
+    font-size: 0.74rem;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.dn-meta-sep { color: var(--border); }
+
+/* Actions */
+.dn-item-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.dn-action-btn {
+    padding: 4px 11px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid transparent;
+    text-decoration: none;
+    background: none;
+    transition: background 0.14s;
+}
+
+.dn-action-btn.edit   { color: #1d4ed8; background: #dbeafe; border-color: #bfdbfe; }
+.dn-action-btn.edit:hover { background: #bfdbfe; }
+
+.dn-action-btn.toggle { color: #4b5563; background: #f3f4f6; border-color: #e5e7eb; }
+.dn-action-btn.toggle:hover { background: #e5e7eb; }
+
+.dn-action-btn.delete { color: #991b1b; background: #fee2e2; border-color: #fecaca; }
+.dn-action-btn.delete:hover { background: #fecaca; }
+
+/* ---------------------------------------------------------------
+   BADGES
+--------------------------------------------------------------- */
+.dn-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 100px;
+}
+
+/* Status */
+.dn-badge.status-lunas   { background: #dcfce7; color: #166534; }
+.dn-badge.status-pending { background: #fef9c3; color: #854d0e; }
+.dn-badge.status-batal   { background: #f3f4f6; color: #9ca3af; }
+
+/* Kategori */
+.dn-badge.kategori-infaq   { background: #e0f2fe; color: #0369a1; }
+.dn-badge.kategori-sedekah { background: #f0fdf4; color: #166534; }
+.dn-badge.kategori-zakat   { background: #fef9c3; color: #854d0e; }
+.dn-badge.kategori-wakaf   { background: #f3e8ff; color: #6d28d9; }
+.dn-badge.kategori-lainnya { background: #f3f4f6; color: #6b7280; }
+
+/* Metode */
+.dn-badge.metode-tunai    { background: #fef3c7; color: #92400e; }
+.dn-badge.metode-transfer { background: #dbeafe; color: #1e40af; }
+.dn-badge.metode-qris     { background: #ede9fe; color: #5b21b6; }
+.dn-badge.metode-lainnya  { background: #f3f4f6; color: #6b7280; }
+
+/* ---------------------------------------------------------------
+   EMPTY STATE
+--------------------------------------------------------------- */
+.dn-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 52px 24px;
+    text-align: center;
+}
+
+.dn-empty-icon {
+    width: 56px;
+    height: 56px;
+    background: #f3f4f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: #d1d5db;
+    margin-bottom: 14px;
+}
+
+.dn-empty-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 5px;
+}
+
+.dn-empty-sub {
+    font-size: 0.78rem;
+    color: var(--text-light);
+    max-width: 260px;
+    line-height: 1.5;
+}
+
+/* ---------------------------------------------------------------
+   ALERT FLASH
+--------------------------------------------------------------- */
+.dn-alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.84rem;
+    font-weight: 500;
+    animation: dnFadeIn 0.25s ease;
+}
+
+.dn-alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.dn-alert-error   { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+.dn-alert i:first-child { font-size: 1rem; flex-shrink: 0; }
+
+.dn-alert-close {
+    margin-left: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.55;
+    font-size: 0.9rem;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: opacity 0.15s;
+}
+.dn-alert-close:hover { opacity: 1; }
+
+@keyframes dnFadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------------------------------------------------------------
+   RESPONSIVE
+--------------------------------------------------------------- */
+@media (max-width: 1200px) {
+    .dn-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 1100px) {
+    .dn-layout { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+    .dn-stats   { grid-template-columns: repeat(2, 1fr); }
+    .dn-row-2   { grid-template-columns: 1fr; }
+    .dn-item-head { flex-wrap: wrap; }
+    .dn-item-jumlah { font-size: 0.9rem; }
+}
+
+@media (max-width: 480px) {
+    .dn-stats       { grid-template-columns: 1fr; }
+    .dn-card-body   { padding: 14px; }
+    .dn-item        { padding: 12px 14px; }
+    .dn-stat-card   { padding: 13px 14px; }
+}

@@ -1,0 +1,560 @@
+/* =============================================================
+   PENGUMUMAN — module CSS
+   Bergantung pada variabel & base dari berandaAdmin.css
+   Prefix kelas: pg-
+   ============================================================= */
+
+/* ---------------------------------------------------------------
+   LAYOUT DUA KOLOM
+--------------------------------------------------------------- */
+.pg-layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.pg-form-col,
+.pg-list-col {
+    min-width: 0;
+}
+
+/* ---------------------------------------------------------------
+   CARD
+--------------------------------------------------------------- */
+.pg-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.pg-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+}
+
+.pg-card-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pg-card-title i {
+    color: var(--sidebar-bg);
+    font-size: 0.85rem;
+}
+
+.pg-count-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-light);
+    background: #f3f4f6;
+    padding: 2px 10px;
+    border-radius: 100px;
+}
+
+.pg-card-body {
+    padding: 18px;
+}
+
+/* ---------------------------------------------------------------
+   FORM
+--------------------------------------------------------------- */
+.pg-field {
+    margin-bottom: 14px;
+}
+
+.pg-field:last-child {
+    margin-bottom: 0;
+}
+
+.pg-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-mid);
+    margin-bottom: 5px;
+}
+
+.pg-required {
+    color: #ef4444;
+    margin-left: 2px;
+}
+
+.pg-input {
+    width: 100%;
+    padding: 8px 11px;
+    font-size: 0.84rem;
+    font-family: 'Poppins', sans-serif;
+    color: var(--text);
+    background: #fafaf8;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.16s, box-shadow 0.16s;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.pg-input:focus {
+    border-color: var(--sidebar-bg);
+    box-shadow: 0 0 0 3px rgba(14, 51, 32, 0.08);
+    background: #ffffff;
+}
+
+.pg-input.is-error {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.pg-textarea {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.55;
+}
+
+select.pg-input {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+    cursor: pointer;
+}
+
+.pg-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.pg-error-msg {
+    display: block;
+    font-size: 0.75rem;
+    color: #ef4444;
+    margin-top: 4px;
+}
+
+/* Toggle switch */
+.pg-toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.pg-toggle-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.pg-toggle-track {
+    width: 36px;
+    height: 20px;
+    background: #d1d5db;
+    border-radius: 100px;
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.2s;
+}
+
+.pg-toggle-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 14px;
+    height: 14px;
+    background: #ffffff;
+    border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.pg-toggle-input:checked + .pg-toggle-track {
+    background: var(--sidebar-bg);
+}
+
+.pg-toggle-input:checked + .pg-toggle-track .pg-toggle-thumb {
+    transform: translateX(16px);
+}
+
+.pg-toggle-label {
+    font-size: 0.82rem;
+    color: var(--text-mid);
+    font-weight: 500;
+}
+
+/* Form actions */
+.pg-form-actions {
+    margin-top: 18px;
+    display: flex;
+    gap: 10px;
+}
+
+.pg-btn-submit {
+    flex: 1;
+    padding: 9px 16px;
+    background: var(--sidebar-bg);
+    color: #ffffff;
+    font-size: 0.84rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    transition: background 0.18s, transform 0.1s;
+}
+
+.pg-btn-submit:hover  { background: #0a2518; }
+.pg-btn-submit:active { transform: scale(0.98); }
+
+.pg-btn-cancel {
+    padding: 7px 13px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-mid);
+    background: #f3f4f6;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.16s;
+    white-space: nowrap;
+}
+
+.pg-btn-cancel:hover { background: #e5e7eb; }
+
+/* ---------------------------------------------------------------
+   FILTER TABS
+--------------------------------------------------------------- */
+.pg-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: #fafaf8;
+    overflow-x: auto;
+}
+
+.pg-tabs::-webkit-scrollbar { height: 0; }
+
+.pg-tab {
+    padding: 5px 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-mid);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 100px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.pg-tab:hover {
+    background: #f3f4f6;
+    color: var(--text);
+}
+
+.pg-tab.active {
+    background: var(--sidebar-bg);
+    color: #ffffff;
+    border-color: var(--sidebar-bg);
+}
+
+/* ---------------------------------------------------------------
+   LIST PENGUMUMAN
+--------------------------------------------------------------- */
+.pg-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.pg-item {
+    padding: 14px 18px;
+    border-bottom: 1px solid #f5f5f7;
+    transition: background 0.14s;
+    position: relative;
+}
+
+.pg-item:last-child {
+    border-bottom: none;
+}
+
+.pg-item:hover {
+    background: #faf9f6;
+}
+
+.pg-item.is-penting {
+    border-left: 3px solid #ef4444;
+    padding-left: 15px;
+}
+
+/* Item head */
+.pg-item-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+}
+
+.pg-item-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+}
+
+.pg-item-title {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pg-item-badges {
+    display: flex;
+    gap: 5px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+/* Isi preview */
+.pg-item-isi {
+    font-size: 0.79rem;
+    color: var(--text-mid);
+    line-height: 1.55;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Meta */
+.pg-item-meta {
+    font-size: 0.74rem;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.pg-meta-icon { font-size: 0.72rem; }
+
+/* Actions */
+.pg-item-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.pg-action-btn {
+    padding: 4px 11px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid transparent;
+    text-decoration: none;
+    transition: background 0.14s, color 0.14s;
+    background: none;
+}
+
+.pg-action-btn.edit {
+    color: #1d4ed8;
+    background: #dbeafe;
+    border-color: #bfdbfe;
+}
+.pg-action-btn.edit:hover { background: #bfdbfe; }
+
+.pg-action-btn.toggle {
+    color: #4b5563;
+    background: #f3f4f6;
+    border-color: #e5e7eb;
+}
+.pg-action-btn.toggle:hover { background: #e5e7eb; }
+
+.pg-action-btn.delete {
+    color: #991b1b;
+    background: #fee2e2;
+    border-color: #fecaca;
+}
+.pg-action-btn.delete:hover { background: #fecaca; }
+
+/* ---------------------------------------------------------------
+   BADGES
+--------------------------------------------------------------- */
+.pg-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 100px;
+}
+
+/* Status */
+.pg-badge.status-aktif    { background: #dcfce7; color: #166534; }
+.pg-badge.status-nonaktif { background: #f3f4f6; color: #9ca3af; }
+
+/* Kategori */
+.pg-badge.kategori-umum     { background: #e0f2fe; color: #0369a1; }
+.pg-badge.kategori-ibadah   { background: #fef9c3; color: #854d0e; }
+.pg-badge.kategori-kegiatan { background: #f3e8ff; color: #6d28d9; }
+.pg-badge.kategori-sosial   { background: #dcfce7; color: #166534; }
+.pg-badge.kategori-darurat  { background: #fee2e2; color: #991b1b; }
+
+/* Penting */
+.pg-badge.darurat {
+    background: #fee2e2;
+    color: #ef4444;
+    padding: 2px 5px;
+}
+
+/* ---------------------------------------------------------------
+   EMPTY STATE
+--------------------------------------------------------------- */
+.pg-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 52px 24px;
+    text-align: center;
+}
+
+.pg-empty-icon {
+    width: 56px;
+    height: 56px;
+    background: #f3f4f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: #d1d5db;
+    margin-bottom: 14px;
+}
+
+.pg-empty-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 5px;
+}
+
+.pg-empty-sub {
+    font-size: 0.78rem;
+    color: var(--text-light);
+    max-width: 260px;
+    line-height: 1.5;
+}
+
+/* ---------------------------------------------------------------
+   ALERT FLASH
+--------------------------------------------------------------- */
+.pg-alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.84rem;
+    font-weight: 500;
+    position: relative;
+    animation: pgFadeIn 0.25s ease;
+}
+
+.pg-alert-success {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.pg-alert-error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.pg-alert i:first-child { font-size: 1rem; flex-shrink: 0; }
+
+.pg-alert-close {
+    margin-left: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.55;
+    font-size: 0.9rem;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: opacity 0.15s;
+}
+.pg-alert-close:hover { opacity: 1; }
+
+@keyframes pgFadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------------------------------------------------------------
+   RESPONSIVE
+--------------------------------------------------------------- */
+@media (max-width: 1100px) {
+    .pg-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .pg-row-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .pg-item-head {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .pg-item-badges {
+        margin-top: 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .pg-card-body { padding: 14px; }
+    .pg-item { padding: 12px 14px; }
+    .pg-item.is-penting { padding-left: 11px; }
+}

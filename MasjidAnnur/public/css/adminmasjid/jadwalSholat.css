@@ -1,0 +1,55 @@
+/* =============================================================
+   JADWAL SHALAT — Coming Soon Page
+   ============================================================= */
+
+.js-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f7;
+    min-height: calc(100vh - 52px);
+}
+
+.js-coming-soon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 24px;
+    max-width: 420px;
+}
+
+.js-icon {
+    font-size: 3.2rem;
+    margin-bottom: 18px;
+    line-height: 1;
+}
+
+.js-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 10px;
+}
+
+.js-desc {
+    font-size: 0.86rem;
+    color: #9ca3af;
+    line-height: 1.7;
+    margin-bottom: 22px;
+}
+
+.js-badge {
+    display: inline-block;
+    padding: 8px 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    color: #d97706;
+    background: #fffbeb;
+    border: 1.5px solid #fde68a;
+    border-radius: 100px;
+    cursor: default;
+}
