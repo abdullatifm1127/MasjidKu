@@ -19,6 +19,7 @@ use App\Http\Controllers\SuperAdmin\MosqueManagementController;
 use App\Http\Controllers\Donasi\DonasiController;
 use App\Http\Controllers\adminmasjid\DonasiAdminController;
 use App\Http\Controllers\adminmasjid\JamaahController;
+use App\Http\Controllers\adminmasjid\DonationCategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -61,6 +62,10 @@ Route::get('/masjid/{slug}', [PublicMosqueController::class, 'show'])->name('mas
 
 // Halaman Publik Donasi (Berdasarkan Slug Masjid)
 Route::get('/masjid/{slug}/donasi', [PublicMosqueController::class, 'showDonasi'])->name('masjid.donasi.publik');
+
+// Rute Publik Store Donasi (Ditambahkan)
+Route::post('/masjid/{slug}/donasi', [DonasiController::class, 'store'])
+    ->name('masjid.donasi.store');
 
 Route::middleware(['auth'])->get('/masjidUser', function () {
     $mosque = \App\Models\Mosque::where('user_id', Auth::id())->first();
@@ -158,6 +163,19 @@ Route::middleware(['auth', 'check.status'])->group(function () {
     Route::put('/admin/donasi/pengaturan', [DonasiAdminController::class, 'updatePengaturan'])->name('admin.donasi.pengaturan');
     Route::post('/admin/donasi/galeri', [DonasiAdminController::class, 'storeGaleri'])->name('admin.donasi.galeri.store');
     Route::delete('/admin/donasi/galeri/{id}', [DonasiAdminController::class, 'destroyGaleri'])->name('admin.donasi.galeri.destroy');
+
+    // Rute Kategori Donasi Admin (Ditambahkan)
+    Route::post('/admin/donasi/kategori', [DonationCategoryController::class, 'store'])
+        ->name('admin.donasi.kategori.store');
+
+    Route::put('/admin/donasi/kategori/{kategori}', [DonationCategoryController::class, 'update'])
+        ->name('admin.donasi.kategori.update');
+
+    Route::patch('/admin/donasi/kategori/{kategori}/toggle', [DonationCategoryController::class, 'toggle'])
+        ->name('admin.donasi.kategori.toggle');
+
+    Route::delete('/admin/donasi/kategori/{kategori}', [DonationCategoryController::class, 'destroy'])
+        ->name('admin.donasi.kategori.destroy');
 
     // ===== Data Jamaah (Dimasukkan ke dalam Group Middleware Admin) =====
     Route::get('/admin/jamaah', [JamaahController::class, 'index'])

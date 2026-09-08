@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Mosque;
 use App\Models\LandingPage;
 use App\Models\DonasiGaleri;
+use App\Models\DonationCategory;
 use App\Services\PrayerTimeService;
 use Illuminate\Http\Request;
 
@@ -49,30 +50,33 @@ class PublicMosqueController extends Controller
 
         // Pastikan paketnya bukan free
         $hasDonationFeature = $mosque->package_type !== 'free';
-        
+
         if (!$hasDonationFeature) {
-            return redirect()->route('masjid.detail', $slug); 
+            return redirect()->route('masjid.detail', $slug);
         }
 
         $zakatFitrahDefault = $mosque->zakat_fitrah_default ?? 45000;
-        
+
         // Pastikan Model Donasi Galeri aman dari error jika tabelnya kosong
-        $items = class_exists('\App\Models\DonasiGaleri') 
-            ? \App\Models\DonasiGaleri::where('mosque_id', $mosque->id)->latest()->get() 
+        $items = class_exists('\App\Models\DonasiGaleri')
+            ? \App\Models\DonasiGaleri::where('mosque_id', $mosque->id)->latest()->get()
             : collect();
 
-        $categories = [
-            'zakat' => ['title' => 'Zakat Fitrah & Mal'],
-            'infaq' => ['title' => 'Infaq & Shodaqoh Umum'],
-            'pembangunan' => ['title' => 'Pembangunan & Renovasi Masjid'],
-            'kegiatan' => ['title' => 'Kegiatan & Santunan Sosial']
-        ];
+        // Ambil kategori donasi yang aktif
+        $categories = DonationCategory::where('mosque_id', $mosque->id)
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+
+        // UBAH KE JSON agar bisa dibaca langsung oleh script window.donasiCategories di Blade
+        $categoriesJson = $categories->toJson();
 
         return view('donasi.donasi', [
             'mosque'             => $mosque,
             'zakatFitrahDefault' => $zakatFitrahDefault,
             'items'              => $items,
             'categories'         => $categories,
+            'categoriesJson'     => $categoriesJson, // <-- TAMBAHKAN INI
         ]);
     }
 }

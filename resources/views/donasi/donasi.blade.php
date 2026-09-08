@@ -1,219 +1,215 @@
-{{--
-  resources/views/donasi.blade.php
-
-  Ini masih file mandiri (<!DOCTYPE> penuh) supaya bisa langsung dibuka & diuji.
-  Kalau project Anda sudah punya layout utama (navbar Beranda/Profil/dst di screenshot),
-  ganti bagian <html>...<body> dengan:
-
-    @extends('layouts.app')
-    @section('title', 'Donasi - ' . $masjid->nama)
-    @section('content')
-      ...isi <div class="donasi-page"> di bawah...
-    @endsection
-
-  dan pindahkan <link>/<script> ke @push('styles') / @push('scripts') sesuai stack Anda.
---}}
-
-@php
-  // Idealnya ini dikirim dari controller (mis. DonasiController@index), bukan hardcode di view.
-  $categories = [
-    'zakat' => [
-      'title' => 'Zakat',
-      'desc'  => "Zakat fitrah & zakat mal, wajib bagi yang memenuhi nisab dan haul.",
-      'icon'  => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
-    ],
-    'infaq' => [
-      'title' => 'Infaq',
-      'desc'  => 'Pemberian sukarela rutin untuk mendukung kegiatan masjid sehari-hari.',
-      'icon'  => '<path d="M12 3v18M5 8h14M5 16h14"/>',
-    ],
-    'sedekah' => [
-      'title' => 'Sedekah',
-      'desc'  => 'Sedekah bebas, bisa untuk siapa saja yang membutuhkan bantuan.',
-      'icon'  => '<path d="M12 21s-7-4.6-9.5-9C1 8 3 4 7 4c2 0 4 1.5 5 3 1-1.5 3-3 5-3 4 0 6 4 4.5 8-2.5 4.4-9.5 9-9.5 9Z"/>',
-    ],
-    'pembangunan' => [
-      'title' => 'Pembangunan Masjid',
-      'desc'  => 'Mendukung renovasi dan perluasan bangunan masjid yang sedang berjalan.',
-      'icon'  => '<path d="M4 21V10l8-6 8 6v11M9 21v-7h6v7"/>',
-    ],
-    'yatim' => [
-      'title' => 'Santunan Yatim & Dhuafa',
-      'desc'  => 'Bantuan rutin bagi anak yatim dan keluarga dhuafa binaan masjid.',
-      'icon'  => '<circle cx="12" cy="8" r="3.2"/><path d="M5 21c0-4 3-6.5 7-6.5S19 17 19 21"/>',
-    ],
-    'bencana' => [
-      'title' => 'Bantuan Bencana',
-      'desc'  => 'Donasi cepat untuk bencana alam atau musibah terkini di sekitar kita.',
-      'icon'  => '<path d="M13 2 3 14h7l-1 8 11-14h-7l0-6Z"/>',
-    ],
-    'wakaf' => [
-      'title' => 'Wakaf',
-      'desc'  => "Aset produktif jangka panjang seperti tanah, sumur, atau Al-Qur'an.",
-      'icon'  => '<path d="M12 3v18M6 7h12M6 7c0 5-2 6-2 6h16s-2-1-2-6"/>',
-    ],
-    'qurban' => [
-      'title' => 'Qurban',
-      'desc'  => 'Tabungan atau donasi hewan qurban untuk Idul Adha mendatang.',
-      'icon'  => '<circle cx="12" cy="13" r="7"/><path d="M8 8 6 4M16 8l2-4"/>',
-    ],
-    'lainnya' => [
-      'title' => 'Donasi Bebas',
-      'desc'  => 'Donasi tanpa kategori khusus, disalurkan sesuai kebutuhan masjid.',
-      'icon'  => '<path d="M12 5v14M5 12h14"/>',
-    ],
-  ];
-
-  // dipakai JS (donasi.js) untuk menampilkan judul/deskripsi tanpa hit server lagi
-  $categoriesJson = collect($categories)->map(fn ($c) => ['title' => $c['title'], 'desc' => $c['desc']]);
-@endphp
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="csrf-token" content="{{ csrf_token() }}">
-<title>Donasi — {{ $mosque->mosque_name ?? 'Masjid' }}</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/donasi/donasi.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Donasi & Zakat — Masjid {{ $mosque->mosque_name ?? '' }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/donasi/donasi.css') }}?v={{ time() }}">
 </head>
-<body class="donasi-page">
-<div class="wrap">
+<body>
 
-  <div class="top">
-    <div class="mark">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 21V10l8-6 8 6v11" stroke="#c99a46"/><path d="M9 21v-7h6v7" stroke="#c99a46"/></svg>
-    </div>
-    <div class="name">Masjid <b>{{ $mosque->mosque_name ?? 'Masjid' }}</b> · {{ $mosque->city ?? '' }}</div>
-  </div>
+    <div class="donation-wrapper">
+        <!-- Header Identitas Masjid -->
+        <header class="mosque-header">
+            <div class="mosque-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 21h18M5 21V7l7-4 7 4v14M9 9v12M15 9v12"/>
+                </svg>
+            </div>
+            <div>
+                <h1>Masjid {{ $mosque->mosque_name ?? 'Al-Ikhlas' }}</h1>
+                <p>{{ $mosque->city ?? 'Pusat Layanan Umat' }}</p>
+            </div>
+        </header>
 
-  <div class="steps">
-    <div class="s" id="bar-1"></div>
-    <div class="s" id="bar-2"></div>
-    <div class="s" id="bar-3"></div>
-    <div class="s" id="bar-4"></div>
-  </div>
-
-  {{-- STEP 1: pilih jenis --}}
-  <section id="step-1">
-    <div class="head">
-      <div class="eyebrow">Langkah 1 dari 4</div>
-      <h1>Pilih jenis donasi</h1>
-      <p>Setiap jenis memiliki ketentuan dan penyaluran yang berbeda. Pilih yang sesuai dengan niat Anda.</p>
-    </div>
-    <div class="grid">
-      @foreach ($categories as $key => $cat)
-        <button class="cat" onclick="openDetail('{{ $key }}')">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">{!! $cat['icon'] !!}</svg>
-          <h3>{{ $cat['title'] }}</h3>
-          <p>{{ $cat['desc'] }}</p>
-        </button>
-      @endforeach
-    </div>
-    <div class="foot-link">Ingin tahu ke mana dana disalurkan? <a href="{{ '#' }}">Lihat laporan transparansi donasi</a></div>
-  </section>
-
-  {{-- STEP 2: detail / kalkulator --}}
-  <section id="step-2" class="hidden">
-    <div class="head">
-      <div class="eyebrow">Langkah 2 dari 4</div>
-      <h1 id="detail-title">Detail donasi</h1>
-      <p id="detail-desc"></p>
-    </div>
-
-    <div class="panel">
-      <button class="back" onclick="goStep(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg> Ganti jenis donasi</button>
-
-      <div id="zakat-subtype" class="subtype-row hidden">
-        <button class="active" onclick="setZakatType('fitrah', this)">Zakat Fitrah</button>
-        <button onclick="setZakatType('mal', this)">Zakat Mal</button>
-      </div>
-
-      <div id="calc-fitrah" class="hidden">
-        <div class="row2">
-          <div class="field"><label>Jumlah jiwa</label><input type="number" id="fitrah-jiwa" value="1" min="1" oninput="calcFitrah()"></div>
-          <div class="field"><label>Nominal per jiwa (Rp)</label><input type="number" id="fitrah-nominal" value="{{ $zakatFitrahDefault ?? 45000 }}" step="1000" oninput="calcFitrah()"></div>
+        <!-- Progress Steps -->
+        <div class="stepper">
+            <div class="step active" id="st-1"><span>1</span> Kategori</div>
+            <div class="step" id="st-2"><span>2</span> Nominal</div>
+            <div class="step" id="st-3"><span>3</span> Pembayaran</div>
         </div>
-        <div class="calc-note">Nominal per jiwa mengikuti harga beras standar wilayah {{ $mosque->city ?? '' }}, dapat disesuaikan admin masjid setiap tahun.</div>
-        <div class="calc-total"><span>Total zakat fitrah</span><span id="fitrah-total">Rp 45.000</span></div>
-      </div>
 
-      <div id="calc-mal" class="hidden">
-        <div class="field"><label>Total harta yang sudah mencapai haul (Rp)</label><input type="number" id="mal-harta" placeholder="0" oninput="calcMal()"></div>
-        <div class="calc-note">Zakat mal wajib dikeluarkan sebesar 2,5% dari harta yang telah mencapai nisab (setara 85 gram emas) dan dimiliki selama satu tahun penuh (haul).</div>
-        <div class="calc-total"><span>Zakat yang harus dibayar (2,5%)</span><span id="mal-total">Rp 0</span></div>
-      </div>
+        <!-- STEP 1: PILIH KATEGORI & GALERI DOKUMENTASI -->
+        <div class="panel-card" id="panel-1">
+            <div class="panel-title">
+                <h2>Pilih Kategori Donasi</h2>
+                <p>Tentukan jenis kebaikan yang ingin Anda salurkan hari ini.</p>
+            </div>
 
-      <div id="generic-amount" class="hidden">
-        <div class="amount-grid">
-          <button onclick="pickAmount(50000,this)">Rp 50.000</button>
-          <button onclick="pickAmount(100000,this)">Rp 100.000</button>
-          <button onclick="pickAmount(250000,this)">Rp 250.000</button>
-          <button onclick="pickAmount(500000,this)">Rp 500.000</button>
+            @if ($categories->isEmpty())
+                <div class="empty-box">Belum ada kategori donasi yang tersedia.</div>
+            @else
+                <div class="category-list">
+                    @foreach ($categories as $cat)
+                        <button type="button" class="category-item" onclick="selectCategory('{{ $cat->key }}', '{{ addslashes($cat->title) }}', '{{ $cat->calc_type ?? 'nominal' }}')">
+                            <div class="ci-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    {!! $cat->iconPath() !!}
+                                </svg>
+                            </div>
+                            <div class="ci-info">
+                                <h3>{{ $cat->title }}</h3>
+                                <p>{{ $cat->description }}</p>
+                            </div>
+                            <div class="ci-arrow">&rsaquo;</div>
+                        </button>
+                    @endforeach
+                </div>
+            @endif
+
+            <!-- BAGIAN GALERI DOKUMENTASI PENYALURAN (Menggunakan $items dari Controller) -->
+            <div style="margin-top: 32px; border-top: 1px solid #f1f5f9; padding-top: 24px;">
+                <div class="panel-title" style="margin-bottom: 14px;">
+                    <h2>Dokumentasi Penyaluran</h2>
+                    <p>Bukti transparansi penyaluran dana kebaikan dari jamaah.</p>
+                </div>
+
+                @if(isset($items) && $items->isNotEmpty())
+                    <div class="public-gallery-grid">
+                        @foreach($items as $gal)
+                            <div class="pub-gal-item">
+                                <div class="pub-gal-img" style="background-image: url('{{ asset('storage/' . $gal->foto) }}')"></div>
+                                <div class="pub-gal-info">
+                                    <span class="pub-tag">{{ $gal->kategori ?? 'Penyaluran' }}</span>
+                                    <h4>{{ $gal->judul }}</h4>
+                                    <p>{{ Str::limit($gal->deskripsi, 60) }}</p>
+                                    <div class="pub-meta">
+                                        <span>Rp {{ number_format($gal->nominal_terpakai ?? 0, 0, ',', '.') }}</span>
+                                        <span>{{ $gal->tanggal ? \Carbon\Carbon::parse($gal->tanggal)->format('d M Y') : '' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="empty-box" style="padding: 20px;">
+                        Belum ada dokumentasi foto penyaluran yang diunggah.
+                    </div>
+                @endif
+            </div>
         </div>
-        <div class="field"><label>Atau masukkan nominal lain (Rp)</label><input type="number" id="custom-amount" placeholder="0" oninput="pickCustom()"></div>
-      </div>
 
-      <div class="field"><label>Nama (opsional)</label><input type="text" id="donor-name" placeholder="Hamba Allah"></div>
+        <!-- STEP 2: MASUKKAN NOMINAL -->
+        <div class="panel-card hidden" id="panel-2">
+            <button type="button" class="btn-back" onclick="changeStep(1)">&larr; Kembali ke Kategori</button>
+            
+            <div class="panel-title" style="margin-top: 10px;">
+                <h2 id="selected-cat-title">Nominal Donasi</h2>
+                <p>Pilih atau ketik jumlah dana yang ingin disumbangkan.</p>
+            </div>
 
-      <button class="cta" id="to-payment-btn" onclick="goStep(3)" disabled>Lanjut ke pembayaran</button>
-    </div>
-  </section>
+            <!-- Khusus Kalkulator Zakat -->
+            <div id="section-zakat" class="hidden">
+                <div class="zakat-toggle">
+                    <button type="button" class="z-tab active" onclick="setZakatSub('fitrah', this)">Zakat Fitrah</button>
+                    <button type="button" class="z-tab" onclick="setZakatSub('mal', this)">Zakat Mal</button>
+                </div>
+                
+                <div id="form-fitrah">
+                    <div class="input-group">
+                        <label>Jumlah Jiwa</label>
+                        <input type="number" id="f-jiwa" value="1" min="1" oninput="calcZakatFitrah()">
+                    </div>
+                    <div class="input-group">
+                        <label>Nominal per Jiwa (Rp)</label>
+                        <input type="number" id="f-nominal" value="{{ $mosque->zakat_fitrah_default ?? 45000 }}" oninput="calcZakatFitrah()">
+                    </div>
+                </div>
 
-  {{-- STEP 3: pembayaran --}}
-  <section id="step-3" class="hidden">
-    <div class="head">
-      <div class="eyebrow">Langkah 3 dari 4</div>
-      <h1>Pilih metode pembayaran</h1>
-      <p>Periksa kembali ringkasan donasi Anda sebelum melanjutkan.</p>
-    </div>
-    <div class="panel">
-      <button class="back" onclick="goStep(2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg> Ubah detail donasi</button>
+                <div id="form-mal" class="hidden">
+                    <div class="input-group">
+                        <label>Total Harta Haul (Rp)</label>
+                        <input type="number" id="m-harta" placeholder="Contoh: 80000000" oninput="calcZakatMal()">
+                        <small style="color: #888; margin-top: 4px; display:block;">Dihitung otomatis 2,5% dari total harta.</small>
+                    </div>
+                </div>
+            </div>
 
-      <div class="summary-line"><span>Jenis donasi</span><b id="sum-jenis">—</b></div>
-      <div class="summary-line"><span>Atas nama</span><b id="sum-nama">Hamba Allah</b></div>
-      <div class="summary-line" style="border-bottom:none;padding-top:14px;"><span>Total dibayarkan</span><b id="sum-total" style="font-size:18px;">Rp 0</b></div>
+            <!-- Pilihan Nominal Cepat (Untuk Donasi Umum) -->
+            <div id="section-nominal">
+                <div class="nominal-chips">
+                    <button type="button" onclick="setAmount(20000, this)">Rp 20.000</button>
+                    <button type="button" onclick="setAmount(50000, this)">Rp 50.000</button>
+                    <button type="button" onclick="setAmount(100000, this)">Rp 100.000</button>
+                    <button type="button" onclick="setAmount(250000, this)">Rp 250.000</button>
+                </div>
+                <div class="input-group">
+                    <label>Atau Masukkan Nominal Lain (Rp)</label>
+                    <input type="number" id="custom-nominal" placeholder="Contoh: 75000" oninput="setCustomAmount()">
+                </div>
+            </div>
 
-      <div style="margin-top:22px;">
-        <div class="paymethods">
-          <div class="sel" onclick="selectPay(this)">QRIS</div>
-          <div onclick="selectPay(this)">Transfer Bank</div>
-          <div onclick="selectPay(this)">Dompet Digital</div>
+            <div class="input-group" style="margin-top: 16px;">
+                <label>Nama Donatur (Opsional)</label>
+                <input type="text" id="donor-name" placeholder="Tulis nama atau kosongkan (Hamba Allah)">
+            </div>
+
+            <div class="total-display">
+                <span>Total Donasi</span>
+                <strong id="final-amount-text">Rp 0</strong>
+            </div>
+
+            <button type="button" class="btn-submit" id="to-pay-btn" onclick="changeStep(3)" disabled>Lanjut ke Pembayaran</button>
         </div>
-      </div>
 
-      <button class="cta">Selesaikan Donasi</button>
+        <!-- STEP 3: PEMBAYARAN -->
+        <div class="panel-card hidden" id="panel-3">
+            <button type="button" class="btn-back" onclick="changeStep(2)">&larr; Ubah Nominal</button>
+
+            <div class="panel-title" style="margin-top: 10px;">
+                <h2>Metode Pembayaran</h2>
+                <p>Silakan pilih kanal pembayaran yang Anda inginkan.</p>
+            </div>
+
+            <div class="summary-box">
+                <div class="sb-row"><span>Kategori</span><b id="sum-cat">-</b></div>
+                <div class="sb-row"><span>Donatur</span><b id="sum-name">Hamba Allah</b></div>
+                <div class="sb-row total"><span>Total Transfer</span><b id="sum-total">Rp 0</b></div>
+            </div>
+
+            <div class="payment-channels">
+                <label class="channel-option">
+                    <input type="radio" name="payment" value="QRIS" checked>
+                    <div>
+                        <strong>QRIS (All Payment)</strong>
+                        <span>Scan pakai GoPay, OVO, Dana, BCA, Mandiri, dll</span>
+                    </div>
+                </label>
+                <label class="channel-option">
+                    <input type="radio" name="payment" value="Transfer Bank Syariah">
+                    <div>
+                        <strong>Transfer Bank Syariah Indonesia (BSI)</strong>
+                        <span>No. Rek: 7123456789 a.n. Masjid</span>
+                    </div>
+                </label>
+            </div>
+
+            <button type="button" class="btn-submit" onclick="processDonation()" style="margin-top: 20px;">Konfirmasi & Selesaikan</button>
+        </div>
+
+        <!-- STEP 4: SUKSES -->
+        <div class="panel-card hidden" id="panel-4" style="text-align: center;">
+            <div class="success-icon">&#10003;</div>
+            <h2 style="margin-bottom: 6px;">Jazaakumullahu Khairan</h2>
+            <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Donasi Anda berhasil dicatat dalam sistem kebaikan masjid.</p>
+            
+            <div class="receipt-card">
+                No. Transaksi: <b id="res-code">TRX-001</b><br>
+                Kategori: <b id="res-cat">-</b><br>
+                Jumlah: <b id="res-total">Rp 0</b>
+            </div>
+
+            <button type="button" class="btn-submit" onclick="resetAll()">Donasi Kembali</button>
+        </div>
+
     </div>
-  </section>
 
-  {{-- STEP 4: konfirmasi --}}
-  <section id="step-4" class="hidden">
-    <div class="head">
-      <div class="eyebrow">Langkah 4 dari 4</div>
-      <h1>Donasi berhasil dicatat</h1>
-      <p>Terima kasih, semoga menjadi amal jariyah yang terus mengalir pahalanya.</p>
-    </div>
-    <div class="panel">
-      <div class="confirm-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div>
-      <h2 id="conf-title">Jazaakumullahu khairan</h2>
-      <div class="sub">Bukti donasi telah dikirim ke sistem masjid.</div>
-      <div class="receipt">
-        No. referensi: <b>DN-PENDING</b><br>
-        Jenis: <b id="conf-jenis">—</b><br>
-        Nominal: <b id="conf-total">Rp 0</b><br>
-        Metode: <b id="conf-method">QRIS</b>
-      </div>
-      <button class="cta" onclick="resetAll()">Donasi lagi</button>
-    </div>
-  </section>
-
-</div>
-
-{{-- data kategori dikirim ke JS lewat window, dibuat dari array PHP di atas, bukan diketik ulang --}}
-<script>
-  window.donasiCategories = @json($categoriesJson);
-</script>
-<script src="{{ asset('js/donasi/donasi.js') }}"></script>
+    <script>
+        window.categoryData = {!! $categoriesJson ?? '[]' !!};
+    </script>
+    <script src="{{ asset('js/donasi/donasi.js') }}?v={{ time() }}"></script>
 </body>
 </html>

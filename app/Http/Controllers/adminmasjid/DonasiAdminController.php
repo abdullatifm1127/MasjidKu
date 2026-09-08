@@ -4,6 +4,7 @@ namespace App\Http\Controllers\adminmasjid;
 
 use App\Http\Controllers\Controller;
 use App\Models\DonasiGaleri;
+use App\Models\DonationCategory;
 use App\Models\Mosque;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,26 +12,6 @@ use Illuminate\Support\Facades\Storage;
 
 class DonasiAdminController extends Controller
 {
-    /**
-     * Kategori donasi, sama persis dengan yang dipakai DonasiController (publik).
-     * Kalau nanti dipindah ke database, cukup ganti isi method ini di kedua tempat,
-     * atau taruh di satu Trait/Helper bersama.
-     */
-    protected function categories(): array
-    {
-        return [
-            'zakat'       => ['title' => 'Zakat'],
-            'infaq'       => ['title' => 'Infaq'],
-            'sedekah'     => ['title' => 'Sedekah'],
-            'pembangunan' => ['title' => 'Pembangunan Masjid'],
-            'yatim'       => ['title' => 'Santunan Yatim & Dhuafa'],
-            'bencana'     => ['title' => 'Bantuan Bencana'],
-            'wakaf'       => ['title' => 'Wakaf'],
-            'qurban'      => ['title' => 'Qurban'],
-            'lainnya'     => ['title' => 'Donasi Bebas'],
-        ];
-    }
-
     protected function mosque(): Mosque
     {
         return Mosque::where('user_id', Auth::id())->firstOrFail();
@@ -45,11 +26,15 @@ class DonasiAdminController extends Controller
 
         // CEK APAKAH PAKET MASJID MASIH FREE
         if (($mosque->package_type ?? 'free') === 'free') {
-            // Jika free, langsung arahkan ke halaman pembayaran yang ada di folder paymentmasjid
             return view('paymentmasjid.payment', [
                 'mosque' => $mosque
             ]);
         }
+
+        // Ambil data kategori donasi dari database khusus untuk masjid ini
+        $donationCategories = DonationCategory::where('mosque_id', $mosque->id)
+            ->orderBy('sort_order', 'asc')
+            ->get();
 
         // Jika sudah berbayar, tampilkan halaman kelola donasi admin seperti biasa
         $items = DonasiGaleri::where('mosque_id', $mosque->id)
@@ -57,11 +42,12 @@ class DonasiAdminController extends Controller
             ->get();
 
         return view('auth.adminmasjid.donasiAdmin', [
-            'mosque'     => $mosque,
-            'categories' => $this->categories(),
-            'items'      => $items,
+            'mosque'             => $mosque,
+            'donationCategories' => $donationCategories,
+            'items'              => $items,
         ]);
     }
+
     /**
      * PUT /admin/donasi/pengaturan
      */
@@ -78,6 +64,14 @@ class DonasiAdminController extends Controller
         ]);
 
         return back()->with('success', 'Pengaturan zakat fitrah berhasil disimpan.');
+    }
+
+    /**
+     * Alias untuk mengantisipasi pemanggilan rute updatePengaturan
+     */
+    public function updatePengaturan(Request $request)
+    {
+        return $this->updateSettings($request);
     }
 
     /**

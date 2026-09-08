@@ -1,199 +1,167 @@
-document.addEventListener('DOMContentLoaded', function () {
+let activeCategoryKey = null;
+let activeCategoryTitle = '';
+let calcType = 'nominal';
+let zakatSub = 'fitrah';
+let amountValue = 0;
 
-  let current = null;
-  let amount = 0;
-  let zakatSubtype = 'fitrah'; // default zakat subtype
-  let generatedNoReferensi = ''; // menampung nomor referensi dari server
-
-  function goStep(n) {
-    for (let i = 1; i <= 4; i++) document.getElementById('step-' + i).classList.add('hidden');
-    document.getElementById('step-' + n).classList.remove('hidden');
+function changeStep(stepNum) {
     for (let i = 1; i <= 4; i++) {
-      const bar = document.getElementById('bar-' + i);
-      bar.classList.remove('active', 'done');
-      if (i < n) bar.classList.add('done');
-      if (i === n) bar.classList.add('active');
+        const panel = document.getElementById(`panel-${i}`);
+        const st = document.getElementById(`st-${i}`);
+        if (panel) panel.classList.add('hidden');
+        if (st) st.classList.remove('active');
     }
-    if (n === 3) fillSummary();
-    if (n === 4) fillConfirm();
+    
+    const targetPanel = document.getElementById(`panel-${stepNum}`);
+    const targetSt = document.getElementById(`st-${stepNum}`);
+    
+    if (targetPanel) targetPanel.classList.remove('hidden');
+    if (targetSt) targetSt.classList.add('active');
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
 
-  function openDetail(key) {
-    current = key;
-    amount = 0;
-    zakatSubtype = 'fitrah';
-    const cat = window.donasiCategories[key];
-    document.getElementById('detail-title').textContent = cat.title;
-    document.getElementById('detail-desc').textContent = cat.desc;
+    if (stepNum === 3) {
+        const sumCat = document.getElementById('sum-cat');
+        const donorNameInput = document.getElementById('donor-name');
+        const sumName = document.getElementById('sum-name');
+        const sumTotal = document.getElementById('sum-total');
 
-    document.getElementById('zakat-subtype').classList.add('hidden');
-    document.getElementById('calc-fitrah').classList.add('hidden');
-    document.getElementById('calc-mal').classList.add('hidden');
-    document.getElementById('generic-amount').classList.add('hidden');
-    document.getElementById('to-payment-btn').disabled = true;
+        if (sumCat) sumCat.textContent = activeCategoryTitle;
+        const nameInput = donorNameInput ? donorNameInput.value.trim() : '';
+        if (sumName) sumName.textContent = nameInput !== '' ? nameInput : 'Hamba Allah';
+        if (sumTotal) sumTotal.textContent = formatRp(amountValue);
+    }
+}
 
-    if (key === 'zakat') {
-      document.getElementById('zakat-subtype').classList.remove('hidden');
-      document.getElementById('calc-fitrah').classList.remove('hidden');
-      // Set active button UI for zakat subtype
-      const buttons = document.querySelectorAll('#zakat-subtype button');
-      buttons.forEach((b, idx) => {
-        if (idx === 0) b.classList.add('active');
-        else b.classList.remove('active');
-      });
-      calcFitrah();
+function selectCategory(key, title, type) {
+    activeCategoryKey = key;
+    activeCategoryTitle = title;
+    calcType = type ? type.trim().toLowerCase() : 'nominal';
+
+    const catTitleEl = document.getElementById('selected-cat-title');
+    if (catTitleEl) {
+        catTitleEl.textContent = title;
+    }
+
+    const sectionZakat = document.getElementById('section-zakat');
+    const sectionNominal = document.getElementById('section-nominal');
+
+    // Jika tipenya adalah zakat, tampilkan kalkulator zakat dan sembunyikan nominal bebas
+    if (calcType === 'zakat') {
+        if (sectionZakat) sectionZakat.classList.remove('hidden');
+        if (sectionNominal) sectionNominal.classList.add('hidden');
+        
+        // Reset ke tab fitrah secara default saat kategori zakat dipilih
+        zakatSub = 'fitrah';
+        document.querySelectorAll('.z-tab').forEach((b, idx) => {
+            if (idx === 0) b.classList.add('active');
+            else b.classList.remove('active');
+        });
+        const formFitrah = document.getElementById('form-fitrah');
+        const formMal = document.getElementById('form-mal');
+        if (formFitrah) formFitrah.classList.remove('hidden');
+        if (formMal) formMal.classList.add('hidden');
+
+        calcZakatFitrah();
     } else {
-      document.getElementById('generic-amount').classList.remove('hidden');
+        if (sectionZakat) sectionZakat.classList.add('hidden');
+        if (sectionNominal) sectionNominal.classList.remove('hidden');
+        amountValue = 0;
+        updateAmountUI();
     }
-    goStep(2);
-  }
+    changeStep(2);
+}
 
-  function setZakatType(type, btn) {
-    zakatSubtype = type;
-    document.querySelectorAll('#zakat-subtype button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('calc-fitrah').classList.toggle('hidden', type !== 'fitrah');
-    document.getElementById('calc-mal').classList.toggle('hidden', type !== 'mal');
-    if (type === 'fitrah') calcFitrah(); else calcMal();
-  }
+function setZakatSub(sub, btn) {
+    zakatSub = sub;
+    document.querySelectorAll('.z-tab').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
 
-  function formatRp(v) { return 'Rp ' + Math.round(v).toLocaleString('id-ID'); }
+    const formFitrah = document.getElementById('form-fitrah');
+    const formMal = document.getElementById('form-mal');
 
-  function calcFitrah() {
-    const jiwa = parseFloat(document.getElementById('fitrah-jiwa').value) || 0;
-    const nom = parseFloat(document.getElementById('fitrah-nominal').value) || 0;
-    amount = jiwa * nom;
-    document.getElementById('fitrah-total').textContent = formatRp(amount);
-    document.getElementById('to-payment-btn').disabled = amount <= 0;
-  }
+    if (formFitrah) formFitrah.classList.toggle('hidden', sub !== 'fitrah');
+    if (formMal) formMal.classList.toggle('hidden', sub !== 'mal');
 
-  function calcMal() {
-    const harta = parseFloat(document.getElementById('mal-harta').value) || 0;
-    amount = harta * 0.025;
-    document.getElementById('mal-total').textContent = formatRp(amount);
-    document.getElementById('to-payment-btn').disabled = amount <= 0;
-  }
+    if (sub === 'fitrah') calcZakatFitrah();
+    else calcZakatMal();
+}
 
-  function pickAmount(v, btn) {
-    document.querySelectorAll('#generic-amount .amount-grid button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('custom-amount').value = '';
-    amount = v;
-    document.getElementById('to-payment-btn').disabled = false;
-  }
-
-  function pickCustom() {
-    document.querySelectorAll('#generic-amount .amount-grid button').forEach(b => b.classList.remove('active'));
-    amount = parseFloat(document.getElementById('custom-amount').value) || 0;
-    document.getElementById('to-payment-btn').disabled = amount <= 0;
-  }
-
-  function selectPay(el) {
-    document.querySelectorAll('.paymethods div').forEach(d => d.classList.remove('sel'));
-    el.classList.add('sel');
-  }
-
-  function fillSummary() {
-    const name = document.getElementById('donor-name').value || 'Hamba Allah';
-    document.getElementById('sum-jenis').textContent = window.donasiCategories[current].title;
-    document.getElementById('sum-nama').textContent = name;
-    document.getElementById('sum-total').textContent = formatRp(amount);
-  }
-
-  // Fungsi untuk mengirim data ke DonasiController@store via AJAX Fetch
-  function submitDonation() {
-    const name = document.getElementById('donor-name').value || 'Hamba Allah';
-    const selMethod = document.querySelector('.paymethods .sel');
-    const paymentMethod = selMethod ? selMethod.textContent.trim() : 'QRIS';
+function calcZakatFitrah() {
+    const jiwaEl = document.getElementById('f-jiwa');
+    const nominalEl = document.getElementById('f-nominal');
     
-    // Ambil slug masjid dari URL path (format: /masjid/{slug}/donasi)
-    const pathSegments = window.location.pathname.split('/');
-    const mosqueSlug = pathSegments[pathSegments.indexOf('masjid') + 1];
-
-    const payload = {
-      jenis: current,
-      zakat_subtype: current === 'zakat' ? zakatSubtype : null,
-      nominal: amount,
-      nama_donatur: name,
-      metode_pembayaran: paymentMethod
-    };
-
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
-    fetch(`/masjid/${mosqueSlug}/donasi`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-CSRF-TOKEN': csrfToken
-      },
-      body: JSON.stringify(payload)
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        generatedNoReferensi = data.no_referensi;
-        goStep(4);
-      } else {
-        alert('Gagal memproses donasi. Silakan periksa kembali data Anda.');
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Terjadi kesalahan pada server.');
-    });
-  }
-
-  function fillConfirm() {
-    document.getElementById('conf-jenis').textContent = window.donasiCategories[current].title;
-    document.getElementById('conf-total').textContent = formatRp(amount);
-    const sel = document.querySelector('.paymethods .sel');
-    document.getElementById('conf-method').textContent = sel ? sel.textContent.trim() : 'QRIS';
+    const jiwa = jiwaEl ? parseFloat(jiwaEl.value) || 0 : 0;
+    const nominal = nominalEl ? parseFloat(nominalEl.value) || 0 : 0;
     
-    // Tampilkan nomor referensi asli yang didapat dari server
-    const refContainer = document.querySelector('.receipt');
-    if (refContainer) {
-      refContainer.innerHTML = `
-        No. referensi: <b>${generatedNoReferensi || 'DN-PENDING'}</b><br>
-        Jenis: <b id="conf-jenis">${window.donasiCategories[current].title}</b><br>
-        Nominal: <b id="conf-total">${formatRp(amount)}</b><br>
-        Metode: <b id="conf-method">${sel ? sel.textContent.trim() : 'QRIS'}</b>
-      `;
-    }
-  }
+    amountValue = jiwa * nominal;
+    updateAmountUI();
+}
 
-  function resetAll() {
-    current = null; 
-    amount = 0;
-    generatedNoReferensi = '';
-    document.getElementById('donor-name').value = '';
-    const malHarta = document.getElementById('mal-harta');
-    if (malHarta) malHarta.value = '';
-    const customAmt = document.getElementById('custom-amount');
-    if (customAmt) customAmt.value = '';
-    const fitrahJiwa = document.getElementById('fitrah-jiwa');
-    if (fitrahJiwa) fitrahJiwa.value = 1;
-    goStep(1);
-  }
+function calcZakatMal() {
+    const hartaEl = document.getElementById('m-harta');
+    const harta = hartaEl ? parseFloat(hartaEl.value) || 0 : 0;
+    
+    // Perhitungan zakat mal 2.5% dibulatkan agar rapi
+    amountValue = Math.round(harta * 0.025);
+    updateAmountUI();
+}
 
-  // Override tombol "Selesaikan Donasi" agar memanggil fungsi AJAX submitDonation
-  const finishBtn = document.querySelector('#step-3 .cta');
-  if (finishBtn) {
-    finishBtn.removeAttribute('onclick');
-    finishBtn.addEventListener('click', submitDonation);
-  }
+function setAmount(val, btn) {
+    document.querySelectorAll('.nominal-chips button').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    
+    const customNominal = document.getElementById('custom-nominal');
+    if (customNominal) customNominal.value = '';
+    
+    amountValue = val;
+    updateAmountUI();
+}
 
-  // expose functions used by inline onclick= attributes in the Blade view
-  window.goStep = goStep;
-  window.openDetail = openDetail;
-  window.setZakatType = setZakatType;
-  window.calcFitrah = calcFitrah;
-  window.calcMal = calcMal;
-  window.pickAmount = pickAmount;
-  window.pickCustom = pickCustom;
-  window.selectPay = selectPay;
-  window.resetAll = resetAll;
+function setCustomAmount() {
+    document.querySelectorAll('.nominal-chips button').forEach(b => b.classList.remove('active'));
+    
+    const customNominal = document.getElementById('custom-nominal');
+    amountValue = customNominal ? parseFloat(customNominal.value) || 0 : 0;
+    
+    updateAmountUI();
+}
 
-  goStep(1);
-});
+function updateAmountUI() {
+    const finalAmountText = document.getElementById('final-amount-text');
+    const toPayBtn = document.getElementById('to-pay-btn');
+
+    if (finalAmountText) finalAmountText.textContent = formatRp(amountValue);
+    if (toPayBtn) toPayBtn.disabled = amountValue <= 0;
+}
+
+function formatRp(num) {
+    return 'Rp ' + Math.round(num).toLocaleString('id-ID');
+}
+
+function processDonation() {
+    const trxCode = 'TRX-' + Math.floor(100000 + Math.random() * 900000);
+    
+    const resCode = document.getElementById('res-code');
+    const resCat = document.getElementById('res-cat');
+    const resTotal = document.getElementById('res-total');
+
+    if (resCode) resCode.textContent = trxCode;
+    if (resCat) resCat.textContent = activeCategoryTitle;
+    if (resTotal) resTotal.textContent = formatRp(amountValue);
+    
+    changeStep(4);
+}
+
+function resetAll() {
+    activeCategoryKey = null;
+    amountValue = 0;
+    
+    const donorName = document.getElementById('donor-name');
+    const customNominal = document.getElementById('custom-nominal');
+
+    if (donorName) donorName.value = '';
+    if (customNominal) customNominal.value = '';
+    
+    changeStep(1);
+}
