@@ -31,8 +31,18 @@ class PublicMosqueController extends Controller
             ->take(3)
             ->get();
 
-        // 1. SESUAIKAN KOLOM MENJADI package_type (berdasarkan database Anda)
         $hasDonationFeature = in_array($mosque->package_type ?? 'free', ['premium', 'pro', 'paid']);
+
+        // === TAMBAHKAN PENGAMBILAN DATA DONASI INI ===
+        $categories = DonationCategory::where('mosque_id', $mosque->id)
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+
+        $items = DonasiGaleri::where('mosque_id', $mosque->id)
+            ->latest()
+            ->get();
+        // ============================================
 
         return view('auth.adminmasjid.halamanUtamaUser', [
             'mosque'             => $mosque,
@@ -40,6 +50,8 @@ class PublicMosqueController extends Controller
             'prayers'            => $prayers,
             'acaras'             => $acaras,
             'hasDonationFeature' => $hasDonationFeature,
+            'categories'         => $categories, // <-- Kirim ke view
+            'items'              => $items,      // <-- Kirim ke view
         ]);
     }
 
