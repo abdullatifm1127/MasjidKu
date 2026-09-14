@@ -338,7 +338,7 @@
     @endif
 
    {{-- DONASI — modul: donasi & paket berbayar --}}
-@if($modOn('donasi') && isset($mosque) && $mosque->package_type != 'free' && $mosque->has_online_donation)
+@if($modOn('donasi') && isset($mosque) && $mosque->package_type != 'free')
 <section class="hu-donasi-v2-section" id="donasi">
     <div class="hu-donasi-v2-inner">
         <div class="hu-donasi-v2-left">

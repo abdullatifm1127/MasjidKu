@@ -4,17 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="Donasi dan Zakat online untuk Masjid {{ $mosque->mosque_name ?? '' }}">
     <title>Donasi & Zakat — Masjid {{ $mosque->mosque_name ?? '' }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/donasi/donasi.css') }}?v={{ time() }}">
 </head>
 <body>
 
-    <div class="donation-wrapper">
+    <!--
+        data-submit-url  : endpoint that creates the donation on the server (POST, JSON in/out).
+                            Expected response JSON: { "success": true, "trx_code": "TRX-...",
+                            "qris_image_url": "...", "payment_status_url": "..." }
+                            If the endpoint isn't ready yet, donasi.js falls back to a local
+                            demo transaction so the front end keeps working during development.
+        data-nisab        : current zakat mal nisab threshold in Rupiah, used only to show a
+                             help note — the server must still validate the real calculation.
+    -->
+    <div class="donation-wrapper"
+         id="app"
+         data-submit-url="{{ $submitUrl ?? (\Illuminate\Support\Facades\Route::has('masjid.donasi.store') && isset($mosque) ? route('masjid.donasi.store', $mosque->slug) : '') }}"
+         data-nisab="{{ $mosque->zakat_nisab ?? 85000000 }}">
+
         <!-- Header Identitas Masjid -->
         <header class="mosque-header">
-            <div class="mosque-icon">
+            <div class="mosque-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 21h18M5 21V7l7-4 7 4v14M9 9v12M15 9v12"/>
                 </svg>
@@ -26,53 +40,59 @@
         </header>
 
         <!-- Progress Steps -->
-        <div class="stepper">
-            <div class="step active" id="st-1"><span>1</span> Kategori</div>
-            <div class="step" id="st-2"><span>2</span> Nominal</div>
-            <div class="step" id="st-3"><span>3</span> Pembayaran</div>
-        </div>
+        <ol class="stepper" role="list" aria-label="Tahapan donasi">
+            <li class="step active" id="st-1" data-step="1" aria-current="step"><span aria-hidden="true">1</span> Kategori</li>
+            <li class="step" id="st-2" data-step="2"><span aria-hidden="true">2</span> Nominal</li>
+            <li class="step" id="st-3" data-step="3"><span aria-hidden="true">3</span> Pembayaran</li>
+        </ol>
+
+        <div role="status" aria-live="polite" class="sr-only" id="step-announcer"></div>
 
         <!-- STEP 1: PILIH KATEGORI & GALERI DOKUMENTASI -->
-        <div class="panel-card" id="panel-1">
+        <section class="panel-card" id="panel-1" aria-labelledby="panel-1-title">
             <div class="panel-title">
-                <h2>Pilih Kategori Donasi</h2>
+                <h2 id="panel-1-title">Pilih kategori donasi</h2>
                 <p>Tentukan jenis kebaikan yang ingin Anda salurkan hari ini.</p>
             </div>
 
             @if ($categories->isEmpty())
-                <div class="empty-box">Belum ada kategori donasi yang tersedia.</div>
+                <p class="empty-box">Belum ada kategori donasi yang tersedia. Silakan kembali lagi nanti.</p>
             @else
                 <div class="category-list">
                     @foreach ($categories as $cat)
-                        <button type="button" class="category-item" onclick="selectCategory('{{ $cat->key }}', '{{ addslashes($cat->title) }}', '{{ $cat->calc_type ?? 'nominal' }}')">
-                            <div class="ci-icon">
+                        <button type="button"
+                                class="category-item"
+                                data-key="{{ $cat->key }}"
+                                data-title="{{ $cat->title }}"
+                                data-calc-type="{{ strtolower(trim($cat->calc_type ?? 'nominal')) }}">
+                            <span class="ci-icon" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                     {!! $cat->iconPath() !!}
                                 </svg>
-                            </div>
-                            <div class="ci-info">
-                                <h3>{{ $cat->title }}</h3>
-                                <p>{{ $cat->description }}</p>
-                            </div>
-                            <div class="ci-arrow">&rsaquo;</div>
+                            </span>
+                            <span class="ci-info">
+                                <span class="ci-info-title">{{ $cat->title }}</span>
+                                <span class="ci-info-desc">{{ $cat->description }}</span>
+                            </span>
+                            <span class="ci-arrow" aria-hidden="true">&rsaquo;</span>
                         </button>
                     @endforeach
                 </div>
             @endif
 
-            <!-- BAGIAN GALERI DOKUMENTASI PENYALURAN (Menggunakan $items dari Controller) -->
-            <div style="margin-top: 32px; border-top: 1px solid #f1f5f9; padding-top: 24px;">
-                <div class="panel-title" style="margin-bottom: 14px;">
-                    <h2>Dokumentasi Penyaluran</h2>
+            <!-- GALERI DOKUMENTASI PENYALURAN -->
+            <div class="gallery-block">
+                <div class="panel-title panel-title--tight">
+                    <h2>Dokumentasi penyaluran</h2>
                     <p>Bukti transparansi penyaluran dana kebaikan dari jamaah.</p>
                 </div>
 
                 @if(isset($items) && $items->isNotEmpty())
                     <div class="public-gallery-grid">
                         @foreach($items as $gal)
-                            <div class="pub-gal-item">
-                                <div class="pub-gal-img" style="background-image: url('{{ asset('storage/' . $gal->foto) }}')"></div>
-                                <div class="pub-gal-info">
+                            <figure class="pub-gal-item">
+                                <div class="pub-gal-img" style="background-image: url('{{ asset('storage/' . $gal->foto) }}')" role="img" aria-label="{{ $gal->judul }}"></div>
+                                <figcaption class="pub-gal-info">
                                     <span class="pub-tag">{{ $gal->kategori ?? 'Penyaluran' }}</span>
                                     <h4>{{ $gal->judul }}</h4>
                                     <p>{{ Str::limit($gal->deskripsi, 60) }}</p>
@@ -80,136 +100,159 @@
                                         <span>Rp {{ number_format($gal->nominal_terpakai ?? 0, 0, ',', '.') }}</span>
                                         <span>{{ $gal->tanggal ? \Carbon\Carbon::parse($gal->tanggal)->format('d M Y') : '' }}</span>
                                     </div>
-                                </div>
-                            </div>
+                                </figcaption>
+                            </figure>
                         @endforeach
                     </div>
                 @else
-                    <div class="empty-box" style="padding: 20px;">
-                        Belum ada dokumentasi foto penyaluran yang diunggah.
-                    </div>
+                    <p class="empty-box empty-box--tight">Belum ada dokumentasi foto penyaluran yang diunggah.</p>
                 @endif
             </div>
-        </div>
+        </section>
 
         <!-- STEP 2: MASUKKAN NOMINAL -->
-        <div class="panel-card hidden" id="panel-2">
-            <button type="button" class="btn-back" onclick="changeStep(1)">&larr; Kembali ke Kategori</button>
-            
-            <div class="panel-title" style="margin-top: 10px;">
-                <h2 id="selected-cat-title">Nominal Donasi</h2>
+        <section class="panel-card hidden" id="panel-2" aria-labelledby="panel-2-title">
+            <button type="button" class="btn-back" data-goto-step="1">&larr; Kembali ke kategori</button>
+
+            <div class="panel-title">
+                <h2 id="panel-2-title" data-role="selected-cat-title">Nominal donasi</h2>
                 <p>Pilih atau ketik jumlah dana yang ingin disumbangkan.</p>
             </div>
 
-            <!-- Khusus Kalkulator Zakat -->
+            <!-- Kalkulator Zakat -->
             <div id="section-zakat" class="hidden">
-                <div class="zakat-toggle">
-                    <button type="button" class="z-tab active" onclick="setZakatSub('fitrah', this)">Zakat Fitrah</button>
-                    <button type="button" class="z-tab" onclick="setZakatSub('mal', this)">Zakat Mal</button>
+                <div class="zakat-toggle" role="tablist" aria-label="Jenis zakat">
+                    <button type="button" class="z-tab active" role="tab" aria-selected="true" data-zakat-sub="fitrah">Zakat Fitrah</button>
+                    <button type="button" class="z-tab" role="tab" aria-selected="false" data-zakat-sub="mal">Zakat Mal</button>
                 </div>
-                
+
                 <div id="form-fitrah">
                     <div class="input-group">
-                        <label>Jumlah Jiwa</label>
-                        <input type="number" id="f-jiwa" value="1" min="1" oninput="calcZakatFitrah()">
+                        <label for="f-jiwa">Jumlah jiwa</label>
+                        <input type="number" id="f-jiwa" inputmode="numeric" value="1" min="1" step="1">
                     </div>
                     <div class="input-group">
-                        <label>Nominal per Jiwa (Rp)</label>
-                        <input type="number" id="f-nominal" value="{{ $mosque->zakat_fitrah_default ?? 45000 }}" oninput="calcZakatFitrah()">
+                        <label for="f-nominal">Nominal per jiwa (Rp)</label>
+                        <input type="number" id="f-nominal" inputmode="numeric" min="0" step="1000" value="{{ $mosque->zakat_fitrah_default ?? 45000 }}">
                     </div>
                 </div>
 
                 <div id="form-mal" class="hidden">
                     <div class="input-group">
-                        <label>Total Harta Haul (Rp)</label>
-                        <input type="number" id="m-harta" placeholder="Contoh: 80000000" oninput="calcZakatMal()">
-                        <small style="color: #888; margin-top: 4px; display:block;">Dihitung otomatis 2,5% dari total harta.</small>
+                        <label for="m-harta">Total harta haul (Rp)</label>
+                        <input type="text" id="m-harta" inputmode="numeric" placeholder="Contoh: 80.000.000">
+                        <small class="hint">Dizakatkan 2,5% dari total harta yang sudah mencapai haul dan nisab.</small>
+                        <small class="hint hint--nisab" id="nisab-note" hidden></small>
                     </div>
                 </div>
             </div>
 
-            <!-- Pilihan Nominal Cepat (Untuk Donasi Umum) -->
+            <!-- Nominal Cepat (Donasi Umum) -->
             <div id="section-nominal">
-                <div class="nominal-chips">
-                    <button type="button" onclick="setAmount(20000, this)">Rp 20.000</button>
-                    <button type="button" onclick="setAmount(50000, this)">Rp 50.000</button>
-                    <button type="button" onclick="setAmount(100000, this)">Rp 100.000</button>
-                    <button type="button" onclick="setAmount(250000, this)">Rp 250.000</button>
+                <div class="nominal-chips" role="group" aria-label="Pilihan nominal cepat">
+                    <button type="button" data-amount="20000">Rp 20.000</button>
+                    <button type="button" data-amount="50000">Rp 50.000</button>
+                    <button type="button" data-amount="100000">Rp 100.000</button>
+                    <button type="button" data-amount="250000">Rp 250.000</button>
                 </div>
                 <div class="input-group">
-                    <label>Atau Masukkan Nominal Lain (Rp)</label>
-                    <input type="number" id="custom-nominal" placeholder="Contoh: 75000" oninput="setCustomAmount()">
+                    <label for="custom-nominal">Atau masukkan nominal lain (Rp)</label>
+                    <input type="text" id="custom-nominal" inputmode="numeric" placeholder="Contoh: 75.000">
+                    <small class="hint">Minimal donasi Rp 5.000.</small>
                 </div>
             </div>
 
-            <div class="input-group" style="margin-top: 16px;">
-                <label>Nama Donatur (Opsional)</label>
-                <input type="text" id="donor-name" placeholder="Tulis nama atau kosongkan (Hamba Allah)">
+            <div class="input-group">
+                <label for="donor-name">Nama donatur (opsional)</label>
+                <input type="text" id="donor-name" maxlength="60" placeholder="Tulis nama atau kosongkan untuk Hamba Allah">
             </div>
 
             <div class="total-display">
-                <span>Total Donasi</span>
-                <strong id="final-amount-text">Rp 0</strong>
+                <span>Total donasi</span>
+                <strong id="final-amount-text" aria-live="polite">Rp 0</strong>
             </div>
 
-            <button type="button" class="btn-submit" id="to-pay-btn" onclick="changeStep(3)" disabled>Lanjut ke Pembayaran</button>
-        </div>
+            <p class="field-error hidden" id="amount-error" role="alert">Nominal donasi minimal Rp 5.000.</p>
+
+            <button type="button" class="btn-submit" id="to-pay-btn" data-goto-step="3" disabled>Lanjut ke pembayaran</button>
+        </section>
 
         <!-- STEP 3: PEMBAYARAN -->
-        <div class="panel-card hidden" id="panel-3">
-            <button type="button" class="btn-back" onclick="changeStep(2)">&larr; Ubah Nominal</button>
+        <section class="panel-card hidden" id="panel-3" aria-labelledby="panel-3-title">
+            <button type="button" class="btn-back" data-goto-step="2">&larr; Ubah nominal</button>
 
-            <div class="panel-title" style="margin-top: 10px;">
-                <h2>Metode Pembayaran</h2>
+            <div class="panel-title">
+                <h2 id="panel-3-title">Metode pembayaran</h2>
                 <p>Silakan pilih kanal pembayaran yang Anda inginkan.</p>
             </div>
 
             <div class="summary-box">
                 <div class="sb-row"><span>Kategori</span><b id="sum-cat">-</b></div>
                 <div class="sb-row"><span>Donatur</span><b id="sum-name">Hamba Allah</b></div>
-                <div class="sb-row total"><span>Total Transfer</span><b id="sum-total">Rp 0</b></div>
+                <div class="sb-row total"><span>Total transfer</span><b id="sum-total">Rp 0</b></div>
             </div>
 
-            <div class="payment-channels">
+            <fieldset class="payment-channels">
+                <legend class="sr-only">Pilih metode pembayaran</legend>
                 <label class="channel-option">
                     <input type="radio" name="payment" value="QRIS" checked>
-                    <div>
-                        <strong>QRIS (All Payment)</strong>
+                    <span>
+                        <strong>QRIS (semua metode)</strong>
                         <span>Scan pakai GoPay, OVO, Dana, BCA, Mandiri, dll</span>
-                    </div>
+                    </span>
                 </label>
                 <label class="channel-option">
                     <input type="radio" name="payment" value="Transfer Bank Syariah">
-                    <div>
+                    <span>
                         <strong>Transfer Bank Syariah Indonesia (BSI)</strong>
-                        <span>No. Rek: 7123456789 a.n. Masjid</span>
-                    </div>
+                        <span class="account-row">
+                            No. Rek: <b id="bsi-account">7123456789</b> a.n. Masjid
+                            <button type="button" class="btn-copy" data-copy="7123456789" aria-label="Salin nomor rekening">Salin</button>
+                        </span>
+                    </span>
                 </label>
-            </div>
+            </fieldset>
 
-            <button type="button" class="btn-submit" onclick="processDonation()" style="margin-top: 20px;">Konfirmasi & Selesaikan</button>
-        </div>
+            <p class="field-error hidden" id="submit-error" role="alert"></p>
+
+            <button type="button" class="btn-submit" id="confirm-btn">
+                <span class="btn-label">Konfirmasi & selesaikan</span>
+                <span class="btn-spinner hidden" aria-hidden="true"></span>
+            </button>
+        </section>
 
         <!-- STEP 4: SUKSES -->
-        <div class="panel-card hidden" id="panel-4" style="text-align: center;">
-            <div class="success-icon">&#10003;</div>
-            <h2 style="margin-bottom: 6px;">Jazaakumullahu Khairan</h2>
-            <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Donasi Anda berhasil dicatat dalam sistem kebaikan masjid.</p>
-            
-            <div class="receipt-card">
-                No. Transaksi: <b id="res-code">TRX-001</b><br>
-                Kategori: <b id="res-cat">-</b><br>
-                Jumlah: <b id="res-total">Rp 0</b>
+        <section class="panel-card hidden" id="panel-4" aria-labelledby="panel-4-title" style="text-align: center;">
+            <div class="success-icon" aria-hidden="true">&#10003;</div>
+            <h2 id="panel-4-title">Jazaakumullahu khairan</h2>
+            <p class="success-sub">Donasi Anda berhasil dicatat dalam sistem kebaikan masjid.</p>
+
+            <div id="qris-block" class="qris-block hidden">
+                <img id="qris-image" alt="Kode QRIS pembayaran" src="">
+                <p class="hint">Buka aplikasi e-wallet atau m-banking Anda, lalu pindai kode di atas.</p>
             </div>
 
-            <button type="button" class="btn-submit" onclick="resetAll()">Donasi Kembali</button>
-        </div>
+            <div class="receipt-card">
+                <div class="receipt-row">
+                    <span>No. Transaksi</span>
+                    <b id="res-code">TRX-001</b>
+                    <button type="button" class="btn-copy btn-copy--inline" id="copy-trx" aria-label="Salin nomor transaksi">Salin</button>
+                </div>
+                <div class="receipt-row"><span>Kategori</span><b id="res-cat">-</b></div>
+                <div class="receipt-row"><span>Jumlah</span><b id="res-total">Rp 0</b></div>
+            </div>
+
+            <div class="receipt-actions">
+                <a class="btn-secondary" id="share-wa" href="#" target="_blank" rel="noopener">Bagikan ke WhatsApp</a>
+                <button type="button" class="btn-submit" id="reset-btn">Donasi kembali</button>
+            </div>
+        </section>
 
     </div>
 
     <script>
         window.categoryData = {!! $categoriesJson ?? '[]' !!};
     </script>
-    <script src="{{ asset('js/donasi/donasi.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/donasi/donasi.js') }}?v={{ time() }}" defer></script>
 </body>
 </html>

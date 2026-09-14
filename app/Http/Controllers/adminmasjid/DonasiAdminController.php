@@ -14,7 +14,16 @@ class DonasiAdminController extends Controller
 {
     protected function mosque(): Mosque
     {
-        return Mosque::where('user_id', Auth::id())->firstOrFail();
+        // Ambil data masjid pertama milik user yang sedang login
+        $mosque = Mosque::where('user_id', Auth::id())->firstOrFail();
+
+        // Paksa ubah status dan paket secara otomatis di memori 
+        // jika di database sebenarnya sudah berstatus approved/paid
+        if (strtolower(trim($mosque->status)) === 'approved' || strtolower(trim($mosque->status)) === 'aktif') {
+            $mosque->package_type = 'paid';
+        }
+
+        return $mosque;
     }
 
     /**
