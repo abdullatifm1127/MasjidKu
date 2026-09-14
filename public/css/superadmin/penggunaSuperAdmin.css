@@ -1,0 +1,359 @@
+.pg-content {
+    gap: 16px;
+}
+
+/* ---- Alert ---- */
+.pg-alert {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 16px;
+    border-radius: 10px;
+    font-size: 0.84rem;
+    font-weight: 500;
+}
+
+.pg-alert-success {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.pg-subheader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pg-count {
+    font-size: 0.88rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.pg-btn-tambah {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 20px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #fff;
+    background: #1a4731;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.18s;
+}
+
+.pg-btn-tambah:hover { background: #0e3320; }
+.pg-table-wrap {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.pg-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.84rem;
+}
+
+/* Header */
+.pg-table thead tr {
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.pg-table th {
+    padding: 12px 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #9ca3af;
+    text-align: left;
+    white-space: nowrap;
+}
+
+/* Rows */
+.pg-row {
+    border-bottom: 1px solid #f9fafb;
+    transition: background 0.14s;
+}
+
+.pg-row:last-child { border-bottom: none; }
+.pg-row:hover { background: #fafafa; }
+
+.pg-table td {
+    padding: 14px 20px;
+    vertical-align: middle;
+}
+
+/* ---- Column: Pengguna ---- */
+.pg-td-user { min-width: 220px; }
+
+.pg-user-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pg-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.pg-online-dot {
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    width: 9px;
+    height: 9px;
+    background: #22c55e;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+.pg-nama {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 2px;
+}
+
+.pg-email {
+    font-size: 0.76rem;
+    color: #9ca3af;
+}
+
+/* ---- Column: Peran ---- */
+.pg-td-peran { min-width: 130px; }
+
+.pg-peran-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.pg-peran-badge.tenant {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.pg-peran-badge.super {
+    background: #f3e8ff;
+    color: #6b21a8;
+}
+
+/* ---- Column: Masjid ---- */
+.pg-td-masjid {
+    color: #374151;
+    font-weight: 500;
+    min-width: 160px;
+}
+
+/* ---- Column: Terakhir Aktif ---- */
+.pg-td-aktif {
+    color: #6b7280;
+    font-size: 0.82rem;
+    min-width: 130px;
+    white-space: nowrap;
+}
+
+/* ---- Column: Aksi ---- */
+.pg-td-aksi {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.pg-btn-edit {
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #374151;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 6px;
+    opacity: 0;
+    transition: opacity 0.16s, background 0.16s, color 0.16s;
+}
+
+.pg-row:hover .pg-btn-edit { opacity: 1; }
+.pg-btn-edit:hover { background: #f3f4f6; color: #111827; }
+
+/* =============================================================
+   MODAL
+   ============================================================= */
+.pg-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.pg-modal-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.pg-modal {
+    background: #fff;
+    border-radius: 14px;
+    width: 520px;
+    max-width: 96vw;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(0.95);
+    transition: transform 0.2s;
+}
+
+.pg-modal-overlay.active .pg-modal { transform: scale(1); }
+
+.pg-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    border-bottom: 1px solid #f3f4f6;
+    flex-shrink: 0;
+}
+
+.pg-modal-title {
+    font-size: 0.96rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.pg-modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9ca3af;
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    transition: color 0.16s, background 0.16s;
+}
+
+.pg-modal-close:hover { color: #111827; background: #f3f4f6; }
+
+.pg-modal-body {
+    padding: 22px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.pg-modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.pg-modal-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.pg-modal-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #6b7280;
+}
+
+.pg-req { color: #ef4444; }
+
+.pg-modal-input {
+    padding: 9px 12px;
+    font-size: 0.86rem;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #111827;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    outline: none;
+    background: #fff;
+    transition: border-color 0.18s;
+}
+
+.pg-modal-input:focus { border-color: #1a4731; }
+.pg-modal-input::placeholder { color: #9ca3af; }
+
+.pg-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.pg-btn-cancel {
+    padding: 9px 20px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #374151;
+    background: #fff;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.16s;
+}
+
+.pg-btn-cancel:hover { background: #f9fafb; }
+
+.pg-btn-simpan {
+    padding: 9px 22px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #fff;
+    background: #1a4731;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.18s;
+}
+
+.pg-btn-simpan:hover { background: #0e3320; }
+
+/* =============================================================
+   RESPONSIVE
+   ============================================================= */
+@media (max-width: 768px) {
+    .pg-td-masjid { display: none; }
+    .pg-modal-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+    .pg-td-aktif { display: none; }
+    .pg-subheader { flex-direction: column; align-items: flex-start; }
+}

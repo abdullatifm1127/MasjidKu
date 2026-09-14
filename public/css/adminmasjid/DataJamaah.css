@@ -145,9 +145,8 @@
 .dj-required { color: #ef4444; }
 
 .dj-input {
-    width: 85%;
-    padding: 7px 10px;
-
+    width: 100%;
+    padding: 7px 0.5px;
     font-size: 0.83rem;
     font-family: 'Poppins', sans-serif;
     color: var(--text);
@@ -300,8 +299,8 @@ select.dj-input {
 }
 
 .dj-search-input {
-    width: 85%;
-    padding: 6px 10px 6px 30px;
+    width: 100%;
+    padding: 6px 10px 6px 25px;
     font-size: 0.81rem;
     font-family: 'Poppins', sans-serif;
     color: var(--text);

@@ -1,0 +1,61 @@
+/* public/css/waiting.css */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+}
+body {
+    background-color: #f4f6f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #333;
+}
+.card {
+    background: #ffffff;
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    max-width: 480px;
+    width: 100%;
+    border-top: 5px solid #15803d;
+}
+.icon-container {
+    font-size: 50px;
+    margin-bottom: 20px;
+}
+h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 12px;
+}
+p {
+    font-size: 15px;
+    color: #4b5563;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+.btn-home {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: #15803d;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    box-shadow: 0 4px 6px rgba(21, 128, 61, 0.2);
+    border: none;
+    cursor: pointer;
+}
+.btn-home:hover {
+    background-color: #166534;
+}
+.btn-home:active {
+    transform: scale(0.98);
+}

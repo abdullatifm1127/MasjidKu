@@ -1,0 +1,331 @@
+.st-content {
+    gap: 0;
+}
+
+/* ---- Alert ---- */
+.st-alert {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 16px;
+    border-radius: 10px;
+    font-size: 0.84rem;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+.st-alert-success {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.st-layout {
+    display: grid;
+    grid-template-columns: 480px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.st-section {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px 26px;
+    margin-bottom: 18px;
+}
+
+.st-section:last-of-type {
+    margin-bottom: 0;
+}
+
+.st-section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 20px;
+}
+.st-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.st-field:last-child { margin-bottom: 0; }
+
+.st-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6b7280;
+}
+
+.st-input {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #111827;
+    background: #fff;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.st-input:focus {
+    border-color: #1a4731;
+    box-shadow: 0 0 0 3px rgba(26,71,49,0.08);
+}
+
+.st-input::placeholder { color: #9ca3af; }
+
+.st-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.st-hint {
+    font-size: 0.76rem;
+    color: #9ca3af;
+    margin-top: 4px;
+}
+
+/* =============================================================
+   TOGGLE SWITCHES
+   ============================================================= */
+.st-toggle-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.st-toggle-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.st-toggle-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.st-toggle-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 3px;
+}
+
+.st-toggle-desc {
+    font-size: 0.76rem;
+    color: #9ca3af;
+    line-height: 1.4;
+}
+
+/* Switch */
+.st-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.st-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.st-switch-track {
+    position: absolute;
+    inset: 0;
+    background: #d1d5db;
+    border-radius: 100px;
+    transition: background 0.2s;
+}
+
+.st-switch-track::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+}
+
+.st-switch input:checked + .st-switch-track {
+    background: #1a4731;
+}
+
+.st-switch input:checked + .st-switch-track::after {
+    transform: translateX(20px);
+}
+
+/* =============================================================
+   SAVE FOOTER
+   ============================================================= */
+.st-footer {
+    display: flex;
+    justify-content: center;
+    padding-top: 4px;
+}
+
+.st-btn-simpan {
+    padding: 11px 36px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #fff;
+    background: #1a4731;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.18s;
+}
+
+.st-btn-simpan:hover { background: #0e3320; }
+
+/* =============================================================
+   RIGHT COLUMN — INFO CARDS
+   ============================================================= */
+.st-col-info {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.st-info-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 18px 20px;
+}
+
+.st-info-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+    margin-bottom: 10px;
+}
+
+.st-info-title.red { color: #b91c1c; }
+
+.st-info-val {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 4px;
+}
+
+.st-info-sub {
+    font-size: 0.76rem;
+    color: #9ca3af;
+}
+
+.st-info-status-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.st-status-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.st-status-dot.green { background: #22c55e; }
+.st-status-dot.amber { background: #f59e0b; }
+.st-status-dot.red   { background: #ef4444; }
+
+.st-info-stat-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #f9fafb;
+    font-size: 0.83rem;
+}
+
+.st-info-stat-row:last-child { border-bottom: none; }
+
+.st-info-stat-label { color: #6b7280; }
+
+.st-info-stat-val {
+    font-weight: 700;
+    color: #111827;
+}
+
+.st-info-stat-val.green { color: #16a34a; }
+.st-info-stat-val.amber { color: #d97706; }
+
+/* Danger card */
+.st-danger-card {
+    border-color: #fecaca;
+    background: #fff1f2;
+}
+
+.st-danger-desc {
+    font-size: 0.78rem;
+    color: #6b7280;
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+
+.st-btn-danger {
+    width: 100%;
+    padding: 9px 16px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #b91c1c;
+    background: #fff;
+    border: 1.5px solid #fca5a5;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.18s, border-color 0.18s;
+}
+
+.st-btn-danger:hover {
+    background: #fee2e2;
+    border-color: #ef4444;
+}
+
+/* =============================================================
+   RESPONSIVE
+   ============================================================= */
+@media (max-width: 1100px) {
+    .st-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .st-grid-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .st-section {
+        padding: 18px 16px;
+    }
+}
