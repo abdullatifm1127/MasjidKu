@@ -271,7 +271,7 @@ body.lp-sidebar-collapsed .lp-main {
 
 .lp-input,
 .lp-textarea {
-    width: 100%; padding: 9px 13px;
+    width: 90%; padding: 9px 13px;
     font-size: 0.88rem; font-family: 'Poppins', sans-serif;
     color: var(--text); background: var(--white);
     border: 1px solid #d1d5db; border-radius: 8px;
