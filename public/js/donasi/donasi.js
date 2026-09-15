@@ -5,13 +5,14 @@
     const submitUrl = app ? app.dataset.submitUrl : null;
     const nisab = app ? parseInt(app.dataset.nisab, 10) || 85000000 : 85000000;
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-    const MIN_AMOUNT = 5000;
+    const MIN_AMOUNT = 5000; // catatan: server (DonasiController) hanya mewajibkan minimal 1.000
+    const MAX_AMOUNT = 500000000; // batas wajar sisi klien saja, server tidak membatasi ini
 
     let state = {
-        categoryKey: null,
+        categoryKey: null,   // dikirim sebagai field "jenis" -> harus persis salah satu key kategori aktif
         categoryTitle: '',
-        calcType: 'nominal',
-        zakatSub: 'fitrah',
+        calcType: 'nominal', // 'nominal' | 'zakat'
+        zakatSub: 'fitrah',  // 'fitrah' | 'mal' -> dikirim sebagai "zakat_subtype" hanya jika calcType === 'zakat'
         amount: 0,
     };
 
@@ -53,6 +54,9 @@
     }
 
     // ---------- step navigation ----------
+    // Catatan: hanya ada 4 panel (panel-1..panel-4). Tidak ada lagi layar "menunggu
+    // pembayaran" dengan polling status, karena backend saat ini (DonasiController@store)
+    // tidak terhubung ke payment gateway apa pun -- lihat komentar di donasi.blade.php.
 
     function changeStep(stepNum) {
         for (let i = 1; i <= 4; i++) {
@@ -66,7 +70,7 @@
         }
 
         document.getElementById(`panel-${stepNum}`)?.classList.remove('hidden');
-        const activeSt = document.getElementById(`st-${stepNum}`);
+        const activeSt = document.getElementById(`st-${Math.min(stepNum, 3)}`);
         if (activeSt) {
             activeSt.classList.add('active');
             activeSt.setAttribute('aria-current', 'step');
@@ -74,7 +78,7 @@
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        const titles = { 1: 'Pilih kategori', 2: 'Masukkan nominal', 3: 'Pilih pembayaran', 4: 'Donasi selesai' };
+        const titles = { 1: 'Pilih kategori', 2: 'Masukkan nominal', 3: 'Pilih pembayaran', 4: 'Donasi tercatat' };
         announce(`Langkah ${stepNum}: ${titles[stepNum] || ''}`);
 
         const firstFocusable = document.getElementById(`panel-${stepNum}`)?.querySelector('button, input, a');
@@ -179,9 +183,16 @@
     function updateAmountUI() {
         document.getElementById('final-amount-text').textContent = formatRp(state.amount);
         const toPayBtn = document.getElementById('to-pay-btn');
-        const valid = state.amount >= MIN_AMOUNT;
+        const valid = state.amount >= MIN_AMOUNT && state.amount <= MAX_AMOUNT;
         if (toPayBtn) toPayBtn.disabled = !valid;
-        setError(document.getElementById('amount-error'), state.amount > 0 && !valid ? `Nominal donasi minimal ${formatRp(MIN_AMOUNT)}.` : '');
+
+        let msg = '';
+        if (state.amount > 0 && state.amount < MIN_AMOUNT) {
+            msg = `Nominal donasi minimal ${formatRp(MIN_AMOUNT)}.`;
+        } else if (state.amount > MAX_AMOUNT) {
+            msg = 'Nominal donasi terlalu besar untuk dicatat online. Silakan hubungi pengurus masjid langsung.';
+        }
+        setError(document.getElementById('amount-error'), msg);
     }
 
     // ---------- copy to clipboard ----------
@@ -211,6 +222,17 @@
     }
 
     // ---------- submit donation ----------
+    //
+    // Payload HARUS memakai nama field yang divalidasi DonasiController@store:
+    //   jenis (key kategori), zakat_subtype (fitrah|mal, hanya jika calc_type zakat),
+    //   nominal, nama_donatur, metode_pembayaran (QRIS|Transfer Bank|Dompet Digital).
+    //
+    // Server saat ini TIDAK terhubung ke payment gateway apa pun -- ia hanya membuat
+    // baris donasi berstatus "pending" dan mengembalikan { success, no_referensi }.
+    // Karena itu JS tidak berpura-pura ada konfirmasi pembayaran otomatis: begitu server
+    // merespons sukses, kita tampilkan nomor referensi + status "menunggu verifikasi admin".
+    // Kalau request ke server gagal (jaringan/validasi), tampilkan error apa adanya —
+    // TIDAK ADA fallback yang memalsukan donasi "berhasil".
 
     async function processDonation() {
         const confirmBtn = document.getElementById('confirm-btn');
@@ -221,21 +243,35 @@
         const donorName = document.getElementById('donor-name')?.value.trim() || '';
 
         setError(errorEl, '');
+
+        if (!submitUrl) {
+            setError(errorEl, 'Sistem donasi belum dikonfigurasi oleh pengurus masjid. Silakan hubungi admin.');
+            return;
+        }
+        if (!state.categoryKey) {
+            setError(errorEl, 'Kategori donasi belum dipilih. Silakan ulangi dari awal.');
+            return;
+        }
+        if (state.amount < MIN_AMOUNT) {
+            setError(errorEl, `Nominal donasi minimal ${formatRp(MIN_AMOUNT)}.`);
+            return;
+        }
+
         if (confirmBtn) confirmBtn.disabled = true;
         btnLabel && (btnLabel.textContent = 'Memproses...');
         btnSpinner?.classList.remove('hidden');
 
         const payload = {
-            category_key: state.categoryKey,
-            category_title: state.categoryTitle,
-            amount: state.amount,
-            donor_name: donorName,
-            payment_method: payment,
+            jenis: state.categoryKey,
+            nominal: state.amount,
+            nama_donatur: donorName, // dikosongkan -> server otomatis isi "Hamba Allah"
+            metode_pembayaran: payment,
         };
+        if (state.calcType === 'zakat') {
+            payload.zakat_subtype = state.zakatSub;
+        }
 
-        let result;
         try {
-            if (!submitUrl) throw new Error('no-endpoint');
             const res = await fetch(submitUrl, {
                 method: 'POST',
                 headers: {
@@ -245,46 +281,40 @@
                 },
                 body: JSON.stringify(payload),
             });
-            if (!res.ok) throw new Error(`http-${res.status}`);
-            result = await res.json();
-            if (!result || result.success === false) {
-                throw new Error(result?.message || 'submit-failed');
+
+            const result = await res.json().catch(() => null);
+
+            if (!res.ok || !result || result.success === false) {
+                const message = result?.message
+                    || firstValidationError(result)
+                    || `Gagal mencatat donasi (kode ${res.status}). Silakan coba lagi.`;
+                throw new Error(message);
             }
+
+            showReceipt(result);
         } catch (err) {
-            // Backend not reachable/configured yet: fall back to a local preview receipt
-            // so the flow stays testable. Remove this fallback once `data-submit-url`
-            // points at a real endpoint in production.
-            console.warn('Donasi: falling back to local preview transaction —', err.message);
-            result = {
-                success: true,
-                trx_code: 'TRX-' + Math.floor(100000 + Math.random() * 900000),
-                qris_image_url: payment === 'QRIS' ? null : null,
-            };
+            setError(errorEl, err.message || 'Terjadi kesalahan jaringan. Silakan coba lagi.');
+        } finally {
+            if (confirmBtn) confirmBtn.disabled = false;
+            btnLabel && (btnLabel.textContent = 'Catat Donasi Saya');
+            btnSpinner?.classList.add('hidden');
         }
-
-        if (confirmBtn) confirmBtn.disabled = false;
-        btnLabel && (btnLabel.textContent = 'Konfirmasi & selesaikan');
-        btnSpinner?.classList.add('hidden');
-
-        showReceipt(result, payload);
     }
 
-    function showReceipt(result, payload) {
-        document.getElementById('res-code').textContent = result.trx_code;
+    /** Laravel mengembalikan { message, errors: { field: [msg,...] } } saat validasi gagal (422). */
+    function firstValidationError(result) {
+        if (!result || !result.errors) return null;
+        const firstKey = Object.keys(result.errors)[0];
+        return firstKey ? result.errors[firstKey][0] : null;
+    }
+
+    function showReceipt(result) {
+        document.getElementById('res-code').textContent = result.no_referensi || '-';
         document.getElementById('res-cat').textContent = state.categoryTitle;
         document.getElementById('res-total').textContent = formatRp(state.amount);
 
-        const qrisBlock = document.getElementById('qris-block');
-        const qrisImage = document.getElementById('qris-image');
-        if (result.qris_image_url && qrisImage) {
-            qrisImage.src = result.qris_image_url;
-            qrisBlock?.classList.remove('hidden');
-        } else {
-            qrisBlock?.classList.add('hidden');
-        }
-
         const waText = encodeURIComponent(
-            `Alhamdulillah, saya baru saja berdonasi ${formatRp(state.amount)} untuk "${state.categoryTitle}" di Masjid. No. Transaksi: ${result.trx_code}.`
+            `Alhamdulillah, saya baru saja berdonasi ${formatRp(state.amount)} untuk "${state.categoryTitle}" di Masjid. No. Referensi: ${result.no_referensi}.`
         );
         const shareLink = document.getElementById('share-wa');
         if (shareLink) shareLink.href = `https://wa.me/?text=${waText}`;
@@ -303,6 +333,7 @@
         if (customNominal) { customNominal.value = ''; customNominal.dataset.raw = '0'; }
         if (harta) { harta.value = ''; harta.dataset.raw = '0'; }
         document.getElementById('nisab-note')?.setAttribute('hidden', '');
+        setError(document.getElementById('submit-error'), '');
 
         changeStep(1);
     }

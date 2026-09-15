@@ -367,225 +367,230 @@
     </div>
 
     <script>
-        // ---- Sidebar toggle ----
-        document.getElementById('saSidebarToggle').addEventListener('click', () => {
+    // ---- 1. AMANKAN SIDEBAR TOGGLE (Cek dulu apakah elemennya ada) ----
+    const sidebarToggle = document.getElementById('saSidebarToggle');
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', () => {
             document.getElementById('saSidebar').classList.toggle('collapsed');
             document.getElementById('saMain').classList.toggle('expanded');
         });
+    }
 
-        // ---- Filter tabs ----
-        const tabs  = document.querySelectorAll('.vf-filter-tab');
-        const cards = document.querySelectorAll('.vf-card');
+    // ---- 2. DEKLARASIKAN VARIABEL DATA DI PALING ATAS (Agar aman dari Temporal Dead Zone) ----
+    const detailData = @json($pendaftaran);
 
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                filterCards(tab.dataset.filter, document.getElementById('vfSearch').value);
-            });
+    // ---- Filter tabs ----
+    const tabs  = document.querySelectorAll('.vf-filter-tab');
+    const cards = document.querySelectorAll('.vf-card');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            filterCards(tab.dataset.filter, document.getElementById('vfSearch').value);
         });
+    });
 
-        // ---- Search ----
-        document.getElementById('vfSearch').addEventListener('input', function () {
+    // ---- Search ----
+    const searchInput = document.getElementById('vfSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
             const activeFilter = document.querySelector('.vf-filter-tab.active').dataset.filter;
             filterCards(activeFilter, this.value.trim().toLowerCase());
         });
+    }
 
-        function filterCards(filter, search) {
-            let visible = 0;
-            cards.forEach(card => {
-                const matchFilter = filter === 'semua' || card.dataset.status === filter;
-                const matchSearch = !search || card.dataset.search.includes(search);
-                const show = matchFilter && matchSearch;
-                card.style.display = show ? 'block' : 'none';
-                if (show) visible++;
+    function filterCards(filter, search) {
+        let visible = 0;
+        cards.forEach(card => {
+            const matchFilter = filter === 'semua' || card.dataset.status === filter;
+            const matchSearch = !search || card.dataset.search.includes(search);
+            const show = matchFilter && matchSearch;
+            card.style.display = show ? 'block' : 'none';
+            if (show) visible++;
+        });
+        const emptyEl = document.getElementById('vfEmpty');
+        if (emptyEl) emptyEl.style.display = visible === 0 ? 'flex' : 'none';
+    }
+
+    // ---- Detail modal using safe JSON conversion ----
+    function vfOpenDetail(id) {
+        const d = detailData.find(x => x.id === id);
+        if (!d) return;
+
+        document.getElementById('vfModalTitle').textContent = 'Detail — ' + (d.mosque_name || '');
+
+        const statusMap = { pending: '⏳ Menunggu', approved: '✓ Disetujui', rejected: '✕ Ditolak', disetujui: '✓ Disetujui', ditolak: '✕ Ditolak' };
+
+        const pStatus = (d.payment_status || d.status_pembayaran || '').toLowerCase();
+        const pPackageType = (d.package_type || '').toLowerCase();
+        const isFree = pPackageType === 'free';
+
+        let paymentBadgeText = '<span style="color: #dc2626; font-weight: 600;">Belum Bayar</span>';
+
+        if (isFree) {
+            paymentBadgeText = '<span style="color: #0284c7; font-weight: 600; background: #e0f2fe; padding: 2px 6px; border-radius: 4px;">Paket Free / Gratis</span>';
+        } else if (pStatus === 'approved' || pStatus === 'paid' || pStatus === 'lunas' || pStatus === 'disetujui') {
+            paymentBadgeText = '<span style="color: #059669; font-weight: 600; background: #d1fae5; padding: 2px 6px; border-radius: 4px;">Lunas / Disetujui</span>';
+        } else if (pStatus === 'pending' || d.payment_proof) {
+            paymentBadgeText = '<span style="color: #d97706; font-weight: 600; background: #fef3c7; padding: 2px 6px; border-radius: 4px;">Sudah Transfer (Menunggu Verifikasi)</span>';
+        } else if (pStatus === 'rejected' || pStatus === 'ditolak') {
+            paymentBadgeText = '<span style="color: #dc2626; font-weight: 600; background: #fee2e2; padding: 2px 6px; border-radius: 4px;">Ditolak</span>';
+        }
+
+        let paymentProofSection = '<div style="color: #9ca3af; font-style: italic; font-size: 0.9rem;">Belum mengunggah bukti pembayaran.</div>';
+        if (d.payment_proof) {
+            paymentProofSection = `
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <a href="/storage/${d.payment_proof}" target="_blank" style="color: #0284c7; font-weight: 600; text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-external-link-alt"></i> Buka Gambar Ukuran Penuh
+                    </a>
+                    <img src="/storage/${d.payment_proof}" alt="Bukti Transfer" style="max-width: 100%; max-height: 220px; border-radius: 8px; border: 1px solid #cbd5e1; object-fit: contain; background: #f8fafc; padding: 4px;">
+                </div>
+            `;
+        }
+
+        let historyListHTML = '<div style="color: #64748b; font-size: 0.85rem; font-style: italic;">Belum ada riwayat transaksi lain untuk masjid ini.</div>';
+
+        if (d.subscriptions && d.subscriptions.length > 0) {
+            historyListHTML = `
+                <div style="max-height: 160px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
+                    <table style="width: 100%; font-size: 0.82rem; border-collapse: collapse; text-align: left;">
+                        <thead style="background: #f1f5f9; color: #334155; position: sticky; top: 0;">
+                            <tr>
+                                <th style="padding: 6px 8px;">Tanggal</th>
+                                <th style="padding: 6px 8px;">Nominal</th>
+                                <th style="padding: 6px 8px;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            d.subscriptions.forEach(sub => {
+                const subDate = new Date(sub.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+                const formattedAmount = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(sub.amount || 0);
+
+                let badgeSubColor = 'color: #d97706;';
+                if (sub.status === 'paid' || sub.status === 'approved' || sub.status === 'disetujui') {
+                    badgeSubColor = 'color: #059669; font-weight: 600;';
+                } else if (sub.status === 'rejected' || sub.status === 'ditolak') {
+                    badgeSubColor = 'color: #dc2626; font-weight: 600;';
+                }
+
+                const safeProof = sub.payment_proof ? sub.payment_proof : '';
+                const safeSubJson = JSON.stringify({id: d.id, date: subDate, amount: formattedAmount, status: sub.status, proof: safeProof}).replace(/"/g, '&quot;');
+
+                historyListHTML += `
+                    <tr style="border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.2s;"
+                        onmouseover="this.style.background='#f8fafc'"
+                        onmouseout="this.style.background='transparent'"
+                        onclick="showSubDetailObj(${safeSubJson})">
+                        <td style="padding: 6px 8px;">${subDate}</td>
+                        <td style="padding: 6px 8px; font-weight: 600; color: #334155;">${formattedAmount}</td>
+                        <td style="padding: 6px 8px;"><span style="text-transform: capitalize; ${badgeSubColor}">${sub.status}</span> <i class="fa-solid fa-chevron-right" style="float: right; font-size: 0.75rem; color: #94a3b8; margin-top: 3px;"></i></td>
+                    </tr>
+                `;
             });
-            document.getElementById('vfEmpty').style.display = visible === 0 ? 'flex' : 'none';
+            historyListHTML += `</tbody></table></div>`;
         }
 
-        // ---- Detail modal using safe JSON conversion ----
-        const detailData = @json($pendaftaran);
-
-        function vfOpenDetail(id) {
-            const d = detailData.find(x => x.id === id);
-            if (!d) return;
-
-            document.getElementById('vfModalTitle').textContent = 'Detail — ' + (d.mosque_name || '');
-
-            const statusMap = { pending: '⏳ Menunggu', approved: '✓ Disetujui', rejected: '✕ Ditolak', disetujui: '✓ Disetujui', ditolak: '✕ Ditolak' };
-
-            const pStatus = (d.payment_status || d.status_pembayaran || '').toLowerCase();
-            const pPackageType = (d.package_type || '').toLowerCase();
-            const isFree = pPackageType === 'free';
-
-            let paymentBadgeText = '<span style="color: #dc2626; font-weight: 600;">Belum Bayar</span>';
-
-            // PRIORITAS 1: Free/Gratis — dicek dari package_type, bukan payment_status
-            if (isFree) {
-                paymentBadgeText = '<span style="color: #0284c7; font-weight: 600; background: #e0f2fe; padding: 2px 6px; border-radius: 4px;">Paket Free / Gratis</span>';
-            }
-            // PRIORITAS 2: Sudah lunas/disetujui
-            else if (pStatus === 'approved' || pStatus === 'paid' || pStatus === 'lunas' || pStatus === 'disetujui') {
-                paymentBadgeText = '<span style="color: #059669; font-weight: 600; background: #d1fae5; padding: 2px 6px; border-radius: 4px;">Lunas / Disetujui</span>';
-            }
-            // PRIORITAS 3: Masih pending / ada bukti tapi belum diverifikasi
-            else if (pStatus === 'pending' || d.payment_proof) {
-                paymentBadgeText = '<span style="color: #d97706; font-weight: 600; background: #fef3c7; padding: 2px 6px; border-radius: 4px;">Sudah Transfer (Menunggu Verifikasi)</span>';
-            }
-            // PRIORITAS 4: Ditolak
-            else if (pStatus === 'rejected' || pStatus === 'ditolak') {
-                paymentBadgeText = '<span style="color: #dc2626; font-weight: 600; background: #fee2e2; padding: 2px 6px; border-radius: 4px;">Ditolak</span>';
-            }
-
-            let paymentProofSection = '<div style="color: #9ca3af; font-style: italic; font-size: 0.9rem;">Belum mengunggah bukti pembayaran.</div>';
-            if (d.payment_proof) {
-                paymentProofSection = `
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <a href="/storage/${d.payment_proof}" target="_blank" style="color: #0284c7; font-weight: 600; text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px;">
-                            <i class="fa-solid fa-external-link-alt"></i> Buka Gambar Ukuran Penuh
-                        </a>
-                        <img src="/storage/${d.payment_proof}" alt="Bukti Transfer" style="max-width: 100%; max-height: 220px; border-radius: 8px; border: 1px solid #cbd5e1; object-fit: contain; background: #f8fafc; padding: 4px;">
-                    </div>
-                `;
-            }
-
-            let historyListHTML = '<div style="color: #64748b; font-size: 0.85rem; font-style: italic;">Belum ada riwayat transaksi lain untuk masjid ini.</div>';
-
-            if (d.subscriptions && d.subscriptions.length > 0) {
-                historyListHTML = `
-                    <div style="max-height: 160px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
-                        <table style="width: 100%; font-size: 0.82rem; border-collapse: collapse; text-align: left;">
-                            <thead style="background: #f1f5f9; color: #334155; position: sticky; top: 0;">
-                                <tr>
-                                    <th style="padding: 6px 8px;">Tanggal</th>
-                                    <th style="padding: 6px 8px;">Nominal</th>
-                                    <th style="padding: 6px 8px;">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                `;
-                d.subscriptions.forEach(sub => {
-                    const subDate = new Date(sub.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-                    const formattedAmount = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(sub.amount || 0);
-
-                    let badgeSubColor = 'color: #d97706;';
-                    if (sub.status === 'paid' || sub.status === 'approved' || sub.status === 'disetujui') {
-                        badgeSubColor = 'color: #059669; font-weight: 600;';
-                    } else if (sub.status === 'rejected' || sub.status === 'ditolak') {
-                        badgeSubColor = 'color: #dc2626; font-weight: 600;';
-                    }
-
-                    const safeProof = sub.payment_proof ? sub.payment_proof : '';
-                    const safeSubJson = JSON.stringify({id: d.id, date: subDate, amount: formattedAmount, status: sub.status, proof: safeProof}).replace(/"/g, '&quot;');
-
-                    historyListHTML += `
-                        <tr style="border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.2s;"
-                            onmouseover="this.style.background='#f8fafc'"
-                            onmouseout="this.style.background='transparent'"
-                            onclick="showSubDetailObj(${safeSubJson})">
-                            <td style="padding: 6px 8px;">${subDate}</td>
-                            <td style="padding: 6px 8px; font-weight: 600; color: #334155;">${formattedAmount}</td>
-                            <td style="padding: 6px 8px;"><span style="text-transform: capitalize; ${badgeSubColor}">${sub.status}</span> <i class="fa-solid fa-chevron-right" style="float: right; font-size: 0.75rem; color: #94a3b8; margin-top: 3px;"></i></td>
-                        </tr>
-                    `;
-                });
-                historyListHTML += `</tbody></table></div>`;
-            }
-
-            let programsArray = [];
-            try {
-                programsArray = typeof d.programs === 'string' ? JSON.parse(d.programs) : (d.programs || []);
-            } catch (e) {
-                programsArray = [];
-            }
-
-            const programTags = programsArray.length > 0
-                ? programsArray.map(prog => `<span class="vf-tag" style="display:inline-block; margin-right:4px; margin-bottom:4px;">${prog}</span>`).join('')
-                : '<span style="color: #9ca3af; font-style: italic; font-size: 0.9rem;">Tidak ada program yang dipilih.</span>';
-
-            const formattedDate = d.created_at ? new Date(d.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
-            const mosqueInitials = (d.mosque_name || 'MS').substring(0, 2).toUpperCase();
-
-            document.getElementById('vfModalBody').innerHTML = `
-                <div class="vf-modal-row" style="display: flex; gap: 12px; align-items: center; margin-bottom: 16px;">
-                    <div class="vf-modal-avatar" style="background:#4f46e5; color:white; width:45px; height:45px; display:flex; align-items:center; justify-content:center; border-radius:8px; font-weight:bold;">${mosqueInitials}</div>
-                    <div>
-                        <div class="vf-modal-mosque-name" style="font-weight: 700; font-size: 1.1rem;">${d.mosque_name ?? '-'}</div>
-                        <div class="vf-modal-mosque-sub" style="color: #64748b; font-size: 0.85rem;">${d.city ?? '-'} · ${d.founded ?? '-'} · ${d.capacity ?? '-'} jamaah</div>
-                        <span class="vf-status-badge ${d.status} vf-modal-status" style="margin-top: 4px; display: inline-block;">${statusMap[d.status] || d.status}</span>
-                    </div>
-                </div>
-                <div class="vf-modal-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-                    <div class="vf-modal-field"><div class="vf-info-label" style="font-size:0.75rem; color:#64748b;">Imam</div><div class="vf-info-val" style="font-weight:600;">${d.imam_name ?? '-'}</div></div>
-                    <div class="vf-modal-field"><div class="vf-info-label" style="font-size:0.75rem; color:#64748b;">Ketua</div><div class="vf-info-val" style="font-weight:600;">${d.chairman_name ?? '-'}</div></div>
-                    <div class="vf-modal-field"><div class="vf-info-label" style="font-size:0.75rem; color:#64748b;">Email</div><div class="vf-info-val" style="font-weight:600;">${d.email ?? '-'}</div></div>
-                    <div class="vf-modal-field"><div class="vf-info-label" style="font-size:0.75rem; color:#64748b;">Telepon</div><div class="vf-info-val" style="font-weight:600;">${d.phone ?? '-'}</div></div>
-                    <div class="vf-modal-field"><div class="vf-info-label" style="font-size:0.75rem; color:#64748b;">Tanggal Daftar</div><div class="vf-info-val" style="font-weight:600;">${formattedDate}</div></div>
-                    <div class="vf-modal-field"><div class="vf-info-label" style="font-size:0.75rem; color:#64748b;">Status Pembayaran</div><div class="vf-info-val" style="font-weight:600;">${paymentBadgeText}</div></div>
-                </div>
-
-                <div class="vf-info-label" style="margin:16px 0 8px; font-weight:600;">Program Kegiatan</div>
-                <div class="vf-tags" style="margin-bottom: 16px;">${programTags}</div>
-
-                <div class="vf-info-label" style="margin:16px 0 8px; font-weight:600;">Bukti Transfer Pembayaran</div>
-                <div style="margin-bottom: 16px;">${paymentProofSection}</div>
-
-                <div class="vf-info-label" style="margin:16px 0 8px; font-weight:600;">Riwayat Transaksi Akun Ini</div>
-                <div>${historyListHTML}</div>
-            `;
-
-            document.getElementById('vfModalOverlay').classList.add('active');
+        let programsArray = [];
+        try {
+            programsArray = typeof d.programs === 'string' ? JSON.parse(d.programs) : (d.programs || []);
+        } catch (e) {
+            programsArray = [];
         }
 
-        function showSubDetailObj(sub) {
-            let proofHtml = '<div style="color: #9ca3af; font-style: italic; font-size: 0.9rem;">Tidak ada bukti pembayaran untuk transaksi ini.</div>';
-            if (sub.proof && sub.proof !== '') {
-                proofHtml = `
-                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
-                        <a href="/storage/${sub.proof}" target="_blank" style="color: #0284c7; font-weight: 600; text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px;">
-                            <i class="fa-solid fa-external-link-alt"></i> Buka Gambar Ukuran Penuh
-                        </a>
-                        <img src="/storage/${sub.proof}" alt="Bukti Transaksi" style="max-width: 100%; max-height: 220px; border-radius: 8px; border: 1px solid #cbd5e1; object-fit: contain; background: #f8fafc; padding: 4px;">
-                    </div>
-                `;
-            }
+        const programTags = programsArray.length > 0
+            ? programsArray.map(prog => `<span class="vf-tag" style="display:inline-block; margin-right:4px; margin-bottom:4px;">${prog}</span>`).join('')
+            : '<span style="color: #9ca3af; font-style: italic; font-size: 0.9rem;">Tidak ada program yang dipilih.</span>';
 
-            document.getElementById('vfModalBody').innerHTML = `
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-                    <h3 style="font-size: 1.05rem; font-weight: 700; color: #1e293b; margin: 0;">Rincian Detail Transaksi</h3>
-                    <button onclick="vfOpenDetail(${sub.id})" style="background: #e2e8f0; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; color: #334155;">← Kembali ke Profil</button>
+        const formattedDate = d.created_at ? new Date(d.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+        const mosqueInitials = (d.mosque_name || 'MS').substring(0, 2).toUpperCase();
+
+        document.getElementById('vfModalBody').innerHTML = `
+            <div class="vf-modal-row" style="display: flex; gap: 12px; align-items: center; margin-bottom: 16px;">
+                <div class="vf-modal-avatar" style="background:#4f46e5; color:white; width:45px; height:45px; display:flex; align-items:center; justify-content:center; border-radius:8px; font-weight:bold;">${mosqueInitials}</div>
+                <div>
+                    <div class="vf-modal-mosque-name" style="font-weight: 700; font-size: 1.1rem;">${d.mosque_name ?? '-'}</div>
+                    <div class="vf-modal-mosque-sub" style="color: #64748b; font-size: 0.85rem;">${d.city ?? '-'} · ${d.founded ?? '-'} · ${d.capacity ?? '-'} jamaah</div>
+                    <span class="vf-status-badge ${d.status} vf-modal-status" style="margin-top: 4px; display: inline-block;">${statusMap[d.status] || d.status}</span>
                 </div>
+            </div>
+            <div class="vf-modal-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                <div class="vf-modal-field"><div class="vf-info-label" style="font-size:0.75rem; color:#64748b;">Imam</div><div class="vf-info-val" style="font-weight:600;">${d.imam_name ?? '-'}</div></div>
+                <div class="vf-modal-field"><div class="vf-info-label" style="font-size:0.75rem; color:#64748b;">Ketua</div><div class="vf-info-val" style="font-weight:600;">${d.chairman_name ?? '-'}</div></div>
+                <div class="vf-modal-field"><div class="vf-info-label" style="font-size:0.75rem; color:#64748b;">Email</div><div class="vf-info-val" style="font-weight:600;">${d.email ?? '-'}</div></div>
+                <div class="vf-modal-field"><div class="vf-info-label" style="font-size:0.75rem; color:#64748b;">Telepon</div><div class="vf-info-val" style="font-weight:600;">${d.phone ?? '-'}</div></div>
+                <div class="vf-modal-field"><div class="vf-info-label" style="font-size:0.75rem; color:#64748b;">Tanggal Daftar</div><div class="vf-info-val" style="font-weight:600;">${formattedDate}</div></div>
+                <div class="vf-modal-field"><div class="vf-info-label" style="font-size:0.75rem; color:#64748b;">Status Pembayaran</div><div class="vf-info-val" style="font-weight:600;">${paymentBadgeText}</div></div>
+            </div>
 
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
-                    <div>
-                        <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 600;">Tanggal Transaksi</div>
-                        <div style="font-size: 0.95rem; font-weight: 600; color: #334155;">${sub.date}</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 600;">Nominal</div>
-                        <div style="font-size: 1.1rem; font-weight: 700; color: #059669;">${sub.amount}</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 600;">Status Transaksi</div>
-                        <div style="font-size: 0.95rem; font-weight: 600; text-transform: capitalize; color: #334155;">${sub.status}</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Bukti Pembayaran</div>
-                        ${proofHtml}
-                    </div>
+            <div class="vf-info-label" style="margin:16px 0 8px; font-weight:600;">Program Kegiatan</div>
+            <div class="vf-tags" style="margin-bottom: 16px;">${programTags}</div>
+
+            <div class="vf-info-label" style="margin:16px 0 8px; font-weight:600;">Bukti Transfer Pembayaran</div>
+            <div style="margin-bottom: 16px;">${paymentProofSection}</div>
+
+            <div class="vf-info-label" style="margin:16px 0 8px; font-weight:600;">Riwayat Transaksi Akun Ini</div>
+            <div>${historyListHTML}</div>
+        `;
+
+        document.getElementById('vfModalOverlay').classList.add('active');
+    }
+
+    function showSubDetailObj(sub) {
+        let proofHtml = '<div style="color: #9ca3af; font-style: italic; font-size: 0.9rem;">Tidak ada bukti pembayaran untuk transaksi ini.</div>';
+        if (sub.proof && sub.proof !== '') {
+            proofHtml = `
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+                    <a href="/storage/${sub.proof}" target="_blank" style="color: #0284c7; font-weight: 600; text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-external-link-alt"></i> Buka Gambar Ukuran Penuh
+                    </a>
+                    <img src="/storage/${sub.proof}" alt="Bukti Transaksi" style="max-width: 100%; max-height: 220px; border-radius: 8px; border: 1px solid #cbd5e1; object-fit: contain; background: #f8fafc; padding: 4px;">
                 </div>
             `;
         }
 
-        document.getElementById('vfModalClose').addEventListener('click', () => {
+        document.getElementById('vfModalBody').innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: #1e293b; margin: 0;">Rincian Detail Transaksi</h3>
+                <button onclick="vfOpenDetail(${sub.id})" style="background: #e2e8f0; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; color: #334155;">← Kembali ke Profil</button>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                    <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 600;">Tanggal Transaksi</div>
+                    <div style="font-size: 0.95rem; font-weight: 600; color: #334155;">${sub.date}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 600;">Nominal</div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: #059669;">${sub.amount}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 600;">Status Transaksi</div>
+                    <div style="font-size: 0.95rem; font-weight: 600; text-transform: capitalize; color: #334155;">${sub.status}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Bukti Pembayaran</div>
+                    ${proofHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    const modalCloseBtn = document.getElementById('vfModalClose');
+    if (modalCloseBtn) {
+        modalCloseBtn.addEventListener('click', () => {
             document.getElementById('vfModalOverlay').classList.remove('active');
         });
+    }
 
-        document.getElementById('vfModalOverlay').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('vfModalOverlay')) {
-                document.getElementById('vfModalOverlay').classList.remove('active');
+    const modalOverlay = document.getElementById('vfModalOverlay');
+    if (modalOverlay) {
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                modalOverlay.classList.remove('active');
             }
         });
-    </script>
-</body>
-</html>
+    }
+</script>

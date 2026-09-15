@@ -6,6 +6,7 @@ use App\Models\Mosque;
 use App\Models\LandingPage;
 use App\Models\DonasiGaleri;
 use App\Models\DonationCategory;
+use App\Models\Donasi;
 use App\Services\PrayerTimeService;
 use Illuminate\Http\Request;
 
@@ -83,12 +84,30 @@ class PublicMosqueController extends Controller
         // UBAH KE JSON agar bisa dibaca langsung oleh script window.donasiCategories di Blade
         $categoriesJson = $categories->toJson();
 
+        // ===== BARU: Riwayat donasi untuk ditampilkan ke publik =====
+        // Hanya donasi berstatus "diterima" (sudah diverifikasi admin lewat
+        // DonasiAdminController::updateStatus) yang ditampilkan. Donasi "pending"
+        // sengaja TIDAK ditampilkan di sini supaya publik tidak melihat transaksi
+        // yang belum tentu benar-benar sampai ke rekening masjid.
+        $recentDonations = Donasi::where('mosque_id', $mosque->id)
+            ->where('status', 'diterima')
+            ->latest()
+            ->take(10)
+            ->get()
+            ->map(function ($donasi) use ($categories) {
+                $donasi->category_title = optional($categories->firstWhere('key', $donasi->jenis))->title
+                    ?? ucfirst($donasi->jenis);
+                return $donasi;
+            });
+        // ================================================================
+
         return view('donasi.donasi', [
             'mosque'             => $mosque,
             'zakatFitrahDefault' => $zakatFitrahDefault,
             'items'              => $items,
             'categories'         => $categories,
-            'categoriesJson'     => $categoriesJson, // <-- TAMBAHKAN INI
+            'categoriesJson'     => $categoriesJson,
+            'recentDonations'    => $recentDonations, // <-- BARU
         ]);
     }
 }
