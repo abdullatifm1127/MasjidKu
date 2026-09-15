@@ -161,7 +161,7 @@ body {
 .panel-title p { font-size: 0.85rem; color: var(--muted); }
 
 /* Category List */
-.category-list { display: flex; flex-direction: column; gap: 12px; }
+.category-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
 
 .category-item {
     width: 100%;
@@ -194,11 +194,35 @@ body {
 
 .ci-icon svg { width: 20px; height: 20px; }
 
-.ci-info { flex: 1; display: flex; flex-direction: column; }
+.ci-info { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .ci-info-title { font-size: 0.9rem; font-weight: 600; color: #1e293b; margin-bottom: 2px; }
 .ci-info-desc { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
 
 .ci-arrow { font-size: 1.2rem; color: #cbd5e1; font-weight: 700; }
+
+/* Progress bar target dana, ditampilkan di dalam kartu kategori */
+.ci-progress { display: block; margin-top: 8px; }
+.ci-progress-track {
+    display: block;
+    width: 100%;
+    height: 6px;
+    background: var(--line-soft);
+    border-radius: 999px;
+    overflow: hidden;
+}
+.ci-progress-fill {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #f59e0b);
+    border-radius: 999px;
+}
+.ci-progress-text {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.68rem;
+    color: var(--muted);
+    font-weight: 600;
+}
 
 /* Buttons & Inputs */
 .btn-back {
@@ -246,6 +270,17 @@ body {
 }
 
 .input-group input:invalid { border-color: var(--err); }
+
+.checkbox-inline {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    color: var(--ink-soft) !important;
+    cursor: pointer;
+}
+.checkbox-inline input { width: auto; accent-color: var(--accent); }
 
 .hint { display: block; margin-top: 6px; font-size: 0.75rem; color: #94a3b8; }
 .hint--nisab { color: var(--accent-dark); font-weight: 600; }
@@ -355,6 +390,15 @@ body {
     border-top-color: #ffffff;
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
+}
+
+.waiting-spinner {
+    width: 44px; height: 44px;
+    margin: 0 auto 18px;
+    border: 4px solid var(--accent-bg);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -502,6 +546,109 @@ body {
 }
 
 .empty-box--tight { padding: 20px; }
+
+/* Riwayat Donasi — kartu tersendiri (bukan menempel di bawah daftar kategori) */
+.history-card {
+    background: #ffffff;
+    border: 1.5px solid var(--line);
+    border-radius: 16px;
+    padding: 18px 18px 6px;
+    margin-bottom: 28px;
+}
+
+.history-card-head { margin-bottom: 6px; }
+.history-card-head h2 { font-size: 1.05rem; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+.history-card-head p { font-size: 0.8rem; color: var(--muted); }
+
+.history-list {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.history-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 2px;
+    border-top: 1px solid var(--line-soft);
+}
+
+.history-row:first-child { border-top: none; }
+
+.history-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--accent-bg);
+    color: var(--accent-dark);
+    border: 1px solid var(--accent-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.history-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.history-name {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.history-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.history-badge {
+    font-size: 0.66rem;
+    font-weight: 700;
+    color: var(--accent-dark);
+    background: var(--accent-bg);
+    border: 1px solid var(--accent-border);
+    padding: 1px 8px;
+    border-radius: 100px;
+    line-height: 1.6;
+    white-space: nowrap;
+}
+
+.history-time {
+    font-size: 0.72rem;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.history-amount {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent-dark);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.history-list::-webkit-scrollbar { width: 6px; }
+.history-list::-webkit-scrollbar-thumb { background: var(--line); border-radius: 100px; }
+
+@media (max-width: 400px) {
+    .history-name { max-width: 140px; }
+}
 
 /* Galeri Dokumentasi Publik */
 .gallery-block {

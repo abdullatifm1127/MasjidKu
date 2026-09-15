@@ -56,20 +56,16 @@ class DonationCategoryController extends Controller
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ]);
 
-        // Jika judul berubah, update juga key/slug-nya secara otomatis
-        if ($kategori->title !== $data['title']) {
-            $baseKey = Str::slug($data['title']);
-            $key = $baseKey;
-            $i = 1;
-            while (DonationCategory::where('mosque_id', $kategori->mosque_id)
-                ->where('key', $key)
-                ->where('id', '!=', $kategori->id)
-                ->exists()) {
-                $key = $baseKey . '-' . (++$i);
-            }
-            $data['key'] = $key;
-        }
-
+        // PENTING: `key` SENGAJA TIDAK diregenerasi di sini lagi.
+        //
+        // Sebelumnya, kalau admin mengubah judul kategori, `key` ikut berubah
+        // (mis. "Infaq Jumat" -> infaq-jumat berubah jadi "Infaq Jumat Berkah" -> infaq-jumat-berkah).
+        // Karena foto di galeri (DonasiGaleri::kategori) menyimpan `key` lama sebagai
+        // referensi string, perubahan itu MEMUTUS tautan galeri -> kategori secara diam-diam:
+        // foto lama yang sudah diunggah tiba-tiba tampil sebagai kategori "Umum".
+        //
+        // `key` sekarang bersifat stabil (dibuat sekali saat kategori pertama kali dibuat).
+        // Admin tetap bebas mengubah judul tampilan (`title`) kapan pun tanpa efek samping ini.
         $kategori->update($data);
 
         return back()->with('success', 'Jenis donasi berhasil diperbarui.');

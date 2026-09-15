@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\adminmasjid;
 
 use App\Http\Controllers\Controller;
+use App\Models\Donasi;
 use App\Models\DonasiGaleri;
 use App\Models\DonationCategory;
 use App\Models\Mosque;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class DonasiAdminController extends Controller
 {
@@ -17,7 +19,7 @@ class DonasiAdminController extends Controller
         // Ambil data masjid pertama milik user yang sedang login
         $mosque = Mosque::where('user_id', Auth::id())->firstOrFail();
 
-        // Paksa ubah status dan paket secara otomatis di memori 
+        // Paksa ubah status dan paket secara otomatis di memori
         // jika di database sebenarnya sudah berstatus approved/paid
         if (strtolower(trim($mosque->status)) === 'approved' || strtolower(trim($mosque->status)) === 'aktif') {
             $mosque->package_type = 'paid';
@@ -45,15 +47,43 @@ class DonasiAdminController extends Controller
             ->orderBy('sort_order', 'asc')
             ->get();
 
-        // Jika sudah berbayar, tampilkan halaman kelola donasi admin seperti biasa
         $items = DonasiGaleri::where('mosque_id', $mosque->id)
             ->latest('tanggal')
             ->get();
+
+        // ===== BARU: daftar donasi masuk (butuh admin bisa melihat & memverifikasi) =====
+        // 10 transaksi terbaru untuk ringkasan cepat di dashboard donasi.
+        // Peta key kategori -> judul, supaya tabel donasi tidak perlu join berulang.
+        $categoryTitles = $donationCategories->pluck('title', 'key');
+
+        $recentDonations = Donasi::where('mosque_id', $mosque->id)
+            ->latest()
+            ->take(10)
+            ->get()
+            ->map(function ($d) use ($categoryTitles) {
+                $d->category_title = $categoryTitles[$d->jenis] ?? $d->jenis;
+                return $d;
+            });
+
+        $summary = [
+            'total_diterima' => (int) Donasi::where('mosque_id', $mosque->id)
+                ->where('status', 'diterima')
+                ->sum('nominal'),
+            'total_menunggu' => (int) Donasi::where('mosque_id', $mosque->id)
+                ->where('status', 'pending')
+                ->sum('nominal'),
+            'jumlah_donatur' => Donasi::where('mosque_id', $mosque->id)
+                ->where('status', 'diterima')
+                ->count(),
+        ];
+        // ================================================================================
 
         return view('auth.adminmasjid.donasiAdmin', [
             'mosque'             => $mosque,
             'donationCategories' => $donationCategories,
             'items'              => $items,
+            'recentDonations'    => $recentDonations,
+            'summary'            => $summary,
         ]);
     }
 
@@ -66,10 +96,14 @@ class DonasiAdminController extends Controller
 
         $data = $request->validate([
             'zakat_fitrah_default' => ['required', 'numeric', 'min:0'],
+            // Kolom ini sudah dipakai di halaman publik (donasi.blade.php: data-nisab="{{ $mosque->zakat_nisab }}")
+            // tapi belum bisa diubah admin dari mana pun — sekarang dilengkapi di sini.
+            'zakat_nisab' => ['required', 'numeric', 'min:0'],
         ]);
 
         $mosque->update([
             'zakat_fitrah_default' => $data['zakat_fitrah_default'],
+            'zakat_nisab' => $data['zakat_nisab'],
         ]);
 
         return back()->with('success', 'Pengaturan zakat fitrah berhasil disimpan.');
@@ -94,7 +128,7 @@ class DonasiAdminController extends Controller
             'judul'            => 'required|string|max:150',
             'kategori'         => 'nullable|string|max:50',
             'deskripsi'        => 'nullable|string|max:1000',
-            'tanggal'          => 'required|date',
+            'tanggal'          => 'required|date|before_or_equal:today',
             'nominal_terpakai' => 'nullable|numeric|min:0',
             'foto'             => 'required|image|max:4096', // maks 4MB
         ]);
@@ -127,5 +161,29 @@ class DonasiAdminController extends Controller
         $item->delete();
 
         return back()->with('success', 'Foto dihapus.');
+    }
+
+    /**
+     * ===== BARU =====
+     * PATCH /admin/donasi/{donasi}/status
+     *
+     * Verifikasi manual: admin menandai sebuah donasi sebagai "diterima" setelah
+     * mengecek mutasi rekening/e-wallet masjid, atau "ditolak" kalau dana ternyata
+     * tidak pernah masuk (mis. donatur batal transfer). Ini pengganti sementara untuk
+     * konfirmasi otomatis payment gateway yang belum diimplementasikan di sistem ini
+     * (lihat CATATAN-BACKEND.md untuk opsi integrasi Midtrans/Xendit ke depannya).
+     */
+    public function updateStatus(Request $request, Donasi $donasi)
+    {
+        $mosque = $this->mosque();
+        abort_unless($donasi->mosque_id === $mosque->id, 403);
+
+        $data = $request->validate([
+            'status' => ['required', Rule::in(['diterima', 'ditolak', 'pending'])],
+        ]);
+
+        $donasi->update(['status' => $data['status']]);
+
+        return back()->with('success', 'Status donasi ' . $donasi->no_referensi . ' diperbarui menjadi "' . $data['status'] . '".');
     }
 }

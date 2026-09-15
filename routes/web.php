@@ -67,6 +67,9 @@ Route::get('/masjid/{slug}/donasi', [PublicMosqueController::class, 'showDonasi'
 Route::post('/masjid/{slug}/donasi', [DonasiController::class, 'store'])
     ->name('masjid.donasi.store');
 
+Route::patch('/admin/donasi/{donasi}/status', [DonasiAdminController::class, 'updateStatus'])
+    ->name('admin.donasi.status');
+
 Route::middleware(['auth'])->get('/masjidUser', function () {
     $mosque = \App\Models\Mosque::where('user_id', Auth::id())->first();
     if (!$mosque) {

@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/adminmasjid/berandaAdmin.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/adminmasjid/donasiAdmin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/adminmasjid/donasiAdmin.css') }}?v={{ time() }}">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
         .dn-modern-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; background: #ffffff; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -131,6 +131,104 @@
                 </div>
             @endif
 
+            {{-- ===== RINGKASAN TOTAL DONASI ===== --}}
+            @isset($summary)
+            <div class="dn-grid-dashboard" style="margin-bottom: 0;">
+                <div class="dn-card-modern" style="grid-column: span 1;">
+                    <h3><i class="fa-solid fa-sack-dollar text-teal-600"></i> Total Diterima (Terverifikasi)</h3>
+                    <p style="font-size: 1.6rem; font-weight: 800; color: #0f766e; margin: 0;">Rp {{ number_format($summary['total_diterima'] ?? 0, 0, ',', '.') }}</p>
+                </div>
+                <div class="dn-card-modern" style="grid-column: span 1;">
+                    <h3><i class="fa-solid fa-hourglass-half text-teal-600"></i> Menunggu Verifikasi</h3>
+                    <p style="font-size: 1.6rem; font-weight: 800; color: #b45309; margin: 0;">Rp {{ number_format($summary['total_menunggu'] ?? 0, 0, ',', '.') }}</p>
+                </div>
+                <div class="dn-card-modern" style="grid-column: span 1;">
+                    <h3><i class="fa-solid fa-users text-teal-600"></i> Jumlah Donatur Terverifikasi</h3>
+                    <p style="font-size: 1.6rem; font-weight: 800; color: #0f766e; margin: 0;">{{ $summary['jumlah_donatur'] ?? 0 }}</p>
+                </div>
+            </div>
+            @endisset
+
+            {{-- ===== BARU: Donasi Masuk — perlu diverifikasi manual admin ===== --}}
+            {{-- Sistem saat ini belum tersambung ke payment gateway otomatis (Midtrans/Xendit),
+                 jadi setiap donasi yang masuk lewat halaman publik berstatus "pending" sampai
+                 admin mengecek mutasi rekening/e-wallet masjid dan menandainya di sini. --}}
+            @isset($recentDonations)
+            <section class="dn-card-modern">
+                <h3><i class="fa-solid fa-list-check text-teal-600"></i> Donasi Masuk Terbaru</h3>
+                <p>Cek mutasi rekening/e-wallet masjid, lalu tandai donasi di bawah sebagai <b>Diterima</b> atau <b>Ditolak</b>. Donatur akan terus melihat nomor referensi sebagai bukti transaksi mereka.</p>
+
+                @if ($recentDonations->isEmpty())
+                    <div class="dn-empty" style="text-align: center; padding: 2rem; color: #64748b;">Belum ada donasi yang masuk.</div>
+                @else
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                            <thead>
+                                <tr style="text-align: left; border-bottom: 2px solid #e2e8f0;">
+                                    <th style="padding: 0.6rem 0.5rem;">No. Referensi</th>
+                                    <th style="padding: 0.6rem 0.5rem;">Donatur</th>
+                                    <th style="padding: 0.6rem 0.5rem;">Kategori</th>
+                                    <th style="padding: 0.6rem 0.5rem;">Nominal</th>
+                                    <th style="padding: 0.6rem 0.5rem;">Metode</th>
+                                    <th style="padding: 0.6rem 0.5rem;">Status</th>
+                                    <th style="padding: 0.6rem 0.5rem;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($recentDonations as $don)
+                                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                                        <td style="padding: 0.6rem 0.5rem; font-weight: 600;">{{ $don->no_referensi }}</td>
+                                        <td style="padding: 0.6rem 0.5rem;">{{ $don->nama_donatur }}</td>
+                                        <td style="padding: 0.6rem 0.5rem;">{{ $don->category_title }}</td>
+                                        <td style="padding: 0.6rem 0.5rem;">Rp {{ number_format($don->nominal, 0, ',', '.') }}</td>
+                                        <td style="padding: 0.6rem 0.5rem;">{{ $don->metode_pembayaran }}</td>
+                                        <td style="padding: 0.6rem 0.5rem;">
+                                            @php
+                                                $statusStyle = match($don->status) {
+                                                    'diterima' => 'background:#dcfce7;color:#15803d;',
+                                                    'ditolak' => 'background:#fee2e2;color:#991b1b;',
+                                                    default => 'background:#fef3c7;color:#92400e;',
+                                                };
+                                            @endphp
+                                            <span style="font-size: 0.72rem; padding: 0.2rem 0.55rem; border-radius: 999px; {{ $statusStyle }}">{{ ucfirst($don->status) }}</span>
+                                        </td>
+                                        <td style="padding: 0.6rem 0.5rem;">
+                                            @if ($don->status !== 'diterima')
+                                                <form action="{{ route('admin.donasi.status', $don->id) }}" method="POST" style="display:inline;">
+                                                    @csrf @method('PATCH')
+                                                    <input type="hidden" name="status" value="diterima">
+                                                    <button type="submit" style="background:#dcfce7;color:#15803d;border:1px solid #a7f3d0;padding:0.3rem 0.6rem;border-radius:0.4rem;cursor:pointer;font-size:0.75rem;">Terima</button>
+                                                </form>
+                                            @endif
+                                            @if ($don->status !== 'ditolak')
+                                                <form action="{{ route('admin.donasi.status', $don->id) }}" method="POST" style="display:inline;">
+                                                    @csrf @method('PATCH')
+                                                    <input type="hidden" name="status" value="ditolak">
+                                                    <button type="submit" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;padding:0.3rem 0.6rem;border-radius:0.4rem;cursor:pointer;font-size:0.75rem;">Tolak</button>
+                                                </form>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </section>
+            @endisset
+
+            @php
+                // Satu sumber daftar tipe kalkulasi, dipakai di form Tambah maupun form Edit.
+                // HANYA "nominal" dan "zakat" — ini sesuai validasi di DonationCategoryController
+                // ('calc_type' => 'in:zakat,nominal'). Jenis donasi seperti Infaq/Sedekah/Qurban/dst
+                // dibedakan lewat Nama & Ikon, BUKAN lewat calc_type — calc_type hanya menentukan
+                // apakah halaman publik menampilkan kalkulator zakat atau input nominal bebas.
+                $calcTypeOptions = [
+                    'nominal' => 'Nominal bebas (donatur pilih/isi sendiri jumlahnya)',
+                    'zakat'   => 'Zakat (kalkulator otomatis Fitrah & Mal)',
+                ];
+            @endphp
+
             <div class="dn-grid-dashboard">
                 {{-- ===== Kelola Jenis Donasi ===== --}}
                 <section class="dn-card-modern" style="grid-column: span 2;">
@@ -142,23 +240,16 @@
                         @csrf
                         <div class="dn-field" style="margin: 0;">
                             <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Nama Jenis Donasi</label>
-                            <input type="text" name="title" class="form-control-modern" placeholder="Mis. Infaq Jumat" required>
+                            <input type="text" name="title" class="form-control-modern" placeholder="Mis. Infaq Jumat" required maxlength="100">
                         </div>
                         <div class="dn-field" style="margin: 0;">
-    <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Tipe Kalkulasi / Kategori</label>
-    <select name="calc_type" class="form-control-modern">
-        <option value="zakat">Zakat (Fitrah &amp; Mal)</option>
-        <option value="infaq">Infaq (Kotak infaq operasional)</option>
-        <option value="sedekah">Sedekah (Sedekah umum/harian)</option>
-        <option value="pembangunan">Pembangunan (Renovasi &amp; pembangunan fisik masjid)</option>
-        <option value="yatim">Yatim (Santunan anak yatim &amp; dhuafa)</option>
-        <option value="bencana">Bencana (Dana darurat &amp; kemanusiaan)</option>
-        <option value="wakaf">Wakaf (Wakaf produktif, tanah, atau sumur)</option>
-        <option value="qurban">Qurban (Tabungan atau penyaluran hewan qurban)</option>
-        <option value="pendidikan">Pendidikan (TPA, madrasah, atau beasiswa santri)</option>
-        <option value="kesehatan">Kesehatan (Bantuan berobat jamaah / sosial kesehatan)</option>
-    </select>
-</div>
+                            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Tipe Kalkulasi / Kategori</label>
+                            <select name="calc_type" class="form-control-modern" required>
+                                @foreach ($calcTypeOptions as $val => $label)
+                                    <option value="{{ $val }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="dn-field" style="margin: 0;">
                             <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Ikon</label>
                             <select name="icon_key" class="form-control-modern">
@@ -173,7 +264,7 @@
                         </div>
                         <div style="grid-column: 1 / -1; margin: 0;">
                             <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Deskripsi Singkat</label>
-                            <textarea name="description" class="form-control-modern" rows="2" placeholder="Penjelasan singkat mengenai program donasi ini..."></textarea>
+                            <textarea name="description" class="form-control-modern" rows="2" placeholder="Penjelasan singkat mengenai program donasi ini..." maxlength="300"></textarea>
                         </div>
                         <div style="grid-column: 1 / -1;">
                             <button type="submit" class="btn-primary-modern"><i class="fa-solid fa-plus"></i> Tambah Kategori Donasi</button>
@@ -203,18 +294,28 @@
                                     </summary>
 
                                     <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #f1f5f9;">
+
                                         <form action="{{ route('admin.donasi.kategori.update', $kategori->id) }}" method="POST" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
                                             @csrf
                                             @method('PUT')
                                             <div>
                                                 <label style="font-size: 0.8rem; font-weight: 600;">Nama</label>
-                                                <input type="text" name="title" class="form-control-modern" value="{{ $kategori->title }}" required>
+                                                <input type="text" name="title" class="form-control-modern" value="{{ $kategori->title }}" required maxlength="100">
                                             </div>
                                             <div>
                                                 <label style="font-size: 0.8rem; font-weight: 600;">Tipe</label>
-                                                <select name="calc_type" class="form-control-modern">
-                                                    <option value="nominal" {{ $kategori->calc_type === 'nominal' ? 'selected' : '' }}>Nominal</option>
-                                                    <option value="zakat" {{ $kategori->calc_type === 'zakat' ? 'selected' : '' }}>Zakat</option>
+                                                <select name="calc_type" class="form-control-modern" required>
+                                                    @foreach ($calcTypeOptions as $val => $label)
+                                                        <option value="{{ $val }}" {{ $kategori->calc_type === $val ? 'selected' : '' }}>{{ $label }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label style="font-size: 0.8rem; font-weight: 600;">Ikon</label>
+                                                <select name="icon_key" class="form-control-modern">
+                                                    @foreach (\App\Models\DonationCategory::iconOptions() as $iconKey => $iconLabel)
+                                                        <option value="{{ $iconKey }}" {{ $kategori->icon_key === $iconKey ? 'selected' : '' }}>{{ $iconLabel }}</option>
+                                                    @endforeach
                                                 </select>
                                             </div>
                                             <div>
@@ -223,7 +324,7 @@
                                             </div>
                                             <div style="grid-column: 1 / -1;">
                                                 <label style="font-size: 0.8rem; font-weight: 600;">Deskripsi</label>
-                                                <textarea name="description" class="form-control-modern" rows="2">{{ $kategori->description }}</textarea>
+                                                <textarea name="description" class="form-control-modern" rows="2" maxlength="300">{{ $kategori->description }}</textarea>
                                             </div>
                                             <div>
                                                 <button type="submit" class="btn-primary-modern" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Simpan Perubahan</button>
@@ -238,7 +339,7 @@
                                                     {{ $kategori->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
                                                 </button>
                                             </form>
-                                            <form action="{{ route('admin.donasi.kategori.destroy', $kategori->id) }}" method="POST" onsubmit="return confirm('Hapus jenis donasi ini?');">
+                                            <form action="{{ route('admin.donasi.kategori.destroy', $kategori->id) }}" method="POST" onsubmit="return confirm('Hapus jenis donasi ini? Riwayat donasi pada kategori ini akan tetap tersimpan.');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" style="background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 0.4rem 0.8rem; border-radius: 0.4rem; cursor: pointer; font-size: 0.85rem;">Hapus</button>
@@ -262,7 +363,12 @@
                             @method('PUT')
                             <div style="margin-bottom: 1rem;">
                                 <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Nominal per Jiwa (Rp)</label>
-                                <input type="number" step="1000" min="0" name="zakat_fitrah_default" class="form-control-modern" value="{{ old('zakat_fitrah_default', $mosque->zakat_fitrah_default ?? 45000) }}" required>
+                                <input type="number" step="1000" min="1000" name="zakat_fitrah_default" class="form-control-modern" value="{{ old('zakat_fitrah_default', $mosque->zakat_fitrah_default ?? 45000) }}" required>
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Nisab Zakat Mal (Rp)</label>
+                                <input type="number" step="1000" min="0" name="zakat_nisab" class="form-control-modern" value="{{ old('zakat_nisab', $mosque->zakat_nisab ?? 85000000) }}" required>
+                                <small style="color: #94a3b8; font-size: 0.75rem;">Dipakai kalkulator zakat mal (2,5%) di halaman publik.</small>
                             </div>
                             <button type="submit" class="btn-primary-modern" style="width: 100%; justify-content: center;">Simpan Pengaturan</button>
                         </form>
@@ -276,10 +382,14 @@
                             @csrf
                             <div>
                                 <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Judul Kegiatan</label>
-                                <input type="text" name="judul" class="form-control-modern" placeholder="Mis. Sembako Ramadhan" value="{{ old('judul') }}" required>
+                                <input type="text" name="judul" class="form-control-modern" placeholder="Mis. Sembako Ramadhan" value="{{ old('judul') }}" required maxlength="120">
                             </div>
                             <div>
                                 <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Kategori</label>
+                                {{-- Value = $cat->key, sesuai kolom DonasiGaleri::kategori (string) dan
+                                     validasi di DonasiAdminController::storeGaleri(). `key` kategori sekarang
+                                     stabil (tidak berubah lagi saat judul kategori diedit — lihat
+                                     DonationCategoryController::update()), jadi tautan ini aman dari "putus". --}}
                                 <select name="kategori" class="form-control-modern">
                                     <option value="">Umum</option>
                                     @foreach ($donationCategories as $cat)
@@ -289,19 +399,20 @@
                             </div>
                             <div>
                                 <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Tanggal</label>
-                                <input type="date" name="tanggal" class="form-control-modern" value="{{ old('tanggal', date('Y-m-d')) }}" required>
+                                <input type="date" name="tanggal" class="form-control-modern" value="{{ old('tanggal', date('Y-m-d')) }}" max="{{ date('Y-m-d') }}" required>
                             </div>
                             <div>
                                 <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Nominal Terpakai (Rp)</label>
-                                <input type="number" min="0" name="nominal_terpakai" class="form-control-modern" placeholder="0" value="{{ old('nominal_terpakai') }}">
+                                <input type="number" min="0" step="1000" name="nominal_terpakai" class="form-control-modern" placeholder="0" value="{{ old('nominal_terpakai') }}">
                             </div>
                             <div>
                                 <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Deskripsi</label>
-                                <textarea name="deskripsi" class="form-control-modern" rows="2" placeholder="Ceritakan singkat...">{{ old('deskripsi') }}</textarea>
+                                <textarea name="deskripsi" class="form-control-modern" rows="2" placeholder="Ceritakan singkat..." maxlength="300">{{ old('deskripsi') }}</textarea>
                             </div>
                             <div>
-                                <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Pilih Foto</label>
-                                <input type="file" name="foto" accept="image/*" class="form-control-modern" onchange="dnPreviewFoto(this)" required>
+                                <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Pilih Foto (JPG/PNG, maks. 2MB)</label>
+                                <input type="file" name="foto" accept="image/png, image/jpeg" class="form-control-modern" onchange="dnPreviewFoto(this)" required>
+                                <img id="dn-foto-preview" class="dn-preview hidden" alt="Pratinjau foto">
                             </div>
                             <button type="submit" class="btn-primary-modern" style="width: 100%; justify-content: center;">Unggah Dokumentasi</button>
                         </form>
@@ -352,5 +463,20 @@
     <button class="ba2-fab" aria-label="Bantuan" style="position: fixed; bottom: 2rem; right: 2rem; width: 48px; height: 48px; border-radius: 50%; background: #0f766e; color: white; border: none; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">?</button>
 
     <script src="{{ asset('js/adminmasjid/donasi.js') }}"></script>
+    <script>
+        function dnPreviewFoto(input) {
+            const preview = document.getElementById('dn-foto-preview');
+            if (!preview || !input.files || !input.files[0]) return;
+            const file = input.files[0];
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Ukuran foto maksimal 2MB.');
+                input.value = '';
+                preview.classList.add('hidden');
+                return;
+            }
+            preview.src = URL.createObjectURL(file);
+            preview.classList.remove('hidden');
+        }
+    </script>
 </body>
 </html>
