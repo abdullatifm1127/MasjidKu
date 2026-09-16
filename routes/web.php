@@ -113,6 +113,8 @@ Route::post('/superadmin/login', [LoginController::class, 'login'])->name('super
 | Halaman Waiting & Forgot Password
 |--------------------------------------------------------------------------
 */
+Route::get('/waiting', [MosqueController::class, 'waiting'])->name('waiting');
+
 Route::get('/forgot-password', function () {
     return view('auth.login');
 })->name('password.request');

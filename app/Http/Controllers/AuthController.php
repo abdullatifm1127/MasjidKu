@@ -7,7 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon; // <--- 1. TAMBAHKAN INI DI BAGIAN ATAS
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -33,7 +33,8 @@ class AuthController extends Controller
 
         return redirect()->route('home');
     }
-// Proses Login Reguler (Admin Masjid / User)
+
+    // Proses Login Reguler (Admin Masjid / User)
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -58,13 +59,12 @@ class AuthController extends Controller
                 return redirect()->route('daftar.masjid');
             }
 
-            // Jika statusnya masih pending, arahkan ke halaman waiting
-            if ($mosque->status === 'pending' || $mosque->status === 'Pending') {
+            // Jika pembayaran atau status masjid masih pending, arahkan ke halaman tunggu/pending
+            if ($mosque->status === 'pending' || $mosque->payment_status === 'pending') {
                 return redirect()->route('waiting');
             }
 
             // Jika sudah Aktif / approved, langsung lempar ke dashboard admin.
-            // (Nanti middleware 'check.status' yang akan otomatis mengamankan jika berubah jadi nonaktif/pending lagi)
             return redirect()->route('dashboard');
         }
 
@@ -73,7 +73,7 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    // --- TAMBAHKAN METHOD INI UNTUK LOGIN SUPER ADMIN ---
+    // --- METHOD LOGIN SUPER ADMIN ---
     public function superAdminLogin(Request $request)
     {
         $credentials = $request->validate([
@@ -88,11 +88,10 @@ class AuthController extends Controller
 
             // Update waktu aktif terakhir
             User::where('id', $user->id)->update([
-    'last_active_at' => Carbon::now(),
-]);
+                'last_active_at' => Carbon::now(),
+            ]);
 
-            // Validasi apakah user benar-benar superadmin (sesuaikan pengecekan role di database Anda)
-            // Contoh jika menggunakan kolom 'role' atau 'is_superadmin':
+            // Validasi apakah user benar-benar superadmin
             if (isset($user->role) && $user->role === 'superadmin') {
                 return redirect()->route('superadmin.dashboard');
             }
@@ -108,7 +107,6 @@ class AuthController extends Controller
             'email' => 'Email atau kata sandi Super Admin salah.',
         ])->onlyInput('email');
     }
-    // ----------------------------------------------------
 
     // Logout
     public function logout(Request $request)

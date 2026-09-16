@@ -29,13 +29,6 @@ class PaymentController extends Controller
             return redirect()->route('dashboard');
         }
 
-        // HAPUS ATAU KOMENTARI BLOK INI (Agar tidak terpental ke waiting saat status pending)
-        /*
-        if ($mosque->payment_status === 'pending' && $mosque->payment_proof) {
-            return redirect()->route('waiting');
-        }
-        */
-
         // Jika sudah kirim bukti tapi status masih pending, arahkan ke dashboard saja
         if ($mosque->payment_status === 'pending' && $mosque->payment_proof) {
             return redirect()->route('dashboard');
