@@ -15,31 +15,32 @@ class PaymentController extends Controller
     {
         $mosque = Mosque::where('user_id', Auth::id())->first();
 
-        // Jika belum daftar masjid, lempar ke form pendaftaran
         if (!$mosque) {
             return redirect()->route('daftar.masjid');
         }
 
-        // 1. TAMBAHAN CEK PAKET FREE: 
-        // Jika status pembayaran atau tipe/paketnya adalah free/gratis, langsung arahkan ke dashboard utama
         $paymentStatus = strtolower($mosque->payment_status ?? '');
         if ($paymentStatus === 'free' || $paymentStatus === 'gratis') {
             return redirect()->route('dashboard');
         }
 
-        // 2. Jika sudah disetujui (approved) dan lunas, baru boleh masuk dashboard utama
+        // Jika sudah lunas / approved
         if ($mosque->status === 'approved' && $mosque->payment_status === 'paid') {
             return redirect()->route('dashboard');
         }
 
-        // 3. Jika status pembayaran sudah 'pending' (sudah upload bukti tapi belum diverifikasi admin),
-        // arahkan ke halaman waiting agar mereka tahu datanya sedang dicek.
+        // HAPUS ATAU KOMENTARI BLOK INI (Agar tidak terpental ke waiting saat status pending)
+        /*
         if ($mosque->payment_status === 'pending' && $mosque->payment_proof) {
             return redirect()->route('waiting');
         }
+        */
 
-        // 4. Selain kondisi di atas (artinya baru daftar / belum upload bukti / batal bayar),
-        // tampilkan kembali halaman pembayaran beserta datanya.
+        // Jika sudah kirim bukti tapi status masih pending, arahkan ke dashboard saja
+        if ($mosque->payment_status === 'pending' && $mosque->payment_proof) {
+            return redirect()->route('dashboard');
+        }
+
         return view('paymentmasjid.payment', compact('mosque'));
     }
 
@@ -60,16 +61,17 @@ class PaymentController extends Controller
             // Simpan file bukti transfer ke storage/app/public/payment-proofs
             $path = $request->file('payment_proof')->store('payment-proofs', 'public');
 
-            // Update status masjid menjadi pending & simpan path foto
+            // Update status masjid menjadi approved & payment_status jadi pending (menunggu cek admin di latar belakang)
             $mosque->update([
                 'payment_proof' => $path,
                 'payment_status' => 'pending', 
+                'status'         => 'approved', // <--- Pastikan status tetap approved agar bisa akses dashboard
             ]);
 
-            return redirect()->route('waiting')->with('success', 'Bukti pembayaran berhasil dikirim!');
+            // UBAH REDIRECT KE DASHBOARD, BUKAN KE WAITING
+            return redirect()->route('dashboard')->with('success', 'Bukti pembayaran berhasil dikirim! Menunggu verifikasi Super Admin.');
 
         } catch (\Exception $e) {
-            // Jika terjadi error sistem di luar validasi (misal folder storage belum di-link)
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
