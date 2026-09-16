@@ -338,6 +338,31 @@
         changeStep(1);
     }
 
+    // ---------- modal detail dokumentasi penyaluran ----------
+
+    function openGalleryModal(item) {
+        const modal = document.getElementById('gallery-modal');
+        if (!modal) return;
+
+        document.getElementById('gm-img').style.backgroundImage = item.photo ? `url('${item.photo}')` : 'none';
+        document.getElementById('gm-category').textContent = item.category || 'Penyaluran';
+        document.getElementById('gm-title').textContent = item.title || '';
+        document.getElementById('gm-desc').textContent = item.desc || 'Tidak ada deskripsi tambahan.';
+        document.getElementById('gm-amount').textContent = item.amount || 'Rp 0';
+        document.getElementById('gm-date').textContent = item.date || '-';
+
+        modal.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+        modal.querySelector('.gallery-modal-close')?.focus();
+    }
+
+    function closeGalleryModal() {
+        const modal = document.getElementById('gallery-modal');
+        if (!modal) return;
+        modal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+    }
+
     // ---------- wire up events (delegation, no inline handlers) ----------
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -353,6 +378,24 @@
         document.getElementById('f-nominal')?.addEventListener('input', calcZakatFitrah);
 
         document.body.addEventListener('click', (e) => {
+            const galItem = e.target.closest('.pub-gal-item');
+            if (galItem) {
+                openGalleryModal({
+                    title: galItem.dataset.title,
+                    desc: galItem.dataset.desc,
+                    category: galItem.dataset.category,
+                    photo: galItem.dataset.photo,
+                    amount: galItem.dataset.amount,
+                    date: galItem.dataset.date,
+                });
+                return;
+            }
+
+            if (e.target.closest('[data-close-modal]')) {
+                closeGalleryModal();
+                return;
+            }
+
             const catBtn = e.target.closest('.category-item');
             if (catBtn) {
                 selectCategory(catBtn.dataset.key, catBtn.dataset.title, catBtn.dataset.calcType);
@@ -391,6 +434,20 @@
             if (e.target.closest('#reset-btn')) {
                 resetAll();
                 return;
+            }
+        });
+
+        // Kartu galeri pakai role="button" + tabindex, jadi perlu ditangani manual
+        // supaya bisa dibuka dengan Enter/Spasi juga (bukan cuma klik mouse).
+        document.body.addEventListener('keydown', (e) => {
+            const galItem = e.target.closest('.pub-gal-item');
+            if (galItem && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                galItem.click();
+                return;
+            }
+            if (e.key === 'Escape') {
+                closeGalleryModal();
             }
         });
     });

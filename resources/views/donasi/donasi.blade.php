@@ -137,8 +137,22 @@
                                 // $categories di sini adalah kategori AKTIF saja (lihat DonasiController::categories()),
                                 // jadi kalau kategori dinonaktifkan/dihapus, badge otomatis jatuh ke "Penyaluran".
                                 $galCatTitle = optional($categories->firstWhere('key', $gal->kategori))->title ?? 'Penyaluran';
+                                $galDate = $gal->tanggal ? \Carbon\Carbon::parse($gal->tanggal)->translatedFormat('d F Y') : '';
                             @endphp
-                            <figure class="pub-gal-item">
+                            {{-- Seluruh kartu bisa diklik/keyboard (tabindex+role=button) untuk buka
+                                 detail lengkap di modal (lihat #gallery-modal di bawah + donasi.js).
+                                 data-desc sengaja memuat deskripsi PENUH (bukan Str::limit), karena
+                                 teks pendek di kartu ini cuma ringkasan. --}}
+                            <figure class="pub-gal-item"
+                                    tabindex="0"
+                                    role="button"
+                                    aria-haspopup="dialog"
+                                    data-title="{{ $gal->judul }}"
+                                    data-desc="{{ $gal->deskripsi }}"
+                                    data-category="{{ $galCatTitle }}"
+                                    data-photo="{{ asset('storage/' . $gal->foto) }}"
+                                    data-amount="Rp {{ number_format($gal->nominal_terpakai ?? 0, 0, ',', '.') }}"
+                                    data-date="{{ $galDate }}">
                                 <div class="pub-gal-img" style="background-image: url('{{ asset('storage/' . $gal->foto) }}')" role="img" aria-label="{{ $gal->judul }}"></div>
                                 <figcaption class="pub-gal-info">
                                     <span class="pub-tag">{{ $galCatTitle }}</span>
@@ -146,8 +160,9 @@
                                     <p>{{ Str::limit($gal->deskripsi, 60) }}</p>
                                     <div class="pub-meta">
                                         <span>Rp {{ number_format($gal->nominal_terpakai ?? 0, 0, ',', '.') }}</span>
-                                        <span>{{ $gal->tanggal ? \Carbon\Carbon::parse($gal->tanggal)->format('d M Y') : '' }}</span>
+                                        <span>{{ $galDate }}</span>
                                     </div>
+                                    <span class="pub-gal-more">Lihat detail &rsaquo;</span>
                                 </figcaption>
                             </figure>
                         @endforeach
@@ -306,6 +321,24 @@
             </div>
         </section>
 
+    </div>
+
+    <!-- MODAL DETAIL DOKUMENTASI PENYALURAN -->
+    <div class="gallery-modal hidden" id="gallery-modal" role="dialog" aria-modal="true" aria-labelledby="gm-title">
+        <div class="gallery-modal-backdrop" data-close-modal></div>
+        <div class="gallery-modal-panel">
+            <button type="button" class="gallery-modal-close" data-close-modal aria-label="Tutup detail">&times;</button>
+            <div class="gallery-modal-img" id="gm-img"></div>
+            <div class="gallery-modal-body">
+                <span class="pub-tag" id="gm-category">-</span>
+                <h3 id="gm-title">-</h3>
+                <p id="gm-desc" class="gallery-modal-desc">-</p>
+                <div class="gallery-modal-meta">
+                    <div><span>Dana terpakai</span><b id="gm-amount">Rp 0</b></div>
+                    <div><span>Tanggal</span><b id="gm-date">-</b></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="{{ asset('js/donasi/donasi.js') }}?v={{ time() }}" defer></script>
