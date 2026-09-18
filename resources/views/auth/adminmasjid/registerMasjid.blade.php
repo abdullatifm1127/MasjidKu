@@ -301,24 +301,34 @@
                         <div style="display: flex; gap: 16px;">
     
                             {{-- Paket Free (Gratis) --}}
-                            <label style="border: 1px solid #cbd5e1; padding: 16px; border-radius: 8px; flex: 1; cursor: pointer; background: #fff; display: flex; flex-direction: column; justify-content: space-between;">
-                                <div>
-                                    <input type="radio" name="package_type" value="free" checked style="margin-right: 6px;" required> 
-                                    <strong style="color: #1e293b;">Paket Free</strong><br>
-                                    <span style="color: #64748b; font-weight: 700; font-size: 1.1rem; display: inline-block; margin-top: 4px;">Rp 0 (Gratis)</span>
-                                </div>
-                                <p style="font-size: 0.85rem; color: #64748b; margin-top: 8px; margin-bottom: 0;">Fitur standar website masjid. Fitur donasi online non-aktif.</p>
-                            </label>
+<label style="border: 1px solid #cbd5e1; padding: 16px; border-radius: 8px; flex: 1; cursor: pointer; background: #fff; display: flex; flex-direction: column; justify-content: space-between;">
+    <div>
+        <input type="radio" name="package_type" value="free" checked style="margin-right: 6px;" required> 
+        <strong style="color: #1e293b;">Paket Free</strong><br>
+        <span style="color: #64748b; font-weight: 700; font-size: 1.1rem; display: inline-block; margin-top: 4px;">Rp 0 (Gratis)</span>
+    </div>
+    <p style="font-size: 0.85rem; color: #64748b; margin-top: 8px; margin-bottom: 0;">Fitur standar website masjid. Fitur donasi online non-aktif.</p>
+</label>
 
-                            {{-- Paket Berbayar (Premium) --}}
-                            <label style="border: 1px solid #cbd5e1; padding: 16px; border-radius: 8px; flex: 1; cursor: pointer; background: #fff; display: flex; flex-direction: column; justify-content: space-between;">
-                                <div>
-                                    <input type="radio" name="package_type" value="paid" style="margin-right: 6px;"> 
-                                    <strong style="color: #1e293b;">Paket Berbayar</strong><br>
-                                    <span style="color: #16a34a; font-weight: 700; font-size: 1.1rem; display: inline-block; margin-top: 4px;">Rp 100.000 / bln</span>
-                              </div>
-                              <p style="font-size: 0.85rem; color: #64748b; margin-top: 8px; margin-bottom: 0;">Mengaktifkan fitur donasi online penuh & dukungan prioritas.</p>
-                          </label>
+{{-- Paket 1 Bulan --}}
+<label style="border: 1px solid #cbd5e1; padding: 16px; border-radius: 8px; flex: 1; cursor: pointer; background: #fff; display: flex; flex-direction: column; justify-content: space-between;">
+    <div>
+        <input type="radio" name="package_type" value="100000_1" style="margin-right: 6px;"> 
+        <strong style="color: #1e293b;">Paket 1 Bulan</strong><br>
+        <span style="color: #16a34a; font-weight: 700; font-size: 1.1rem; display: inline-block; margin-top: 4px;">Rp 100.000 / bln</span>
+    </div>
+    <p style="font-size: 0.85rem; color: #64748b; margin-top: 8px; margin-bottom: 0;">Mengaktifkan fitur donasi online penuh & dukungan prioritas.</p>
+</label>
+
+{{-- Paket 1 Tahun --}}
+<label style="border: 1px solid #cbd5e1; padding: 16px; border-radius: 8px; flex: 1; cursor: pointer; background: #fff; display: flex; flex-direction: column; justify-content: space-between;">
+    <div>
+        <input type="radio" name="package_type" value="1000000_12" style="margin-right: 6px;"> 
+        <strong style="color: #1e293b;">Paket 1 Tahun</strong><br>
+        <span style="color: #16a34a; font-weight: 700; font-size: 1.1rem; display: inline-block; margin-top: 4px;">Rp 1.000.000 / thn</span>
+    </div>
+    <p style="font-size: 0.85rem; color: #64748b; margin-top: 8px; margin-bottom: 0;">Hemat lebih banyak dengan masa aktif penuh 12 bulan.</p>
+</label>
 
                         </div>
                     </div>
@@ -353,76 +363,90 @@
     </footer>
     
     <script>
-        /* ---- Step navigation ---- */
-        const panels = [
-            document.getElementById('rmP1'),
-            document.getElementById('rmP2'),
-            document.getElementById('rmP3'),
-            document.getElementById('rmP4'),
-        ];
-        const stepEls = [
-            document.getElementById('rmS1'),
-            document.getElementById('rmS2'),
-            document.getElementById('rmS3'),
-            document.getElementById('rmS4'),
-        ];
-        const lineEls = [
-            document.getElementById('rmL1'),
-            document.getElementById('rmL2'),
-            document.getElementById('rmL3'),
-        ];
+    /* ---- Step navigation ---- */
+    const panels = [
+        document.getElementById('rmP1'),
+        document.getElementById('rmP2'),
+        document.getElementById('rmP3'),
+        document.getElementById('rmP4'),
+    ];
+    const stepEls = [
+        document.getElementById('rmS1'),
+        document.getElementById('rmS2'),
+        document.getElementById('rmS3'),
+        document.getElementById('rmS4'),
+    ];
+    const lineEls = [
+        document.getElementById('rmL1'),
+        document.getElementById('rmL2'),
+        document.getElementById('rmL3'),
+    ];
 
-        let current = 0;
+    let current = 0;
 
-        function goTo(idx) {
-            panels[current].style.display = 'none';
-            stepEls[current].className = 'rm-step is-done';
+    function goTo(idx) {
+        panels[current].style.display = 'none';
+        stepEls[current].className = 'rm-step is-done';
 
-            current = idx;
-            panels[current].style.display = 'block';
-            stepEls[current].className = 'rm-step is-active';
+        current = idx;
+        panels[current].style.display = 'block';
+        stepEls[current].className = 'rm-step is-active';
 
-            for (let i = 0; i < lineEls.length; i++) {
-                lineEls[i].classList.toggle('is-done', i < current);
-            }
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        for (let i = 0; i < lineEls.length; i++) {
+            lineEls[i].classList.toggle('is-done', i < current);
         }
 
-        function goBack(idx) {
-            panels[current].style.display = 'none';
-            stepEls[current].className = 'rm-step is-inactive';
-            current = idx;
-            panels[current].style.display = 'block';
-            stepEls[current].className = 'rm-step is-active';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-            for (let i = 0; i < lineEls.length; i++) {
-                lineEls[i].classList.toggle('is-done', i < current);
-            }
+    function goBack(idx) {
+        panels[current].style.display = 'none';
+        stepEls[current].className = 'rm-step is-inactive';
+        current = idx;
+        panels[current].style.display = 'block';
+        stepEls[current].className = 'rm-step is-active';
 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        for (let i = 0; i < lineEls.length; i++) {
+            lineEls[i].classList.toggle('is-done', i < current);
         }
 
-        document.getElementById('rmNext1').addEventListener('click', () => {
-            const name = document.querySelector('[name="mosque_name"]').value.trim();
-            if (!name) { alert('Nama masjid wajib diisi.'); return; }
-            goTo(1);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Validasi Panel 1 (Informasi Masjid)
+    document.getElementById('rmNext1').addEventListener('click', () => {
+        const mosqueName = document.querySelector('[name="mosque_name"]').value.trim();
+        const founded = document.querySelector('[name="founded"]').value.trim();
+        const capacity = document.querySelector('[name="capacity"]').value.trim();
+        const address = document.querySelector('[name="address"]').value.trim();
+        const kelurahan = document.querySelector('[name="kelurahan"]').value.trim();
+        const kecamatan = document.querySelector('[name="kecamatan"]').value.trim();
+        const city = document.querySelector('[name="city"]').value.trim();
+        const province = document.querySelector('[name="province"]').value;
+        const phone = document.querySelector('[name="phone"]').value.trim();
+        const email = document.querySelector('[name="email"]').value.trim();
+
+        if (!mosqueName || !founded || !capacity || !address || !kelurahan || !kecamatan || !city || !province || !phone || !email) {
+            alert('Mohon lengkapi semua kolom yang wajib diisi (tanda *) pada Informasi Masjid.');
+            return;
+        }
+        goTo(1);
+    });
+
+    document.getElementById('rmPrev2').addEventListener('click', () => goBack(0));
+    document.getElementById('rmNext2').addEventListener('click', () => goTo(2));
+
+    document.getElementById('rmPrev3').addEventListener('click', () => goBack(1));
+    document.getElementById('rmNext3').addEventListener('click', () => goTo(3));
+
+    document.getElementById('rmPrev4').addEventListener('click', () => goBack(2));
+
+    /* ---- Chip toggle visual ---- */
+    document.querySelectorAll('.rm-chip input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', () => {
+            cb.closest('.rm-chip').classList.toggle('checked', cb.checked);
         });
-
-        document.getElementById('rmPrev2').addEventListener('click', () => goBack(0));
-        document.getElementById('rmNext2').addEventListener('click', () => goTo(2));
-
-        document.getElementById('rmPrev3').addEventListener('click', () => goBack(1));
-        document.getElementById('rmNext3').addEventListener('click', () => goTo(3));
-
-        document.getElementById('rmPrev4').addEventListener('click', () => goBack(2));
-
-        /* ---- Chip toggle visual ---- */
-        document.querySelectorAll('.rm-chip input[type="checkbox"]').forEach(cb => {
-            cb.addEventListener('change', () => {
-                cb.closest('.rm-chip').classList.toggle('checked', cb.checked);
-            });
-        });
-    </script>
+    });
+</script>
 </body>
 </html>

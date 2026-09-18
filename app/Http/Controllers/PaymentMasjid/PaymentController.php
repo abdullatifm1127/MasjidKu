@@ -7,10 +7,21 @@ use App\Models\Mosque;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
+use Midtrans\Config;
+use Midtrans\Snap;
 
 class PaymentController extends Controller
 {
-    // Menampilkan halaman form pembayaran
+    public function __construct()
+    {
+        // Konfigurasi Midtrans
+        Config::$serverKey = config('services.midtrans.server_key');
+        Config::$isProduction = config('services.midtrans.is_production');
+        Config::$isSanitized = true;
+        Config::$is3ds = true;
+    }
+
+    // Menampilkan halaman form pembayaran (menampilkan tombol bayar Midtrans Snap)
     public function index()
     {
         $mosque = Mosque::where('user_id', Auth::id())->first();
@@ -25,48 +36,97 @@ class PaymentController extends Controller
         }
 
         // Jika sudah lunas / approved
-        if ($mosque->status === 'approved' && $mosque->payment_status === 'paid') {
-            return redirect()->route('dashboard');
-        }
-
-        // Jika sudah kirim bukti tapi status masih pending, arahkan ke dashboard saja
-        if ($mosque->payment_status === 'pending' && $mosque->payment_proof) {
+        if ($mosque->status === 'approved' && $mosque->payment_status === 'approved') {
             return redirect()->route('dashboard');
         }
 
         return view('paymentmasjid.payment', compact('mosque'));
     }
 
-    public function store(Request $request)
+    public function createTransaction(Request $request)
     {
-        try {
-            // Validasi file (gunakan huruf kecil pada ekstensi)
-            $request->validate([
-                'payment_proof' => 'required|mimes:jpeg,png,jpg,avif|max:2048',
-            ]);
+        $mosque = Mosque::where('user_id', Auth::id())->first();
 
-            $mosque = Mosque::where('user_id', Auth::id())->first();
-
-            if (!$mosque) {
-                return redirect()->route('daftar.masjid');
-            }
-
-            // Simpan file bukti transfer ke storage/app/public/payment-proofs
-            $path = $request->file('payment_proof')->store('payment-proofs', 'public');
-
-            // Update status masjid menjadi approved & payment_status jadi pending (menunggu cek admin di latar belakang)
-            $mosque->update([
-                'payment_proof' => $path,
-                'payment_status' => 'pending', 
-                'status'         => 'approved', // <--- Pastikan status tetap approved agar bisa akses dashboard
-            ]);
-
-            // UBAH REDIRECT KE DASHBOARD, BUKAN KE WAITING
-            return redirect()->route('dashboard')->with('success', 'Bukti pembayaran berhasil dikirim! Menunggu verifikasi Super Admin.');
-
-        } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        if (!$mosque) {
+            return response()->json(['error' => 'Data masjid tidak ditemukan.'], 404);
         }
+
+        $orderId = 'MOSQUE-' . $mosque->id . '-' . time();
+        
+        // Tentukan nominal berdasarkan package_type yang dipilih saat registrasi
+        $grossAmount = 100000; // Default 1 bulan
+        if ($mosque->package_type === '1000000_12') {
+            $grossAmount = 1000000; // 1 Tahun
+        }
+
+        // Simpan order_id ke database
+        $mosque->update([
+            'order_id' => $orderId,
+            'payment_status' => 'pending'
+        ]);
+
+        $params = [
+            'transaction_details' => [
+                'order_id' => $orderId,
+                'gross_amount' => $grossAmount,
+            ],
+            'customer_details' => [
+                'first_name' => $mosque->mosque_name,
+                'email' => $mosque->email,
+                'phone' => $mosque->phone,
+            ],
+        ];
+
+        try {
+            $snapToken = Snap::getSnapToken($params);
+            return response()->json(['snap_token' => $snapToken]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    // Menangani Notifikasi / Webhook dari Server Midtrans (Otomatis Ubah Status Lunas)
+    public function handleNotification(Request $request)
+    {
+        $payload = $request->all();
+        $serverKey = config('services.midtrans.server_key');
+        
+        $hashedKey = hash("sha512", $payload['order_id'] . $payload['status_code'] . $payload['gross_amount'] . $serverKey);
+
+        if ($hashedKey !== $payload['signature_key']) {
+            return response()->json(['message' => 'Invalid signature key'], 403);
+        }
+
+        $orderId = $payload['order_id'];
+        $transactionStatus = $payload['transaction_status'];
+        $fraudStatus = $payload['fraud_status'] ?? null;
+
+        $mosque = Mosque::where('order_id', $orderId)->first();
+        if (!$mosque) {
+            return response()->json(['message' => 'Mosque not found'], 404);
+        }
+
+        if ($transactionStatus == 'capture') {
+            if ($fraudStatus == 'challenge') {
+                $mosque->payment_status = 'challenge';
+            } else if ($fraudStatus == 'accept') {
+                $mosque->payment_status = 'approved';
+                $mosque->status = 'approved';
+                $mosque->has_online_donation = true;
+            }
+        } else if ($transactionStatus == 'settlement') {
+            $mosque->payment_status = 'approved';
+            $mosque->status = 'approved';
+            $mosque->has_online_donation = true;
+        } else if (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
+            $mosque->payment_status = 'failed';
+        } else if ($transactionStatus == 'pending') {
+            $mosque->payment_status = 'pending';
+        }
+
+        $mosque->save();
+
+        return response()->json(['message' => 'Notification successfully handled']);
     }
 
     /**
@@ -77,12 +137,10 @@ class PaymentController extends Controller
         $mosque = Mosque::where('user_id', Auth::id())->first();
 
         if ($mosque) {
-            // Hapus file bukti pembayaran jika sempat ter-upload
             if ($mosque->payment_proof && Storage::disk('public')->exists($mosque->payment_proof)) {
                 Storage::disk('public')->delete($mosque->payment_proof);
             }
 
-            // Hapus record masjid agar user bisa mendaftar dari awal
             $mosque->delete();
         }
 

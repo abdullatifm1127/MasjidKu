@@ -20,9 +20,9 @@ class MosqueController extends Controller
         $existingMosque = Mosque::where('user_id', Auth::id())->first();
 
         if ($existingMosque) {
-            // Jika pembayaran masjid masih pending, arahkan ke halaman tunggu/pending pembayaran
+            // Jika pembayaran masjid masih pending, arahkan ke halaman pembayaran
             if ($existingMosque->payment_status === 'pending') {
-                return redirect()->route('waiting');
+                return redirect()->route('masjid.payment');
             }
             
             // Jika sudah approved atau pembayarannya sudah beres, arahkan ke dashboard
@@ -84,14 +84,15 @@ class MosqueController extends Controller
             'has_online_donation' => 'nullable',
             'has_prayer_schedule' => 'nullable',
 
-            // VALIDASI PAKET (free / paid)
-            'package_type' => 'required|in:free,paid',
+            // 1. UPDATE VALIDASI: Sesuaikan dengan value baru dari form (free, 100000_1, 1000000_12)
+            'package_type' => 'required|in:free,100000_1,1000000_12',
 
             'description' => 'nullable|string',
             'agree' => 'required|accepted',
         ]);
 
         $status = 'approved'; 
+        // 2. Jika paket bukan 'free' (artinya 100000_1 atau 1000000_12), status pembayaran jadi 'unpaid'
         $paymentStatus = ($validated['package_type'] === 'free') ? 'approved' : 'unpaid';
 
         $mosque = Mosque::create([
@@ -130,7 +131,8 @@ class MosqueController extends Controller
             'facilities' => $validated['facilities'] ?? [],
             'programs' => $validated['programs'] ?? [],
 
-            'has_online_donation' => ($validated['package_type'] === 'paid'),
+            // 3. Fitur donasi aktif jika memilih paket berbayar
+            'has_online_donation' => ($validated['package_type'] !== 'free'),
             'has_prayer_schedule' => $request->has('has_prayer_schedule'),
 
             'package_type' => $validated['package_type'],
@@ -139,16 +141,19 @@ class MosqueController extends Controller
             'description' => $validated['description'] ?? null,
         ]);
 
+        // Jika memilih Free, baru arahkan ke dashboard
         if ($validated['package_type'] === 'free') {
             return redirect()
                 ->route('dashboard')
                 ->with('success', 'Pendaftaran akun Free berhasil! Selamat datang di Dashboard.');
         }
 
+        // Jika memilih Paket 1 Bulan atau 1 Tahun, arahkan langsung ke halaman pembayaran Midtrans
         return redirect()
             ->route('masjid.payment')
-            ->with('success', 'Pendaftaran berhasil! Silakan selesaikan pembayaran aktivasi.');
+            ->with('success', 'Pendaftaran berhasil! Silakan selesaikan pembayaran langganan Anda.');
     }
+    
 
     public function dashboard()
     {
@@ -162,9 +167,10 @@ class MosqueController extends Controller
             return redirect()->route('masjid.payment');
         }
 
-        if ($mosque->status === 'pending' && empty($mosque->payment_proof)) {
-            return redirect()->route('waiting');
-        }
+        // Catatan: pengecekan status 'pending' yang dulu mengarah ke halaman
+        // waiting sudah dihapus. Middleware CheckMosqueStatus sudah menangani
+        // pemblokiran akses dashboard untuk masjid yang statusnya belum
+        // approved dan paketnya bukan free.
 
         $totalAcara = class_exists('\App\Models\Acara') ? \App\Models\Acara::where('mosque_id', $mosque->id)->count() : 0;
         $totalPengumuman = class_exists('\App\Models\Pengumuman') ? \App\Models\Pengumuman::where('mosque_id', $mosque->id)->count() : 0;
@@ -419,21 +425,6 @@ class MosqueController extends Controller
         ));
     }
 
-    public function waiting()
-    {
-        $mosque = Mosque::where('user_id', Auth::id())->first();
-
-        if (!$mosque) {
-            return redirect()->route('daftar.masjid');
-        }
-
-        if ($mosque->status === 'approved' && $mosque->payment_status === 'approved') {
-            return redirect()->route('dashboard');
-        }
-
-        return view('mosque.waiting', compact('mosque')); 
-    }
-
     public function storeRenewal(Request $request)
     {
         $request->validate([
@@ -475,22 +466,21 @@ class MosqueController extends Controller
     }
 
     public function cancelRegistration()
-    {
-        $mosque = Mosque::where('user_id', Auth::id())
-                        ->where('status', 'pending')
-                        ->first();
+{
+    // Cari masjid berdasarkan user yang login saja agar pasti ketemu
+    $mosque = Mosque::where('user_id', Auth::id())->first();
 
-        if ($mosque) {
-            if ($mosque->payment_proof && Storage::disk('public')->exists($mosque->payment_proof)) {
-                Storage::disk('public')->delete($mosque->payment_proof);
-            }
-
-            $mosque->delete();
+    if ($mosque) {
+        if ($mosque->payment_proof && Storage::disk('public')->exists($mosque->payment_proof)) {
+            Storage::disk('public')->delete($mosque->payment_proof);
         }
 
-        return redirect()->route('daftar.masjid')
-                         ->with('success', 'Pendaftaran berhasil dibatalkan. Silakan isi kembali formulir pendaftaran masjid.');
+        $mosque->delete();
     }
+
+    return redirect()->route('daftar.masjid')
+                     ->with('success', 'Pendaftaran berhasil dibatalkan. Silakan isi kembali formulir pendaftaran masjid.');
+}
 
     public function unsubscribe(Request $request)
     {

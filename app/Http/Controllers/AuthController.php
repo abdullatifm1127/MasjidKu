@@ -59,12 +59,14 @@ class AuthController extends Controller
                 return redirect()->route('daftar.masjid');
             }
 
-            // Jika pembayaran atau status masjid masih pending, arahkan ke halaman tunggu/pending
-            if ($mosque->status === 'pending' || $mosque->payment_status === 'pending') {
-                return redirect()->route('waiting');
+            // Jika pembayaran masih pending, arahkan langsung ke halaman pembayaran
+            if ($mosque->payment_status === 'pending') {
+                return redirect()->route('masjid.payment');
             }
 
-            // Jika sudah Aktif / approved, langsung lempar ke dashboard admin.
+            // Selain itu, lempar ke dashboard.
+            // Kalau status masjid ternyata belum di-approve Superadmin,
+            // middleware CheckMosqueStatus yang akan menangani (redirect ke login + pesan error).
             return redirect()->route('dashboard');
         }
 

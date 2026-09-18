@@ -39,11 +39,20 @@ Route::get('/', function () {
 | Halaman Pembayaran & Perpanjangan Langganan Masjid
 |--------------------------------------------------------------------------
 */
+
+// Rute Webhook / Notifikasi dari Midtrans (HARUS DI LUAR middleware auth)
+Route::post('/masjid/pembayaran/notification', [PaymentController::class, 'handleNotification'])
+    ->name('masjid.payment.notification');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/masjid/pembayaran', [PaymentController::class, 'index'])->name('masjid.payment');
-    Route::post('/masjid/pembayaran/upload', [PaymentController::class, 'store'])->name('masjid.payment.upload');
+    
+    // Rute untuk membuat Snap Token Midtrans via Ajax/Axios
+    Route::post('/masjid/pembayaran/create', [PaymentController::class, 'createTransaction'])->name('masjid.payment.create');
 
-    Route::delete('/masjid/batalkan', [MosqueController::class, 'cancelRegistration'])->name('masjid.cancel');
+    // (Rute upload manual sudah dihapus karena beralih ke Midtrans)
+
+    Route::get('/masjid/batalkan', [MosqueController::class, 'cancelRegistration'])->name('masjid.cancel');
 
     // Perpanjangan Langganan
     Route::get('/masjid/perpanjangan', [MosqueController::class, 'createRenewal'])->name('masjid.perpanjangan.create');
@@ -110,11 +119,9 @@ Route::post('/superadmin/login', [LoginController::class, 'login'])->name('super
 
 /*
 |--------------------------------------------------------------------------
-| Halaman Waiting & Forgot Password
+| Forgot Password
 |--------------------------------------------------------------------------
 */
-Route::get('/waiting', [MosqueController::class, 'waiting'])->name('waiting');
-
 Route::get('/forgot-password', function () {
     return view('auth.login');
 })->name('password.request');
@@ -213,8 +220,8 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
         ->name('verifikasi.reject');
 
     // === TAMBAHAN: Hapus data masjid dari daftar verifikasi ===
-   Route::delete('/verifikasi/{id}', [MosqueController::class, 'destroyVerifikasi'])
-    ->name('verifikasi.destroy');
+    Route::delete('/verifikasi/{id}', [MosqueController::class, 'destroyVerifikasi'])
+        ->name('verifikasi.destroy');
 
     Route::get('/manajemen-masjid', [MosqueController::class, 'manajemenMasjid'])->name('manajemen-masjid');
     Route::patch('/manajemen-masjid/{id}/update-status', [MosqueManagementController::class, 'updateStatus'])->name('manajemen-masjid.updateStatus');
