@@ -1,0 +1,186 @@
+:root {
+    --ink: #1c2b27;
+    --ink-soft: #5b6d67;
+    --parchment: #faf7f0;
+    --sand: #e9e2d2;
+    --emerald: #14524a;
+    --emerald-dark: #0d3d37;
+    --emerald-pale: #eef4f2;
+    --gold: #b3894a;
+    --gold-soft: #d9bb85;
+    --amber-bg: #f6f0e1;
+    --amber-text: #8a5a1f;
+}
+* { box-sizing: border-box; }
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--emerald-dark);
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0);
+    background-size: 26px 26px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 3rem 1.25rem;
+}
+.pay-card {
+    background: var(--parchment);
+    padding: 0;
+    border-radius: 14px;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.5);
+    width: 100%;
+    max-width: 480px;
+    box-sizing: border-box;
+    overflow: hidden;
+    border: 1px solid rgba(179,137,74,0.25);
+}
+.pay-card > .card-inner {
+    padding: 2.5rem 2.25rem 2.25rem;
+}
+.card-band {
+    height: 10px;
+    background: repeating-linear-gradient(
+        135deg,
+        var(--gold) 0px, var(--gold) 8px,
+        var(--emerald) 8px, var(--emerald) 16px
+    );
+}
+.pay-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.55rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.65rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.55rem;
+    line-height: 1.25;
+}
+.pay-title svg { flex-shrink: 0; align-self: center; }
+.pay-desc {
+    color: var(--ink-soft);
+    font-size: 0.93rem;
+    margin-bottom: 1.75rem;
+    line-height: 1.6;
+    max-width: 42ch;
+}
+.pay-desc strong { color: var(--ink); font-weight: 600; }
+
+.bank-card {
+    background: #ffffff;
+    border: 1px solid var(--sand);
+    border-radius: 10px;
+    margin-bottom: 1.75rem;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(28,43,39,0.04);
+}
+.bank-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: var(--emerald-pale);
+    border-bottom: 1px solid var(--sand);
+}
+.bank-logo {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background: var(--emerald);
+    color: #fdfbf5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+    letter-spacing: 0.02em;
+}
+.bank-name-block { line-height: 1.35; }
+.bank-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 0.98rem;
+    color: var(--ink);
+}
+.bank-sub {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+}
+.bank-card-body { padding: 1.15rem 1.25rem 0.5rem; }
+.bank-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.65rem 0;
+}
+.bank-row-label {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    font-weight: 500;
+}
+.bank-row-value {
+    font-size: 0.92rem;
+    color: var(--ink);
+    font-weight: 600;
+    text-align: right;
+}
+.bank-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: var(--amber-bg);
+    border-top: 1px solid var(--sand);
+}
+.bank-total-label {
+    font-size: 0.78rem;
+    color: var(--amber-text);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.bank-total-value {
+    font-family: 'Fraunces', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--emerald-dark);
+}
+.btn-submit {
+    background: var(--emerald);
+    color: #fdfbf5;
+    border: none;
+    padding: 0.95rem 1.5rem;
+    width: 100%;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    box-shadow: 0 4px 12px rgba(20,82,74,0.25);
+}
+.btn-submit:hover { background: var(--emerald-dark); }
+.btn-cancel-container {
+    text-align: center;
+    margin-top: 1.25rem;
+}
+.btn-cancel {
+    background: none;
+    border: none;
+    color: #b3401f;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    font-family: 'Inter', sans-serif;
+}
+.btn-cancel:hover { color: #802c14; }

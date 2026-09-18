@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perpanjangan Langganan - MasjidKu</title>
+    <title>Langganan Masjid - MasjidKu</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -341,7 +341,7 @@
     <div class="wrap">
 
         <div class="page-head">
-            <h1>Perpanjangan Langganan Masjid</h1>
+            <h1>Upgrade Langganan Masjid</h1>
             <p>Pilih paket durasi langganan, lakukan transfer pembayaran, lalu unggah buktinya di bawah ini.</p>
         </div>
 
@@ -458,7 +458,7 @@
             <!-- Tombol Aksi -->
             <div class="actions">
                 <a href="{{ url('/dashboard') }}" class="btn-back">← Kembali ke Dashboard</a>
-                <button type="submit" class="btn-submit">Kirim Bukti Perpanjangan</button>
+                <button type="submit" class="btn-submit">Kirim Bukti</button>
             </div>
 
         </form>
