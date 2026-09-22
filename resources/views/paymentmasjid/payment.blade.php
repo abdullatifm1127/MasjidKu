@@ -20,7 +20,10 @@
             <div class="pay-desc">Selesaikan pembayaran biaya aktivasi platform untuk membuka akses dashboard dan modul publik masjid <strong>{{ $mosque->mosque_name }}</strong> secara instan.</div>
 
             @php
-                $rawPackage = $mosque->package_type ?? '100000_1';
+                // Cek dari session pending_renewal terlebih dahulu, jika tidak ada baru ambil dari database
+                $pendingRenewal = session('pending_renewal');
+                $rawPackage = $pendingRenewal['package'] ?? ($mosque->package_type ?? '100000_1');
+                
                 $nominal = 100000;
                 if ($rawPackage === '1000000_12') {
                     $nominal = 1000000;
@@ -56,14 +59,14 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                 Bayar Sekarang (Otomatis)
             </button>
-<!-- Tombol Batalkan Transaksi -->
-<div class="btn-cancel-container">
-    <a href="{{ route('masjid.cancel') }}" 
-       onclick="return confirm('Apakah Anda yakin ingin membatalkan transaksi dan mengisi ulang data pendaftaran?');" 
-       class="btn-cancel" style="display: inline-block;">
-        Batalkan Pendaftaran & Isi Ulang
-    </a>
-</div>
+            <!-- Tombol Batalkan Transaksi -->
+            <div class="btn-cancel-container">
+                <a href="{{ route('masjid.cancel') }}" 
+                   onclick="return confirm('Apakah Anda yakin ingin membatalkan transaksi ini?');" 
+                   class="btn-cancel" style="display: inline-block;">
+                    Batalkan & Kembali
+                </a>
+            </div>
         </div>
     </div>
 

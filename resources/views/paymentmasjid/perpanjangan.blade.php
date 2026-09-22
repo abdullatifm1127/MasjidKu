@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Langganan Masjid - MasjidKu</title>
+    <title>Upgrade & Perpanjangan Langganan Masjid - MasjidKu</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -13,7 +13,6 @@
             --paper: #faf9f6;
             --accent: #2f7a4f;
             --accent-soft: #eef7f0;
-            --highlight: #f5b400;
         }
 
         * { box-sizing: border-box; }
@@ -49,38 +48,12 @@
             margin: 0;
         }
 
-        .status-alert {
-            max-width: 640px;
-            margin: 0 auto 32px;
-            background: var(--accent-soft);
-            border: 1px solid #bfe3cb;
-            color: #1f5c39;
-            border-radius: 10px;
-            padding: 14px 18px;
-            font-size: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .status-alert strong { font-weight: 700; }
-
-        .status-alert button {
-            background: none;
-            border: none;
-            font-size: 18px;
-            line-height: 1;
-            color: #1f5c39;
-            cursor: pointer;
-        }
-
-        /* Pricing cards */
         .plans {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
             align-items: stretch;
+            margin-bottom: 40px;
         }
 
         .plan {
@@ -149,11 +122,6 @@
             letter-spacing: -0.01em;
         }
 
-        .plan-price .unit {
-            font-size: 12.5px;
-            color: var(--muted);
-        }
-
         .plan-note {
             font-size: 12.5px;
             color: var(--muted);
@@ -171,7 +139,6 @@
             font-weight: 600;
             font-size: 14px;
             text-align: center;
-            transition: background .15s ease, color .15s ease;
         }
 
         .plan input:checked + .plan-card .plan-select {
@@ -234,79 +201,10 @@
             letter-spacing: 0.02em;
         }
 
-        /* Section: payment info */
-        .section {
-            margin-top: 44px;
-        }
-
-        .section-label {
-            font-weight: 700;
-            font-size: 15px;
-            margin-bottom: 14px;
-        }
-
-        .pay-box {
-            background: var(--accent-soft);
-            border: 1px solid #bfe3cb;
-            border-radius: 12px;
-            padding: 20px 22px;
-        }
-
-        .pay-box p.lead {
-            color: var(--accent);
-            font-weight: 600;
-            font-size: 14px;
-            margin: 0 0 12px;
-        }
-
-        .pay-box ul {
-            margin: 0;
-            padding-left: 18px;
-            font-size: 14px;
-            color: #333;
-        }
-
-        .pay-box ul li { margin-bottom: 6px; }
-
-        .pay-box .hint {
-            color: var(--muted);
-            font-size: 12.5px;
-            margin: 12px 0 0;
-        }
-
-        /* Upload */
-        .upload-box {
-            border: 1.5px dashed var(--line);
-            border-radius: 12px;
-            padding: 22px;
-            background: #fff;
-        }
-
-        .upload-box input[type="file"] {
-            width: 100%;
-            font-size: 14px;
-            padding: 10px 0;
-        }
-
-        .upload-box small {
-            display: block;
-            color: var(--muted);
-            font-size: 12.5px;
-            margin-top: 8px;
-        }
-
-        .invalid-feedback {
-            color: #c0392b;
-            font-size: 12.5px;
-            margin-top: 6px;
-        }
-
-        /* Actions */
         .actions {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 40px;
         }
 
         .btn-back {
@@ -319,7 +217,7 @@
         .btn-back:hover { color: var(--ink); }
 
         .btn-submit {
-            background: var(--ink);
+            background: var(--accent);
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -329,7 +227,7 @@
             cursor: pointer;
         }
 
-        .btn-submit:hover { background: #000; }
+        .btn-submit:hover { background: #235c3c; }
 
         @media (max-width: 860px) {
             .plans { grid-template-columns: 1fr; }
@@ -341,23 +239,14 @@
     <div class="wrap">
 
         <div class="page-head">
-            <h1>Upgrade Langganan Masjid</h1>
-            <p>Pilih paket durasi langganan, lakukan transfer pembayaran, lalu unggah buktinya di bawah ini.</p>
+            <h1>Upgrade & Perpanjangan Langganan Masjid</h1>
+            <p>Pilih paket durasi langganan pilihan Anda. Pembayaran diproses otomatis via Midtrans.</p>
         </div>
 
-        @if (session('status'))
-            <div class="status-alert" role="alert">
-                <span><strong>Terima kasih.</strong> {{ session('status') }}</span>
-                <button type="button" onclick="this.closest('.status-alert').remove()" aria-label="Tutup">&times;</button>
-            </div>
-        @endif
-
-        <form action="{{ route('masjid.perpanjangan.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('masjid.perpanjangan.store') }}" method="POST">
             @csrf
 
-            <!-- Pilihan Paket Langganan -->
             <div class="plans">
-
                 <!-- Paket Free -->
                 <label class="plan">
                     <input type="radio" name="package" value="0_0" required>
@@ -366,39 +255,33 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
                         </div>
                         <p class="plan-name">Free</p>
-                        <p class="plan-tag">Kenali fitur dasar website masjid</p>
-                        <div class="plan-price">
-                            <span class="amount">Rp 0</span>
-                        </div>
+                        <p class="plan-tag">Fitur dasar website masjid</p>
+                        <div class="plan-price"><span class="amount">Rp 0</span></div>
                         <p class="plan-note">Masa uji coba terbatas</p>
                         <span class="plan-select"></span>
                         <hr class="plan-divider">
                         <ul class="plan-feats">
-                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Profil & informasi masjid dasar</li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Profil & informasi dasar</li>
                             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Jadwal sholat otomatis</li>
-                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Batas fitur & kapasitas terbatas</li>
                         </ul>
                     </div>
                 </label>
 
                 <!-- Paket 1 Bulan -->
                 <label class="plan">
-                    <input type="radio" name="package" value="100000_1">
+                    <input type="radio" name="package" value="100000_1" checked>
                     <div class="plan-card">
                         <div class="plan-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v4M12 17v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M3 12h4M17 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
                         </div>
                         <p class="plan-name">Paket 1 Bulan</p>
-                        <p class="plan-tag">Untuk pengelolaan sehari-hari</p>
-                        <div class="plan-price">
-                            <span class="amount">Rp 100rb</span>
-                        </div>
+                        <p class="plan-tag">Pengelolaan sehari-hari</p>
+                        <div class="plan-price"><span class="amount">Rp 100rb</span></div>
                         <p class="plan-note">Rp 100.000 / bulan</p>
                         <span class="plan-select"></span>
                         <hr class="plan-divider">
                         <ul class="plan-feats">
-                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Semua fitur Free, dan:</li>
-                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Akses penuh fitur standar website masjid</li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Akses penuh fitur standar</li>
                             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Masa aktif 30 hari</li>
                         </ul>
                     </div>
@@ -413,75 +296,41 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v4M12 17v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M3 12h4M17 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
                         </div>
                         <p class="plan-name">Paket 1 Tahun</p>
-                        <p class="plan-tag">Bebas repot memperpanjang tiap bulan</p>
-                        <div class="plan-price">
-                            <span class="amount">Rp 1jt</span>
-                        </div>
+                        <p class="plan-tag">Bebas repot tiap bulan</p>
+                        <div class="plan-price"><span class="amount">Rp 1jt</span></div>
                         <p class="plan-note">Setara Rp 83.300 / bulan</p>
                         <span class="plan-select"></span>
                         <hr class="plan-divider">
                         <ul class="plan-feats">
-                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Semua fitur Paket 1 Bulan, dan:</li>
                             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Masa aktif penuh 12 bulan</li>
-                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Harga per bulan paling rendah</li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Harga per bulan paling hemat</li>
                         </ul>
                     </div>
                 </label>
-
             </div>
 
-            <!-- Informasi Rekening / Pembayaran -->
-            <div class="section" id="payment-section">
-                <p class="section-label">Informasi rekening tujuan transfer</p>
-                <div class="pay-box">
-                    <p class="lead">Lakukan transfer pembayaran ke salah satu rekening resmi MasjidKu:</p>
-                    <ul>
-                        <li><strong>Bank Syariah Indonesia (BSI):</strong> 7123-4567-89 a.n. Yayasan MasjidKu Digital</li>
-                        <li><strong>Bank Central Asia (BCA):</strong> 1234-5678-90 a.n. MasjidKu Indonesia</li>
-                    </ul>
-                    <p class="hint">Pastikan nominal transfer sesuai dengan harga paket yang Anda pilih di atas.</p>
-                </div>
-            </div>
-
-            <!-- Upload Bukti Transfer -->
-            <div class="section" id="upload-section">
-                <p class="section-label">Unggah bukti transfer</p>
-                <div class="upload-box">
-                    <input type="file" name="payment_proof" id="payment-proof-input" class="@error('payment_proof') is-invalid @enderror" required>
-                    <small>Format yang diizinkan: JPG, PNG, AVIF. Maksimal 2MB.</small>
-                    @error('payment_proof')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-            </div>
-
-            <!-- Tombol Aksi -->
             <div class="actions">
                 <a href="{{ url('/dashboard') }}" class="btn-back">← Kembali ke Dashboard</a>
-                <button type="submit" class="btn-submit">Kirim Bukti</button>
+                <button type="submit" class="btn-submit" id="submit-btn">Lanjutkan ke Pembayaran Otomatis</button>
             </div>
-
         </form>
-
     </div>
 
     <script>
-        const packageInputs = document.querySelectorAll('input[name="package"]');
-        const paymentSection = document.getElementById('payment-section');
-        const uploadSection = document.getElementById('upload-section');
-        const proofInput = document.getElementById('payment-proof-input');
+        const packageRadios = document.querySelectorAll('input[name="package"]');
+        const submitBtn = document.getElementById('submit-btn');
 
-        function togglePaymentSections() {
-            const checked = document.querySelector('input[name="package"]:checked');
-            const isFree = checked && checked.value.startsWith('0_');
-            paymentSection.style.display = isFree ? 'none' : 'block';
-            uploadSection.style.display = isFree ? 'none' : 'block';
-            proofInput.required = !isFree;
+        function updateButtonText() {
+            const selected = document.querySelector('input[name="package"]:checked');
+            if (selected && selected.value.startsWith('0_')) {
+                submitBtn.textContent = 'Simpan & Gunakan Paket Free';
+            } else {
+                submitBtn.textContent = 'Lanjutkan ke Pembayaran Otomatis';
+            }
         }
 
-        packageInputs.forEach(input => input.addEventListener('change', togglePaymentSections));
-        togglePaymentSections();
+        packageRadios.forEach(radio => radio.addEventListener('change', updateButtonText));
+        updateButtonText();
     </script>
-
 </body>
 </html>

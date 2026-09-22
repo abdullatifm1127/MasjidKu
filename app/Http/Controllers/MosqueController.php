@@ -429,7 +429,6 @@ class MosqueController extends Controller
     {
         $request->validate([
             'package' => 'required',
-            'payment_proof' => 'required|image|mimes:jpeg,png,jpg,avif|max:2048',
         ]);
 
         $mosque = Mosque::where('user_id', Auth::id())->first();
@@ -438,26 +437,33 @@ class MosqueController extends Controller
             return redirect()->back()->with('error', 'Data masjid tidak ditemukan.');
         }
 
-        list($amount, $durationMonths) = explode('_', $request->package);
+        // Jika memilih Paket Free (0_0), langsung terapkan perubahannya tanpa Midtrans
+        if ($request->package === '0_0') {
+            $mosque->update([
+                'package_type'        => 'free',
+                'payment_status'      => 'approved',
+                'has_online_donation' => false, // Matikan donasi online untuk paket free
+                'order_id'            => null,
+            ]);
 
-        $path = $request->file('payment_proof')->store('payment-proofs', 'public');
+            return redirect()->route('dashboard')
+                             ->with('status', 'Paket Free berhasil dipilih. Fitur donasi online dinonaktifkan.');
+        }
 
-        Subscription::create([
-            'mosque_id' => $mosque->id,
-            'amount' => $amount,
-            'payment_proof' => $path,
-            'status' => 'pending',
+        // Untuk paket berbayar (100000_1 atau 1000000_12):
+        // SIMPAN KE SESSION SEMENTARA (Jangan ubah data masjid dulu agar aman jika dibatalkan)
+        $orderId = 'RENEW-' . time() . '-' . rand(100, 999);
+
+        session([
+            'pending_renewal' => [
+                'package'   => $request->package,
+                'order_id'  => $orderId,
+                'mosque_id' => $mosque->id,
+            ]
         ]);
 
-        $mosque->update([
-            'status'             => 'approved',          
-            'payment_status'     => 'pending',           
-            'package_type'       => 'paid',
-            'has_online_donation'=> true,         
-            'payment_proof'      => $path 
-        ]);
-
-        return redirect()->route('dashboard')->with('status', 'Bukti pembayaran berhasil dikirim. Modul donasi akan aktif setelah diverifikasi Superadmin.');
+        // Langsung arahkan ke halaman pembayaran Midtrans
+        return redirect()->route('masjid.payment');
     }
 
     public function createRenewal()
@@ -465,9 +471,16 @@ class MosqueController extends Controller
         return view('paymentmasjid.perpanjangan');
     }
 
-    public function cancelRegistration()
+   public function cancelRegistration()
 {
-    // Cari masjid berdasarkan user yang login saja agar pasti ketemu
+    // Jika ini dibatalkan dari proses PERPANJANGAN langganan
+    if (session()->has('pending_renewal')) {
+        session()->forget('pending_renewal'); // Hapus sesi perpanjangan
+        return redirect()->route('dashboard')
+                         ->with('info', 'Perpanjangan langganan dibatalkan.');
+    }
+
+    // Jika ini dibatalkan dari proses pendaftaran awal (registrasi baru)
     $mosque = Mosque::where('user_id', Auth::id())->first();
 
     if ($mosque) {
