@@ -23,25 +23,41 @@ class PaymentController extends Controller
 
     // Menampilkan halaman form pembayaran (menampilkan tombol bayar Midtrans Snap)
     public function index()
-    {
-        $mosque = Mosque::where('user_id', Auth::id())->first();
+{
+    $mosque = Mosque::where('user_id', Auth::id())->first();
 
-        if (!$mosque) {
-            return redirect()->route('daftar.masjid');
-        }
+    if (!$mosque) {
+        return redirect()->route('daftar.masjid');
+    }
 
+    $pendingRenewal = session('pending_renewal');
+
+    if (!$pendingRenewal) {
         $paymentStatus = strtolower($mosque->payment_status ?? '');
         if ($paymentStatus === 'free' || $paymentStatus === 'gratis') {
             return redirect()->route('dashboard');
         }
 
-        // Jika sudah lunas / approved
         if ($mosque->status === 'approved' && $mosque->payment_status === 'approved') {
             return redirect()->route('dashboard');
         }
-
-        return view('paymentmasjid.payment', compact('mosque'));
+        
+        $packageType = $mosque->package_type ?? '100000_1';
+    } else {
+        $packageType = $pendingRenewal['package'];
     }
+
+    // Tentukan teks dan nominal untuk ditampilkan di layar
+    if ($packageType === '1000000_12') {
+        $packageName = 'Langganan 1 Tahun';
+        $amountFormatted = 'Rp 1.000.000';
+    } else {
+        $packageName = 'Langganan 1 Bulan';
+        $amountFormatted = 'Rp 100.000';
+    }
+
+    return view('paymentmasjid.payment', compact('mosque', 'packageName', 'amountFormatted'));
+}
 
     public function createTransaction(Request $request)
     {
@@ -51,29 +67,43 @@ class PaymentController extends Controller
             return response()->json(['error' => 'Data masjid tidak ditemukan.'], 404);
         }
 
-        $orderId = 'MOSQUE-' . $mosque->id . '-' . time();
-        
-        // Tentukan nominal berdasarkan package_type yang dipilih saat registrasi
-        $grossAmount = 100000; // Default 1 bulan
-        if ($mosque->package_type === '1000000_12') {
-            $grossAmount = 1000000; // 1 Tahun
+        // Ambil data pilihan paket dari Session perpanjangan
+        $pendingRenewal = session('pending_renewal');
+
+        if ($pendingRenewal) {
+            $orderId = $pendingRenewal['order_id'];
+            $packageType = $pendingRenewal['package']; // Contoh: '1000000_12' atau '100000_1'
+        } else {
+            $orderId = 'MOSQUE-' . $mosque->id . '-' . time();
+            $packageType = $mosque->package_type ?? '100000_1';
         }
 
-        // Simpan order_id ke database
+        // AMBIL NOMINAL HARGA SECARA OTOMATIS DARI VALUE PAKET
+        // Format value: "100000_1" (100rb) atau "1000000_12" (1jt)
+        if (str_contains($packageType, '_')) {
+            list($grossAmount, $durationMonths) = explode('_', $packageType);
+            $grossAmount = (int) $grossAmount;
+        } else {
+            // Fallback jika berupa teks biasa
+            $grossAmount = ($packageType === '1000000_12') ? 1000000 : 100000;
+        }
+
+        // Simpan order_id dan package_type terbaru ke database
         $mosque->update([
-            'order_id' => $orderId,
+            'order_id'       => $orderId,
+            'package_type'   => $packageType,
             'payment_status' => 'pending'
         ]);
 
         $params = [
             'transaction_details' => [
-                'order_id' => $orderId,
-                'gross_amount' => $grossAmount,
+                'order_id'     => $orderId,
+                'gross_amount' => $grossAmount, // Nominal sekarang otomatis dinamis (100rb atau 1jt)
             ],
             'customer_details' => [
                 'first_name' => $mosque->mosque_name,
-                'email' => $mosque->email,
-                'phone' => $mosque->phone,
+                'email'      => $mosque->email,
+                'phone'      => $mosque->phone,
             ],
         ];
 
@@ -126,6 +156,9 @@ class PaymentController extends Controller
 
         $mosque->save();
 
+        // Hapus sesi perpanjangan setelah notifikasi diproses
+        session()->forget('pending_renewal');
+
         return response()->json(['message' => 'Notification successfully handled']);
     }
 
@@ -143,6 +176,8 @@ class PaymentController extends Controller
 
             $mosque->delete();
         }
+
+        session()->forget('pending_renewal');
 
         return redirect()->route('daftar.masjid')->with('info', 'Pendaftaran dibatalkan. Silakan isi kembali form pendaftaran.');
     }
