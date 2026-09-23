@@ -24,6 +24,14 @@ class DonasiGaleri extends Model
         'nominal_terpakai' => 'decimal:2',
     ];
 
+    /**
+     * Accessor untuk mendapatkan URL lengkap file foto galeri.
+     */
+    public function getFotoUrlAttribute()
+    {
+        return $this->foto ? asset('storage/' . $this->foto) : null;
+    }
+
     public function mosque()
     {
         return $this->belongsTo(Mosque::class);
