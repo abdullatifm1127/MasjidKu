@@ -61,6 +61,8 @@ class Mosque extends Model
         'has_online_donation' => 'boolean',
         'has_prayer_schedule' => 'boolean',
         'subscription_expires_at' => 'datetime',
+        'zakat_fitrah_default' => 'decimal:2', // <-- TAMBAHKAN INI
+        'zakat_nisab' => 'decimal:2',          // <-- TAMBAHKAN INI
     ];
 
     protected static function boot()

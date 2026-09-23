@@ -355,11 +355,11 @@
                             @method('PUT')
                             <div style="margin-bottom: 1rem;">
                                 <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Nominal per Jiwa (Rp)</label>
-                                <input type="number" step="1000" min="1000" name="zakat_fitrah_default" class="form-control-modern" value="{{ old('zakat_fitrah_default', $mosque->zakat_fitrah_default ?? 45000) }}" required>
+                                <input type="number" step="1000" min="1000" name="zakat_fitrah_default" class="form-control-modern" value="{{ $mosque->zakat_fitrah_default ?? 45000 }}" required>
                             </div>
                             <div style="margin-bottom: 1rem;">
                                 <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Nisab Zakat Mal (Rp)</label>
-                                <input type="number" step="1000" min="0" name="zakat_nisab" class="form-control-modern" value="{{ old('zakat_nisab', $mosque->zakat_nisab ?? 85000000) }}" required>
+                                <input type="number" step="1000" min="0" name="zakat_nisab" class="form-control-modern" value="{{ $mosque->zakat_nisab ?? 85000000 }}" required>
                                 <small style="color: #94a3b8; font-size: 0.75rem;">Dipakai kalkulator zakat mal (2,5%) di halaman publik.</small>
                             </div>
                             <button type="submit" class="btn-primary-modern" style="width: 100%; justify-content: center;">Simpan Pengaturan</button>
