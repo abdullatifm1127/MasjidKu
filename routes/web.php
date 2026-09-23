@@ -50,9 +50,8 @@ Route::middleware(['auth'])->group(function () {
     // Rute untuk membuat Snap Token Midtrans via Ajax/Axios
     Route::post('/masjid/pembayaran/create', [PaymentController::class, 'createTransaction'])->name('masjid.payment.create');
 
-    // (Rute upload manual sudah dihapus karena beralih ke Midtrans)
-
-    Route::get('/masjid/batalkan', [MosqueController::class, 'cancelRegistration'])->name('masjid.cancel');
+    // Rute Pembatalan Pendaftaran/Pembayaran
+    Route::get('/masjid/batalkan', [PaymentController::class, 'cancelRegistration'])->name('masjid.cancel');
 
     // Perpanjangan Langganan
     Route::get('/masjid/perpanjangan', [MosqueController::class, 'createRenewal'])->name('masjid.perpanjangan.create');
@@ -72,7 +71,7 @@ Route::get('/masjid/{slug}', [PublicMosqueController::class, 'show'])->name('mas
 // Halaman Publik Donasi (Berdasarkan Slug Masjid)
 Route::get('/masjid/{slug}/donasi', [PublicMosqueController::class, 'showDonasi'])->name('masjid.donasi.publik');
 
-// Rute Publik Store Donasi (Ditambahkan)
+// Rute Publik Store Donasi
 Route::post('/masjid/{slug}/donasi', [DonasiController::class, 'store'])
     ->name('masjid.donasi.store');
 
@@ -140,7 +139,7 @@ Route::middleware(['auth', 'check.status'])->group(function () {
     Route::get('/dashboard', [MosqueController::class, 'dashboard'])->name('dashboard');
     Route::get('/admin/dashboard', [MosqueController::class, 'dashboard'])->name('admin.dashboard');
 
-    // TAMBAHKAN RUTE FITUR TERKUNCI DI SINI
+    // Rute Fitur Terkunci
     Route::get('/admin/fitur-terkunci', function () {
         return view('auth.adminmasjid.fiturTerkunci');
     })->name('admin.fitur.terkunci');
@@ -174,7 +173,16 @@ Route::middleware(['auth', 'check.status'])->group(function () {
     Route::post('/admin/donasi/galeri', [DonasiAdminController::class, 'storeGaleri'])->name('admin.donasi.galeri.store');
     Route::delete('/admin/donasi/galeri/{id}', [DonasiAdminController::class, 'destroyGaleri'])->name('admin.donasi.galeri.destroy');
 
-    // Rute Kategori Donasi Admin (Ditambahkan)
+    // Manajemen Rekening Bank & QRIS Admin Donasi (BARU)
+    Route::post('/admin/donasi/rekening', [DonasiAdminController::class, 'storeBankAccount'])->name('admin.donasi.rekening.store');
+    Route::put('/admin/donasi/rekening/{id}', [DonasiAdminController::class, 'updateBankAccount'])->name('admin.donasi.rekening.update');
+    Route::patch('/admin/donasi/rekening/{id}/toggle', [DonasiAdminController::class, 'toggleBankAccount'])->name('admin.donasi.rekening.toggle');
+    Route::delete('/admin/donasi/rekening/{id}', [DonasiAdminController::class, 'destroyBankAccount'])->name('admin.donasi.rekening.destroy');
+
+    Route::post('/admin/donasi/qris', [DonasiAdminController::class, 'updateQris'])->name('admin.donasi.qris.update');
+    Route::delete('/admin/donasi/qris', [DonasiAdminController::class, 'destroyQris'])->name('admin.donasi.qris.destroy');
+
+    // Rute Kategori Donasi Admin
     Route::post('/admin/donasi/kategori', [DonationCategoryController::class, 'store'])
         ->name('admin.donasi.kategori.store');
 
@@ -187,7 +195,7 @@ Route::middleware(['auth', 'check.status'])->group(function () {
     Route::delete('/admin/donasi/kategori/{kategori}', [DonationCategoryController::class, 'destroy'])
         ->name('admin.donasi.kategori.destroy');
 
-    // ===== Data Jamaah (Dimasukkan ke dalam Group Middleware Admin) =====
+    // Data Jamaah
     Route::get('/admin/jamaah', [JamaahController::class, 'index'])
         ->name('admin.jamaah');
 
@@ -219,7 +227,6 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
     Route::put('/verifikasi/{id}/reject', [MosqueController::class, 'rejectVerifikasi'])
         ->name('verifikasi.reject');
 
-    // === TAMBAHAN: Hapus data masjid dari daftar verifikasi ===
     Route::delete('/verifikasi/{id}', [MosqueController::class, 'destroyVerifikasi'])
         ->name('verifikasi.destroy');
 

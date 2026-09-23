@@ -7,6 +7,7 @@ use App\Models\Donasi;
 use App\Models\DonasiGaleri;
 use App\Models\DonationCategory;
 use App\Models\Mosque;
+use App\Models\MosqueBankAccount; // <-- BARU: Model rekening bank
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -52,8 +53,6 @@ class DonasiAdminController extends Controller
             ->get();
 
         // ===== BARU: daftar donasi masuk (butuh admin bisa melihat & memverifikasi) =====
-        // 10 transaksi terbaru untuk ringkasan cepat di dashboard donasi.
-        // Peta key kategori -> judul, supaya tabel donasi tidak perlu join berulang.
         $categoryTitles = $donationCategories->pluck('title', 'key');
 
         $recentDonations = Donasi::where('mosque_id', $mosque->id)
@@ -84,6 +83,7 @@ class DonasiAdminController extends Controller
             'items'              => $items,
             'recentDonations'    => $recentDonations,
             'summary'            => $summary,
+            'bankAccounts'       => $mosque->bankAccounts, // <-- BARU: Kirim data rekening bank ke view
         ]);
     }
 
@@ -96,8 +96,6 @@ class DonasiAdminController extends Controller
 
         $data = $request->validate([
             'zakat_fitrah_default' => ['required', 'numeric', 'min:0'],
-            // Kolom ini sudah dipakai di halaman publik (donasi.blade.php: data-nisab="{{ $mosque->zakat_nisab }}")
-            // tapi belum bisa diubah admin dari mana pun — sekarang dilengkapi di sini.
             'zakat_nisab' => ['required', 'numeric', 'min:0'],
         ]);
 
@@ -164,14 +162,7 @@ class DonasiAdminController extends Controller
     }
 
     /**
-     * ===== BARU =====
      * PATCH /admin/donasi/{donasi}/status
-     *
-     * Verifikasi manual: admin menandai sebuah donasi sebagai "diterima" setelah
-     * mengecek mutasi rekening/e-wallet masjid, atau "ditolak" kalau dana ternyata
-     * tidak pernah masuk (mis. donatur batal transfer). Ini pengganti sementara untuk
-     * konfirmasi otomatis payment gateway yang belum diimplementasikan di sistem ini
-     * (lihat CATATAN-BACKEND.md untuk opsi integrasi Midtrans/Xendit ke depannya).
      */
     public function updateStatus(Request $request, Donasi $donasi)
     {
@@ -185,5 +176,116 @@ class DonasiAdminController extends Controller
         $donasi->update(['status' => $data['status']]);
 
         return back()->with('success', 'Status donasi ' . $donasi->no_referensi . ' diperbarui menjadi "' . $data['status'] . '".');
+    }
+
+    // ==========================================
+    // BARU: MANAJEMEN REKENING BANK & QRIS
+    // ==========================================
+
+    /**
+     * POST /admin/donasi/rekening
+     */
+    public function storeBankAccount(Request $request)
+    {
+        $mosque = $this->mosque();
+        
+        $data = $request->validate([
+            'bank_name'      => ['required', 'string', 'max:100'],
+            'account_number' => ['required', 'string', 'max:50'],
+            'account_holder' => ['required', 'string', 'max:100'],
+        ]);
+
+        MosqueBankAccount::create([
+            'mosque_id'      => $mosque->id,
+            'bank_name'      => $data['bank_name'],
+            'account_number' => $data['account_number'],
+            'account_holder' => $data['account_holder'],
+            'sort_order'     => (MosqueBankAccount::where('mosque_id', $mosque->id)->max('sort_order') ?? -1) + 1,
+            'is_active'      => true,
+        ]);
+
+        return back()->with('success', 'Rekening bank berhasil ditambahkan.');
+    }
+
+    /**
+     * PUT /admin/donasi/rekening/{id}
+     */
+    public function updateBankAccount(Request $request, int $id)
+    {
+        $mosque = $this->mosque();
+        $rekening = MosqueBankAccount::where('mosque_id', $mosque->id)->findOrFail($id);
+        
+        $data = $request->validate([
+            'bank_name'      => ['required', 'string', 'max:100'],
+            'account_number' => ['required', 'string', 'max:50'],
+            'account_holder' => ['required', 'string', 'max:100'],
+        ]);
+
+        $rekening->update($data);
+
+        return back()->with('success', 'Rekening bank berhasil diperbarui.');
+    }
+
+    /**
+     * PATCH /admin/donasi/rekening/{id}/toggle
+     */
+    public function toggleBankAccount(int $id)
+    {
+        $mosque = $this->mosque();
+        $rekening = MosqueBankAccount::where('mosque_id', $mosque->id)->findOrFail($id);
+        
+        $rekening->update(['is_active' => ! $rekening->is_active]);
+
+        return back()->with('success', $rekening->is_active ? 'Rekening diaktifkan.' : 'Rekening dinonaktifkan.');
+    }
+
+    /**
+     * DELETE /admin/donasi/rekening/{id}
+     */
+    public function destroyBankAccount(int $id)
+    {
+        $mosque = $this->mosque();
+        $rekening = MosqueBankAccount::where('mosque_id', $mosque->id)->findOrFail($id);
+        
+        $rekening->delete();
+
+        return back()->with('success', 'Rekening bank dihapus.');
+    }
+
+    /**
+     * POST /admin/donasi/qris
+     */
+    public function updateQris(Request $request)
+    {
+        $mosque = $this->mosque();
+        
+        $request->validate([
+            'qris_image' => ['required', 'image', 'max:2048'], // maks 2MB
+        ]);
+
+        // Hapus file QRIS lama supaya storage tidak menumpuk
+        if ($mosque->qris_image) {
+            Storage::disk('public')->delete($mosque->qris_image);
+        }
+
+        $path = $request->file('qris_image')->store('qris', 'public');
+        $mosque->update(['qris_image' => $path]);
+
+        return back()->with('success', 'Gambar QRIS berhasil diperbarui.');
+    }
+
+    /**
+     * DELETE /admin/donasi/qris
+     */
+    public function destroyQris()
+    {
+        $mosque = $this->mosque();
+        
+        if ($mosque->qris_image) {
+            Storage::disk('public')->delete($mosque->qris_image);
+            $mosque->update(['qris_image' => null]);
+        }
+
+        return back()->with('success', 'Gambar QRIS dihapus.');
     }
 }

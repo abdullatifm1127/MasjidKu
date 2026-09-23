@@ -23,41 +23,41 @@ class PaymentController extends Controller
 
     // Menampilkan halaman form pembayaran (menampilkan tombol bayar Midtrans Snap)
     public function index()
-{
-    $mosque = Mosque::where('user_id', Auth::id())->first();
+    {
+        $mosque = Mosque::where('user_id', Auth::id())->first();
 
-    if (!$mosque) {
-        return redirect()->route('daftar.masjid');
-    }
-
-    $pendingRenewal = session('pending_renewal');
-
-    if (!$pendingRenewal) {
-        $paymentStatus = strtolower($mosque->payment_status ?? '');
-        if ($paymentStatus === 'free' || $paymentStatus === 'gratis') {
-            return redirect()->route('dashboard');
+        if (!$mosque) {
+            return redirect()->route('daftar.masjid');
         }
 
-        if ($mosque->status === 'approved' && $mosque->payment_status === 'approved') {
-            return redirect()->route('dashboard');
+        $pendingRenewal = session('pending_renewal');
+
+        if (!$pendingRenewal) {
+            $paymentStatus = strtolower($mosque->payment_status ?? '');
+            if ($paymentStatus === 'free' || $paymentStatus === 'gratis') {
+                return redirect()->route('dashboard');
+            }
+
+            if ($mosque->status === 'approved' && $mosque->payment_status === 'approved') {
+                return redirect()->route('dashboard');
+            }
+            
+            $packageType = $mosque->package_type ?? '100000_1';
+        } else {
+            $packageType = $pendingRenewal['package'];
         }
-        
-        $packageType = $mosque->package_type ?? '100000_1';
-    } else {
-        $packageType = $pendingRenewal['package'];
-    }
 
-    // Tentukan teks dan nominal untuk ditampilkan di layar
-    if ($packageType === '1000000_12') {
-        $packageName = 'Langganan 1 Tahun';
-        $amountFormatted = 'Rp 1.000.000';
-    } else {
-        $packageName = 'Langganan 1 Bulan';
-        $amountFormatted = 'Rp 100.000';
-    }
+        // Tentukan teks dan nominal untuk ditampilkan di layar (1 Bulan = Rp 100.000)
+        if ($packageType === '1000000_12') {
+            $packageName = 'Langganan 1 Tahun';
+            $amountFormatted = 'Rp 1.000.000';
+        } else {
+            $packageName = 'Langganan 1 Bulan';
+            $amountFormatted = 'Rp 100.000';
+        }
 
-    return view('paymentmasjid.payment', compact('mosque', 'packageName', 'amountFormatted'));
-}
+        return view('paymentmasjid.payment', compact('mosque', 'packageName', 'amountFormatted'));
+    }
 
     public function createTransaction(Request $request)
     {
@@ -72,19 +72,17 @@ class PaymentController extends Controller
 
         if ($pendingRenewal) {
             $orderId = $pendingRenewal['order_id'];
-            $packageType = $pendingRenewal['package']; // Contoh: '1000000_12' atau '100000_1'
+            $packageType = $pendingRenewal['package']; 
         } else {
             $orderId = 'MOSQUE-' . $mosque->id . '-' . time();
             $packageType = $mosque->package_type ?? '100000_1';
         }
 
-        // AMBIL NOMINAL HARGA SECARA OTOMATIS DARI VALUE PAKET
-        // Format value: "100000_1" (100rb) atau "1000000_12" (1jt)
+        // AMBIL NOMINAL HARGA SECARA OTOMATIS (1 Bulan = 100000, 1 Tahun = 1000000)
         if (str_contains($packageType, '_')) {
             list($grossAmount, $durationMonths) = explode('_', $packageType);
             $grossAmount = (int) $grossAmount;
         } else {
-            // Fallback jika berupa teks biasa
             $grossAmount = ($packageType === '1000000_12') ? 1000000 : 100000;
         }
 
@@ -95,15 +93,20 @@ class PaymentController extends Controller
             'payment_status' => 'pending'
         ]);
 
+        // Validasi email agar tidak error di Midtrans
+        $customerEmail = filter_var($mosque->email, FILTER_VALIDATE_EMAIL) 
+            ? $mosque->email 
+            : (Auth::user()->email ?? 'admin@simmasjid.test');
+
         $params = [
             'transaction_details' => [
                 'order_id'     => $orderId,
-                'gross_amount' => $grossAmount, // Nominal sekarang otomatis dinamis (100rb atau 1jt)
+                'gross_amount' => $grossAmount, 
             ],
             'customer_details' => [
                 'first_name' => $mosque->mosque_name,
-                'email'      => $mosque->email,
-                'phone'      => $mosque->phone,
+                'email'      => $customerEmail, // Menggunakan email yang sudah dijamin valid
+                'phone'      => $mosque->phone ?? '08123456789',
             ],
         ];
 
@@ -162,23 +165,37 @@ class PaymentController extends Controller
         return response()->json(['message' => 'Notification successfully handled']);
     }
 
-    /**
-     * Membatalkan pendaftaran & menghapus data masjid agar user bisa daftar ulang.
-     */
-    public function cancelRegistration()
-    {
-        $mosque = Mosque::where('user_id', Auth::id())->first();
+     public function cancelRegistration()
+{
+    // Cek dulu apakah ini pembatalan PERPANJANGAN (mosque sudah pernah approved)
+    // sebelum session-nya dihapus, karena setelah forget() kita kehilangan info ini.
+    $isRenewalCancel = session()->has('pending_renewal');
 
-        if ($mosque) {
-            if ($mosque->payment_proof && Storage::disk('public')->exists($mosque->payment_proof)) {
-                Storage::disk('public')->delete($mosque->payment_proof);
-            }
+    // Bersihkan sesi perpanjangan
+    session()->forget('pending_renewal');
 
-            $mosque->delete();
+    $mosque = Mosque::where('user_id', Auth::id())->first();
+
+    if ($mosque) {
+        if ($isRenewalCancel) {
+            // Kasus PERPANJANGAN dibatalkan: akun sudah aktif sebelumnya,
+            // jangan sentuh payment_status/package_type sama sekali.
+            // Langganan lama tetap berjalan sampai masa aktifnya habis.
+            return redirect()->route('dashboard')
+                ->with('info', 'Perpanjangan langganan dibatalkan. Langganan Anda saat ini tetap berjalan.');
         }
 
-        session()->forget('pending_renewal');
+        // Kasus REGISTRASI AWAL dibatalkan: masjid belum pernah approved/bayar.
+        // Downgrade otomatis ke paket Free supaya tidak nyangkut di halaman pembayaran.
+        $mosque->update([
+            'package_type'   => 'free',
+            'payment_status' => 'free',
+        ]);
 
-        return redirect()->route('daftar.masjid')->with('info', 'Pendaftaran dibatalkan. Silakan isi kembali form pendaftaran.');
+        return redirect()->route('dashboard')
+            ->with('info', 'Pembayaran dibatalkan. Akun Anda menggunakan paket Free.');
     }
+
+    return redirect()->route('dashboard')->with('info', 'Pembayaran dibatalkan.');
+}
 }

@@ -49,7 +49,8 @@ class Mosque extends Model
         'about_photo',
         'about_vision',
         'about_photo_secondary',
-        'subscription_expires_at', // <-- DITAMBAHKAN
+        'subscription_expires_at',
+        'qris_image', // <-- DITAMBAHKAN (Kolom QRIS baru)
     ];
 
     protected $casts = [
@@ -57,7 +58,7 @@ class Mosque extends Model
         'programs' => 'array',
         'has_online_donation' => 'boolean',
         'has_prayer_schedule' => 'boolean',
-        'subscription_expires_at' => 'datetime', // <-- DITAMBAHKAN
+        'subscription_expires_at' => 'datetime',
     ];
 
     protected static function boot()
@@ -90,6 +91,27 @@ class Mosque extends Model
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);
+    }
+
+    // ==========================================
+    // TAMBAHAN: Relasi & Accessor Rekening & QRIS
+    // ==========================================
+
+    public function bankAccounts(): HasMany
+    {
+        return $this->hasMany(MosqueBankAccount::class)->orderBy('sort_order');
+    }
+
+    public function activeBankAccounts(): HasMany
+    {
+        return $this->hasMany(MosqueBankAccount::class)
+            ->where('is_active', true)
+            ->orderBy('sort_order');
+    }
+
+    public function getQrisUrlAttribute()
+    {
+        return $this->qris_image ? asset('storage/' . $this->qris_image) : null;
     }
 
     /**

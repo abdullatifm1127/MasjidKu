@@ -84,15 +84,12 @@ class MosqueController extends Controller
             'has_online_donation' => 'nullable',
             'has_prayer_schedule' => 'nullable',
 
-            // 1. UPDATE VALIDASI: Sesuaikan dengan value baru dari form (free, 100000_1, 1000000_12)
-            'package_type' => 'required|in:free,100000_1,1000000_12',
-
+            'package_type' => 'required|in:free,8000_1,1000000_12,100000_1',
             'description' => 'nullable|string',
             'agree' => 'required|accepted',
         ]);
 
         $status = 'approved'; 
-        // 2. Jika paket bukan 'free' (artinya 100000_1 atau 1000000_12), status pembayaran jadi 'unpaid'
         $paymentStatus = ($validated['package_type'] === 'free') ? 'approved' : 'unpaid';
 
         $mosque = Mosque::create([
@@ -131,8 +128,8 @@ class MosqueController extends Controller
             'facilities' => $validated['facilities'] ?? [],
             'programs' => $validated['programs'] ?? [],
 
-            // 3. Fitur donasi aktif jika memilih paket berbayar
-            'has_online_donation' => ($validated['package_type'] !== 'free'),
+            // PERBAIKAN: Donasi online hanya aktif jika paket 'free' atau jika payment_status sudah 'approved'
+            'has_online_donation' => ($validated['package_type'] === 'free'), 
             'has_prayer_schedule' => $request->has('has_prayer_schedule'),
 
             'package_type' => $validated['package_type'],
@@ -141,14 +138,14 @@ class MosqueController extends Controller
             'description' => $validated['description'] ?? null,
         ]);
 
-        // Jika memilih Free, baru arahkan ke dashboard
+        // Jika memilih Free, langsung arahkan ke dashboard
         if ($validated['package_type'] === 'free') {
             return redirect()
                 ->route('dashboard')
                 ->with('success', 'Pendaftaran akun Free berhasil! Selamat datang di Dashboard.');
         }
 
-        // Jika memilih Paket 1 Bulan atau 1 Tahun, arahkan langsung ke halaman pembayaran Midtrans
+        // Jika memilih paket berbayar, arahkan ke halaman pembayaran Midtrans
         return redirect()
             ->route('masjid.payment')
             ->with('success', 'Pendaftaran berhasil! Silakan selesaikan pembayaran langganan Anda.');

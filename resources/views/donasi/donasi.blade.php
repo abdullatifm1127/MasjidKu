@@ -12,25 +12,6 @@
 </head>
 <body>
 
-    <!--
-        data-submit-url : endpoint yang membuat donasi di server (POST, JSON in/out) ->
-                           App\Http\Controllers\Donasi\DonasiController@store.
-                           Response: { success: true, no_referensi: "DN-2609-00123" }.
-
-                           CATATAN JUJUR SOAL ALUR PEMBAYARAN SAAT INI:
-                           Sistem ini BELUM tersambung ke payment gateway otomatis
-                           (Midtrans/Xendit/dsb). store() hanya mencatat niat donasi dengan
-                           status "pending" dan mengembalikan nomor referensi. Donatur tetap
-                           harus transfer manual sesuai metode yang dipilih, dan admin masjid
-                           yang mengecek mutasi lalu menandai donasi "Diterima" di dashboard admin
-                           (lihat DonasiAdminController::updateStatus). Karena itu JS TIDAK
-                           menampilkan simulasi "pembayaran berhasil terverifikasi otomatis" —
-                           yang ditampilkan hanya "donasi tercatat, nomor referensi ini",
-                           supaya tidak menyesatkan donatur. Lihat CATATAN-BACKEND.md untuk opsi
-                           menyambungkan payment gateway sungguhan ke depannya.
-        data-nisab      : ambang nisab zakat mal saat ini (kolom mosques.zakat_nisab), hanya
-                           untuk catatan bantuan di UI — validasi perhitungan tetap di server.
-    -->
     <div class="donation-wrapper"
          id="app"
          data-submit-url="{{ $submitUrl ?? (\Illuminate\Support\Facades\Route::has('masjid.donasi.store') && isset($mosque) ? route('masjid.donasi.store', $mosque->slug) : '') }}"
@@ -70,9 +51,6 @@
             @else
                 <div class="category-list">
                     @foreach ($categories as $cat)
-                        {{-- data-key = kategori->key, dikirim sebagai field "jenis" ke
-                             DonasiController@store (lihat validasi: 'jenis' => Rule::in($validKeys)
-                             yang isinya categories()->pluck('key')). --}}
                         <button type="button"
                                 class="category-item"
                                 data-key="{{ $cat->key }}"
@@ -93,10 +71,7 @@
                 </div>
             @endif
 
-            <!-- RIWAYAT DONASI: kartu tersendiri, terpisah dari daftar kategori -->
-            {{-- Hanya donasi yang sudah diverifikasi admin (status "diterima") yang tampil di
-                 sini — lihat PublicMosqueController::showDonasi(). Donasi yang masih menunggu
-                 verifikasi sengaja tidak ditampilkan ke publik. --}}
+            <!-- RIWAYAT DONASI -->
             @isset($recentDonations)
                 @if ($recentDonations->isNotEmpty())
                     <div class="history-card">
@@ -134,15 +109,9 @@
                     <div class="public-gallery-grid">
                         @foreach($items as $gal)
                             @php
-                                // $categories di sini adalah kategori AKTIF saja (lihat DonasiController::categories()),
-                                // jadi kalau kategori dinonaktifkan/dihapus, badge otomatis jatuh ke "Penyaluran".
                                 $galCatTitle = optional($categories->firstWhere('key', $gal->kategori))->title ?? 'Penyaluran';
                                 $galDate = $gal->tanggal ? \Carbon\Carbon::parse($gal->tanggal)->translatedFormat('d F Y') : '';
                             @endphp
-                            {{-- Seluruh kartu bisa diklik/keyboard (tabindex+role=button) untuk buka
-                                 detail lengkap di modal (lihat #gallery-modal di bawah + donasi.js).
-                                 data-desc sengaja memuat deskripsi PENUH (bukan Str::limit), karena
-                                 teks pendek di kartu ini cuma ringkasan. --}}
                             <figure class="pub-gal-item"
                                     tabindex="0"
                                     role="button"
@@ -240,7 +209,7 @@
             <button type="button" class="btn-submit" id="to-pay-btn" data-goto-step="3" disabled>Lanjut ke pembayaran</button>
         </section>
 
-        <!-- STEP 3: PEMBAYARAN -->
+        <!-- STEP 3: PEMBAYARAN (DINAMIS DARI DATABASE) -->
         <section class="panel-card hidden" id="panel-3" aria-labelledby="panel-3-title">
             <button type="button" class="btn-back" data-goto-step="2">&larr; Ubah nominal</button>
 
@@ -255,37 +224,50 @@
                 <div class="sb-row total"><span>Total transfer</span><b id="sum-total">Rp 0</b></div>
             </div>
 
-            {{-- Nilai radio HARUS persis sama dengan enum yang divalidasi
-                 DonasiController@store: Rule::in(['QRIS', 'Transfer Bank', 'Dompet Digital']). --}}
             <fieldset class="payment-channels">
                 <legend class="sr-only">Pilih metode pembayaran</legend>
-                <label class="channel-option">
-                    <input type="radio" name="payment" value="QRIS" checked>
-                    <span>
-                        <strong>QRIS (semua metode)</strong>
-                        <span>Scan pakai GoPay, OVO, Dana, BCA, Mandiri, dll</span>
-                    </span>
-                </label>
-                <label class="channel-option">
-                    <input type="radio" name="payment" value="Transfer Bank">
-                    <span>
-                        <strong>Transfer Bank Syariah Indonesia (BSI)</strong>
-                        <span class="account-row">
-                            No. Rek: <b id="bsi-account">{{ $mosque->bank_account_number ?? '7123456789' }}</b> a.n. {{ $mosque->bank_account_name ?? 'Masjid' }}
-                            <button type="button" class="btn-copy" data-copy="{{ $mosque->bank_account_number ?? '7123456789' }}" aria-label="Salin nomor rekening">Salin</button>
+                
+                {{-- QRIS Dinamis --}}
+                @if ($mosque->qris_image)
+                    <label class="channel-option">
+                        <input type="radio" name="payment" value="QRIS" checked>
+                        <span>
+                            <strong>QRIS (semua metode)</strong>
+                            <span>Scan pakai GoPay, OVO, Dana, BCA, Mandiri, dll</span>
                         </span>
-                    </span>
-                </label>
-                <label class="channel-option">
-                    <input type="radio" name="payment" value="Dompet Digital">
-                    <span>
-                        <strong>Transfer E-Wallet</strong>
-                        <span class="account-row">
-                            No. HP: <b id="ewallet-account">{{ $mosque->ewallet_number ?? '081234567890' }}</b> a.n. {{ $mosque->ewallet_account_name ?? $mosque->bank_account_name ?? 'Masjid' }}
-                            <button type="button" class="btn-copy" data-copy="{{ $mosque->ewallet_number ?? '081234567890' }}" aria-label="Salin nomor e-wallet">Salin</button>
+                    </label>
+                    <div class="qris-preview" data-for-payment="QRIS" style="text-align:center; margin: -0.5rem 0 0.75rem;">
+                        <img src="{{ $mosque->qris_url }}" alt="QRIS {{ $mosque->mosque_name }}" style="max-width:200px; border:1px solid #e5e7eb; border-radius:0.5rem; padding:0.5rem; background: #fff;">
+                    </div>
+                @endif
+
+                {{-- Rekening Bank Dinamis (Multi-Bank) --}}
+                @foreach ($mosque->activeBankAccounts as $rek)
+                    <label class="channel-option">
+                        <input type="radio" name="payment" value="Transfer Bank" data-bank-id="{{ $rek->id }}" {{ !$mosque->qris_image && $loop->first ? 'checked' : '' }}>
+                        <span>
+                            <strong>Transfer Bank {{ $rek->bank_name }}</strong>
+                            <span class="account-row">
+                                No. Rek: <b>{{ $rek->account_number }}</b> a.n. {{ $rek->account_holder }}
+                                <button type="button" class="btn-copy" data-copy="{{ $rek->account_number }}" aria-label="Salin nomor rekening">Salin</button>
+                            </span>
                         </span>
-                    </span>
-                </label>
+                    </label>
+                @endforeach
+
+                {{-- E-Wallet (Fallback jika masih ada data lama) --}}
+                @if ($mosque->ewallet_number)
+                    <label class="channel-option">
+                        <input type="radio" name="payment" value="Dompet Digital">
+                        <span>
+                            <strong>Transfer E-Wallet</strong>
+                            <span class="account-row">
+                                No. HP: <b>{{ $mosque->ewallet_number }}</b> a.n. {{ $mosque->ewallet_account_name ?? $mosque->bank_account_name ?? 'Masjid' }}
+                                <button type="button" class="btn-copy" data-copy="{{ $mosque->ewallet_number }}" aria-label="Salin nomor e-wallet">Salin</button>
+                            </span>
+                        </span>
+                    </label>
+                @endif
             </fieldset>
 
             <p class="hint" style="margin-bottom: 14px;">Setelah transfer, simpan nomor referensi yang muncul di layar berikutnya sebagai bukti. Admin masjid akan memverifikasi penerimaan dana secara manual.</p>
