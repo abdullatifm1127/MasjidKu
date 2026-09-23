@@ -50,7 +50,9 @@ class Mosque extends Model
         'about_vision',
         'about_photo_secondary',
         'subscription_expires_at',
-        'qris_image', // <-- DITAMBAHKAN (Kolom QRIS baru)
+        'qris_image',// <-- DITAMBAHKAN (Kolom QRIS baru)
+        'zakat_fitrah_default', // <-- TAMBAHKAN INI
+        'zakat_nisab',
     ];
 
     protected $casts = [
