@@ -9,17 +9,22 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-   public function up(): void
-{
-    Schema::table('acaras', function (Blueprint $table) {
-        $table->string('photo')->nullable()->after('id'); // Menambahkan kolom photo
-    });
-}
+    public function up(): void
+    {
+        Schema::table('acaras', function (Blueprint $table) {
+            // Cek dulu apakah kolom 'photo' sudah ada atau belum
+            if (!Schema::hasColumn('acaras', 'photo')) {
+                $table->string('photo')->nullable()->after('id');
+            }
+        });
+    }
 
-public function down(): void
-{
-    Schema::table('acaras', function (Blueprint $table) {
-        $table->dropColumn('photo');
-    });
-}
+    public function down(): void
+    {
+        Schema::table('acaras', function (Blueprint $table) {
+            if (Schema::hasColumn('acaras', 'photo')) {
+                $table->dropColumn('photo');
+            }
+        });
+    }
 };
