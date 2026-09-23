@@ -52,7 +52,8 @@ Route::middleware(['auth'])->group(function () {
 
     // (Rute upload manual sudah dihapus karena beralih ke Midtrans)
 
-    Route::get('/masjid/batalkan', [MosqueController::class, 'cancelRegistration'])->name('masjid.cancel');
+    // Ubah dari MosqueController menjadi PaymentController
+Route::get('/masjid/batalkan', [PaymentController::class, 'cancelRegistration'])->name('masjid.cancel');
 
     // Perpanjangan Langganan
     Route::get('/masjid/perpanjangan', [MosqueController::class, 'createRenewal'])->name('masjid.perpanjangan.create');
