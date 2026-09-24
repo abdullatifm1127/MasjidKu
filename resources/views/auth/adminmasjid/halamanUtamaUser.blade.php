@@ -334,58 +334,85 @@
 
     {{-- DONASI SECTION --}}
     @if($modOn('donasi') && isset($mosque) && $mosque->package_type != 'free')
-    <section class="hu-donasi-v2-section" id="donasi">
-        <div class="hu-donasi-v2-inner">
-            <div class="hu-donasi-v2-left">
-                <div class="hu-section-tag hu-tag-amber-light">Donasi & Sedekah</div>
-                <h2 class="hu-donasi-v2-title">Investasi<br><em>Terbaik Akhirat</em></h2>
-                <p class="hu-donasi-v2-desc">
-                    Setiap rupiah yang Anda donasikan akan digunakan untuk pembangunan dan operasional masjid.
-                    Mari bersama-sama memakmurkan masjid Allah.
-                </p>
-                @php
-                    $donasiTerkumpul = $donasiTerkumpul ?? 387000000;
-                    $donasiTarget = $donasiTarget ?? 500000000;
-                    $donasiPct = $donasiTarget > 0 ? round($donasiTerkumpul / $donasiTarget * 100) : 0;
-                @endphp
-                <div class="hu-donasi-v2-progress-wrap">
-                    <div class="hu-donasi-v2-progress-label">
-                        <span>Terkumpul</span>
-                        <span class="hu-donasi-v2-pct">{{ $donasiPct }}%</span>
+    <section class="hu-donasi-v2-section" id="donasi" style="padding: 6rem 0; background-color: #0e3320; color: #ffffff; position: relative; overflow: hidden;">
+        <div class="hu-container" style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;">
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center;">
+                
+                {{-- Sisi Kiri: Informasi & Target Dana --}}
+                <div>
+                    <div style="display: inline-block; background: rgba(217, 119, 6, 0.2); color: #fbbf24; font-size: 0.75rem; font-weight: 700; padding: 0.35rem 0.85rem; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">
+                        Donasi & Sedekah Terbuka
                     </div>
-                    <div class="hu-donasi-v2-track">
-                        <div class="hu-donasi-v2-fill" style="width:{{ $donasiPct }}%"></div>
-                    </div>
-                    <div class="hu-donasi-v2-amounts">
-                        <span>Rp {{ number_format($donasiTerkumpul, 0, ',', '.') }}</span>
-                        <span>Rp {{ number_format($donasiTarget, 0, ',', '.') }}</span>
-                    </div>
-                </div>
-            </div>
+                    <h2 style="font-size: 2.5rem; font-weight: 700; line-height: 1.2; margin-bottom: 1rem; font-family: 'Fraunces', serif;">
+                        Investasi Terbaik <br><span style="color: #fbbf24; font-style: italic;">Untuk Akhirat</span>
+                    </h2>
+                    <p style="font-size: 1rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 2rem;">
+                        Salurkan sebagian rezeki Anda untuk mendukung pembangunan, pemeliharaan, serta program operasional masjid. Setiap uluran tangan Anda sangat berarti bagi kemakmuran umat.
+                    </p>
 
-            <div class="hu-donasi-v2-right">
-                <div class="hu-donasi-v2-card">
-                    <div class="hu-donasi-v2-card-title">Pilih Nominal Donasi</div>
-                    <div class="hu-donasi-v2-nominals">
-                        <button class="hu-nominal-btn" data-val="50000">Rp 50.000</button>
-                        <button class="hu-nominal-btn" data-val="100000">Rp 100.000</button>
-                        <button class="hu-nominal-btn" data-val="250000">Rp 250.000</button>
-                        <button class="hu-nominal-btn" data-val="500000">Rp 500.000</button>
-                    </div>
-                    <div class="hu-donasi-v2-or">Atau masukkan nominal lain</div>
-                    <div class="hu-donasi-v2-input-wrap">
-                        <span class="hu-donasi-v2-prefix">Rp</span>
-                        <input type="number" id="donasiNominal" class="hu-donasi-v2-input" placeholder="0" min="1000">
-                    </div>
-                    <div class="hu-donasi-v2-label-field">Nama (opsional)</div>
-                    <input type="text" class="hu-donasi-v2-input-name" placeholder="Hamba Allah">
-                    <a href="{{ route('masjid.donasi.publik', $mosque->slug) }}" class="hu-donasi-v2-submit" style="text-decoration: none; display: inline-block; text-align: center;">
-                    Donasi Sekarang
-                    </a>
-                    <div class="hu-donasi-v2-note">
-                        Pembayaran aman &amp; terpercaya · QRIS / Transfer Bank / Dompet Digital
+                    @php
+                        // Menggunakan data otomatis dari controller, jika kosong bernilai 0
+                        $terkumpul = $donasiTerkumpul ?? 0;
+                        $target = $donasiTarget ?? 500000000;
+                        $donasiPct = $target > 0 ? min(round($terkumpul / $target * 100), 100) : 0;
+                    @endphp
+
+                    <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1rem; padding: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; font-size: 0.9rem;">
+                            <span style="color: #94a3b8;">Dana Terkumpul</span>
+                            <span style="font-weight: 700; color: #34d399;">{{ $donasiPct }}% Tercapai</span>
+                        </div>
+                        <div style="width: 100%; height: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 9999px; overflow: hidden; margin-bottom: 0.75rem;">
+                            <div style="width: {{ $donasiPct }}%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 9999px;"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.95rem; font-weight: 600;">
+                            <span style="color: #ffffff;">Rp {{ number_format($terkumpul, 0, ',', '.') }}</span>
+                            <span style="color: #94a3b8;">Target: Rp {{ number_format($target, 0, ',', '.') }}</span>
+                        </div>
                     </div>
                 </div>
+
+                {{-- Sisi Kanan: Form Nominal & Aksi Donasi --}}
+                <div>
+                    <div style="background: #ffffff; color: #1e293b; border-radius: 1.25rem; padding: 2rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
+                        <h3 style="font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 1.25rem; text-align: center;">
+                            Pilih Nominal Donasi
+                        </h3>
+
+                        {{-- Tombol Pilihan Nominal Cepat --}}
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-bottom: 1.25rem;">
+                            <button type="button" class="hu-nominal-btn" data-val="50000" style="padding: 0.75rem; border: 2px solid #e2e8f0; background: #f8fafc; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Rp 50.000</button>
+                            <button type="button" class="hu-nominal-btn" data-val="100000" style="padding: 0.75rem; border: 2px solid #e2e8f0; background: #f8fafc; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Rp 100.000</button>
+                            <button type="button" class="hu-nominal-btn" data-val="250000" style="padding: 0.75rem; border: 2px solid #e2e8f0; background: #f8fafc; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Rp 250.000</button>
+                            <button type="button" class="hu-nominal-btn" data-val="500000" style="padding: 0.75rem; border: 2px solid #e2e8f0; background: #f8fafc; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Rp 500.000</button>
+                        </div>
+
+                        <div style="text-align: center; font-size: 0.85rem; color: #64748b; margin-bottom: 0.75rem;">Atau masukkan nominal lain</div>
+
+                        {{-- Input Nominal Manual --}}
+                        <div style="position: relative; margin-bottom: 1rem;">
+                            <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-weight: 600; color: #64748b;">Rp</span>
+                            <input type="number" id="donasiNominal" placeholder="0" min="1000" style="width: 100%; padding: 0.75rem 0.75rem 0.75rem 2.75rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-size: 1rem; font-weight: 600; outline: none; box-sizing: border-box;">
+                        </div>
+
+                        {{-- Input Nama --}}
+                        <div style="margin-bottom: 1.25rem;">
+                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Nama Donatur (Opsional)</label>
+                            <input type="text" class="hu-donasi-v2-input-name" placeholder="Hamba Allah" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-size: 0.95rem; outline: none; box-sizing: border-box;">
+                        </div>
+
+                        {{-- Tombol Aksi --}}
+                        <a href="{{ route('masjid.donasi.publik', $mosque->slug) }}" style="display: block; width: 100%; background: #0d9488; color: #ffffff; text-align: center; padding: 0.85rem; border-radius: 0.75rem; font-weight: 700; text-decoration: none; box-sizing: border-box; transition: background 0.2s;">
+                            Lanjut Pembayaran →
+                        </a>
+
+                        <div style="text-align: center; font-size: 0.75rem; color: #94a3b8; margin-top: 1rem;">
+                            🔒 Pembayaran aman & terpercaya · QRIS / Transfer Bank / Dompet Digital
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
@@ -400,7 +427,7 @@
                     <div class="hu-section-tag hu-tag-amber" style="margin-bottom: 0.5rem;">Transparansi</div>
                     <h2 class="hu-section-title hu-title-dark">Dokumentasi Penyaluran</h2>
                 </div>
-                <a href="#penyaluran" class="hu-acara-lihat">Lihat semua →</a>
+                <a href="{{ route('masjid.donasi.publik', $mosque->slug) }}" class="hu-acara-lihat">Lihat semua →</a>
             </div>
 
             @if(isset($items) && $items->isNotEmpty())
@@ -700,8 +727,14 @@
 
         document.querySelectorAll('.hu-nominal-btn').forEach(btn => {
             btn.addEventListener('click', function () {
-                document.querySelectorAll('.hu-nominal-btn').forEach(b => b.classList.remove('selected'));
-                this.classList.add('selected');
+                document.querySelectorAll('.hu-nominal-btn').forEach(b => {
+                    b.style.background = '#f8fafc';
+                    b.style.borderColor = '#e2e8f0';
+                    b.style.color = '#1e293b';
+                });
+                this.style.background = '#f0fdf4';
+                this.style.borderColor = '#10b981';
+                this.style.color = '#047857';
                 document.getElementById('donasiNominal').value = this.dataset.val;
             });
         });
