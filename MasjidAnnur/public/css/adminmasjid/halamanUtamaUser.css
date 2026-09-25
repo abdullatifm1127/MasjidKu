@@ -805,3 +805,232 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
     .hu-hero-content, .hu-hero-scroll, .hu-ticker-track { animation: none; }
     * { transition-duration: 0.001ms !important; }
 }
+
+
+/* =========================================================================
+   DIREKTORI MASJID — section di halaman publik masjid
+   Prefix: huu-dir-
+   ========================================================================= */
+.huu-dir-section {
+    background: var(--parchment);
+    padding: 80px 0;
+    border-top: 1px solid var(--line);
+}
+
+/* Header: judul kiri, link "Lihat Semua" kanan */
+.huu-dir-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 44px;
+    flex-wrap: wrap;
+}
+
+.huu-dir-head .hu-section-title em {
+    font-style: italic;
+    color: var(--emerald-700);
+}
+
+.huu-dir-all-link {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--emerald-700);
+    text-decoration: none;
+    white-space: nowrap;
+    padding: 8px 18px;
+    border: 1.5px solid var(--emerald-100);
+    border-radius: 100px;
+    transition: background 0.18s, color 0.18s;
+}
+.huu-dir-all-link:hover {
+    background: var(--emerald-700);
+    color: #fff;
+    border-color: var(--emerald-700);
+}
+
+/* Grid 3 kolom */
+.huu-dir-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+/* Kartu */
+.huu-dir-card {
+    background: #ffffff;
+    border: 1.5px solid var(--line);
+    border-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.22s, transform 0.22s;
+}
+
+.huu-dir-card:hover {
+    box-shadow: 0 12px 40px -12px rgba(11, 61, 46, 0.2);
+    transform: translateY(-4px);
+}
+
+/* Gambar */
+.huu-dir-img {
+    position: relative;
+    height: 186px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.huu-dir-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    inset: 0;
+}
+
+.huu-dir-initial {
+    font-size: 3.2rem;
+    font-weight: 800;
+    color: rgba(255,255,255,0.18);
+    letter-spacing: -2px;
+    user-select: none;
+    font-family: var(--font-display, Georgia, serif);
+}
+
+/* Badge kota */
+.huu-dir-city {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0,0,0,0.52);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 11px;
+    border-radius: 100px;
+    letter-spacing: 0.02em;
+}
+
+/* Body */
+.huu-dir-body {
+    padding: 18px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 0;
+}
+
+.huu-dir-name {
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0 0 5px;
+    line-height: 1.3;
+    font-family: var(--font-display, Georgia, serif);
+}
+
+.huu-dir-tagline {
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    margin: 0 0 14px;
+    line-height: 1.5;
+}
+
+/* Meta: kapasitas + sejak */
+.huu-dir-meta {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 14px;
+}
+
+.huu-dir-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.huu-dir-meta-label {
+    font-size: 0.69rem;
+    color: var(--ink-soft);
+    font-weight: 500;
+}
+
+.huu-dir-meta-item strong {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+/* Progress donasi */
+.huu-dir-prog {
+    margin-bottom: 14px;
+}
+
+.huu-dir-prog-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.73rem;
+    color: var(--ink-soft);
+    margin-bottom: 5px;
+}
+
+.huu-dir-prog-pct {
+    font-weight: 700;
+    color: var(--emerald-700);
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+.huu-dir-prog-bar {
+    height: 6px;
+    background: var(--parchment-deep);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.huu-dir-prog-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+}
+
+.huu-dir-prog-amount {
+    font-size: 0.71rem;
+    color: var(--ink-soft);
+}
+
+/* Tombol kunjungi */
+.huu-dir-btn {
+    display: block;
+    width: 100%;
+    padding: 11px;
+    text-align: center;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #ffffff;
+    border-radius: 10px;
+    text-decoration: none;
+    margin-top: auto;
+    letter-spacing: 0.01em;
+    transition: filter 0.18s, transform 0.1s;
+}
+.huu-dir-btn:hover  { filter: brightness(0.87); }
+.huu-dir-btn:active { transform: scale(0.98); }
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .huu-dir-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+    .huu-dir-head { flex-direction: column; align-items: flex-start; }
+    .huu-dir-grid { grid-template-columns: 1fr; }
+    .huu-dir-section { padding: 52px 0; }
+}

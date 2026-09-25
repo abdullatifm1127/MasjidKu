@@ -36,11 +36,19 @@ class PublicMosqueController extends Controller
             ->take(3)
             ->get();
 
+        // Direktori masjid lain (approved, kecuali diri sendiri), max 6
+        $direktoriMasjid = Mosque::where('status', 'approved')
+            ->where('id', '!=', $mosque->id)
+            ->latest()
+            ->take(6)
+            ->get();
+
         return view('auth.adminmasjid.halamanUtamaUser', [
-            'mosque'      => $mosque,
-            'landingPage' => $landingPage,
-            'prayers'     => $prayers,
-            'acaras'      => $acaras,
+            'mosque'          => $mosque,
+            'landingPage'     => $landingPage,
+            'prayers'         => $prayers,
+            'acaras'          => $acaras,
+            'direktoriMasjid' => $direktoriMasjid,
         ]);
     }
 }

@@ -171,18 +171,58 @@
                 $warna = ['#1a4731','#1a3a6e','#6b2a2a','#0d5c5c','#4a3100','#2a1a5e'];
             @endphp
 
-            @if($direktoriMasjid->isEmpty())
+            @if($direktoriMasjid->isEmpty() && request('q'))
+                {{-- Hasil pencarian kosong --}}
                 <div class="dir-empty">
-                    <div class="dir-empty-ico">🕌</div>
-                    <p class="dir-empty-title">
-                        @if(request('q'))
-                            Tidak ada masjid yang cocok dengan "<strong>{{ request('q') }}</strong>"
-                        @else
-                            Belum ada masjid terdaftar
-                        @endif
-                    </p>
-                    <p class="dir-empty-sub">Jadilah yang pertama mendaftarkan masjid Anda.</p>
-                    <a href="{{ route('daftar.masjid') }}" class="btn-primary" style="margin-top:16px;">Daftarkan Masjid</a>
+                    <div class="dir-empty-ico">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="32" height="32">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 15.803a7.5 7.5 0 0 0 10.607 0Z"/>
+                        </svg>
+                    </div>
+                    <p class="dir-empty-title">Tidak ada masjid yang cocok dengan "<strong>{{ request('q') }}</strong>"</p>
+                    <p class="dir-empty-sub">Coba kata kunci lain atau hapus filter pencarian.</p>
+                    <a href="{{ url('/') }}#direktori" class="btn-primary" style="margin-top:16px;">Reset Pencarian</a>
+                </div>
+            @elseif($direktoriMasjid->isEmpty())
+                {{-- Belum ada data sama sekali — tampilkan placeholder card --}}
+                @php
+                    $placeholders = [
+                        ['nama' => 'Masjid Ar-Rahman',  'kota' => 'Jakarta Selatan', 'tagline' => 'Pusat Ilmu dan Ibadah',      'kapasitas' => '2.500', 'sejak' => '1987', 'bg' => '#1a4731'],
+                        ['nama' => 'Masjid Al-Ikhlas',  'kota' => 'Bandung',         'tagline' => 'Rahmat untuk Semua',          'kapasitas' => '1.800', 'sejak' => '1994', 'bg' => '#1a3a6e'],
+                        ['nama' => 'Masjid Baitussalam', 'kota' => 'Surabaya',        'tagline' => 'Kiblat Ilmu & Peradaban',     'kapasitas' => '3.200', 'sejak' => '1965', 'bg' => '#6b2a2a'],
+                    ];
+                @endphp
+                <div class="dir-grid">
+                    @foreach($placeholders as $p)
+                    <div class="dir-card dir-card-placeholder">
+                        <div class="dir-card-img" style="background: {{ $p['bg'] }};">
+                            <span class="dir-card-initial">{{ mb_strtoupper(mb_substr($p['nama'], 7, 2)) }}</span>
+                            <span class="dir-card-city">{{ $p['kota'] }}</span>
+                        </div>
+                        <div class="dir-card-body">
+                            <h3 class="dir-card-name">{{ $p['nama'] }}</h3>
+                            <p class="dir-card-tagline">{{ $p['tagline'] }}</p>
+                            <div class="dir-card-meta">
+                                <div class="dir-meta-item">
+                                    <span class="dir-meta-label">Kapasitas</span>
+                                    <strong>{{ $p['kapasitas'] }} orang</strong>
+                                </div>
+                                <div class="dir-meta-item">
+                                    <span class="dir-meta-label">Sejak</span>
+                                    <strong>{{ $p['sejak'] }}</strong>
+                                </div>
+                            </div>
+                            <span class="dir-card-btn dir-card-btn-dummy" style="background: {{ $p['bg'] }};">
+                                Segera Hadir →
+                            </span>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                <div class="dir-more" style="margin-top:32px;">
+                    <a href="{{ route('daftar.masjid') }}" class="dir-more-btn">
+                        + Daftarkan Masjid Anda
+                    </a>
                 </div>
             @else
                 <div class="dir-grid">
