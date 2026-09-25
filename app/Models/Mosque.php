@@ -50,7 +50,9 @@ class Mosque extends Model
         'about_vision',
         'about_photo_secondary',
         'subscription_expires_at',
-        'qris_image', // <-- DITAMBAHKAN (Kolom QRIS baru)
+        'qris_image',// <-- DITAMBAHKAN (Kolom QRIS baru)
+        'zakat_fitrah_default', // <-- TAMBAHKAN INI
+        'zakat_nisab',
     ];
 
     protected $casts = [
@@ -59,6 +61,8 @@ class Mosque extends Model
         'has_online_donation' => 'boolean',
         'has_prayer_schedule' => 'boolean',
         'subscription_expires_at' => 'datetime',
+        'zakat_fitrah_default' => 'decimal:2', // <-- TAMBAHKAN INI
+        'zakat_nisab' => 'decimal:2',          // <-- TAMBAHKAN INI
     ];
 
     protected static function boot()

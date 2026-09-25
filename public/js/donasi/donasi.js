@@ -241,6 +241,9 @@
         const errorEl = document.getElementById('submit-error');
         const payment = document.querySelector('input[name="payment"]:checked')?.value || 'QRIS';
         const donorName = document.getElementById('donor-name')?.value.trim() || '';
+        
+        // AMBIL USER ID DARI INPUT TERSEMBUNYI DI BLADE
+        const authUserIdInput = document.getElementById('auth-user-id');
 
         setError(errorEl, '');
 
@@ -264,14 +267,16 @@
         const payload = {
             jenis: state.categoryKey,
             nominal: state.amount,
-            nama_donatur: donorName, // dikosongkan -> server otomatis isi "Hamba Allah"
+            nama_donatur: donorName, 
             metode_pembayaran: payment,
+            user_id: authUserIdInput ? authUserIdInput.value : null, // <--- SERTAKAN USER ID DI SINI
         };
         if (state.calcType === 'zakat') {
             payload.zakat_subtype = state.zakatSub;
         }
 
         try {
+            // ... (lanjutan kode fetch ke server tetap sama)
             const res = await fetch(submitUrl, {
                 method: 'POST',
                 headers: {

@@ -71,32 +71,44 @@
                 </div>
             @endif
 
-            <!-- RIWAYAT DONASI -->
-            @isset($recentDonations)
-                @if ($recentDonations->isNotEmpty())
-                    <div class="history-card">
-                        <div class="history-card-head">
-                            <h2>Riwayat donasi</h2>
-                            <p>Donasi yang telah diverifikasi oleh pengurus masjid.</p>
-                        </div>
-                        <ul class="history-list">
+            <!-- RIWAYAT DONASI PRIBADI -->
+            @auth
+                <div style="margin: 2rem 0; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                    <div style="margin-bottom: 1rem;">
+                        <h2 style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin: 0;">Riwayat Donasi Anda</h2>
+                        <p style="font-size: 0.85rem; color: #64748b; margin: 0.25rem 0 0 0;">Daftar transaksi donasi yang Anda lakukan dengan akun ini.</p>
+                    </div>
+
+                    @if(isset($recentDonations) && $recentDonations->isNotEmpty())
+                        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem;">
                             @foreach ($recentDonations as $don)
-                                <li class="history-row">
-                                    <span class="history-avatar" aria-hidden="true">{{ strtoupper(substr($don->nama_donatur ?: 'H', 0, 1)) }}</span>
-                                    <span class="history-info">
-                                        <span class="history-name">{{ $don->nama_donatur ?: 'Hamba Allah' }}</span>
-                                        <span class="history-meta">
-                                            <span class="history-badge">{{ $don->category_title }}</span>
-                                            <span class="history-time">{{ $don->created_at?->diffForHumans() }}</span>
+                                <li style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: #f8fafc; border-radius: 0.75rem; border: 1px solid #e2e8f0;">
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <span style="width: 38px; height: 38px; background: #0d9488; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem;" aria-hidden="true">
+                                            {{ strtoupper(substr($don->nama_donatur ?: 'H', 0, 1)) }}
                                         </span>
-                                    </span>
-                                    <span class="history-amount">Rp {{ number_format($don->nominal, 0, ',', '.') }}</span>
+                                        <div>
+                                            <span style="display: block; font-weight: 600; color: #1e293b; font-size: 0.95rem;">{{ $don->nama_donatur ?: 'Hamba Allah' }}</span>
+                                            <span style="display: flex; gap: 0.5rem; align-items: center; font-size: 0.75rem; color: #64748b; margin-top: 0.15rem;">
+                                                <span style="background: #e0f2fe; color: #0369a1; padding: 0.1rem 0.5rem; border-radius: 9999px; font-weight: 600;">{{ $don->category_title }}</span>
+                                                <span>•</span>
+                                                <span>{{ $don->created_at?->diffForHumans() }}</span>
+                                                <span>•</span>
+                                                <span style="color: {{ $don->status == 'diterima' ? '#16a34a' : '#b45309' }}; font-weight: 600; text-transform: capitalize;">{{ $don->status }}</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <span style="font-weight: 700; color: #0d9488; font-size: 0.95rem;">Rp {{ number_format($don->nominal, 0, ',', '.') }}</span>
                                 </li>
                             @endforeach
                         </ul>
-                    </div>
-                @endif
-            @endisset
+                    @else
+                        <div style="text-align: center; padding: 1.5rem; background: #f8fafc; border-radius: 0.75rem; border: 1px dashed #cbd5e1; color: #64748b; font-size: 0.9rem;">
+                            Belum ada riwayat donasi tercatat dari akun Anda.
+                        </div>
+                    @endif
+                </div>
+            @endauth
 
             <!-- GALERI DOKUMENTASI PENYALURAN -->
             <div class="gallery-block">

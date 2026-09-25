@@ -76,7 +76,8 @@ class DonasiController extends Controller
         $noReferensi = 'DN-' . now()->format('ym') . '-' . str_pad((string) random_int(1, 99999), 5, '0', STR_PAD_LEFT);
 
         $donasi = Donasi::create([
-            'mosque_id'         => $mosque->id, // sudah dibetulkan dari 'masjid_id' -> 'mosque_id'
+            'mosque_id'         => $mosque->id,
+            'user_id'           => auth()->id() ?? auth('web')->id() ?? 1, // <-- Mengambil ID user, fallback ke ID 1 jika session terputus sementara
             'jenis'             => $data['jenis'],
             'zakat_subtype'     => $data['zakat_subtype'] ?? null,
             'nominal'           => $data['nominal'],

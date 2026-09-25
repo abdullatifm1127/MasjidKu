@@ -12,7 +12,7 @@
 
     @php
         $modules = $mosque->active_modules ?? [];
-        $modOn = fn($key) => data_get($modules, $key, true); // default nyala kalau belum pernah diatur
+        $modOn = fn($key) => data_get($modules, $key, true); 
     @endphp
 
     {{-- TOP BAR: JADWAL SHALAT (modul: jadwal_shalat) --}}
@@ -61,20 +61,20 @@
                 </div>
             </a>
 
-          <nav class="hu-nav">
-    <a href="#beranda" class="hu-nav-link active">Beranda</a>
-    <a href="#profil" class="hu-nav-link">Profil</a>
-    @if($modOn('jadwal_shalat'))<a href="#shalat" class="hu-nav-link">Waktu Shalat</a>@endif
-    <a href="#program" class="hu-nav-link">Program & Fasilitas</a>
-    @if($modOn('kegiatan'))<a href="#acara" class="hu-nav-link">Acara</a>@endif
-    
-    {{-- MENU DONASI: Disamakan seperti yang lain menggunakan ID section #donasi --}}
-    @if(isset($mosque) && $mosque->package_type !== 'free')
-        <a href="#donasi" class="hu-nav-link">Donasi</a>
-    @endif
-    
-    <a href="#kontak" class="hu-nav-link">Hubungi</a>
-</nav>
+            <nav class="hu-nav">
+                <a href="#beranda" class="hu-nav-link active">Beranda</a>
+                <a href="#profil" class="hu-nav-link">Profil</a>
+                @if($modOn('jadwal_shalat'))<a href="#shalat" class="hu-nav-link">Waktu Shalat</a>@endif
+                <a href="#program" class="hu-nav-link">Program & Fasilitas</a>
+                @if($modOn('kegiatan'))<a href="#acara" class="hu-nav-link">Acara</a>@endif
+                
+                @if(isset($mosque) && $mosque->package_type !== 'free')
+                    <a href="#donasi" class="hu-nav-link">Donasi</a>
+                @endif
+
+                <a href="#penyaluran" class="hu-nav-link">Penyaluran</a>
+                <a href="#kontak" class="hu-nav-link">Hubungi</a>
+            </nav>
 
             <button class="hu-ganti-btn" id="huGantiBtn">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -120,51 +120,48 @@
     </div>
     @endif
 
- {{-- HERO — menggunakan hero_image sesuai form editor landing page --}}
-<section class="hu-hero" id="beranda" style="position: relative; overflow: hidden; color: {{ $landingPage->hero_text_color ?? $mosque->hero_text_color ?? '#ffffff' }};">
-    
-    {{-- Cek hero_image, bukan hero_background --}}
-    @if(!empty($landingPage->hero_image))
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">
-            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); z-index: 2;"></div>
-            <img src="{{ asset('storage/' . $landingPage->hero_image) }}" alt="Hero Background" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1;">
-        </div>
-    @else
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: {{ $landingPage->hero_bg_color ?? '#0e3320' }}; z-index: 1;"></div>
-    @endif
+    {{-- HERO SECTION --}}
+    <section class="hu-hero" id="beranda" style="position: relative; overflow: hidden; color: {{ $landingPage->hero_text_color ?? $mosque->hero_text_color ?? '#ffffff' }};">
+        @if(!empty($landingPage->hero_image))
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); z-index: 2;"></div>
+                <img src="{{ asset('storage/' . $landingPage->hero_image) }}" alt="Hero Background" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1;">
+            </div>
+        @else
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: {{ $landingPage->hero_bg_color ?? '#0e3320' }}; z-index: 1;"></div>
+        @endif
 
-    <div class="hu-hero-overlay" style="position: relative; z-index: 3;"></div>
-    
-    <div class="hu-hero-content" style="position: relative; z-index: 4;">
-        <div class="hu-hero-arabic">{{ $mosque->arabic_name ?? '' }}</div>
-        <h1 class="hu-hero-title">{{ $landingPage->hero_title ?? $mosque->mosque_name ?? 'Selamat Datang' }}</h1>
-        <p class="hu-hero-tagline">
-            {{ $landingPage->hero_subtitle ?? $mosque->tagline ?? '' }}
-            @if(!empty($landingPage->hero_desc)) — {{ $landingPage->hero_desc }} @endif
-        </p>
-        <div class="hu-hero-btns">
-            @if(!empty($landingPage->btn_primary))
-            <a href="{{ $landingPage->btn_primary_url ?? '#donasi' }}" class="hu-btn-primary">{{ $landingPage->btn_primary }}</a>
-            @endif
-            @if(!empty($landingPage->btn_secondary))
-            <a href="{{ $landingPage->btn_secondary_url ?? '#profil' }}" class="hu-btn-outline">{{ $landingPage->btn_secondary }}</a>
-            @endif
+        <div class="hu-hero-overlay" style="position: relative; z-index: 3;"></div>
+        
+        <div class="hu-hero-content" style="position: relative; z-index: 4;">
+            <div class="hu-hero-arabic">{{ $mosque->arabic_name ?? '' }}</div>
+            <h1 class="hu-hero-title">{{ $landingPage->hero_title ?? $mosque->mosque_name ?? 'Selamat Datang' }}</h1>
+            <p class="hu-hero-tagline">
+                {{ $landingPage->hero_subtitle ?? $mosque->tagline ?? '' }}
+                @if(!empty($landingPage->hero_desc)) — {{ $landingPage->hero_desc }} @endif
+            </p>
+            <div class="hu-hero-btns">
+                @if(!empty($landingPage->btn_primary))
+                <a href="{{ $landingPage->btn_primary_url ?? '#donasi' }}" class="hu-btn-primary">{{ $landingPage->btn_primary }}</a>
+                @endif
+                @if(!empty($landingPage->btn_secondary))
+                <a href="{{ $landingPage->btn_secondary_url ?? '#profil' }}" class="hu-btn-outline">{{ $landingPage->btn_secondary }}</a>
+                @endif
+            </div>
         </div>
-    </div>
-    
-    <div class="hu-hero-scroll" style="position: relative; z-index: 4;">
-        <span>SCROLL</span>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-             stroke-width="2" stroke="currentColor" width="16" height="16">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
-        </svg>
-    </div>
-</section>
-   {{-- PROFIL — sekarang murni dari kolom Profil Masjid --}}
+        
+        <div class="hu-hero-scroll" style="position: relative; z-index: 4;">
+            <span>SCROLL</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
+            </svg>
+        </div>
+    </section>
+
+    {{-- PROFIL SECTION --}}
     <section class="hu-section hu-profil-section" id="profil">
         <div class="hu-container">
             <div class="hu-profil-v2-grid">
-
                 <div class="hu-profil-v2-left">
                     <div class="hu-profil-v2-tag">Profil Masjid</div>
                     <h2 class="hu-profil-v2-title">
@@ -188,6 +185,11 @@
                         <div class="hu-profil-v2-stat">
                             <div class="hu-profil-v2-stat-label">Imam Besar</div>
                             <div class="hu-profil-v2-stat-val">{{ $mosque->imam_name ?? '—' }}</div>
+                            @if(!empty($mosque->organization_name) || !empty($mosque->chairman_name) || !empty($mosque->secretary_name) || !empty($mosque->treasurer_name))
+                                <button type="button" id="btnBukaPengurus" style="background: none; border: none; padding: 0; font-size: 0.85rem; font-weight: 600; color: #0d9488; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; margin-top: 0.4rem;">
+                                    Lihat detail →
+                                </button>
+                            @endif
                         </div>
                         <div class="hu-profil-v2-stat">
                             <div class="hu-profil-v2-stat-label">Program Aktif</div>
@@ -196,18 +198,16 @@
                             </div>
                         </div>
                     </div>
+
                 </div>
 
                 <div class="hu-profil-v2-right">
                     <div class="hu-profil-v2-images">
-                        <!-- Kotak Gambar Pertama (Tall) -->
                         <div class="hu-profil-v2-img hu-img-tall">
                             @if(!empty($mosque->about_photo))
                                 <img src="{{ asset('storage/'.$mosque->about_photo) }}" alt="Foto Masjid" loading="lazy">
                             @endif
                         </div>
-                        
-                        <!-- Kotak Gambar Kedua (Short) -->
                         <div class="hu-profil-v2-img hu-img-short">
                             @if(!empty($mosque->about_photo_secondary))
                                 <img src="{{ asset('storage/'.$mosque->about_photo_secondary) }}" alt="Masjid" loading="lazy">
@@ -221,12 +221,11 @@
                     </div>
                     @endif
                 </div>
-
             </div>
         </div>
     </section>
 
-    {{-- JADWAL SHALAT (grid besar) — modul: jadwal_shalat --}}
+    {{-- JADWAL SHALAT SECTION --}}
     @if($modOn('jadwal_shalat'))
     <section class="hu-section hu-section-dark" id="shalat">
         <div class="hu-container">
@@ -247,56 +246,51 @@
     </section>
     @endif
 
-   {{-- PROGRAM & FASILITAS — bersebelahan --}}
-<section class="hu-section hu-program-section" id="program">
-    <div class="hu-container">
-        <div class="hu-progfas-grid">
-
-            {{-- KOLOM KIRI: PROGRAM --}}
-            <div>
-                <div class="hu-section-head hu-progfas-col-head">
-                    <div class="hu-section-tag hu-tag-amber">Kegiatan & Program</div>
-                    <h2 class="hu-section-title hu-title-dark">Program Unggulan</h2>
-                </div>
-                <div class="hu-program-v2-list">
-                    @php
-                        $programList = !empty($mosque->programs) ? $mosque->programs : [
-                            'Hafalan Quran 30 Juz', 'Ekonomi Syariah', 'Koperasi Masjid', 'Kajian Tafsir', 'Program Yatim',
-                        ];
-                    @endphp
-                    @foreach($programList as $idx => $prog)
-                    <div class="hu-program-v2-item">
-                        <span class="hu-program-v2-num">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</span>
-                        <span class="hu-program-v2-name">{{ $prog }}</span>
+    {{-- PROGRAM & FASILITAS SECTION --}}
+    <section class="hu-section hu-program-section" id="program">
+        <div class="hu-container">
+            <div class="hu-progfas-grid">
+                <div>
+                    <div class="hu-section-head hu-progfas-col-head">
+                        <div class="hu-section-tag hu-tag-amber">Kegiatan & Program</div>
+                        <h2 class="hu-section-title hu-title-dark">Program Unggulan</h2>
                     </div>
-                    @endforeach
-                </div>
-            </div>
-
-            {{-- KOLOM KANAN: FASILITAS --}}
-            @if(!empty($mosque->facilities))
-            <div>
-                <div class="hu-section-head hu-progfas-col-head">
-                    <div class="hu-section-tag hu-tag-amber">Fasilitas Masjid</div>
-                    <h2 class="hu-section-title hu-title-dark">Fasilitas Dan Layanan</h2>
-                </div>
-                <div class="hu-fasilitas-wrap">
-                    @foreach($mosque->facilities as $idx => $f)
-                    <div class="hu-fasilitas-item">
-                        <span class="hu-fasilitas-num">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</span>
-                        <span class="hu-fasilitas-name">{{ $f }}</span>
+                    <div class="hu-program-v2-list">
+                        @php
+                            $programList = !empty($mosque->programs) ? $mosque->programs : [
+                                'Hafalan Quran 30 Juz', 'Ekonomi Syariah', 'Koperasi Masjid', 'Kajian Tafsir', 'Program Yatim',
+                            ];
+                        @endphp
+                        @foreach($programList as $idx => $prog)
+                        <div class="hu-program-v2-item">
+                            <span class="hu-program-v2-num">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <span class="hu-program-v2-name">{{ $prog }}</span>
+                        </div>
+                        @endforeach
                     </div>
-                    @endforeach
                 </div>
-            </div>
-            @endif
 
+                @if(!empty($mosque->facilities))
+                <div>
+                    <div class="hu-section-head hu-progfas-col-head">
+                        <div class="hu-section-tag hu-tag-amber">Fasilitas Masjid</div>
+                        <h2 class="hu-section-title hu-title-dark">Fasilitas Dan Layanan</h2>
+                    </div>
+                    <div class="hu-fasilitas-wrap">
+                        @foreach($mosque->facilities as $idx => $f)
+                        <div class="hu-fasilitas-item">
+                            <span class="hu-fasilitas-num">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <span class="hu-fasilitas-name">{{ $f }}</span>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+            </div>
         </div>
-    </div>
-</section>
+    </section>
 
-
-    {{-- ACARA — modul: kegiatan --}}
+    {{-- ACARA SECTION --}}
     @if($modOn('kegiatan'))
     <section class="hu-acara-section" id="acara">
         <div class="hu-container">
@@ -305,11 +299,19 @@
                     <div class="hu-section-tag hu-tag-amber">Agenda</div>
                     <h2 class="hu-section-title hu-title-dark">Acara Mendatang</h2>
                 </div>
-                <a href="#" class="hu-acara-lihat">Lihat semua →</a>
+                <a href="javascript:void(0);" id="btnLihatSemuaAcara" class="hu-acara-lihat">Lihat semua →</a>
             </div>
             <div class="hu-acara-v2-grid">
                 @forelse(($acaras ?? collect()) as $a)
-                <div class="hu-acara-v2-card">
+                <div class="hu-acara-v2-card btn-buka-acara"
+                     style="cursor: pointer;"
+                     data-title="{{ $a->title }}"
+                     data-desc="{{ $a->description ?? 'Tidak ada deskripsi lengkap untuk acara ini.' }}"
+                     data-date="{{ \Illuminate\Support\Carbon::parse($a->event_date)->translatedFormat('d F Y') }}"
+                     data-time="{{ $a->event_time ?? '-' }}"
+                     data-organizer="{{ $a->organizer ?? 'Pengurus Masjid' }}"
+                     data-photo="{{ !empty($a->photo) ? asset('storage/'.$a->photo) : '' }}">
+                    
                     @if(!empty($a->photo))
                     <div class="hu-acara-v2-photo">
                         <img src="{{ asset('storage/'.$a->photo) }}" alt="{{ $a->title }}" loading="lazy">
@@ -327,7 +329,7 @@
                         {{ $a->event_time ?? '-' }}
                         @if($a->organizer) · {{ $a->organizer }} @endif
                     </div>
-                    <a href="#" class="hu-acara-v2-link">Detail Acara →</a>
+                    <span class="hu-acara-v2-link">Detail Acara →</span>
                 </div>
                 @empty
                 <p style="color:var(--ink-soft);grid-column:1/-1;">Belum ada acara mendatang.</p>
@@ -335,68 +337,294 @@
             </div>
         </div>
     </section>
+
+    <!-- MODAL POPUP DETAIL ACARA (Tunggal) -->
+    <div id="modalDetailAcara" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+        <div style="background: #fff; width: 100%; max-width: 600px; border-radius: 1rem; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); max-height: 90vh; display: flex; flex-direction: column;">
+            <div style="position: relative; height: 250px; background-size: cover; background-position: center; display: none;" id="modalAcaraFoto">
+                <button type="button" id="tutupModalAcara" style="position: absolute; top: 1rem; right: 1rem; background: rgba(0,0,0,0.5); color: #fff; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+            </div>
+            <div style="padding: 1.5rem; overflow-y: auto; flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <span id="modalAcaraPenyelenggara" style="font-size: 0.75rem; background: #e0f2fe; color: #0369a1; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600;"></span>
+                    <button type="button" id="tutupModalAcaraAlt" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #64748b;">✕</button>
+                </div>
+                <h3 id="modalAcaraJudul" style="font-size: 1.25rem; font-weight: 700; color: #1e293b; margin: 0.5rem 0 0.75rem 0;"></h3>
+                <div style="display: flex; gap: 1.5rem; font-size: 0.85rem; color: #64748b; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #f1f5f9;">
+                    <span>📅 <strong id="modalAcaraTanggal" style="color: #0d9488;"></strong></span>
+                    <span>⏰ <strong id="modalAcaraWaktu" style="color: #0d9488;"></strong></span>
+                </div>
+                <p id="modalAcaraDeskripsi" style="font-size: 0.95rem; color: #475569; line-height: 1.6; margin: 0; white-space: pre-line;"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP DAFTAR SEMUA ACARA -->
+    <div id="modalSemuaAcara" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+        <div style="background: #fff; width: 100%; max-width: 650px; border-radius: 1rem; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); max-height: 85vh; display: flex; flex-direction: column;">
+            <div style="padding: 1.25rem 1.5rem; background: #0e3320; color: #fff; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0;">Semua Agenda & Acara Mendatang</h3>
+                <button type="button" id="tutupModalSemuaAcara" style="background: rgba(255,255,255,0.2); color: #fff; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+            </div>
+            <div style="padding: 1.5rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 1rem;">
+                @php
+                    $allAcaras = isset($mosque) ? $mosque->acaras()->where('event_date', '>=', now()->toDateString())->orderBy('event_date', 'asc')->get() : collect();
+                @endphp
+
+                @forelse($allAcaras as $itemAcara)
+                    <div class="card-item-semua-acara" 
+                         style="display: flex; gap: 1rem; align-items: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.85rem; border-radius: 0.75rem; cursor: pointer; transition: all 0.2s;"
+                         data-title="{{ $itemAcara->title }}"
+                         data-desc="{{ $itemAcara->description ?? 'Tidak ada deskripsi lengkap.' }}"
+                         data-date="{{ \Illuminate\Support\Carbon::parse($itemAcara->event_date)->translatedFormat('d F Y') }}"
+                         data-time="{{ $itemAcara->event_time ?? '-' }}"
+                         data-organizer="{{ $itemAcara->organizer ?? 'Pengurus Masjid' }}"
+                         data-photo="{{ !empty($itemAcara->photo) ? asset('storage/'.$itemAcara->photo) : '' }}">
+                        
+                        {{-- Thumbnail Foto Acara --}}
+                        <div style="width: 75px; height: 60px; border-radius: 0.5rem; background-color: #cbd5e1; background-size: cover; background-position: center; flex-shrink: 0; @if(!empty($itemAcara->photo)) background-image: url('{{ asset('storage/'.$itemAcara->photo) }}'); @else display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #64748b; @endif">
+                            @if(empty($itemAcara->photo)) No Photo @endif
+                        </div>
+
+                        {{-- Info Acara --}}
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.2rem;">
+                                <span style="font-size: 0.7rem; background: #e0f2fe; color: #0369a1; padding: 0.1rem 0.5rem; border-radius: 9999px; font-weight: 600;">
+                                    📅 {{ \Illuminate\Support\Carbon::parse($itemAcara->event_date)->translatedFormat('d M Y') }}
+                                </span>
+                            </div>
+                            <h4 style="font-size: 1rem; font-weight: 700; color: #1e293b; margin: 0 0 0.2rem 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $itemAcara->title }}</h4>
+                            <p style="font-size: 0.8rem; color: #64748b; margin: 0;">⏰ {{ $itemAcara->event_time ?? '-' }} &nbsp;·&nbsp; 👤 {{ $itemAcara->organizer ?? 'Pengurus Masjid' }}</p>
+                        </div>
+
+                        <span style="font-size: 0.85rem; font-weight: 600; color: #0d9488; white-space: nowrap; padding-right: 0.5rem;">Detail →</span>
+                    </div>
+                @empty
+                    <div style="text-align: center; padding: 2rem; color: #64748b;">
+                        Belum ada daftar acara mendatang saat ini.
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
     @endif
 
-   {{-- DONASI — modul: donasi & paket berbayar --}}
-@if($modOn('donasi') && isset($mosque) && $mosque->package_type != 'free')
-<section class="hu-donasi-v2-section" id="donasi">
-    <div class="hu-donasi-v2-inner">
-        <div class="hu-donasi-v2-left">
-            <div class="hu-section-tag hu-tag-amber-light">Donasi & Sedekah</div>
-            <h2 class="hu-donasi-v2-title">Investasi<br><em>Terbaik Akhirat</em></h2>
-            <p class="hu-donasi-v2-desc">
-                Setiap rupiah yang Anda donasikan akan digunakan untuk pembangunan dan operasional masjid.
-                Mari bersama-sama memakmurkan masjid Allah.
-            </p>
-            @php
-                $donasiTerkumpul = $donasiTerkumpul ?? 387000000;
-                $donasiTarget = $donasiTarget ?? 500000000;
-                $donasiPct = $donasiTarget > 0 ? round($donasiTerkumpul / $donasiTarget * 100) : 0;
-            @endphp
-            <div class="hu-donasi-v2-progress-wrap">
-                <div class="hu-donasi-v2-progress-label">
-                    <span>Terkumpul</span>
-                    <span class="hu-donasi-v2-pct">{{ $donasiPct }}%</span>
+    {{-- DONASI SECTION --}}
+    @if($modOn('donasi') && isset($mosque) && $mosque->package_type != 'free')
+    <section class="hu-donasi-v2-section" id="donasi" style="padding: 6rem 0; background-color: #0e3320; color: #ffffff; position: relative; overflow: hidden;">
+        <div class="hu-container" style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center;">
+                <div>
+                    <div style="display: inline-block; background: rgba(217, 119, 6, 0.2); color: #fbbf24; font-size: 0.75rem; font-weight: 700; padding: 0.35rem 0.85rem; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">
+                        Donasi & Sedekah Terbuka
+                    </div>
+                    <h2 style="font-size: 2.5rem; font-weight: 700; line-height: 1.2; margin-bottom: 1rem; font-family: 'Fraunces', serif;">
+                        Investasi Terbaik <br><span style="color: #fbbf24; font-style: italic;">Untuk Akhirat</span>
+                    </h2>
+                    <p style="font-size: 1rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 2rem;">
+                        Salurkan sebagian rezeki Anda untuk mendukung pembangunan, pemeliharaan, serta program operasional masjid. Setiap uluran tangan Anda sangat berarti bagi kemakmuran umat.
+                    </p>
+
+                    @php
+                        $terkumpul = $donasiTerkumpul ?? 0;
+                        $target = $donasiTarget ?? 500000000;
+                        $donasiPct = $target > 0 ? min(round($terkumpul / $target * 100), 100) : 0;
+                    @endphp
+
+                    <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1rem; padding: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; font-size: 0.9rem;">
+                            <span style="color: #94a3b8;">Dana Terkumpul</span>
+                            <span style="font-weight: 700; color: #34d399;">{{ $donasiPct }}% Tercapai</span>
+                        </div>
+                        <div style="width: 100%; height: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 9999px; overflow: hidden; margin-bottom: 0.75rem;">
+                            <div style="width: {{ $donasiPct }}%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 9999px;"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.95rem; font-weight: 600;">
+                            <span style="color: #ffffff;">Rp {{ number_format($terkumpul, 0, ',', '.') }}</span>
+                            <span style="color: #94a3b8;">Target: Rp {{ number_format($target, 0, ',', '.') }}</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="hu-donasi-v2-track">
-                    <div class="hu-donasi-v2-fill" style="width:{{ $donasiPct }}%"></div>
-                </div>
-                <div class="hu-donasi-v2-amounts">
-                    <span>Rp {{ number_format($donasiTerkumpul, 0, ',', '.') }}</span>
-                    <span>Rp {{ number_format($donasiTarget, 0, ',', '.') }}</span>
+
+                <div>
+                    <div style="background: #ffffff; color: #1e293b; border-radius: 1.25rem; padding: 2rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
+                        <h3 style="font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 1.25rem; text-align: center;">
+                            Pilih Nominal Donasi
+                        </h3>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-bottom: 1.25rem;">
+                            <button type="button" class="hu-nominal-btn" data-val="50000" style="padding: 0.75rem; border: 2px solid #e2e8f0; background: #f8fafc; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Rp 50.000</button>
+                            <button type="button" class="hu-nominal-btn" data-val="100000" style="padding: 0.75rem; border: 2px solid #e2e8f0; background: #f8fafc; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Rp 100.000</button>
+                            <button type="button" class="hu-nominal-btn" data-val="250000" style="padding: 0.75rem; border: 2px solid #e2e8f0; background: #f8fafc; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Rp 250.000</button>
+                            <button type="button" class="hu-nominal-btn" data-val="500000" style="padding: 0.75rem; border: 2px solid #e2e8f0; background: #f8fafc; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Rp 500.000</button>
+                        </div>
+
+                        <div style="text-align: center; font-size: 0.85rem; color: #64748b; margin-bottom: 0.75rem;">Atau masukkan nominal lain</div>
+
+                        <div style="position: relative; margin-bottom: 1rem;">
+                            <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-weight: 600; color: #64748b;">Rp</span>
+                            <input type="number" id="donasiNominal" placeholder="0" min="1000" style="width: 100%; padding: 0.75rem 0.75rem 0.75rem 2.75rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-size: 1rem; font-weight: 600; outline: none; box-sizing: border-box;">
+                        </div>
+
+                        <div style="margin-bottom: 1.25rem;">
+                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Nama Donatur (Opsional)</label>
+                            <input type="text" class="hu-donasi-v2-input-name" placeholder="Hamba Allah" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-size: 0.95rem; outline: none; box-sizing: border-box;">
+                        </div>
+
+                        <a href="{{ route('masjid.donasi.publik', $mosque->slug) }}" style="display: block; width: 100%; background: #0d9488; color: #ffffff; text-align: center; padding: 0.85rem; border-radius: 0.75rem; font-weight: 700; text-decoration: none; box-sizing: border-box; transition: background 0.2s;">
+                            Lanjut Pembayaran →
+                        </a>
+
+                        <div style="text-align: center; font-size: 0.75rem; color: #94a3b8; margin-top: 1rem;">
+                            🔒 Pembayaran aman & terpercaya · QRIS / Transfer Bank / Dompet Digital
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    </section>
+    @endif
 
-        <div class="hu-donasi-v2-right">
-            <div class="hu-donasi-v2-card">
-                <div class="hu-donasi-v2-card-title">Pilih Nominal Donasi</div>
-                <div class="hu-donasi-v2-nominals">
-                    <button class="hu-nominal-btn" data-val="50000">Rp 50.000</button>
-                    <button class="hu-nominal-btn" data-val="100000">Rp 100.000</button>
-                    <button class="hu-nominal-btn" data-val="250000">Rp 250.000</button>
-                    <button class="hu-nominal-btn" data-val="500000">Rp 500.000</button>
+    {{-- DOKUMENTASI PENYALURAN SECTION --}}
+    @if($modOn('donasi') && isset($mosque) && $mosque->package_type != 'free')
+    <section class="hu-section" id="penyaluran" style="background-color: #f8fafc; padding: 5rem 0;">
+        <div class="hu-container">
+            <div class="hu-acara-v2-head" style="margin-bottom: 2.5rem;">
+                <div>
+                    <div class="hu-section-tag hu-tag-amber" style="margin-bottom: 0.5rem;">Transparansi</div>
+                    <h2 class="hu-section-title hu-title-dark">Dokumentasi Penyaluran</h2>
                 </div>
-                <div class="hu-donasi-v2-or">Atau masukkan nominal lain</div>
-                <div class="hu-donasi-v2-input-wrap">
-                    <span class="hu-donasi-v2-prefix">Rp</span>
-                    <input type="number" id="donasiNominal" class="hu-donasi-v2-input" placeholder="0" min="1000">
+                <a href="{{ route('masjid.donasi.publik', $mosque->slug) }}" class="hu-acara-lihat">Lihat semua →</a>
+            </div>
+
+            @if(isset($items) && $items->isNotEmpty())
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2rem;">
+                    @foreach($items as $item)
+                        @php
+                            $catTitle = 'Penyaluran';
+                            if (isset($categories)) {
+                                $matched = $categories->firstWhere('key', $item->kategori);
+                                if ($matched) { $catTitle = $matched->title; }
+                            }
+                            $formattedDate = $item->tanggal ? \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') : '';
+                        @endphp
+                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 1rem; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                            <div style="height: 200px; background-size: cover; background-position: center; background-image: url('{{ $item->foto_url }}')"></div>
+                            <div style="padding: 1.5rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <span style="font-size: 0.75rem; background: #e0f2fe; color: #0369a1; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600;">{{ $catTitle }}</span>
+                                    <h3 style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin: 0.75rem 0 0.5rem 0;">{{ $item->judul }}</h3>
+                                    <p style="font-size: 0.9rem; color: #64748b; line-height: 1.5; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ $item->deskripsi }}</p>
+                                </div>
+                                <div>
+                                    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.75rem;">
+                                        <span style="color: #0d9488; font-weight: 700;">Rp {{ number_format($item->nominal_terpakai ?? 0, 0, ',', '.') }}</span>
+                                        <span style="color: #94a3b8;">{{ $formattedDate }}</span>
+                                    </div>
+                                    <button type="button" 
+                                        class="btn-buka-detail" 
+                                        data-judul="{{ $item->judul }}" 
+                                        data-kategori="{{ $catTitle }}" 
+                                        data-deskripsi="{{ $item->deskripsi ?? 'Tidak ada deskripsi.' }}" 
+                                        data-nominal="Rp {{ number_format($item->nominal_terpakai ?? 0, 0, ',', '.') }}" 
+                                        data-tanggal="{{ $formattedDate }}" 
+                                        data-foto="{{ $item->foto_url }}"
+                                        style="background: none; border: none; padding: 0; font-size: 0.85rem; font-weight: 600; color: #0d9488; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem;">
+                                        Lihat detail →
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
-                <div class="hu-donasi-v2-label-field">Nama (opsional)</div>
-                <input type="text" class="hu-donasi-v2-input-name" placeholder="Hamba Allah">
-                <a href="{{ route('masjid.donasi.publik', $mosque->slug) }}" class="hu-donasi-v2-submit" style="text-decoration: none; display: inline-block; text-align: center;">
-                Donasi Sekarang
-                </a>
-                <div class="hu-donasi-v2-note">
-                    Pembayaran aman &amp; terpercaya · QRIS / Transfer Bank / Dompet Digital
+            @else
+                <div style="text-align: center; padding: 3rem; color: #64748b; background: #ffffff; border-radius: 1rem; border: 2px dashed #cbd5e1;">
+                    Belum ada dokumentasi penyaluran yang dipublikasikan.
+                </div>
+            @endif
+        </div>
+    </section>
+
+    {{-- MODAL POPUP DETAIL PENYALURAN --}}
+    <div id="modalDetailPenyaluran" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+        <div style="background: #fff; width: 100%; max-width: 600px; border-radius: 1rem; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); max-height: 90vh; display: flex; flex-direction: column;">
+            <div style="position: relative; height: 250px; background-size: cover; background-position: center;" id="modalFoto">
+                <button type="button" id="tutupModal" style="position: absolute; top: 1rem; right: 1rem; background: rgba(0,0,0,0.5); color: #fff; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+            </div>
+            <div style="padding: 1.5rem; overflow-y: auto; flex: 1;">
+                <span id="modalKategori" style="font-size: 0.75rem; background: #e0f2fe; color: #0369a1; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600;"></span>
+                <h3 id="modalJudul" style="font-size: 1.25rem; font-weight: 700; color: #1e293b; margin: 0.75rem 0 0.5rem 0;"></h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #64748b; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #f1f5f9;">
+                    <span>Dana Tersalurkan: <strong id="modalNominal" style="color: #0d9488;"></strong></span>
+                    <span id="modalTanggal"></span>
+                </div>
+                <p id="modalDeskripsi" style="font-size: 0.95rem; color: #475569; line-height: 1.6; margin: 0; white-space: pre-line;"></p>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- MODAL POPUP DETAIL STRUKTUR PENGURUS MASJID --}}
+    <div id="modalStrukturPengurus" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+        <div style="background: #fff; width: 100%; max-width: 550px; border-radius: 1rem; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); max-height: 90vh; display: flex; flex-direction: column;">
+            <div style="padding: 1.25rem 1.5rem; background: #0e3320; color: #fff; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0;">Struktur Pengurus & Yayasan</h3>
+                <button type="button" id="tutupModalPengurus" style="background: rgba(255,255,255,0.2); color: #fff; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+            </div>
+            <div style="padding: 1.5rem; overflow-y: auto; flex: 1;">
+                @if(!empty($mosque->organization_name))
+                    <div style="margin-bottom: 1rem; font-size: 0.95rem; color: #334155; background: #f8fafc; padding: 0.75rem 1rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+                        <strong style="color: #0d9488;">Organisasi / Yayasan:</strong> {{ $mosque->organization_name }}
+                    </div>
+                @endif
+
+                <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                    @if(!empty($mosque->chairman_name))
+                    <div style="background: #f8fafc; padding: 0.85rem 1rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 0.7rem; color: #64748b; font-weight: 600;">KETUA DKM</div>
+                            <div style="font-size: 1rem; font-weight: 700; color: #1e293b; margin-top: 0.1rem;">{{ $mosque->chairman_name }}</div>
+                        </div>
+                        @if(!empty($mosque->chairman_phone))
+                            <div style="font-size: 0.8rem; color: #0d9488; background: #e0f2fe; padding: 0.25rem 0.5rem; border-radius: 0.35rem;">📞 {{ $mosque->chairman_phone }}</div>
+                        @endif
+                    </div>
+                    @endif
+
+                    @if(!empty($mosque->imam_name))
+                    <div style="background: #f8fafc; padding: 0.85rem 1rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 0.7rem; color: #64748b; font-weight: 600;">IMAM BESAR / KHATIB</div>
+                            <div style="font-size: 1rem; font-weight: 700; color: #1e293b; margin-top: 0.1rem;">{{ $mosque->imam_name }}</div>
+                        </div>
+                        @if(!empty($mosque->imam_phone))
+                            <div style="font-size: 0.8rem; color: #0d9488; background: #e0f2fe; padding: 0.25rem 0.5rem; border-radius: 0.35rem;">📞 {{ $mosque->imam_phone }}</div>
+                        @endif
+                    </div>
+                    @endif
+
+                    @if(!empty($mosque->secretary_name))
+                    <div style="background: #f8fafc; padding: 0.85rem 1rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 0.7rem; color: #64748b; font-weight: 600;">SEKRETARIS</div>
+                            <div style="font-size: 1rem; font-weight: 700; color: #1e293b; margin-top: 0.1rem;">{{ $mosque->secretary_name }}</div>
+                        </div>
+                    </div>
+                    @endif
+
+                    @if(!empty($mosque->treasurer_name))
+                    <div style="background: #f8fafc; padding: 0.85rem 1rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 0.7rem; color: #64748b; font-weight: 600;">BENDAHARA</div>
+                            <div style="font-size: 1rem; font-weight: 700; color: #1e293b; margin-top: 0.1rem;">{{ $mosque->treasurer_name }}</div>
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
-</section>
-@endif
 
-    {{-- KONTAK — semua isi dari tab "Kontak & Sosial" di editor Landing Page --}}
+    {{-- KONTAK SECTION --}}
     <section class="hu-hubungi-section" id="kontak">
         <div class="hu-container">
             <div class="hu-section-head">
@@ -415,10 +643,16 @@
                     <div>
                         <div class="hu-hubungi-label">Alamat</div>
                         <div class="hu-hubungi-val">
-                            {{ $mosque->contact_address ?? $mosque->address ?? '—' }}
-                            @if($modOn('peta_lokasi') && !empty($mosque->contact_maps))
-                                <br><a href="{{ $mosque->contact_maps }}" target="_blank" style="font-size:0.8rem;">Lihat di Google Maps →</a>
-                            @endif
+                            @php
+                                $alamatLengkap = $mosque->contact_address ?? $mosque->address ?? '—';
+                                $gmapsUrl = !empty($mosque->contact_maps) ? $mosque->contact_maps : 'https://www.google.com/maps/search/?api=1&query=' . urlencode($alamatLengkap . ' ' . ($mosque->city ?? ''));
+                            @endphp
+                            <a href="{{ $gmapsUrl }}" target="_blank" style="color: inherit; text-decoration: none;">
+                                {{ $alamatLengkap }}
+                                @if(!empty($alamatLengkap) && $alamatLengkap !== '—')
+                                    <br><span style="font-size:0.8rem; color:#0d9488; font-weight:600;">Lihat di Google Maps →</span>
+                                @endif
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -430,8 +664,24 @@
                         </svg>
                     </div>
                     <div>
-                        <div class="hu-hubungi-label">Telepon</div>
-                        <div class="hu-hubungi-val">{{ $mosque->contact_phone ?? $mosque->phone ?? '—' }}</div>
+                        <div class="hu-hubungi-label">Telepon / WhatsApp</div>
+                        <div class="hu-hubungi-val">
+                            @php
+                                $noTelp = $mosque->contact_phone ?? $mosque->phone ?? '';
+                                $cleanPhone = preg_replace('/\D/', '', $noTelp);
+                                if(str_starts_with($cleanPhone, '0')) {
+                                    $cleanPhone = '62' . substr($cleanPhone, 1);
+                                }
+                            @endphp
+                            @if(!empty($noTelp))
+                                <a href="https://wa.me/{{ $cleanPhone }}" target="_blank" style="color: inherit; text-decoration: none;">
+                                    {{ $noTelp }}
+                                    <br><span style="font-size:0.8rem; color:#16a34a; font-weight:600;">Chat WhatsApp →</span>
+                                </a>
+                            @else
+                                —
+                            @endif
+                        </div>
                     </div>
                 </div>
 
@@ -443,7 +693,19 @@
                     </div>
                     <div>
                         <div class="hu-hubungi-label">Email</div>
-                        <div class="hu-hubungi-val">{{ $mosque->contact_email ?? $mosque->email ?? '—' }}</div>
+                        <div class="hu-hubungi-val">
+                            @php
+                                $emailMasjid = $mosque->contact_email ?? $mosque->email ?? '';
+                            @endphp
+                            @if(!empty($emailMasjid))
+                                <a href="mailto:{{ $emailMasjid }}" style="color: inherit; text-decoration: none;">
+                                    {{ $emailMasjid }}
+                                    <br><span style="font-size:0.8rem; color:#2563eb; font-weight:600;">Kirim Email →</span>
+                                </a>
+                            @else
+                                —
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
@@ -459,10 +721,10 @@
         </div>
     </section>
 
+    {{-- FOOTER SECTION --}}
     <footer class="hu-footer-v2">
         <div class="hu-footer-v2-inner">
             <div class="hu-footer-v2-grid">
-
                 <div class="hu-footer-v2-brand">
                     <div class="hu-footer-v2-name">{{ $mosque->mosque_name ?? '' }}</div>
                     <div class="hu-footer-v2-tagline">
@@ -488,9 +750,9 @@
                     <a href="#program" class="hu-footer-v2-link">Program & Fasilitas</a>
                     @if($modOn('kegiatan'))<a href="#acara" class="hu-footer-v2-link">Acara</a>@endif
                     @if($modOn('donasi'))<a href="#donasi" class="hu-footer-v2-link">Donasi</a>@endif
+                    <a href="#penyaluran" class="hu-footer-v2-link">Penyaluran</a>
                     <a href="#kontak" class="hu-footer-v2-link">Hubungi Kami</a>
                 </div>
-
             </div>
 
             <div class="hu-footer-v2-bottom">
@@ -528,11 +790,144 @@
 
         document.querySelectorAll('.hu-nominal-btn').forEach(btn => {
             btn.addEventListener('click', function () {
-                document.querySelectorAll('.hu-nominal-btn').forEach(b => b.classList.remove('selected'));
-                this.classList.add('selected');
+                document.querySelectorAll('.hu-nominal-btn').forEach(b => {
+                    b.style.background = '#f8fafc';
+                    b.style.borderColor = '#e2e8f0';
+                    b.style.color = '#1e293b';
+                });
+                this.style.background = '#f0fdf4';
+                this.style.borderColor = '#10b981';
+                this.style.color = '#047857';
                 document.getElementById('donasiNominal').value = this.dataset.val;
             });
         });
+
+        // Script Interaksi Modal Detail Penyaluran
+        const modal = document.getElementById('modalDetailPenyaluran');
+        const btnTutup = document.getElementById('tutupModal');
+
+        document.querySelectorAll('.btn-buka-detail').forEach(button => {
+            button.addEventListener('click', function() {
+                document.getElementById('modalJudul').innerText = this.dataset.judul;
+                document.getElementById('modalKategori').innerText = this.dataset.kategori;
+                document.getElementById('modalDeskripsi').innerText = this.dataset.deskripsi;
+                document.getElementById('modalNominal').innerText = this.dataset.nominal;
+                document.getElementById('modalTanggal').innerText = this.dataset.tanggal;
+                document.getElementById('modalFoto').style.backgroundImage = `url('${this.dataset.foto}')`;
+                
+                modal.style.display = 'flex';
+            });
+        });
+
+        if (btnTutup) {
+            btnTutup.addEventListener('click', () => { modal.style.display = 'none'; });
+        }
+        if (modal) {
+            modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+        }
+
+        // Script Interaksi Modal Detail Acara (Tunggal)
+        const modalAcara = document.getElementById('modalDetailAcara');
+        const tutupModalAcara = document.getElementById('tutupModalAcara');
+        const tutupModalAcaraAlt = document.getElementById('tutupModalAcaraAlt');
+
+        document.querySelectorAll('.btn-buka-acara').forEach(card => {
+            card.addEventListener('click', function() {
+                document.getElementById('modalAcaraJudul').innerText = this.dataset.title;
+                document.getElementById('modalAcaraPenyelenggara').innerText = this.dataset.organizer;
+                document.getElementById('modalAcaraDeskripsi').innerText = this.dataset.desc;
+                document.getElementById('modalAcaraTanggal').innerText = this.dataset.date;
+                document.getElementById('modalAcaraWaktu').innerText = this.dataset.time;
+
+                const fotoUrl = this.dataset.photo;
+                const fotoDiv = document.getElementById('modalAcaraFoto');
+                if (fotoUrl) {
+                    fotoDiv.style.backgroundImage = `url('${fotoUrl}')`;
+                    fotoDiv.style.display = 'block';
+                } else {
+                    fotoDiv.style.display = 'none';
+                }
+
+                modalAcara.style.display = 'flex';
+            });
+        });
+
+        if (tutupModalAcara) {
+            tutupModalAcara.addEventListener('click', () => { modalAcara.style.display = 'none'; });
+        }
+        if (tutupModalAcaraAlt) {
+            tutupModalAcaraAlt.addEventListener('click', () => { modalAcara.style.display = 'none'; });
+        }
+        if (modalAcara) {
+            modalAcara.addEventListener('click', (e) => { if (e.target === modalAcara) modalAcara.style.display = 'none'; });
+        }
+
+        // Script Interaksi Modal Daftar "Lihat Semua" Acara
+        const modalSemuaAcara = document.getElementById('modalSemuaAcara');
+        const btnLihatSemuaAcara = document.getElementById('btnLihatSemuaAcara');
+        const tutupModalSemuaAcara = document.getElementById('tutupModalSemuaAcara');
+
+        if (btnLihatSemuaAcara) {
+            btnLihatSemuaAcara.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (modalSemuaAcara) modalSemuaAcara.style.display = 'flex';
+            });
+        }
+        if (tutupModalSemuaAcara) {
+            tutupModalSemuaAcara.addEventListener('click', () => {
+                if (modalSemuaAcara) modalSemuaAcara.style.display = 'none';
+            });
+        }
+        if (modalSemuaAcara) {
+            modalSemuaAcara.addEventListener('click', (e) => {
+                if (e.target === modalSemuaAcara) modalSemuaAcara.style.display = 'none';
+            });
+        }
+
+        // Klik item dari dalam daftar "Lihat Semua" untuk membuka detail acara
+        document.querySelectorAll('.card-item-semua-acara').forEach(card => {
+            card.addEventListener('click', function() {
+                if (modalSemuaAcara) modalSemuaAcara.style.display = 'none';
+
+                document.getElementById('modalAcaraJudul').innerText = this.dataset.title;
+                document.getElementById('modalAcaraPenyelenggara').innerText = this.dataset.organizer;
+                document.getElementById('modalAcaraDeskripsi').innerText = this.dataset.desc;
+                document.getElementById('modalAcaraTanggal').innerText = this.dataset.date;
+                document.getElementById('modalAcaraWaktu').innerText = this.dataset.time;
+
+                const fotoUrl = this.dataset.photo;
+                const fotoDiv = document.getElementById('modalAcaraFoto');
+                if (fotoUrl) {
+                    fotoDiv.style.backgroundImage = `url('${fotoUrl}')`;
+                    fotoDiv.style.display = 'block';
+                } else {
+                    fotoDiv.style.display = 'none';
+                }
+
+                if (modalAcara) modalAcara.style.display = 'flex';
+            });
+        });
+
+        // Script Interaksi Modal Struktur Pengurus
+        const modalPengurus = document.getElementById('modalStrukturPengurus');
+        const btnBukaPengurus = document.getElementById('btnBukaPengurus');
+        const tutupModalPengurus = document.getElementById('tutupModalPengurus');
+
+        if (btnBukaPengurus) {
+            btnBukaPengurus.addEventListener('click', () => {
+                modalPengurus.style.display = 'flex';
+            });
+        }
+        if (tutupModalPengurus) {
+            tutupModalPengurus.addEventListener('click', () => {
+                modalPengurus.style.display = 'none';
+            });
+        }
+        if (modalPengurus) {
+            modalPengurus.addEventListener('click', (e) => {
+                if (e.target === modalPengurus) modalPengurus.style.display = 'none';
+            });
+        }
     </script>
 </body>
 </html>

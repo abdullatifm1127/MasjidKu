@@ -34,7 +34,13 @@ class PublicMosqueController extends Controller
 
         $hasDonationFeature = in_array($mosque->package_type ?? 'free', ['premium', 'pro', 'paid']);
 
-        // === TAMBAHKAN PENGAMBILAN DATA DONASI INI ===
+        // Perhitungan Dana Terkumpul Otomatis (Hanya status 'diterima')
+        $donasiTerkumpul = Donasi::where('mosque_id', $mosque->id)
+            ->where('status', 'diterima')
+            ->sum('nominal');
+
+        $donasiTarget = $mosque->donation_target ?? 500000000; 
+
         $categories = DonationCategory::where('mosque_id', $mosque->id)
             ->where('is_active', true)
             ->orderBy('sort_order')
@@ -43,7 +49,6 @@ class PublicMosqueController extends Controller
         $items = DonasiGaleri::where('mosque_id', $mosque->id)
             ->latest()
             ->get();
-        // ============================================
 
         return view('auth.adminmasjid.halamanUtamaUser', [
             'mosque'             => $mosque,
@@ -51,17 +56,17 @@ class PublicMosqueController extends Controller
             'prayers'            => $prayers,
             'acaras'             => $acaras,
             'hasDonationFeature' => $hasDonationFeature,
-            'categories'         => $categories, // <-- Kirim ke view
-            'items'              => $items,      // <-- Kirim ke view
+            'categories'         => $categories,
+            'items'              => $items,
+            'donasiTerkumpul'    => $donasiTerkumpul,
+            'donasiTarget'       => $donasiTarget,
         ]);
     }
 
     public function showDonasi(string $slug)
     {
-        // Hapus pengetatan ->where('status', 'approved') agar masjid yang baru memperpanjang/pending tetap bisa diakses publik
         $mosque = Mosque::where('slug', $slug)->firstOrFail();
 
-        // Pastikan paketnya bukan free
         $hasDonationFeature = $mosque->package_type !== 'free';
 
         if (!$hasDonationFeature) {
@@ -70,36 +75,33 @@ class PublicMosqueController extends Controller
 
         $zakatFitrahDefault = $mosque->zakat_fitrah_default ?? 45000;
 
-        // Pastikan Model Donasi Galeri aman dari error jika tabelnya kosong
         $items = class_exists('\App\Models\DonasiGaleri')
             ? \App\Models\DonasiGaleri::where('mosque_id', $mosque->id)->latest()->get()
             : collect();
 
-        // Ambil kategori donasi yang aktif
         $categories = DonationCategory::where('mosque_id', $mosque->id)
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->get();
 
-        // UBAH KE JSON agar bisa dibaca langsung oleh script window.donasiCategories di Blade
         $categoriesJson = $categories->toJson();
 
-        // ===== BARU: Riwayat donasi untuk ditampilkan ke publik =====
-        // Hanya donasi berstatus "diterima" (sudah diverifikasi admin lewat
-        // DonasiAdminController::updateStatus) yang ditampilkan. Donasi "pending"
-        // sengaja TIDAK ditampilkan di sini supaya publik tidak melihat transaksi
-        // yang belum tentu benar-benar sampai ke rekening masjid.
-        $recentDonations = Donasi::where('mosque_id', $mosque->id)
-            ->where('status', 'diterima')
-            ->latest()
-            ->take(10)
-            ->get()
-            ->map(function ($donasi) use ($categories) {
-                $donasi->category_title = optional($categories->firstWhere('key', $donasi->jenis))->title
-                    ?? ucfirst($donasi->jenis);
-                return $donasi;
-            });
-        // ================================================================
+        // Riwayat Donasi Pribadi (Hanya menampilkan milik akun yang sedang login, status 'diterima' atau 'pending')
+        $recentDonations = collect(); 
+        
+        if (auth()->check()) {
+            $recentDonations = Donasi::where('mosque_id', $mosque->id)
+                ->where('user_id', auth()->id()) 
+                ->whereIn('status', ['diterima', 'pending'])
+                ->latest()
+                ->take(10)
+                ->get()
+                ->map(function ($donasi) use ($categories) {
+                    $donasi->category_title = optional($categories->firstWhere('key', $donasi->jenis))->title
+                        ?? ucfirst($donasi->jenis);
+                    return $donasi;
+                });
+        }
 
         return view('donasi.donasi', [
             'mosque'             => $mosque,
@@ -107,7 +109,7 @@ class PublicMosqueController extends Controller
             'items'              => $items,
             'categories'         => $categories,
             'categoriesJson'     => $categoriesJson,
-            'recentDonations'    => $recentDonations, // <-- BARU
+            'recentDonations'    => $recentDonations,
         ]);
     }
 }
