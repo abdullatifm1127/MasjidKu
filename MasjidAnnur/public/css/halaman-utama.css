@@ -1024,3 +1024,37 @@ button.btn-nav-outline:hover {
     .dir-grid { grid-template-columns: 1fr; }
     .dir-header-text h2 { font-size: 1.6rem; }
 }
+
+/* Placeholder cards saat belum ada data nyata */
+.dir-card-placeholder {
+    opacity: 0.72;
+    pointer-events: none;
+    user-select: none;
+}
+
+.dir-card-btn-dummy {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.7);
+    border-radius: 10px;
+    margin-top: auto;
+    cursor: default;
+    letter-spacing: 0.01em;
+}
+
+/* Empty state dengan SVG icon */
+.dir-empty-ico {
+    width: 52px;
+    height: 52px;
+    background: #f3f4f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    margin-bottom: 14px;
+}

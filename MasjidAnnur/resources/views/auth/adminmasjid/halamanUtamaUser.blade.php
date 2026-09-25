@@ -69,6 +69,9 @@
                 @if($modOn('kegiatan'))<a href="#acara" class="hu-nav-link">Acara</a>@endif
                 @if($modOn('donasi'))<a href="#donasi" class="hu-nav-link">Donasi</a>@endif
                 <a href="#kontak"   class="hu-nav-link">Hubungi</a>
+                @if($direktoriMasjid->isNotEmpty())
+                <a href="#direktori" class="hu-nav-link">Direktori</a>
+                @endif
             </nav>
 
             <button class="hu-ganti-btn" id="huGantiBtn">
@@ -451,6 +454,97 @@
             @endif
         </div>
     </section>
+
+    {{-- ===== DIREKTORI MASJID LAINNYA ===== --}}
+    @if($direktoriMasjid->isNotEmpty())
+    <section class="huu-dir-section" id="direktori">
+        <div class="hu-container">
+
+            <div class="huu-dir-head">
+                <div>
+                    <div class="hu-section-tag hu-tag-amber">Direktori Masjid</div>
+                    <h2 class="hu-section-title hu-title-dark">Temukan Masjid<br><em>di Sekitar Anda</em></h2>
+                </div>
+                <a href="{{ url('/') }}#direktori" class="huu-dir-all-link">
+                    Lihat Semua →
+                </a>
+            </div>
+
+            @php
+                $warnaDirekori = ['#1a4731','#1a3a6e','#6b2a2a','#0d5c5c','#4a3100','#2a1a5e'];
+            @endphp
+
+            <div class="huu-dir-grid">
+                @foreach($direktoriMasjid as $i => $m)
+                    @php
+                        $bg      = $warnaDirekori[$i % count($warnaDirekori)];
+                        $initial = mb_strtoupper(mb_substr($m->mosque_name, 0, 2));
+                        $totalDonasi = \App\Models\Donasi::totalLunas($m->id);
+                        $targetDonasi = 1000000000;
+                        $persen = $targetDonasi > 0 ? min(100, round($totalDonasi / $targetDonasi * 100)) : 0;
+                        $kapasitas = $m->capacity
+                            ? number_format((int) str_replace(['.', ','], ['', ''], $m->capacity), 0, ',', '.')
+                            : null;
+                    @endphp
+                    <div class="huu-dir-card">
+                        {{-- Gambar / banner --}}
+                        <div class="huu-dir-img" style="background-color: {{ $bg }};">
+                            @if(!empty($m->hero_image))
+                                <img src="{{ asset('storage/' . $m->hero_image) }}"
+                                     alt="{{ $m->mosque_name }}" class="huu-dir-photo">
+                            @else
+                                <span class="huu-dir-initial">{{ $initial }}</span>
+                            @endif
+                            <span class="huu-dir-city">{{ $m->city ?? 'Indonesia' }}</span>
+                        </div>
+
+                        {{-- Body --}}
+                        <div class="huu-dir-body">
+                            <h3 class="huu-dir-name">{{ $m->mosque_name }}</h3>
+                            <p class="huu-dir-tagline">
+                                {{ \Illuminate\Support\Str::limit($m->tagline ?? $m->description ?? 'Masjid di Indonesia', 52) }}
+                            </p>
+
+                            <div class="huu-dir-meta">
+                                <div class="huu-dir-meta-item">
+                                    <span class="huu-dir-meta-label">Kapasitas</span>
+                                    <strong>{{ $kapasitas ? $kapasitas . ' orang' : '—' }}</strong>
+                                </div>
+                                <div class="huu-dir-meta-item">
+                                    <span class="huu-dir-meta-label">Sejak</span>
+                                    <strong>{{ $m->founded ?? '—' }}</strong>
+                                </div>
+                            </div>
+
+                            @if($totalDonasi > 0)
+                            <div class="huu-dir-prog">
+                                <div class="huu-dir-prog-label">
+                                    <span>Donasi Terkumpul</span>
+                                    <span class="huu-dir-prog-pct">{{ $persen }}%</span>
+                                </div>
+                                <div class="huu-dir-prog-bar">
+                                    <div class="huu-dir-prog-fill"
+                                         style="width: {{ $persen }}%; background: {{ $bg }};"></div>
+                                </div>
+                                <div class="huu-dir-prog-amount">
+                                    Rp {{ number_format($totalDonasi, 0, ',', '.') }} terkumpul
+                                </div>
+                            </div>
+                            @endif
+
+                            <a href="{{ route('masjid.publik', $m->slug) }}"
+                               class="huu-dir-btn"
+                               style="background: {{ $bg }};">
+                                Kunjungi Halaman →
+                            </a>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+        </div>
+    </section>
+    @endif
 
     <footer class="hu-footer-v2">
         <div class="hu-footer-v2-inner">
