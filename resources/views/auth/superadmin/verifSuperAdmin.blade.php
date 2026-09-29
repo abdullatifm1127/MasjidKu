@@ -276,6 +276,8 @@
                                         <div style="flex: 1; min-width: 120px;">
                                             <select name="payment_status" style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.82rem; background: #fff;">
                                                 <option value="approved" {{ $p->payment_status == 'approved' ? 'selected' : '' }}>Approved (Aktif)</option>
+                                                <option value="pending" {{ $p->payment_status == 'pending' ? 'selected' : '' }}>Pending (Menunggu Midtrans)</option>
+                                                <option value="failed" {{ $p->payment_status == 'failed' ? 'selected' : '' }}>Failed (Gagal / Kedaluwarsa)</option>
                                                 <option value="unpaid" {{ $p->payment_status == 'unpaid' ? 'selected' : '' }}>Unpaid (Nonaktif)</option>
                                             </select>
                                         </div>

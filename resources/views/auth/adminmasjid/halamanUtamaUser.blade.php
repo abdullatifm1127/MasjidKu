@@ -61,20 +61,20 @@
                 </div>
             </a>
 
-            <nav class="hu-nav">
-                <a href="#beranda" class="hu-nav-link active">Beranda</a>
-                <a href="#profil" class="hu-nav-link">Profil</a>
-                @if($modOn('jadwal_shalat'))<a href="#shalat" class="hu-nav-link">Waktu Shalat</a>@endif
-                <a href="#program" class="hu-nav-link">Program & Fasilitas</a>
-                @if($modOn('kegiatan'))<a href="#acara" class="hu-nav-link">Acara</a>@endif
-                
-                @if(isset($mosque) && $mosque->package_type !== 'free')
-                    <a href="#donasi" class="hu-nav-link">Donasi</a>
-                @endif
+          <nav class="hu-nav">
+        <a href="#beranda" class="hu-nav-link active">Beranda</a>
+        <a href="#profil" class="hu-nav-link">Profil</a>
+        @if($modOn('jadwal_shalat'))<a href="#shalat" class="hu-nav-link">Waktu Shalat</a>@endif
+        <a href="#program" class="hu-nav-link">Program & Fasilitas</a>
+        @if($modOn('kegiatan'))<a href="#acara" class="hu-nav-link">Acara</a>@endif
+        
+        @if(isset($mosque) && $mosque->package_type !== 'free')
+            <a href="#donasi" class="hu-nav-link">Donasi</a>
+            <a href="#penyaluran" class="hu-nav-link">Penyaluran</a>
+        @endif
 
-                <a href="#penyaluran" class="hu-nav-link">Penyaluran</a>
-                <a href="#kontak" class="hu-nav-link">Hubungi</a>
-            </nav>
+        <a href="#kontak" class="hu-nav-link">Hubungi</a>
+    </nav>
 
             <button class="hu-ganti-btn" id="huGantiBtn">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
