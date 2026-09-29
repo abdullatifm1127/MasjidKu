@@ -512,4 +512,32 @@ class MosqueController extends Controller
 
         return redirect()->route('dashboard')->with('status', 'Anda telah berhenti berlangganan ke paket Free.');
     }
+
+    /**
+     * Mengubah paket dan status donasi masjid secara manual oleh Super Admin.
+     */
+    public function updateSubscription(Request $request, $id)
+    {
+        $mosque = Mosque::findOrFail($id);
+
+        $request->validate([
+            'package_type' => 'required|in:free,8000_1,100000_1,1000000_12',
+            'payment_status' => 'required|in:approved,unpaid,pending',
+        ]);
+
+        $packageType = $request->package_type;
+        $paymentStatus = $request->payment_status;
+
+        // Tentukan apakah donasi online aktif (aktif jika bukan paket free dan payment_status approved)
+        $hasOnlineDonation = ($packageType !== 'free' && $paymentStatus === 'approved');
+
+        $mosque->update([
+            'package_type' => $packageType,
+            'payment_status' => $paymentStatus,
+            'has_online_donation' => $hasOnlineDonation,
+        ]);
+
+        return redirect()->route('superadmin.verifikasi')
+            ->with('success', 'Status paket dan fitur donasi masjid berhasil diperbarui secara manual.');
+    }
 }
