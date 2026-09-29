@@ -12,6 +12,18 @@ use Illuminate\Http\Request;
 
 class PublicMosqueController extends Controller
 {
+    /**
+     * Fitur donasi aktif jika paket bukan free DAN pembayaran sudah approved.
+     * Dipakai di show() dan showDonasi() supaya aturannya sama di kedua halaman.
+     * (package_type tersimpan sebagai 'free', '100000_1', atau '1000000_12',
+     *  bukan 'premium' / 'pro' / 'paid'.)
+     */
+    protected function hasDonationFeature(Mosque $mosque): bool
+    {
+        return ($mosque->package_type ?? 'free') !== 'free'
+            && strtolower(trim($mosque->payment_status ?? '')) === 'approved';
+    }
+
     public function show(string $slug, PrayerTimeService $prayerTimeService)
     {
         $mosque = Mosque::where('slug', $slug)
@@ -32,14 +44,14 @@ class PublicMosqueController extends Controller
             ->take(3)
             ->get();
 
-        $hasDonationFeature = in_array($mosque->package_type ?? 'free', ['premium', 'pro', 'paid']);
+        $hasDonationFeature = $this->hasDonationFeature($mosque);
 
         // Perhitungan Dana Terkumpul Otomatis (Hanya status 'diterima')
         $donasiTerkumpul = Donasi::where('mosque_id', $mosque->id)
             ->where('status', 'diterima')
             ->sum('nominal');
 
-        $donasiTarget = $mosque->donation_target ?? 500000000; 
+        $donasiTarget = $mosque->donation_target ?? 500000000;
 
         $categories = DonationCategory::where('mosque_id', $mosque->id)
             ->where('is_active', true)
@@ -67,9 +79,7 @@ class PublicMosqueController extends Controller
     {
         $mosque = Mosque::where('slug', $slug)->firstOrFail();
 
-        $hasDonationFeature = $mosque->package_type !== 'free';
-
-        if (!$hasDonationFeature) {
+        if (!$this->hasDonationFeature($mosque)) {
             return redirect()->route('masjid.detail', $slug);
         }
 
@@ -86,12 +96,12 @@ class PublicMosqueController extends Controller
 
         $categoriesJson = $categories->toJson();
 
-        // Riwayat Donasi Pribadi (Hanya menampilkan milik akun yang sedang login, status 'diterima' atau 'pending')
-        $recentDonations = collect(); 
-        
+        // Riwayat Donasi Pribadi (hanya milik akun yang sedang login, status 'diterima' atau 'pending')
+        $recentDonations = collect();
+
         if (auth()->check()) {
             $recentDonations = Donasi::where('mosque_id', $mosque->id)
-                ->where('user_id', auth()->id()) 
+                ->where('user_id', auth()->id())
                 ->whereIn('status', ['diterima', 'pending'])
                 ->latest()
                 ->take(10)

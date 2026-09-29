@@ -7,7 +7,7 @@ use App\Models\Donasi;
 use App\Models\DonasiGaleri;
 use App\Models\DonationCategory;
 use App\Models\Mosque;
-use App\Models\MosqueBankAccount; // <-- BARU: Model rekening bank
+use App\Models\MosqueBankAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -15,18 +15,26 @@ use Illuminate\Validation\Rule;
 
 class DonasiAdminController extends Controller
 {
+    /**
+     * Masjid milik user yang sedang login.
+     *
+     * PENTING: model TIDAK boleh diubah atributnya di sini. Sebelumnya package_type
+     * di-set 'paid' di memori, lalu $mosque->update([...]) di method lain ikut
+     * menyimpannya ke database dan menimpa package_type asli (100000_1 / 1000000_12).
+     */
     protected function mosque(): Mosque
     {
-        // Ambil data masjid pertama milik user yang sedang login
-        $mosque = Mosque::where('user_id', Auth::id())->firstOrFail();
+        return Mosque::where('user_id', Auth::id())->firstOrFail();
+    }
 
-        // Paksa ubah status dan paket secara otomatis di memori
-        // jika di database sebenarnya sudah berstatus approved/paid
-        if (strtolower(trim($mosque->status)) === 'approved' || strtolower(trim($mosque->status)) === 'aktif') {
-            $mosque->package_type = 'paid';
-        }
-
-        return $mosque;
+    /**
+     * Fitur donasi aktif jika paket bukan free DAN pembayaran sudah approved
+     * (baik lewat Midtrans maupun diaktifkan manual oleh super admin).
+     */
+    protected function hasDonationFeature(Mosque $mosque): bool
+    {
+        return ($mosque->package_type ?? 'free') !== 'free'
+            && strtolower(trim($mosque->payment_status ?? '')) === 'approved';
     }
 
     /**
@@ -36,14 +44,13 @@ class DonasiAdminController extends Controller
     {
         $mosque = $this->mosque();
 
-        // CEK APAKAH PAKET MASJID MASIH FREE
-        if (($mosque->package_type ?? 'free') === 'free') {
+        // Paket masih free / pembayaran belum lunas -> arahkan ke halaman pembayaran
+        if (!$this->hasDonationFeature($mosque)) {
             return view('paymentmasjid.payment', [
                 'mosque' => $mosque
             ]);
         }
 
-        // Ambil data kategori donasi dari database khusus untuk masjid ini
         $donationCategories = DonationCategory::where('mosque_id', $mosque->id)
             ->orderBy('sort_order', 'asc')
             ->get();
@@ -52,7 +59,7 @@ class DonasiAdminController extends Controller
             ->latest('tanggal')
             ->get();
 
-        // ===== BARU: daftar donasi masuk (butuh admin bisa melihat & memverifikasi) =====
+        // Daftar donasi masuk
         $categoryTitles = $donationCategories->pluck('title', 'key');
 
         $recentDonations = Donasi::where('mosque_id', $mosque->id)
@@ -75,7 +82,6 @@ class DonasiAdminController extends Controller
                 ->where('status', 'diterima')
                 ->count(),
         ];
-        // ================================================================================
 
         return view('auth.adminmasjid.donasiAdmin', [
             'mosque'             => $mosque,
@@ -83,7 +89,7 @@ class DonasiAdminController extends Controller
             'items'              => $items,
             'recentDonations'    => $recentDonations,
             'summary'            => $summary,
-            'bankAccounts'       => $mosque->bankAccounts, // <-- BARU: Kirim data rekening bank ke view
+            'bankAccounts'       => $mosque->bankAccounts,
         ]);
     }
 
@@ -179,7 +185,7 @@ class DonasiAdminController extends Controller
     }
 
     // ==========================================
-    // BARU: MANAJEMEN REKENING BANK & QRIS
+    // MANAJEMEN REKENING BANK & QRIS
     // ==========================================
 
     /**
@@ -188,7 +194,7 @@ class DonasiAdminController extends Controller
     public function storeBankAccount(Request $request)
     {
         $mosque = $this->mosque();
-        
+
         $data = $request->validate([
             'bank_name'      => ['required', 'string', 'max:100'],
             'account_number' => ['required', 'string', 'max:50'],
@@ -214,7 +220,7 @@ class DonasiAdminController extends Controller
     {
         $mosque = $this->mosque();
         $rekening = MosqueBankAccount::where('mosque_id', $mosque->id)->findOrFail($id);
-        
+
         $data = $request->validate([
             'bank_name'      => ['required', 'string', 'max:100'],
             'account_number' => ['required', 'string', 'max:50'],
@@ -233,7 +239,7 @@ class DonasiAdminController extends Controller
     {
         $mosque = $this->mosque();
         $rekening = MosqueBankAccount::where('mosque_id', $mosque->id)->findOrFail($id);
-        
+
         $rekening->update(['is_active' => ! $rekening->is_active]);
 
         return back()->with('success', $rekening->is_active ? 'Rekening diaktifkan.' : 'Rekening dinonaktifkan.');
@@ -246,7 +252,7 @@ class DonasiAdminController extends Controller
     {
         $mosque = $this->mosque();
         $rekening = MosqueBankAccount::where('mosque_id', $mosque->id)->findOrFail($id);
-        
+
         $rekening->delete();
 
         return back()->with('success', 'Rekening bank dihapus.');
@@ -258,7 +264,7 @@ class DonasiAdminController extends Controller
     public function updateQris(Request $request)
     {
         $mosque = $this->mosque();
-        
+
         $request->validate([
             'qris_image' => ['required', 'image', 'max:2048'], // maks 2MB
         ]);
@@ -280,7 +286,7 @@ class DonasiAdminController extends Controller
     public function destroyQris()
     {
         $mosque = $this->mosque();
-        
+
         if ($mosque->qris_image) {
             Storage::disk('public')->delete($mosque->qris_image);
             $mosque->update(['qris_image' => null]);

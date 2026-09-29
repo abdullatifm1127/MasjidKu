@@ -167,13 +167,13 @@ Route::middleware(['auth', 'check.status'])->group(function () {
     Route::put('/admin/acara/{acara}', [AcaraController::class, 'update'])->name('admin.acara.update');
     Route::delete('/admin/acara/{acara}', [AcaraController::class, 'destroy'])->name('admin.acara.destroy');
 
-    // DONASI ADMIN (Otomatis beralih ke halaman pembayaran jika paket masih free)
+    // DONASI ADMIN
     Route::get('/admin/donasi', [DonasiAdminController::class, 'index'])->name('admin.donasi');
     Route::put('/admin/donasi/pengaturan', [DonasiAdminController::class, 'updatePengaturan'])->name('admin.donasi.pengaturan');
     Route::post('/admin/donasi/galeri', [DonasiAdminController::class, 'storeGaleri'])->name('admin.donasi.galeri.store');
     Route::delete('/admin/donasi/galeri/{id}', [DonasiAdminController::class, 'destroyGaleri'])->name('admin.donasi.galeri.destroy');
 
-    // Manajemen Rekening Bank & QRIS Admin Donasi (BARU)
+    // Manajemen Rekening Bank & QRIS Admin Donasi
     Route::post('/admin/donasi/rekening', [DonasiAdminController::class, 'storeBankAccount'])->name('admin.donasi.rekening.store');
     Route::put('/admin/donasi/rekening/{id}', [DonasiAdminController::class, 'updateBankAccount'])->name('admin.donasi.rekening.update');
     Route::patch('/admin/donasi/rekening/{id}/toggle', [DonasiAdminController::class, 'toggleBankAccount'])->name('admin.donasi.rekening.toggle');
@@ -229,6 +229,10 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
 
     Route::delete('/verifikasi/{id}', [MosqueController::class, 'destroyVerifikasi'])
         ->name('verifikasi.destroy');
+
+    // RUTE BARU: Mengaktifkan/mengubah paket & status donasi masjid secara manual oleh Super Admin
+    Route::patch('/mosque/{id}/subscription', [MosqueController::class, 'updateSubscription'])
+        ->name('mosque.subscription');
 
     Route::get('/manajemen-masjid', [MosqueController::class, 'manajemenMasjid'])->name('manajemen-masjid');
     Route::patch('/manajemen-masjid/{id}/update-status', [MosqueManagementController::class, 'updateStatus'])->name('manajemen-masjid.updateStatus');
