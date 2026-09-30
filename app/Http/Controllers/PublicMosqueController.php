@@ -24,7 +24,7 @@ class PublicMosqueController extends Controller
             && strtolower(trim($mosque->payment_status ?? '')) === 'approved';
     }
 
-    public function show(string $slug, PrayerTimeService $prayerTimeService)
+    public function show(string $slug, PrayerTimeService $prayerTimeService, Request $request)
     {
         $mosque = Mosque::where('slug', $slug)
             ->where('status', 'approved')
@@ -37,6 +37,15 @@ class PublicMosqueController extends Controller
         }
 
         $prayers = $prayerTimeService->forMosque($mosque);
+
+        // Jadwal bulanan: filter divalidasi, data di-cache, dan aman bila API gagal
+        $timezone = $prayerTimeService->timezoneFor($mosque);
+        [$bulan, $tahun] = $prayerTimeService->resolvePeriod(
+            $request->input('bulan'),
+            $request->input('tahun'),
+            $timezone
+        );
+        $monthlySchedule = $prayerTimeService->monthlyForMosque($mosque, $tahun, $bulan);
 
         $acaras = $mosque->acaras()
             ->where('event_date', '>=', now()->toDateString())
@@ -63,15 +72,21 @@ class PublicMosqueController extends Controller
             ->get();
 
         return view('auth.adminmasjid.halamanUtamaUser', [
-            'mosque'             => $mosque,
-            'landingPage'        => $landingPage,
-            'prayers'            => $prayers,
-            'acaras'             => $acaras,
-            'hasDonationFeature' => $hasDonationFeature,
-            'categories'         => $categories,
-            'items'              => $items,
-            'donasiTerkumpul'    => $donasiTerkumpul,
-            'donasiTarget'       => $donasiTarget,
+            'mosque'              => $mosque,
+            'landingPage'         => $landingPage,
+            'prayers'             => $prayers,
+            'monthlySchedule'     => $monthlySchedule,
+            'bulan'               => $bulan,
+            'tahun'               => $tahun,
+            'timezone'            => $timezone,
+            'timezoneLabel'       => $prayerTimeService->timezoneLabel($timezone),
+            'today'               => \Carbon\Carbon::now($timezone)->toDateString(),
+            'acaras'              => $acaras,
+            'hasDonationFeature'  => $hasDonationFeature,
+            'categories'          => $categories,
+            'items'               => $items,
+            'donasiTerkumpul'     => $donasiTerkumpul,
+            'donasiTarget'        => $donasiTarget,
         ]);
     }
 
@@ -80,7 +95,8 @@ class PublicMosqueController extends Controller
         $mosque = Mosque::where('slug', $slug)->firstOrFail();
 
         if (!$this->hasDonationFeature($mosque)) {
-            return redirect()->route('masjid.detail', $slug);
+            // Route lama 'masjid.detail' tidak ada di web.php; yang benar 'masjid.publik'
+            return redirect()->route('masjid.publik', $slug);
         }
 
         $zakatFitrahDefault = $mosque->zakat_fitrah_default ?? 45000;

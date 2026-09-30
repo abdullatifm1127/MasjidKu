@@ -227,20 +227,113 @@
 
     {{-- JADWAL SHALAT SECTION --}}
     @if($modOn('jadwal_shalat'))
-    <section class="hu-section hu-section-dark" id="shalat">
+    @php
+        $bulanNama = ['01'=>'Januari','02'=>'Februari','03'=>'Maret','04'=>'April','05'=>'Mei','06'=>'Juni',
+                      '07'=>'Juli','08'=>'Agustus','09'=>'September','10'=>'Oktober','11'=>'November','12'=>'Desember'];
+        $hariNama  = ['Ahad','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+        $kolom     = ['imsak'=>'Imsak','subuh'=>'Subuh','terbit'=>'Terbit','dhuha'=>'Dhuha',
+                      'dzuhur'=>'Dzuhur','ashar'=>'Ashar','maghrib'=>'Maghrib','isya'=>"Isya'"];
+
+        $nowTz   = \Carbon\Carbon::now($timezone ?? 'Asia/Jakarta');
+        $curBln  = str_pad((string) $bulan, 2, '0', STR_PAD_LEFT);
+        $curDate = \Carbon\Carbon::create((int) $tahun, (int) $curBln, 1);
+        $prev    = $curDate->copy()->subMonth();
+        $next    = $curDate->copy()->addMonth();
+        $inRange = function ($d) use ($nowTz) { return $d->year >= $nowTz->year - 1 && $d->year <= $nowTz->year + 2; };
+        $navUrl  = function ($d) use ($mosque) {
+            return route('masjid.publik', ['slug' => $mosque->slug, 'bulan' => $d->format('m'), 'tahun' => $d->year]) . '#kalender-shalat';
+        };
+    @endphp
+
+    <section class="hu-section hu-section-dark" id="shalat" aria-labelledby="shalat-title">
+        <style>
+            .hu-kal { margin-top: 40px; }
+            .hu-kal-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+            .hu-kal-title { margin: 0; font-size: 1rem; color: #f3ead7; }
+            .hu-kal-nav { display: flex; gap: 8px; align-items: center; }
+            .hu-kal-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.2); color: #f3ead7; background: rgba(255,255,255,.06); text-decoration: none; font-size: .8rem; }
+            .hu-kal-btn:hover { background: rgba(193,145,60,.25); border-color: #c1913c; }
+            .hu-kal-btn[aria-disabled="true"] { opacity: .35; pointer-events: none; }
+            .hu-kal-scroll { overflow-x: auto; border: 1px solid rgba(255,255,255,.12); border-radius: 12px; background: rgba(255,255,255,.04); }
+            .hu-kal-table { width: 100%; min-width: 600px; border-collapse: collapse; color: #f3ead7; font-size: .78rem; font-variant-numeric: tabular-nums; }
+            .hu-kal-table th, .hu-kal-table td { padding: 5px 8px; text-align: center; white-space: nowrap; }
+            .hu-kal-table thead th { position: sticky; top: 0; background: #0f4636; font-weight: 600; font-size: .72rem; color: #e2c37f; border-bottom: 1px solid rgba(255,255,255,.15); }
+            .hu-kal-table tbody tr { border-bottom: 1px solid rgba(255,255,255,.07); }
+            .hu-kal-table tbody tr:last-child { border-bottom: 0; }
+            .hu-kal-table td.tgl { text-align: left; font-weight: 600; }
+            .hu-kal-table td.tgl small { display: inline; margin-left: 6px; font-weight: 400; opacity: .65; font-size: .7rem; }
+            .hu-kal-table tr.is-today { background: #c1913c; color: #1c1405; }
+            .hu-kal-table tr.is-today td.tgl small { opacity: .8; }
+            .hu-kal-table tr.is-friday td.tgl { color: #e2c37f; }
+            .hu-kal-table tr.is-today td.tgl { color: #1c1405; }
+            .hu-kal-empty { padding: 28px; text-align: center; opacity: .8; }
+            .hu-kal-note { margin-top: 12px; font-size: .8rem; opacity: .7; text-align: center; }
+        </style>
+
         <div class="hu-container">
             <div class="hu-section-head hu-section-head-light">
-                <div class="hu-section-tag hu-tag-light">Hari Ini</div>
-                <h2 class="hu-section-title hu-title-light">Jadwal Waktu Shalat</h2>
+                <div class="hu-section-tag hu-tag-light">Hari Ini{{ !empty($timezoneLabel) ? ' · ' . $timezoneLabel : '' }}</div>
+                <h2 class="hu-section-title hu-title-light" id="shalat-title">Jadwal Waktu Shalat</h2>
             </div>
+
             <div class="hu-shalat-grid">
                 @foreach($prayers as $p)
-                <div class="hu-shalat-card {{ $p['active'] ? 'active' : '' }}">
+                <div class="hu-shalat-card {{ !empty($p['active']) ? 'active' : '' }}" @if(!empty($p['active'])) aria-current="true" @endif>
                     <div class="hu-shalat-name">{{ $p['name'] }}</div>
                     <div class="hu-shalat-time">{{ $p['time'] }}</div>
-                    @if($p['active'])<div class="hu-shalat-now">Waktu Sekarang</div>@endif
+                    @if(!empty($p['active']))<div class="hu-shalat-now">Waktu Sekarang</div>@endif
                 </div>
                 @endforeach
+            </div>
+
+            @if(!empty($prayers[0]['is_fallback']))
+                <p role="status" class="hu-kal-note">Jadwal resmi belum dapat dimuat, jadi waktu di atas hanya perkiraan.</p>
+            @endif
+
+            {{-- Kalender bulanan --}}
+            <div class="hu-kal" id="kalender-shalat">
+                <div class="hu-kal-head">
+                    <h3 class="hu-kal-title">Jadwal {{ $bulanNama[$curBln] ?? '' }} {{ $tahun }}</h3>
+                    <div class="hu-kal-nav">
+                        <a class="hu-kal-btn" @if($inRange($prev)) href="{{ $navUrl($prev) }}" @else aria-disabled="true" @endif aria-label="Bulan sebelumnya">&larr;</a>
+                        @if($curBln !== $nowTz->format('m') || (int) $tahun !== $nowTz->year)
+                            <a class="hu-kal-btn" href="{{ route('masjid.publik', ['slug' => $mosque->slug]) }}#kalender-shalat">Bulan ini</a>
+                        @endif
+                        <a class="hu-kal-btn" @if($inRange($next)) href="{{ $navUrl($next) }}" @else aria-disabled="true" @endif aria-label="Bulan berikutnya">&rarr;</a>
+                    </div>
+                </div>
+
+                @if(!empty($monthlySchedule))
+                    <div class="hu-kal-scroll">
+                        <table class="hu-kal-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="text-align:left;">Tanggal</th>
+                                    @foreach($kolom as $label)<th scope="col">{{ $label }}</th>@endforeach
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($monthlySchedule as $row)
+                                    @php
+                                        $isToday  = ($row['date'] ?? null) === ($today ?? null);
+                                        $isFriday = ($row['weekday'] ?? null) === 5;
+                                    @endphp
+                                    <tr class="{{ $isToday ? 'is-today' : '' }} {{ $isFriday ? 'is-friday' : '' }}" @if($isToday) aria-current="date" @endif>
+                                        <td class="tgl">
+                                            {{ $row['day'] ?? $loop->iteration }}
+                                            <small>{{ $hariNama[$row['weekday'] ?? 0] ?? '' }}{{ $isToday ? ' · Hari ini' : '' }}</small>
+                                        </td>
+                                        @foreach($kolom as $key => $label)
+                                            <td>{{ $row[$key] ?? '-' }}</td>
+                                        @endforeach
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="hu-kal-scroll"><div class="hu-kal-empty">Jadwal bulan ini belum dapat dimuat. Coba lagi beberapa saat lagi.</div></div>
+                @endif
             </div>
         </div>
     </section>
