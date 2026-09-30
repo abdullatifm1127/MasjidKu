@@ -15,6 +15,8 @@ use Illuminate\Validation\Rule;
 
 class DonasiAdminController extends Controller
 {
+    private const TABS = ['kategori', 'pengaturan', 'penyaluran', 'rekap'];
+
     /**
      * Masjid milik user yang sedang login.
      *
@@ -38,10 +40,13 @@ class DonasiAdminController extends Controller
     }
 
     /**
-     * GET /admin/donasi
+     * GET /admin/donasi            -> tab default "kategori"
+     * GET /admin/donasi/{tab}      -> kategori | pengaturan | penyaluran | rekap
      */
-    public function index()
+    public function index(Request $request, string $tab = 'kategori')
     {
+        abort_unless(in_array($tab, self::TABS, true), 404);
+
         $mosque = $this->mosque();
 
         // Paket masih free / pembayaran belum lunas -> arahkan ke halaman pembayaran
@@ -55,42 +60,71 @@ class DonasiAdminController extends Controller
             ->orderBy('sort_order', 'asc')
             ->get();
 
-        $items = DonasiGaleri::where('mosque_id', $mosque->id)
-            ->latest('tanggal')
-            ->get();
-
-        // Daftar donasi masuk
         $categoryTitles = $donationCategories->pluck('title', 'key');
 
-        $recentDonations = Donasi::where('mosque_id', $mosque->id)
-            ->latest()
-            ->take(10)
-            ->get()
-            ->map(function ($d) use ($categoryTitles) {
+        $data = [
+            'mosque'             => $mosque,
+            'tab'                => $tab,
+            'donationCategories' => $donationCategories,
+            'bankAccounts'       => $mosque->bankAccounts,
+            'summary'            => [
+                'total_diterima'    => (int) Donasi::where('mosque_id', $mosque->id)->where('status', 'diterima')->sum('nominal'),
+                'total_menunggu'    => (int) Donasi::where('mosque_id', $mosque->id)->where('status', 'pending')->sum('nominal'),
+                'jumlah_donatur'    => Donasi::where('mosque_id', $mosque->id)->where('status', 'diterima')->count(),
+                'total_tersalurkan' => (int) DonasiGaleri::where('mosque_id', $mosque->id)->sum('nominal_terpakai'),
+            ],
+        ];
+
+        // ---- Tab: Penyaluran ----
+        if ($tab === 'penyaluran') {
+            $data['items'] = DonasiGaleri::where('mosque_id', $mosque->id)
+                ->latest('tanggal')
+                ->get();
+        }
+
+        // ---- Tab: Rekap / Pelaporan ----
+        if ($tab === 'rekap') {
+            $request->validate([
+                'status'   => ['nullable', Rule::in(['diterima', 'ditolak', 'pending'])],
+                'kategori' => ['nullable', 'string', 'max:50'],
+                'dari'     => ['nullable', 'date'],
+                'sampai'   => ['nullable', 'date'],
+            ]);
+
+            $base = Donasi::where('mosque_id', $mosque->id)
+                ->when($request->filled('kategori'), fn ($q) => $q->where('jenis', $request->kategori))
+                ->when($request->filled('dari'), fn ($q) => $q->whereDate('created_at', '>=', $request->dari))
+                ->when($request->filled('sampai'), fn ($q) => $q->whereDate('created_at', '<=', $request->sampai));
+
+            $donations = (clone $base)
+                ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
+                ->latest()
+                ->paginate(15)
+                ->withQueryString();
+
+            $donations->getCollection()->transform(function ($d) use ($categoryTitles) {
                 $d->category_title = $categoryTitles[$d->jenis] ?? $d->jenis;
                 return $d;
             });
 
-        $summary = [
-            'total_diterima' => (int) Donasi::where('mosque_id', $mosque->id)
+            // Rekap per kategori (hanya donasi yang sudah diterima)
+            $rekapKategori = (clone $base)
                 ->where('status', 'diterima')
-                ->sum('nominal'),
-            'total_menunggu' => (int) Donasi::where('mosque_id', $mosque->id)
-                ->where('status', 'pending')
-                ->sum('nominal'),
-            'jumlah_donatur' => Donasi::where('mosque_id', $mosque->id)
-                ->where('status', 'diterima')
-                ->count(),
-        ];
+                ->selectRaw('jenis, COUNT(*) as jumlah, SUM(nominal) as total')
+                ->groupBy('jenis')
+                ->orderByDesc('total')
+                ->get()
+                ->map(fn ($r) => [
+                    'title'  => $categoryTitles[$r->jenis] ?? $r->jenis,
+                    'jumlah' => (int) $r->jumlah,
+                    'total'  => (int) $r->total,
+                ]);
 
-        return view('auth.adminmasjid.donasiAdmin', [
-            'mosque'             => $mosque,
-            'donationCategories' => $donationCategories,
-            'items'              => $items,
-            'recentDonations'    => $recentDonations,
-            'summary'            => $summary,
-            'bankAccounts'       => $mosque->bankAccounts,
-        ]);
+            $data['donations']     = $donations;
+            $data['rekapKategori'] = $rekapKategori;
+        }
+
+        return view('auth.adminmasjid.donasiAdmin', $data);
     }
 
     /**

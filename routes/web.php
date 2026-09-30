@@ -41,12 +41,13 @@ Route::get('/', function () {
 */
 
 // Rute Webhook / Notifikasi dari Midtrans (HARUS DI LUAR middleware auth)
+// CATATAN: route ini harus dikecualikan dari CSRF (lihat bootstrap/app.php atau VerifyCsrfToken::$except)
 Route::post('/masjid/pembayaran/notification', [PaymentController::class, 'handleNotification'])
     ->name('masjid.payment.notification');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/masjid/pembayaran', [PaymentController::class, 'index'])->name('masjid.payment');
-    
+
     // Rute untuk membuat Snap Token Midtrans via Ajax/Axios
     Route::post('/masjid/pembayaran/create', [PaymentController::class, 'createTransaction'])->name('masjid.payment.create');
 
@@ -74,9 +75,6 @@ Route::get('/masjid/{slug}/donasi', [PublicMosqueController::class, 'showDonasi'
 // Rute Publik Store Donasi
 Route::post('/masjid/{slug}/donasi', [DonasiController::class, 'store'])
     ->name('masjid.donasi.store');
-
-Route::patch('/admin/donasi/{donasi}/status', [DonasiAdminController::class, 'updateStatus'])
-    ->name('admin.donasi.status');
 
 Route::middleware(['auth'])->get('/masjidUser', function () {
     $mosque = \App\Models\Mosque::where('user_id', Auth::id())->first();
@@ -167,8 +165,19 @@ Route::middleware(['auth', 'check.status'])->group(function () {
     Route::put('/admin/acara/{acara}', [AcaraController::class, 'update'])->name('admin.acara.update');
     Route::delete('/admin/acara/{acara}', [AcaraController::class, 'destroy'])->name('admin.acara.destroy');
 
-    // DONASI ADMIN
+    // ==================== DONASI ADMIN ====================
+
+    // Halaman donasi + submenu (Kategori, Pengaturan, Penyaluran, Rekap/Pelaporan)
     Route::get('/admin/donasi', [DonasiAdminController::class, 'index'])->name('admin.donasi');
+    Route::get('/admin/donasi/{tab}', [DonasiAdminController::class, 'index'])
+        ->whereIn('tab', ['kategori', 'pengaturan', 'penyaluran', 'rekap'])
+        ->name('admin.donasi.tab');
+
+    // Verifikasi status donasi masuk (sebelumnya berada di luar middleware auth)
+    Route::patch('/admin/donasi/{donasi}/status', [DonasiAdminController::class, 'updateStatus'])
+        ->name('admin.donasi.status');
+
+    // Pengaturan zakat & galeri penyaluran
     Route::put('/admin/donasi/pengaturan', [DonasiAdminController::class, 'updatePengaturan'])->name('admin.donasi.pengaturan');
     Route::post('/admin/donasi/galeri', [DonasiAdminController::class, 'storeGaleri'])->name('admin.donasi.galeri.store');
     Route::delete('/admin/donasi/galeri/{id}', [DonasiAdminController::class, 'destroyGaleri'])->name('admin.donasi.galeri.destroy');
@@ -195,7 +204,7 @@ Route::middleware(['auth', 'check.status'])->group(function () {
     Route::delete('/admin/donasi/kategori/{kategori}', [DonationCategoryController::class, 'destroy'])
         ->name('admin.donasi.kategori.destroy');
 
-    // Data Jamaah
+    // ==================== DATA JAMAAH ====================
     Route::get('/admin/jamaah', [JamaahController::class, 'index'])
         ->name('admin.jamaah');
 
@@ -230,7 +239,7 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
     Route::delete('/verifikasi/{id}', [MosqueController::class, 'destroyVerifikasi'])
         ->name('verifikasi.destroy');
 
-    // RUTE BARU: Mengaktifkan/mengubah paket & status donasi masjid secara manual oleh Super Admin
+    // Mengaktifkan/mengubah paket & status donasi masjid secara manual oleh Super Admin
     Route::patch('/mosque/{id}/subscription', [MosqueController::class, 'updateSubscription'])
         ->name('mosque.subscription');
 
