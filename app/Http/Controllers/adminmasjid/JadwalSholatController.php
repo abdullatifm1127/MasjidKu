@@ -157,4 +157,5 @@ class JadwalSholatController extends Controller
 
         return route('admin.jadwal-sholat', ['bulan' => $target->format('m'), 'tahun' => $target->year]);
     }
+    
 }
