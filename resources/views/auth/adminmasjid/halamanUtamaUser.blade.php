@@ -158,91 +158,814 @@
         </div>
     </section>
 
-    {{-- PROFIL SECTION --}}
-    <section class="hu-section hu-profil-section" id="profil">
+   {{-- PROFIL SECTION (final + modal pengurus): latar krem, panel pasir keemasan di belakang foto mihrab --}}
+    @php
+        $pfCap = $mosque->capacity ?? null;
+        $pfCapText = is_numeric($pfCap) ? number_format((float) $pfCap, 0, ',', '.') : $pfCap;
+
+        $pfProgRaw = $mosque->programs ?? [];
+        if (is_string($pfProgRaw)) { $pfProgRaw = json_decode($pfProgRaw, true) ?: []; }
+        $pfProgs = collect(is_array($pfProgRaw) ? $pfProgRaw : [])
+            ->map(fn ($p) => is_string($p) ? $p : ($p['name'] ?? $p['title'] ?? ''))
+            ->filter()->values();
+
+        $pfHasPengurus = !empty($mosque->organization_name) || !empty($mosque->chairman_name)
+            || !empty($mosque->secretary_name) || !empty($mosque->treasurer_name);
+    @endphp
+
+    <section class="hu-section hu-profil-section pf-section" id="profil">
+        {{-- bentuk lengkung mihrab (dipakai sebagai clip-path) --}}
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+            <defs>
+                <clipPath id="pfArch" clipPathUnits="objectBoundingBox">
+                    <path d="M0,1 L0,0.46 C0,0.30 0.30,0.20 0.5,0 C0.70,0.20 1,0.30 1,0.46 L1,1 Z"/>
+                </clipPath>
+            </defs>
+        </svg>
+
+        <style>
+            .pf-section { position: relative; padding: 120px 0; overflow: hidden; background: #f8f4ea; color: #4b5a53; }
+            .pf-section::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cpath d='M40 6l7 16.8L64 15l-7.8 17L74 40l-17.8 8L64 65l-17-7.8L40 74l-7-16.8L16 65l7.8-17L6 40l17.8-8L16 15l17 7.8z' fill='none' stroke='%23c1913c' stroke-opacity='.14' stroke-width='1'/%3E%3C/svg%3E"); }
+            .pf-section > .hu-container { position: relative; z-index: 1; }
+            .pf-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 72px; align-items: center; }
+            @media (max-width: 960px) { .pf-section { padding: 72px 0; } .pf-grid { grid-template-columns: 1fr; gap: 72px; } }
+
+            /* ===== teks ===== */
+            .pf-section .pf-kicker { margin: 0 0 16px; display: inline-flex; align-items: center; gap: 10px; font-size: .95rem; font-weight: 600; color: #8a6420; }
+            .pf-section .pf-kicker::before { content: ''; width: 30px; height: 1px; background: #c1913c; }
+            .pf-section .pf-title { margin: 0 0 20px; font-size: clamp(2.8rem, 6vw, 4.6rem); line-height: 1; color: #0f4636; }
+            .pf-section .pf-desc { margin: 0; max-width: 54ch; font-size: 1.04rem; line-height: 1.8; color: #4b5a53; }
+
+            .pf-section .pf-vision { margin: 28px 0 0; max-width: 54ch; padding: 18px 22px; border-radius: 4px 22px 22px 22px; background: #fff; border: 1px solid rgba(193,145,60,.4); box-shadow: 0 10px 26px rgba(15,70,54,.07); }
+            .pf-section .pf-vision b { display: block; margin-bottom: 4px; font-size: .86rem; font-weight: 600; color: #8a6420; }
+            .pf-section .pf-vision p { margin: 0; font-size: 1rem; line-height: 1.65; font-style: italic; color: #0f4636; }
+
+            /* statistik */
+            .pf-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px 40px; margin: 40px 0 0; max-width: 560px; }
+            @media (max-width: 520px) { .pf-stats { grid-template-columns: 1fr; gap: 22px; } }
+            .pf-stat { position: relative; padding-left: 18px; min-width: 0; }
+            .pf-stat::before { content: ''; position: absolute; left: 0; top: 4px; bottom: 4px; width: 2px; border-radius: 2px; background: linear-gradient(#c1913c, rgba(193,145,60,.12)); }
+            .pf-section .pf-label { margin: 0 0 4px; font-size: .84rem; color: #74847c; }
+            .pf-section .pf-val { margin: 0; font-size: clamp(1.7rem, 3vw, 2.2rem); line-height: 1.1; color: #0f4636; word-break: break-word; }
+            .pf-val small { margin-left: 6px; font-family: inherit; font-size: .82rem; font-weight: 500; color: #74847c; }
+            .pf-more { margin-top: 8px; padding: 0; background: none; border: 0; border-bottom: 1px solid #c1913c; font: inherit; font-size: .86rem; font-weight: 600; color: #8a6420; cursor: pointer; }
+            .pf-more:hover { color: #0f4636; }
+            .pf-more:focus-visible { outline: 2px solid #c1913c; outline-offset: 3px; }
+
+            .pf-progs { display: flex; flex-wrap: wrap; gap: 8px; margin: 36px 0 0; padding: 0; list-style: none; max-width: 560px; }
+            .pf-prog { padding: 7px 16px; border-radius: 999px; font-size: .84rem; font-weight: 600; color: #0f4636; background: #e8f1ec; border: 1px solid rgba(15,70,54,.14); }
+            .pf-prog.more { border-style: dashed; color: #74847c; background: transparent; }
+
+            /* ===== foto: bingkai mihrab di atas panel pasir keemasan ===== */
+            .pf-media { position: relative; width: 100%; max-width: 420px; margin: 0 auto; padding-bottom: 20px; }
+            /* panel pasir: meluas ke tepi kanan layar (desktop) */
+            .pf-media::before { content: ''; position: absolute; z-index: 0; top: -64px; bottom: -64px; left: -80px; right: -100vw; border-radius: 44px 0 0 44px;
+                background:
+                    radial-gradient(420px 320px at 70% 20%, rgba(255,255,255,.55), transparent 70%),
+                    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cpath d='M40 6l7 16.8L64 15l-7.8 17L74 40l-17.8 8L64 65l-17-7.8L40 74l-7-16.8L16 65l7.8-17L6 40l17.8-8L16 15l17 7.8z' fill='none' stroke='%23b8862d' stroke-opacity='.22' stroke-width='1'/%3E%3C/svg%3E"),
+                    linear-gradient(160deg, #f3e8cc, #e8d6a6);
+                box-shadow: 0 24px 50px rgba(138,100,32,.18); }
+            @media (max-width: 960px) {
+                .pf-media { max-width: 360px; }
+                .pf-media::before { top: -44px; bottom: -44px; left: -28px; right: -28px; border-radius: 36px; }
+            }
+            .pf-arch { position: relative; z-index: 1; }
+            .pf-arch { aspect-ratio: 4 / 5.4; clip-path: url(#pfArch); background: linear-gradient(170deg, #f0d99a, #c1913c 60%, #8a6420); }
+            .pf-arch-wrap { position: relative; z-index: 1; filter: drop-shadow(0 20px 26px rgba(90,60,10,.28)); }
+            .pf-arch-gap { position: absolute; inset: 12px; clip-path: url(#pfArch); background: #f0e2bd; }
+            .pf-arch-img { position: absolute; inset: 20px; clip-path: url(#pfArch); background: #0f4636; overflow: hidden; }
+            .pf-arch-img img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+            .pf-mini { position: absolute; z-index: 2; left: -44px; bottom: -6px; width: 42%; filter: drop-shadow(0 16px 20px rgba(90,60,10,.32)); }
+            .pf-mini .pf-arch { aspect-ratio: 1 / 1.15; }
+            .pf-mini .pf-arch-gap { inset: 8px; }
+            .pf-mini .pf-arch-img { inset: 14px; }
+            @media (max-width: 520px) { .pf-mini { left: -14px; } }
+
+            .pf-ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: rgba(226,195,127,.9);
+                background: repeating-linear-gradient(45deg, rgba(255,255,255,.045) 0 14px, transparent 14px 28px), linear-gradient(160deg, #176a4f, #0f4636); }
+            .pf-ph svg { width: 36%; max-width: 110px; fill: none; stroke: currentColor; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
+
+            .pf-since { position: absolute; z-index: 3; right: -18px; top: 56px; padding: 12px 18px; border-radius: 16px 16px 4px 16px; background: #0f4636; color: #fff8e8; box-shadow: 0 16px 30px rgba(15,70,54,.35); text-align: center; line-height: 1.1; }
+            .pf-since small { display: block; margin-bottom: 2px; font-size: .74rem; font-weight: 600; color: #e2c37f; }
+            .pf-since b { font-size: 1.6rem; }
+            @media (max-width: 520px) { .pf-since { right: -8px; } }
+        </style>
+
         <div class="hu-container">
-            <div class="hu-profil-v2-grid">
-                <div class="hu-profil-v2-left">
-                    <div class="hu-profil-v2-tag">Profil Masjid</div>
-                    <h2 class="hu-profil-v2-title">
-                        {{ $mosque->mosque_name ?? 'Rumah Ibadah' }}
-                    </h2>
-                    <p class="hu-profil-v2-desc">
+            <div class="pf-grid">
+
+                {{-- ===== KIRI: teks ===== --}}
+                <div class="pf-left">
+                    <p class="pf-kicker">Profil Masjid</p>
+                    <h2 class="pf-title">{{ $mosque->mosque_name ?? 'Rumah Ibadah' }}</h2>
+                    <p class="pf-desc">
                         {{ $mosque->description ?? 'Belum ada deskripsi. Isi di halaman "Profil Masjid" pada panel admin.' }}
                     </p>
 
-                    <div class="hu-profil-v2-divider"><span>✦</span></div>
+                    @if(!empty($mosque->about_vision))
+                        <div class="pf-vision">
+                            <b>Visi</b>
+                            <p>{{ $mosque->about_vision }}</p>
+                        </div>
+                    @endif
 
-                    <div class="hu-profil-v2-stats">
-                        <div class="hu-profil-v2-stat">
-                            <div class="hu-profil-v2-stat-label">Tahun Berdiri</div>
-                            <div class="hu-profil-v2-stat-val">{{ $mosque->founded ?? '—' }}</div>
+                    <dl class="pf-stats">
+                        <div class="pf-stat">
+                            <dt class="pf-label">Tahun berdiri</dt>
+                            <dd class="pf-val" style="margin-left:0">{{ $mosque->founded ?? '—' }}</dd>
                         </div>
-                        <div class="hu-profil-v2-stat">
-                            <div class="hu-profil-v2-stat-label">Kapasitas</div>
-                            <div class="hu-profil-v2-stat-val">{{ $mosque->capacity ?? '—' }}</div>
+                        <div class="pf-stat">
+                            <dt class="pf-label">Kapasitas</dt>
+                            <dd class="pf-val" style="margin-left:0">{{ $pfCapText ?: '—' }}@if($pfCapText && is_numeric($pfCap))<small>jamaah</small>@endif</dd>
                         </div>
-                        <div class="hu-profil-v2-stat">
-                            <div class="hu-profil-v2-stat-label">Imam Besar</div>
-                            <div class="hu-profil-v2-stat-val">{{ $mosque->imam_name ?? '—' }}</div>
-                            @if(!empty($mosque->organization_name) || !empty($mosque->chairman_name) || !empty($mosque->secretary_name) || !empty($mosque->treasurer_name))
-                                <button type="button" id="btnBukaPengurus" style="background: none; border: none; padding: 0; font-size: 0.85rem; font-weight: 600; color: #0d9488; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; margin-top: 0.4rem;">
-                                    Lihat detail →
-                                </button>
+                        <div class="pf-stat">
+                            <dt class="pf-label">Imam besar</dt>
+                            <dd class="pf-val" style="margin-left:0">{{ $mosque->imam_name ?? '—' }}</dd>
+                            @if($pfHasPengurus)
+                                <button type="button" id="btnBukaPengurus" class="pf-more">Lihat detail pengurus</button>
                             @endif
                         </div>
-                        <div class="hu-profil-v2-stat">
-                            <div class="hu-profil-v2-stat-label">Program Aktif</div>
-                            <div class="hu-profil-v2-stat-val">
-                                {{ !empty($mosque->programs) ? count($mosque->programs).' program' : '—' }}
+                        <div class="pf-stat">
+                            <dt class="pf-label">Program aktif</dt>
+                            <dd class="pf-val" style="margin-left:0">{{ $pfProgs->isNotEmpty() ? $pfProgs->count() . ' program' : '—' }}</dd>
+                        </div>
+                    </dl>
+
+                    @if($pfProgs->isNotEmpty())
+                        <ul class="pf-progs" aria-label="Daftar program">
+                            @foreach($pfProgs->take(6) as $prog)
+                                <li class="pf-prog">{{ $prog }}</li>
+                            @endforeach
+                            @if($pfProgs->count() > 6)
+                                <li class="pf-prog more">+{{ $pfProgs->count() - 6 }} lainnya</li>
+                            @endif
+                        </ul>
+                    @endif
+                </div>
+
+                {{-- ===== KANAN: foto bingkai mihrab di atas panel pasir ===== --}}
+                <div class="pf-media">
+                    <div class="pf-arch-wrap">
+                        <div class="pf-arch">
+                            <div class="pf-arch-gap"></div>
+                            <div class="pf-arch-img">
+                                @if(!empty($mosque->about_photo))
+                                    <img src="{{ asset('storage/'.$mosque->about_photo) }}" alt="Foto {{ $mosque->mosque_name ?? 'masjid' }}" loading="lazy">
+                                @else
+                                    <div class="pf-ph" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24"><path d="M12 2.5c-1.6 1.5-3 2.7-3 4.8 0 .5.1.9.3 1.2h5.4c.2-.3.3-.7.3-1.2 0-2.1-1.4-3.3-3-4.8z"/><path d="M6 21v-9.5h12V21M3 21h18M9.5 21v-4a2.5 2.5 0 0 1 5 0v4M4 11.5V7M20 11.5V7"/></svg>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
 
-                </div>
+                    @if(!empty($mosque->about_photo_secondary))
+                        <div class="pf-mini">
+                            <div class="pf-arch">
+                                <div class="pf-arch-gap"></div>
+                                <div class="pf-arch-img">
+                                    <img src="{{ asset('storage/'.$mosque->about_photo_secondary) }}" alt="Suasana {{ $mosque->mosque_name ?? 'masjid' }}" loading="lazy">
+                                </div>
+                            </div>
+                        </div>
+                    @endif
 
-                <div class="hu-profil-v2-right">
-                    <div class="hu-profil-v2-images">
-                        <div class="hu-profil-v2-img hu-img-tall">
-                            @if(!empty($mosque->about_photo))
-                                <img src="{{ asset('storage/'.$mosque->about_photo) }}" alt="Foto Masjid" loading="lazy">
-                            @endif
+                    @if(!empty($mosque->founded))
+                        <div class="pf-since">
+                            <small>Berdiri sejak</small>
+                            <b>{{ $mosque->founded }}</b>
                         </div>
-                        <div class="hu-profil-v2-img hu-img-short">
-                            @if(!empty($mosque->about_photo_secondary))
-                                <img src="{{ asset('storage/'.$mosque->about_photo_secondary) }}" alt="Masjid" loading="lazy">
-                            @endif
-                        </div>
-                    </div>
-                    
-                    @if(!empty($mosque->about_vision))
-                    <div class="hu-profil-v2-ayat">
-                        <div class="hu-profil-v2-trans">{{ $mosque->about_vision }}</div>
-                    </div>
                     @endif
                 </div>
+
             </div>
         </div>
     </section>
 
+{{-- MODAL PENGURUS & YAYASAN (dibuka oleh tombol #btnBukaPengurus) --}}
+@php
+    $pgPeople = collect([
+        ['role' => 'Ketua DKM',            'name' => $mosque->chairman_name  ?? null, 'phone' => $mosque->chairman_phone  ?? null],
+        ['role' => 'Imam Besar / Khatib',  'name' => $mosque->imam_name      ?? null, 'phone' => $mosque->imam_phone      ?? null],
+        ['role' => 'Sekretaris',           'name' => $mosque->secretary_name ?? null, 'phone' => $mosque->secretary_phone ?? null],
+        ['role' => 'Bendahara',            'name' => $mosque->treasurer_name ?? null, 'phone' => $mosque->treasurer_phone ?? null],
+    ])->filter(fn ($p) => !empty($p['name']))->values();
+@endphp
+
+<dialog id="pfPengurusModal" class="pg-modal" aria-labelledby="pgTitle">
+    <style>
+        .pg-modal { width: min(720px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 0; border: 0; border-radius: 28px; overflow: hidden; color: #4b5a53;
+            background: #fbf8f0; box-shadow: 0 40px 90px rgba(11,40,30,.35); opacity: 0; transform: translateY(16px) scale(.98); transition: opacity .25s, transform .25s, overlay .25s allow-discrete, display .25s allow-discrete; }
+        .pg-modal[open] { opacity: 1; transform: none; }
+        @starting-style { .pg-modal[open] { opacity: 0; transform: translateY(16px) scale(.98); } }
+        .pg-modal::backdrop { background: rgba(20,28,24,.55); backdrop-filter: blur(4px); }
+        .pg-wrap { display: flex; flex-direction: column; max-height: calc(100vh - 48px); }
+
+        .pg-head { position: relative; flex: none; display: flex; align-items: center; gap: 16px; padding: 26px 28px 22px; border-bottom: 1px solid rgba(193,145,60,.35);
+            background:
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cpath d='M40 6l7 16.8L64 15l-7.8 17L74 40l-17.8 8L64 65l-17-7.8L40 74l-7-16.8L16 65l7.8-17L6 40l17.8-8L16 15l17 7.8z' fill='none' stroke='%23b8862d' stroke-opacity='.16' stroke-width='1'/%3E%3C/svg%3E"),
+                linear-gradient(160deg, #f3e8cc, #ecdcb0); }
+        .pg-arch { flex: none; width: 46px; height: 54px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px; clip-path: path('M0,54 L0,25 C0,16 16,11 23,0 C30,11 46,16 46,25 L46,54 Z'); background: linear-gradient(170deg, #f0d99a, #c1913c 60%, #8a6420); color: #0f4636; }
+        .pg-arch svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+        .pg-titles { min-width: 0; flex: 1; }
+        .pg-title { margin: 0; font-size: 1.45rem; line-height: 1.2; color: #0f4636; }
+        .pg-sub { margin: 4px 0 0; font-size: .9rem; color: #7a6a3e; }
+        .pg-close { flex: none; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(15,70,54,.2); border-radius: 50%; background: rgba(255,255,255,.6); color: #0f4636; cursor: pointer; transition: background .2s, transform .2s; }
+        .pg-close:hover { background: #fff; transform: rotate(90deg); }
+        .pg-close:focus-visible, .pg-call:focus-visible { outline: 2px solid #c1913c; outline-offset: 2px; }
+        .pg-close svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+
+        .pg-body { flex: 1; overflow-y: auto; padding: 26px 28px 30px; }
+
+        .pg-org { margin: 0 0 22px; padding: 4px 0 4px 18px; border-left: 3px solid #c1913c; }
+        .pg-org small { display: block; margin-bottom: 2px; font-size: .84rem; color: #8a6420; }
+        .pg-org strong { display: block; font-size: 1.3rem; line-height: 1.25; color: #0f4636; word-break: break-word; }
+
+        .pg-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 0; padding: 0; list-style: none; }
+        @media (max-width: 600px) {
+            .pg-list { grid-template-columns: 1fr; }
+            .pg-head { padding: 20px 18px 18px; }
+            .pg-body { padding: 20px 18px 24px; }
+        }
+        .pg-person { display: flex; flex-direction: column; gap: 14px; padding: 18px; border-radius: 4px 22px 22px 22px; background: #fff; border: 1px solid rgba(15,70,54,.1); }
+        .pg-person-top { display: flex; align-items: center; gap: 14px; min-width: 0; }
+        .pg-avatar { flex: none; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1.3rem; font-weight: 700; color: #0f4636;
+            background: linear-gradient(145deg, #f6e4b0, #d9ac55); box-shadow: 0 0 0 3px #fff, 0 0 0 4.5px rgba(193,145,60,.6); }
+        .pg-role { margin: 0; font-size: .82rem; color: #74847c; }
+        .pg-name { margin: 2px 0 0; font-size: 1.12rem; line-height: 1.25; font-weight: 700; color: #0f4636; word-break: break-word; }
+        .pg-call { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; font-size: .88rem; font-weight: 600; text-decoration: none; color: #0f4636; background: #f3e8cc; border: 1px solid rgba(193,145,60,.5); transition: background .2s; }
+        .pg-call:hover { background: #ecdcb0; }
+        .pg-call svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .pg-nophone { font-size: .84rem; color: #9aa59f; }
+        .pg-empty { margin: 0; padding: 24px 0; text-align: center; color: #74847c; }
+
+        @media (prefers-reduced-motion: reduce) { .pg-modal, .pg-close { transition: none; } }
+    </style>
+
+    <div class="pg-wrap">
+        <header class="pg-head">
+            <span class="pg-arch" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M21 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </span>
+            <div class="pg-titles">
+                <h3 class="pg-title" id="pgTitle">Struktur Pengurus &amp; Yayasan</h3>
+                <p class="pg-sub">Kontak pengurus {{ $mosque->mosque_name ?? 'masjid' }}</p>
+            </div>
+            <button type="button" class="pg-close" data-pg-close aria-label="Tutup">
+                <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+        </header>
+
+        <div class="pg-body">
+            @if(!empty($mosque->organization_name))
+                <div class="pg-org">
+                    <small>Organisasi / Yayasan</small>
+                    <strong>{{ $mosque->organization_name }}</strong>
+                </div>
+            @endif
+
+            @if($pgPeople->isNotEmpty())
+                <ul class="pg-list">
+                    @foreach($pgPeople as $person)
+                        @php
+                            $pgInitial = mb_strtoupper(mb_substr(trim($person['name']), 0, 1));
+                            $pgTel = preg_replace('/[^0-9+]/', '', (string) $person['phone']);
+                        @endphp
+                        <li class="pg-person">
+                            <div class="pg-person-top">
+                                <span class="pg-avatar" aria-hidden="true">{{ $pgInitial }}</span>
+                                <div style="min-width:0">
+                                    <p class="pg-role">{{ $person['role'] }}</p>
+                                    <p class="pg-name">{{ $person['name'] }}</p>
+                                </div>
+                            </div>
+                            @if(!empty($pgTel))
+                                <a class="pg-call" href="tel:{{ $pgTel }}">
+                                    <svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>
+                                    {{ $person['phone'] }}
+                                </a>
+                            @else
+                                <span class="pg-nophone">Nomor belum tersedia</span>
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
+            @elseif(empty($mosque->organization_name))
+                <p class="pg-empty">Data pengurus belum diisi di panel admin.</p>
+            @endif
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var dlg = document.getElementById('pfPengurusModal');
+            var openBtn = document.getElementById('btnBukaPengurus');
+            if (!dlg) return;
+
+            function openDlg() {
+                if (typeof dlg.showModal === 'function') { dlg.showModal(); } else { dlg.setAttribute('open', ''); }
+                document.documentElement.style.overflow = 'hidden';
+            }
+            function closeDlg() {
+                if (typeof dlg.close === 'function') { dlg.close(); } else { dlg.removeAttribute('open'); }
+            }
+
+            // capture + stopImmediatePropagation: cegah script modal lama ikut terpanggil
+            if (openBtn) openBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                openDlg();
+            }, true);
+            dlg.querySelectorAll('[data-pg-close]').forEach(function (b) { b.addEventListener('click', closeDlg); });
+            // klik area gelap di luar kotak = tutup
+            dlg.addEventListener('click', function (e) { if (e.target === dlg) closeDlg(); });
+            dlg.addEventListener('close', function () {
+                document.documentElement.style.overflow = '';
+                if (openBtn) openBtn.focus();
+            });
+        })();
+    </script>
+</dialog>
+    
     {{-- JADWAL SHALAT SECTION --}}
     @if($modOn('jadwal_shalat'))
-    <section class="hu-section hu-section-dark" id="shalat">
+    @php
+        $bulanNama = ['01'=>'Januari','02'=>'Februari','03'=>'Maret','04'=>'April','05'=>'Mei','06'=>'Juni',
+                      '07'=>'Juli','08'=>'Agustus','09'=>'September','10'=>'Oktober','11'=>'November','12'=>'Desember'];
+        $hariNama  = ['Ahad','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+        $kolom     = ['imsak'=>'Imsak','subuh'=>'Subuh','terbit'=>'Terbit','dhuha'=>'Dhuha',
+                      'dzuhur'=>'Dzuhur','ashar'=>'Ashar','maghrib'=>'Maghrib','isya'=>"Isya'"];
+        $arab      = ['Subuh'=>'الفجر','Dzuhur'=>'الظهر','Ashar'=>'العصر','Maghrib'=>'المغرب','Isya'=>'العشاء'];
+
+        $tzName  = $timezone ?? 'Asia/Jakarta';
+        $nowTz   = \Carbon\Carbon::now($tzName);
+        $curBln  = str_pad((string) $bulan, 2, '0', STR_PAD_LEFT);
+        $curDate = \Carbon\Carbon::create((int) $tahun, (int) $curBln, 1);
+        $prev    = $curDate->copy()->subMonth();
+        $next    = $curDate->copy()->addMonth();
+        $inRange = function ($d) use ($nowTz) { return $d->year >= $nowTz->year - 1 && $d->year <= $nowTz->year + 2; };
+        $navUrl  = function ($d) use ($mosque) {
+            return route('masjid.publik', ['slug' => $mosque->slug, 'bulan' => $d->format('m'), 'tahun' => $d->year]) . '#kalender-shalat';
+        };
+
+        $tanggalIni = $hariNama[$nowTz->dayOfWeek] . ', ' . $nowTz->day . ' ' . ($bulanNama[$nowTz->format('m')] ?? '') . ' ' . $nowTz->year;
+        $activeIdx  = collect($prayers)->search(fn ($p) => !empty($p['active']));
+
+        // Imam per shalat & jadwal shalat Id (pakai variabel dari controller bila dikirim, jika tidak ambil langsung)
+        $todayStr = $today ?? $nowTz->toDateString();
+        $imams    = $imams ?? \App\Models\PrayerImam::where('mosque_id', $mosque->id)->pluck('imam_name', 'prayer')->all();
+        $eidList  = collect($eidPrayers ?? \App\Models\EidPrayer::where('mosque_id', $mosque->id)->get())
+                        ->filter(fn ($e) => $e->event_date->toDateString() >= $todayStr)
+                        ->sortBy(fn ($e) => $e->event_date->toDateString() . ' ' . $e->prayer_time)
+                        ->take(3);
+    @endphp
+
+    <section class="hu-section hu-section-dark" id="shalat" aria-labelledby="shalat-title">
+        <style>
+            /* ===== Hero hitung mundur ===== */
+            .hx-hero { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; margin: 0 0 22px; padding: 26px 30px; border-radius: 22px; color: #f3ead7;
+                       background: radial-gradient(600px 200px at 100% 0%, rgba(193,145,60,.30), transparent), linear-gradient(135deg, rgba(255,255,255,.09), rgba(255,255,255,.03));
+                       border: 1px solid rgba(226,195,127,.35); box-shadow: 0 18px 40px rgba(0,0,0,.25); }
+            .hx-lbl { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; opacity: .7; }
+            .hx-hero-name { margin: 4px 0 2px; font-size: 1.9rem; font-weight: 700; color: #e2c37f; line-height: 1.15; }
+            .hx-hero-meta { font-size: .85rem; opacity: .8; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+            .hx-cd { display: flex; gap: 10px; }
+            .hx-cd div { min-width: 74px; text-align: center; padding: 12px 8px; border-radius: 14px; background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.1); }
+            .hx-cd b { display: block; font-size: 1.9rem; line-height: 1.1; color: #fff; font-variant-numeric: tabular-nums; }
+            .hx-cd span { font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; opacity: .65; }
+            @media (max-width: 760px) {
+                .hx-hero { grid-template-columns: 1fr; text-align: center; padding: 22px 18px; }
+                .hx-hero-meta, .hx-cd { justify-content: center; }
+                .hx-hero-name { font-size: 1.6rem; }
+            }
+
+            /* ===== Kartu waktu shalat ===== */
+            .hx-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
+            .hx-card { position: relative; text-align: center; padding: 22px 12px 18px; border-radius: 20px; color: #f3ead7; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); transition: transform .2s, border-color .2s; }
+            .hx-card:hover { transform: translateY(-4px); border-color: #c1913c; }
+            .hx-ar { font-family: 'Amiri','Scheherazade New','Noto Naskh Arabic',serif; font-size: 1.7rem; line-height: 1.25; color: #e2c37f; }
+            .hx-name { margin-top: 2px; font-size: .85rem; opacity: .8; }
+            .hx-time { margin: 8px 0 2px; font-size: 2rem; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+            .hx-iq { display: inline-block; margin-top: 8px; padding: 2px 11px; font-size: .72rem; border-radius: 999px; background: rgba(255,255,255,.1); }
+            .hx-badge { position: absolute; top: 10px; right: 10px; display: none; padding: 2px 9px; font-size: .62rem; font-weight: 700; border-radius: 999px; }
+            .hx-card.is-past { opacity: .5; }
+            .hx-card.is-next { border-color: #e2c37f; box-shadow: 0 0 0 1px #e2c37f inset; }
+            .hx-card.is-next .hx-badge.nxt { display: block; background: #e2c37f; color: #1c1405; }
+            .hx-card.is-active { color: #1c1405; border-color: transparent; background: linear-gradient(160deg, #f0d99a, #c1913c); box-shadow: 0 14px 34px rgba(193,145,60,.4); }
+            .hx-card.is-active .hx-ar, .hx-card.is-active .hx-time { color: #1c1405; }
+            .hx-card.is-active .hx-iq { background: rgba(28,20,5,.12); }
+            .hx-card.is-active .hx-badge.now { display: block; background: #1c1405; color: #e2c37f; }
+
+            /* ===== Imam & jadwal Id ===== */
+            .hx-imam { margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,.18); font-size: .78rem; line-height: 1.35; }
+            .hx-imam small { display: block; font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; opacity: .6; }
+            .hx-card.is-active .hx-imam { border-top-color: rgba(28,20,5,.25); }
+            .hx-hero-meta b { color: #fff; }
+
+            .hx-eid { margin-top: 36px; }
+            .hx-eid-title { margin-bottom: 14px; }
+            .hx-eid-title h3 { margin: 0; font-size: 1.15rem; color: #f3ead7; }
+            .hx-eid-title p { margin: 2px 0 0; font-size: .78rem; opacity: .65; color: #f3ead7; }
+            .hx-eid-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+            .hx-eid-card { display: flex; gap: 16px; padding: 18px; border-radius: 20px; color: #f3ead7; border: 1px solid rgba(226,195,127,.4);
+                           background: radial-gradient(420px 160px at 100% 0%, rgba(193,145,60,.25), transparent), rgba(255,255,255,.05); }
+            .hx-eid-date { flex: none; width: 66px; height: fit-content; text-align: center; border-radius: 14px; overflow: hidden; background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.12); }
+            .hx-eid-date small { display: block; padding: 4px 0; font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; background: #c1913c; color: #1c1405; }
+            .hx-eid-date b { display: block; padding: 8px 0; font-size: 1.7rem; line-height: 1; color: #fff; }
+            .hx-eid-body h4 { margin: 6px 0 8px; font-size: 1.05rem; color: #fff; }
+            .hx-eid-chip { display: inline-block; padding: 2px 10px; font-size: .68rem; font-weight: 700; border-radius: 999px; background: #e2c37f; color: #1c1405; }
+            .hx-eid-meta { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; font-size: .82rem; opacity: .9; }
+            .hx-eid-meta b { color: #e2c37f; }
+            .hx-eid-note { margin: 10px 0 0; font-size: .78rem; opacity: .7; }
+
+            /* ===== Kalender (mini kalender + detail) ===== */
+            .hu-kal { margin-top: 44px; }
+            .hu-kal-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+            .hu-kal-title { margin: 0; font-size: 1.15rem; color: #f3ead7; }
+            .hu-kal-title small { display: block; margin-top: 2px; font-size: .75rem; font-weight: 400; opacity: .65; }
+            .hu-kal-nav { display: flex; gap: 8px; align-items: center; }
+            .hu-kal-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,.2); color: #f3ead7; background: rgba(255,255,255,.06); text-decoration: none; font-size: .8rem; transition: .15s; }
+            .hu-kal-btn:hover { background: rgba(193,145,60,.28); border-color: #c1913c; }
+            .hu-kal-btn[aria-disabled="true"] { opacity: .35; pointer-events: none; }
+            .hu-kal-empty { padding: 32px; text-align: center; opacity: .8; border: 1px solid rgba(255,255,255,.14); border-radius: 16px; background: rgba(255,255,255,.04); }
+            .hu-kal-note { margin-top: 14px; font-size: .8rem; opacity: .7; text-align: center; }
+
+            .kx-layout { display: grid; grid-template-columns: minmax(280px, 380px) 1fr; gap: 18px; align-items: stretch; }
+            @media (max-width: 860px) { .kx-layout { grid-template-columns: 1fr; } }
+
+            .kx-mini, .kx-detail { padding: 20px; border-radius: 20px; color: #f3ead7; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.13); }
+            .kx-dow, .kx-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+            .kx-dow { margin-bottom: 8px; text-align: center; font-size: .68rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #e2c37f; }
+            .kx-dow .sun { color: #f0a29a; }
+            .kx-blank { aspect-ratio: 1; }
+            .kx-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; position: relative; border-radius: 12px; border: 1px solid transparent; background: rgba(255,255,255,.05); color: #f3ead7; font: inherit; font-size: .88rem; font-weight: 600; cursor: pointer; transition: .15s; }
+            .kx-day:hover { background: rgba(193,145,60,.25); }
+            .kx-day.is-fri { color: #e2c37f; }
+            .kx-day.is-fri::after { content: ''; position: absolute; bottom: 5px; width: 4px; height: 4px; border-radius: 50%; background: #e2c37f; }
+            .kx-day.is-today { background: linear-gradient(160deg, #f0d99a, #c1913c); color: #1c1405; box-shadow: 0 6px 16px rgba(193,145,60,.35); }
+            .kx-day.is-today::after { background: #1c1405; }
+            .kx-day.is-sel { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,.35); }
+            .kx-day:focus-visible { outline: 2px solid #e2c37f; outline-offset: 2px; }
+            .kx-hint { margin: 14px 0 0; font-size: .75rem; opacity: .65; text-align: center; }
+
+            .kx-detail { display: flex; flex-direction: column; justify-content: center; background: radial-gradient(500px 200px at 100% 0%, rgba(193,145,60,.22), transparent), rgba(255,255,255,.05); }
+            .kx-tag { font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: #e2c37f; }
+            .kx-label { margin: 4px 0 18px; font-size: 1.4rem; font-weight: 700; color: #fff; }
+            .kx-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+            @media (max-width: 560px) { .kx-tiles { grid-template-columns: repeat(2, 1fr); } }
+            .kx-tile { padding: 14px 8px; text-align: center; border-radius: 14px; background: rgba(0,0,0,.2); border: 1px solid rgba(255,255,255,.08); }
+            .kx-tile span { display: block; font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; opacity: .7; }
+            .kx-tile b { display: block; margin-top: 4px; font-size: 1.45rem; color: #fff; font-variant-numeric: tabular-nums; }
+            .kx-tile { transition: opacity .2s, background .2s, border-color .2s; }
+            .kx-st { display: block; min-height: 14px; margin-top: 4px; font-size: .6rem; font-style: normal; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+            .kx-tile.is-past { opacity: .45; }
+            .kx-tile.is-next { border-color: #e2c37f; box-shadow: 0 0 0 1px #e2c37f inset; }
+            .kx-tile.is-next .kx-st { color: #e2c37f; }
+            .kx-tile.is-active { background: linear-gradient(160deg, #f0d99a, #c1913c); border-color: transparent; box-shadow: 0 10px 24px rgba(193,145,60,.35); }
+            .kx-tile.is-active span, .kx-tile.is-active b, .kx-tile.is-active .kx-st { color: #1c1405; opacity: 1; }
+            .kx-now { margin: -8px 0 16px; font-size: .84rem; color: #f3ead7; opacity: .9; }
+            .kx-now b { color: #e2c37f; font-variant-numeric: tabular-nums; }
+
+            /* Tabel lengkap (dilipat) */
+            .kx-more { margin-top: 18px; border: 1px solid rgba(255,255,255,.13); border-radius: 16px; background: rgba(255,255,255,.04); overflow: hidden; }
+            .kx-more summary { cursor: pointer; padding: 14px 18px; font-size: .88rem; font-weight: 600; color: #e2c37f; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+            .kx-more summary::-webkit-details-marker { display: none; }
+            .kx-more summary::after { content: '▾'; transition: transform .2s; }
+            .kx-more[open] summary::after { transform: rotate(180deg); }
+            .kx-more .hu-kal-scroll { max-height: 440px; overflow: auto; border-top: 1px solid rgba(255,255,255,.13); }
+            .hu-kal-table { width: 100%; min-width: 640px; border-collapse: collapse; color: #f3ead7; font-size: .8rem; font-variant-numeric: tabular-nums; }
+            .hu-kal-table th, .hu-kal-table td { padding: 8px 10px; text-align: center; white-space: nowrap; }
+            .hu-kal-table thead th { position: sticky; top: 0; z-index: 1; background: #0f4636; font-weight: 600; font-size: .72rem; letter-spacing: .04em; color: #e2c37f; border-bottom: 1px solid rgba(255,255,255,.18); }
+            .hu-kal-table tbody tr { border-bottom: 1px solid rgba(255,255,255,.07); }
+            .hu-kal-table tbody tr:nth-child(even) { background: rgba(255,255,255,.03); }
+            .hu-kal-table td.tgl { text-align: left; font-weight: 600; }
+            .hu-kal-table td.tgl small { margin-left: 6px; font-weight: 400; opacity: .65; font-size: .7rem; }
+            .hu-kal-table tr.is-friday { background: rgba(226,195,127,.1); }
+            .hu-kal-table tr.is-friday td.tgl { color: #e2c37f; }
+            .hu-kal-table tr.is-today { background: linear-gradient(90deg, #e2c37f, #c1913c); font-weight: 700; }
+            .hu-kal-table tr.is-today td, .hu-kal-table tr.is-today td.tgl small { color: #1c1405; }
+            .hu-kal-table td:nth-child(3), .hu-kal-table td:nth-child(9) { color: #e2c37f; font-weight: 600; }
+            .hu-kal-table tr.is-today td:nth-child(3), .hu-kal-table tr.is-today td:nth-child(9) { color: #1c1405; }
+        </style>
+
         <div class="hu-container">
             <div class="hu-section-head hu-section-head-light">
-                <div class="hu-section-tag hu-tag-light">Hari Ini</div>
-                <h2 class="hu-section-title hu-title-light">Jadwal Waktu Shalat</h2>
+                <div class="hu-section-tag hu-tag-light">Hari Ini{{ !empty($timezoneLabel) ? ' · ' . $timezoneLabel : '' }}</div>
+                <h2 class="hu-section-title hu-title-light" id="shalat-title">Jadwal Waktu Shalat</h2>
             </div>
-            <div class="hu-shalat-grid">
-                @foreach($prayers as $p)
-                <div class="hu-shalat-card {{ $p['active'] ? 'active' : '' }}">
-                    <div class="hu-shalat-name">{{ $p['name'] }}</div>
-                    <div class="hu-shalat-time">{{ $p['time'] }}</div>
-                    @if($p['active'])<div class="hu-shalat-now">Waktu Sekarang</div>@endif
+
+            {{-- Hero: shalat berikutnya + hitung mundur --}}
+            @if(!empty($prayers))
+            <div class="hx-hero">
+                <div>
+                    <div class="hx-lbl">Menuju waktu shalat</div>
+                    <div class="hx-hero-name"><span id="hxName">-</span> &middot; <span id="hxTime">--:--</span></div>
+                    <div class="hx-hero-meta">
+                        <span>{{ $tanggalIni }}</span>
+                        <span>Sekarang <b id="hxClock">--:--:--</b> {{ $timezoneLabel ?? '' }}</span>
+                        <span id="hxImamWrap" hidden>Imam: <b id="hxImam"></b></span>
+                    </div>
                 </div>
+                <div class="hx-cd" aria-live="off">
+                    <div><b id="hxH">00</b><span>Jam</span></div>
+                    <div><b id="hxM">00</b><span>Menit</span></div>
+                    <div><b id="hxS">00</b><span>Detik</span></div>
+                </div>
+            </div>
+            @endif
+
+            <div class="hx-grid">
+                @foreach($prayers as $i => $p)
+                    @php
+                        $state    = !empty($p['active']) ? 'is-active' : (($activeIdx !== false && $i < $activeIdx) ? 'is-past' : '');
+                        $imamNama = $imams[strtolower($p['name'])] ?? '';
+                    @endphp
+                    <div class="hx-card {{ $state }}" data-name="{{ $p['name'] }}" data-time="{{ $p['time'] }}" data-imam="{{ $imamNama }}" @if(!empty($p['active'])) aria-current="true" @endif>
+                        <span class="hx-badge now">Sekarang</span>
+                        <span class="hx-badge nxt">Berikutnya</span>
+                        <div class="hx-ar" lang="ar" dir="rtl">{{ $arab[$p['name']] ?? '' }}</div>
+                        <div class="hx-name">{{ $p['name'] }}</div>
+                        <div class="hx-time">{{ $p['time'] }}</div>
+                        @if($imamNama)
+                            <div class="hx-imam"><small>Imam</small>{{ $imamNama }}</div>
+                        @endif
+                        @if(!empty($p['iqamah']))<div class="hx-iq">Iqamah {{ $p['iqamah'] }}</div>@endif
+                    </div>
                 @endforeach
             </div>
+
+            @if(!empty($prayers[0]['is_fallback']))
+                <p role="status" class="hu-kal-note">Jadwal resmi belum dapat dimuat, jadi waktu di atas hanya perkiraan.</p>
+            @endif
+
+            {{-- Jadwal shalat Id (Idul Fitri / Idul Adha) --}}
+            @if($eidList->isNotEmpty())
+                <div class="hx-eid">
+                    <div class="hx-eid-title">
+                        <h3>Jadwal Shalat Id</h3>
+                        <p>Jadwal terbaru dari pengurus masjid</p>
+                    </div>
+                    <div class="hx-eid-grid">
+                        @foreach($eidList as $eid)
+                            @php
+                                $dl     = (int) \Carbon\Carbon::parse($todayStr)->startOfDay()->diffInDays($eid->event_date->copy()->startOfDay(), false);
+                                $dlText = $dl === 0 ? 'Hari ini' : ($dl === 1 ? 'Besok' : 'H-' . $dl);
+                            @endphp
+                            <article class="hx-eid-card">
+                                <div class="hx-eid-date" aria-hidden="true">
+                                    <small>{{ mb_substr($bulanNama[$eid->event_date->format('m')] ?? '', 0, 3) }}</small>
+                                    <b>{{ $eid->event_date->day }}</b>
+                                </div>
+                                <div class="hx-eid-body">
+                                    <span class="hx-eid-chip">{{ $dlText }}</span>
+                                    <h4>{{ $eid->title }}</h4>
+                                    <ul class="hx-eid-meta">
+                                        <li>{{ $hariNama[$eid->event_date->dayOfWeek] }}, {{ $eid->event_date->day }} {{ $bulanNama[$eid->event_date->format('m')] ?? '' }} {{ $eid->event_date->year }}</li>
+                                        <li>Pukul <b>{{ substr($eid->prayer_time, 0, 5) }}</b> {{ $timezoneLabel ?? '' }}</li>
+                                        @if($eid->location)<li>Tempat: {{ $eid->location }}</li>@endif
+                                        @if($eid->imam_name)<li>Imam: <b>{{ $eid->imam_name }}</b></li>@endif
+                                        @if($eid->khatib_name)<li>Khatib: <b>{{ $eid->khatib_name }}</b></li>@endif
+                                    </ul>
+                                    @if($eid->notes)<p class="hx-eid-note">{{ $eid->notes }}</p>@endif
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
+            {{-- Kalender bulanan: mini kalender + detail hari --}}
+            <div class="hu-kal" id="kalender-shalat">
+                <div class="hu-kal-head">
+                    <h3 class="hu-kal-title">
+                        Jadwal {{ $bulanNama[$curBln] ?? '' }} {{ $tahun }}
+                        <small>Pilih tanggal untuk melihat Imsak sampai Isya' &middot; Jumat ditandai titik emas</small>
+                    </h3>
+                    <div class="hu-kal-nav">
+                        <a class="hu-kal-btn" @if($inRange($prev)) href="{{ $navUrl($prev) }}" @else aria-disabled="true" @endif aria-label="Bulan sebelumnya">&larr;</a>
+                        @if($curBln !== $nowTz->format('m') || (int) $tahun !== $nowTz->year)
+                            <a class="hu-kal-btn" href="{{ route('masjid.publik', ['slug' => $mosque->slug]) }}#kalender-shalat">Bulan ini</a>
+                        @endif
+                        <a class="hu-kal-btn" @if($inRange($next)) href="{{ $navUrl($next) }}" @else aria-disabled="true" @endif aria-label="Bulan berikutnya">&rarr;</a>
+                    </div>
+                </div>
+
+                @if(!empty($monthlySchedule))
+                    @php
+                        $rowsC    = collect($monthlySchedule);
+                        $selected = $rowsC->firstWhere('date', $today ?? null) ?? $rowsC->first();
+                        $selLabel = $hariNama[$selected['weekday'] ?? 0] . ', ' . ($selected['day'] ?? '') . ' ' . ($bulanNama[$curBln] ?? '') . ' ' . $tahun;
+                        $selToday = ($selected['date'] ?? null) === ($today ?? null);
+                    @endphp
+
+                    <div class="kx-layout">
+                        <div class="kx-mini">
+                            <div class="kx-dow" aria-hidden="true">
+                                @foreach(['Ahd','Sen','Sel','Rab','Kam','Jum','Sab'] as $d)
+                                    <span class="{{ $loop->first ? 'sun' : '' }}">{{ $d }}</span>
+                                @endforeach
+                            </div>
+                            <div class="kx-days">
+                                @for($i = 0; $i < $curDate->dayOfWeek; $i++)<span class="kx-blank" aria-hidden="true"></span>@endfor
+                                @foreach($monthlySchedule as $row)
+                                    @php
+                                        $isToday = ($row['date'] ?? null) === ($today ?? null);
+                                        $isFri   = ($row['weekday'] ?? null) === 5;
+                                        $isSel   = ($row['date'] ?? null) === ($selected['date'] ?? null);
+                                        $times   = collect($kolom)->keys()->mapWithKeys(fn ($k) => [$k => $row[$k] ?? '-']);
+                                    @endphp
+                                    <button type="button"
+                                            class="kx-day {{ $isToday ? 'is-today' : '' }} {{ $isFri ? 'is-fri' : '' }} {{ $isSel ? 'is-sel' : '' }}"
+                                            data-t="{{ $times->toJson() }}"
+                                            data-label="{{ $hariNama[$row['weekday'] ?? 0] }}, {{ $row['day'] }} {{ $bulanNama[$curBln] ?? '' }} {{ $tahun }}"
+                                            aria-pressed="{{ $isSel ? 'true' : 'false' }}"
+                                            @if($isToday) aria-current="date" @endif>{{ $row['day'] }}</button>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="kx-detail" aria-live="polite">
+                            <div class="kx-tag" id="kxTag">{{ $selToday ? 'Hari ini' : (($selected['weekday'] ?? null) === 5 ? 'Hari Jumat' : 'Tanggal dipilih') }}</div>
+                            <h4 class="kx-label" id="kxLabel">{{ $selLabel }}</h4>
+                            <div class="kx-now" id="kxNow" {{ $selToday ? '' : 'hidden' }}></div>
+                            <div class="kx-tiles">
+                                @foreach($kolom as $key => $label)
+                                    <div class="kx-tile k-{{ $key }}" data-k="{{ $key }}">
+                                        <span>{{ $label }}</span>
+                                        <b>{{ $selected[$key] ?? '-' }}</b>
+                                        <em class="kx-st"></em>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Tabel lengkap sebulan (dilipat agar halaman tidak terlalu panjang) --}}
+                    <details class="kx-more">
+                        <summary>Lihat tabel lengkap bulan {{ $bulanNama[$curBln] ?? '' }} {{ $tahun }}</summary>
+                        <div class="hu-kal-scroll">
+                            <table class="hu-kal-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" style="text-align:left;">Tanggal</th>
+                                        @foreach($kolom as $label)<th scope="col">{{ $label }}</th>@endforeach
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($monthlySchedule as $row)
+                                        @php
+                                            $isToday  = ($row['date'] ?? null) === ($today ?? null);
+                                            $isFriday = ($row['weekday'] ?? null) === 5;
+                                        @endphp
+                                        <tr class="{{ $isToday ? 'is-today' : '' }} {{ $isFriday ? 'is-friday' : '' }}" @if($isToday) aria-current="date" @endif>
+                                            <td class="tgl">
+                                                {{ $row['day'] ?? $loop->iteration }}
+                                                <small>{{ $hariNama[$row['weekday'] ?? 0] ?? '' }}{{ $isToday ? ' · Hari ini' : '' }}</small>
+                                            </td>
+                                            @foreach($kolom as $key => $label)
+                                                <td>{{ $row[$key] ?? '-' }}</td>
+                                            @endforeach
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </details>
+                @else
+                    <div class="hu-kal-empty">Jadwal bulan ini belum dapat dimuat. Coba lagi beberapa saat lagi.</div>
+                @endif
+            </div>
         </div>
+
+        <script>
+            // Hitung mundur & penanda waktu shalat (mengikuti zona waktu masjid)
+            (function () {
+                const root = document.getElementById('shalat');
+                if (!root) return;
+                const tz = @json($tzName);
+                const cards = [...root.querySelectorAll('.hx-card[data-time]')].filter(c => /^\d{2}:\d{2}$/.test(c.dataset.time));
+                if (!cards.length) return;
+
+                const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: tz, hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const $ = id => document.getElementById(id);
+                const pad = n => String(n).padStart(2, '0');
+                const times = cards.map(c => { const [h, m] = c.dataset.time.split(':').map(Number); return h * 3600 + m * 60; });
+
+                function nowSec() {
+                    const p = fmt.formatToParts(new Date());
+                    const g = t => parseInt(p.find(x => x.type === t).value, 10);
+                    return g('hour') * 3600 + g('minute') * 60 + g('second');
+                }
+
+                function tick() {
+                    const s = nowSec();
+                    let next = times.findIndex(t => t > s);
+                    let diff;
+                    if (next === -1) { next = 0; diff = 86400 - s + times[0]; } else { diff = times[next] - s; }
+
+                    let active = -1;
+                    times.forEach((t, i) => { if (t <= s) active = i; });
+
+                    cards.forEach((c, i) => {
+                        c.classList.toggle('is-active', i === active);
+                        c.classList.toggle('is-past', i < active);
+                        c.classList.toggle('is-next', i === next && i !== active);
+                    });
+
+                    $('hxName').textContent = cards[next].dataset.name;
+                    $('hxTime').textContent = cards[next].dataset.time;
+                    const imam = cards[next].dataset.imam || '';
+                    $('hxImam').textContent = imam;
+                    $('hxImamWrap').hidden = !imam;
+                    $('hxClock').textContent = fmt.format(new Date());
+                    $('hxH').textContent = pad(Math.floor(diff / 3600));
+                    $('hxM').textContent = pad(Math.floor((diff % 3600) / 60));
+                    $('hxS').textContent = pad(diff % 60);
+                }
+                tick();
+                setInterval(tick, 1000);
+            })();
+        </script>
+        <script>
+            // Pilih tanggal di mini kalender + sorot waktu shalat yang sedang berlangsung (khusus hari ini)
+            (function () {
+                const root = document.getElementById('kalender-shalat');
+                if (!root) return;
+                const days = [...root.querySelectorAll('.kx-day')];
+                if (!days.length) return;
+
+                const tz = @json($tzName);
+                const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: tz, hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const tiles = [...root.querySelectorAll('.kx-tile')];
+                const nowEl = root.querySelector('#kxNow');
+                const pad = n => String(n).padStart(2, '0');
+                const hms = d => pad(Math.floor(d / 3600)) + ':' + pad(Math.floor((d % 3600) / 60)) + ':' + pad(d % 60);
+
+                let viewingToday = !!root.querySelector('.kx-day.is-sel.is-today');
+                let lastSec = -1;
+
+                function nowSec() {
+                    const p = fmt.formatToParts(new Date());
+                    const g = t => parseInt(p.find(x => x.type === t).value, 10);
+                    return g('hour') * 3600 + g('minute') * 60 + g('second');
+                }
+
+                function apply() {
+                    tiles.forEach(t => { t.classList.remove('is-active', 'is-past', 'is-next'); t.querySelector('.kx-st').textContent = ''; });
+                    if (!viewingToday) { nowEl.hidden = true; return; }
+
+                    const s = nowSec();
+                    if (lastSec >= 0 && s < lastSec - 3600) { location.reload(); return; } // lewat tengah malam
+                    lastSec = s;
+
+                    const times = tiles.map(t => {
+                        const m = (t.querySelector('b').textContent || '').match(/^(\d{1,2}):(\d{2})$/);
+                        return m ? parseInt(m[1], 10) * 3600 + parseInt(m[2], 10) * 60 : null;
+                    });
+
+                    let active = -1, next = -1;
+                    times.forEach((t, i) => { if (t !== null && t <= s) active = i; });
+                    for (let i = 0; i < times.length; i++) { if (times[i] !== null && times[i] > s) { next = i; break; } }
+
+                    let diff;
+                    if (next === -1) { next = times.findIndex(t => t !== null); diff = 86400 - s + times[next]; }
+                    else { diff = times[next] - s; }
+
+                    tiles.forEach((t, i) => {
+                        if (i === active) { t.classList.add('is-active'); t.querySelector('.kx-st').textContent = 'Sekarang'; }
+                        else if (i < active) { t.classList.add('is-past'); }
+                        if (i === next && i !== active) { t.classList.add('is-next'); t.querySelector('.kx-st').textContent = 'Berikutnya'; }
+                    });
+
+                    nowEl.hidden = false;
+                    nowEl.innerHTML = 'Sekarang pukul <b>' + fmt.format(new Date()) + '</b> &middot; ' +
+                        tiles[next].querySelector('span').textContent + ' dalam <b>' + hms(diff) + '</b>';
+                }
+
+                days.forEach(btn => btn.addEventListener('click', () => {
+                    days.forEach(b => { b.classList.remove('is-sel'); b.setAttribute('aria-pressed', 'false'); });
+                    btn.classList.add('is-sel');
+                    btn.setAttribute('aria-pressed', 'true');
+
+                    const t = JSON.parse(btn.dataset.t);
+                    tiles.forEach(el => { el.querySelector('b').textContent = t[el.dataset.k] || '-'; });
+                    root.querySelector('#kxLabel').textContent = btn.dataset.label;
+                    root.querySelector('#kxTag').textContent =
+                        btn.classList.contains('is-today') ? 'Hari ini'
+                        : btn.classList.contains('is-fri') ? 'Hari Jumat' : 'Tanggal dipilih';
+
+                    viewingToday = btn.classList.contains('is-today');
+                    lastSec = -1;
+                    apply();
+                }));
+
+                apply();
+                setInterval(apply, 1000);
+            })();
+        </script>
     </section>
     @endif
 
@@ -296,7 +1019,6 @@
         <div class="hu-container">
             <div class="hu-acara-v2-head">
                 <div>
-                    <div class="hu-section-tag hu-tag-amber">Agenda</div>
                     <h2 class="hu-section-title hu-title-dark">Acara Mendatang</h2>
                 </div>
                 <a href="javascript:void(0);" id="btnLihatSemuaAcara" class="hu-acara-lihat">Lihat semua →</a>
@@ -729,7 +1451,6 @@
                     <div class="hu-footer-v2-name">{{ $mosque->mosque_name ?? '' }}</div>
                     <div class="hu-footer-v2-tagline">
                         {{ $mosque->hero_subtitle ?? $mosque->tagline ?? '' }}<br>
-                        Bersama kita makmurkan masjid Allah.
                     </div>
                 </div>
 
