@@ -154,7 +154,11 @@ Route::middleware(['auth', 'check.status'])->group(function () {
 
     Route::get('/admin/jadwal-sholat', [JadwalSholatController::class, 'index'])->name('admin.jadwal-sholat');
     Route::put('/admin/jadwal-sholat', [JadwalSholatController::class, 'update'])->name('admin.jadwal-sholat.update');
+    
+    // Rute untuk Shalat Eid / Khusus
     Route::post('/admin/jadwal-sholat/eid', [JadwalSholatController::class, 'storeEid'])->name('admin.jadwal-sholat.eid.store');
+    Route::put('/admin/jadwal-sholat/eid/{eid}', [JadwalSholatController::class, 'updateEid'])->name('admin.jadwal-sholat.eid.update');
+    Route::delete('/admin/jadwal-sholat/eid/{eid}', [JadwalSholatController::class, 'destroyEid'])->name('admin.jadwal-sholat.eid.destroy');
 
     // Program Unggulan
     Route::get('/admin/program', [ProgramController::class, 'index'])->name('admin.program');

@@ -62,7 +62,7 @@
         'kategori'   => 'Kategori',
         'pengaturan' => 'Pengaturan',
         'penyaluran' => 'Penyaluran',
-        'rekap'      => 'Rekap / Pelaporan',
+        'rekap'      => 'Rekap Data',
     ];
     $meta = $tabMeta[$tab];
 
