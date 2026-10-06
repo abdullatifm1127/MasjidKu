@@ -21,37 +21,37 @@
                 <li><a href="#beranda" class="nav-link active">Beranda</a></li>
                 <li><a href="#tentang" class="nav-link">Fitur</a></li>
                 <li><a href="#program" class="nav-link">Program</a></li>
+                <li><a href="#masjid" class="nav-link">Masjid</a></li>
                 <li><a href="#donasi" class="nav-link">Artikel</a></li>
                 <li><a href="#kontak" class="nav-link">Kontak</a></li>
             </ul>
             <div class="navbar-actions">
-         @auth
-   @php
-        $mosque = \App\Models\Mosque::where('user_id', Auth::id())->first();
-    @endphp
+                @auth
+                    @php
+                        $mosque = \App\Models\Mosque::where('user_id', Auth::id())->first();
+                    @endphp
 
-    @if(!$mosque)
-        {{-- Belum daftar masjid --}}
-        <a href="{{ route('daftar.masjid') }}" class="btn-nav-primary">Daftarkan Masjid</a>
-    @elseif($mosque->status === 'pending')
-        {{-- Jika status pending --}}
-        <a href="{{ route('waiting') }}" class="btn-nav-primary" style="background-color: #d97706;">Menunggu Verifikasi</a>
+                    @if(!$mosque)
+                        {{-- Belum daftar masjid --}}
+                        <a href="{{ route('daftar.masjid') }}" class="btn-nav-primary">Daftarkan Masjid</a>
+                    @elseif($mosque->status === 'pending')
+                        {{-- Jika status pending --}}
+                        <a href="{{ route('waiting') }}" class="btn-nav-primary" style="background-color: #d97706;">Menunggu Verifikasi</a>
+                    @elseif($mosque->status === 'approved')
+                        {{-- Sudah disetujui --}}
+                        <a href="{{ route('dashboard') }}" class="btn-nav-primary" style="background-color: #059669;">Dashboard Masjid</a>
+                    @endif
 
-    @elseif($mosque->status === 'approved')
-        {{-- Sudah disetujui --}}
-        <a href="{{ route('dashboard') }}" class="btn-nav-primary" style="background-color: #059669;">Dashboard Masjid</a>
-    @endif
+                    <form method="POST" action="{{ route('logout') }}" style="display: inline; margin-left: 5px;">
+                        @csrf
+                        <button type="submit" class="btn-nav-outline">Logout</button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}" class="btn-nav-outline">Masuk</a>
+                    <a href="{{ route('register') }}" class="btn-nav-primary">Daftar Akun</a>
+                @endauth
+            </div>
 
-    <form method="POST" action="{{ route('logout') }}" style="display: inline; margin-left: 5px;">
-        @csrf
-        <button type="submit" class="btn-nav-outline">Logout</button>
-    </form>
-@else
-    <a href="{{ route('login') }}" class="btn-nav-outline">Masuk</a>
-    <a href="{{ route('register') }}" class="btn-nav-primary">Daftar Akun</a>
-@endauth
-        </div>
-                    
             <button class="navbar-toggle" id="navToggle" aria-label="Buka menu">
                 <span></span><span></span><span></span>
             </button>
@@ -79,7 +79,7 @@
                 </div>
                 <div class="hero-stats">
                     <div class="stat-item">
-                        <strong>1.200+</strong>
+                        <strong>{{ \App\Models\Mosque::where('status', 'approved')->count() }}</strong>
                         <span>Masjid Terdaftar</span>
                     </div>
                     <div class="stat-divider"></div>
@@ -94,7 +94,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </section>
 
@@ -102,7 +101,7 @@
     <section class="features" id="tentang">
         <div class="section-container">
             <div class="section-header">
-                <span class="section-badge">FITRUR UNGGULAN</span>
+                <span class="section-badge">FITUR UNGGULAN</span>
                 <h2>Semua yang Anda Butuhkan<br>dalam Satu Platform</h2>
                 <p>Dirancang khusus untuk kebutuhan masjid modern di Indonesia.</p>
             </div>
@@ -187,6 +186,151 @@
         </div>
     </section>
 
+    {{-- ===== MASJID TERDAFTAR ===== --}}
+    @php
+        $keyword = trim(request('lokasi', ''));
+
+        $query = \App\Models\Mosque::where('status', 'approved');
+
+        if ($keyword !== '') {
+            // Cari otomatis di kolom nama/alamat/kota yang ada di tabel mosques
+            $searchCols = collect(\Illuminate\Support\Facades\Schema::getColumnListing('mosques'))
+                ->filter(fn($c) => preg_match('/^(nama|name)|alamat|address|city|kota|kabupaten|kecamatan|kelurahan|desa|provinsi|province/i', $c))
+                ->values();
+
+            $query->where(function ($w) use ($searchCols, $keyword) {
+                foreach ($searchCols as $col) {
+                    $w->orWhere($col, 'like', '%' . $keyword . '%');
+                }
+            });
+        }
+
+        $registeredMosques = $query->latest()
+            ->take($keyword !== '' ? 30 : 6)
+            ->get();
+    @endphp
+
+    <section class="mosques" id="masjid">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-badge">Masjid Terdaftar</span>
+                <h2>Masjid yang Sudah Bergabung</h2>
+                <p>Daftar masjid yang telah terverifikasi dan menggunakan platform MasjidKu.</p>
+            </div>
+
+            <form method="GET" action="{{ url('/') }}#masjid" class="mosque-search">
+                <div class="mosque-search-box">
+                    <span class="mosque-search-icon">📍</span>
+                    <input type="text" name="lokasi" value="{{ $keyword }}"
+                           placeholder="Cari masjid berdasarkan lokasi, mis. Malang, Kendalsari, Lowokwaru..."
+                           aria-label="Cari lokasi masjid">
+                    <button type="submit">Cari</button>
+                </div>
+                @if($keyword !== '')
+                    <p class="mosque-search-info">
+                        Menampilkan <strong>{{ $registeredMosques->count() }}</strong> masjid untuk
+                        "<strong>{{ $keyword }}</strong>" &middot;
+                        <a href="{{ url('/') }}#masjid">Reset</a>
+                    </p>
+                @endif
+            </form>
+
+            @if($registeredMosques->count())
+                <div class="mosques-grid">
+                    @foreach($registeredMosques as $m)
+                        @php
+                            // Deteksi otomatis kolom dari tabel mosques
+                            $attrs = collect($m->getAttributes());
+                            $skip  = '/(^id$|_id$|status|slug|password|token|created|updated|deleted)/i';
+
+                            // Ambil nilai teks (bukan angka murni) dari kolom yang cocok dengan pola
+                            $pickAll = fn($pattern) => $attrs
+                                ->filter(fn($v, $k) => preg_match($pattern, $k) && !preg_match($skip, $k)
+                                    && is_string($v) && trim($v) !== '' && !is_numeric($v))
+                                ->values();
+                            $pick = fn($pattern) => $pickAll($pattern)->first();
+
+                            $namaRaw = $pick('/^(nama|name)/i')
+                                    ?? $pick('/nama|name|masjid|judul|title/i')
+                                    ?? 'Masjid';
+                            // Rapikan: "al hikmah" -> "Masjid Al Hikmah"
+                            $nama = \Illuminate\Support\Str::title(trim($namaRaw));
+                            if (!preg_match('/masjid|musholla|mushola|langgar|surau/i', $nama)) {
+                                $nama = 'Masjid ' . $nama;
+                            }
+
+                            // Alamat jalan (baris 1) dan wilayah (baris 2), huruf kapital dirapikan
+                            $alamat = $pickAll('/alamat|address|jalan/i')->first();
+                            $alamat = $alamat ? preg_replace('/\bJln\b\.?/i', 'Jl.', \Illuminate\Support\Str::title($alamat)) : null;
+
+                            $wilayah = $pickAll('/kelurahan|desa|kecamatan|kota|city|kabupaten|provinsi|province/i')
+                                ->map(fn($v) => \Illuminate\Support\Str::title(trim($v)))
+                                ->unique()->implode(', ');
+
+                            $telp = $attrs->first(fn($v, $k) => preg_match('/telp|telepon|phone|hp|wa|whatsapp/i', $k) && !empty($v));
+                            $foto   = $pick('/foto|photo|image|gambar|logo|banner|cover|thumbnail/i');
+
+                            $fotoUrl = $foto
+                                ? (\Illuminate\Support\Str::startsWith($foto, ['http://', 'https://'])
+                                    ? $foto
+                                    : asset('storage/' . ltrim($foto, '/')))
+                                : null;
+
+                            // Ganti dengan route halaman web masjid, mis. route('masjid.show', $m->slug ?? $m->id)
+                            $link = url('/masjid/' . ($m->slug ?? $m->id));
+                        @endphp
+
+                        {{-- DEBUG: buka /?debug=1 untuk melihat isi kolom, hapus setelah selesai --}}
+                        @if(request('debug') && $loop->first)
+                            <pre style="grid-column:1/-1;background:#111;color:#4ade80;padding:16px;border-radius:12px;overflow:auto;font-size:12px;">{{ json_encode($m->getAttributes(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
+                        @endif
+                        <a href="{{ $link }}" class="mosque-card">
+                            <div class="mosque-photo">
+                                @if($fotoUrl)
+                                    <img src="{{ $fotoUrl }}" alt="{{ $nama }}" loading="lazy">
+                                @else
+                                    <span class="mosque-photo-placeholder">🕌</span>
+                                @endif
+                                <span class="mosque-badge">✔ Terverifikasi</span>
+                            </div>
+                            <div class="mosque-info">
+                                <h3>{{ $nama }}</h3>
+
+                                <ul class="mosque-meta">
+                                    @if($alamat || $wilayah)
+                                        <li>
+                                            <span class="meta-icon">📍</span>
+                                            <span>
+                                                @if($alamat)<span class="meta-main">{{ $alamat }}</span>@endif
+                                                @if($wilayah)<span class="meta-sub">{{ $wilayah }}</span>@endif
+                                            </span>
+                                        </li>
+                                    @endif
+                                    @if($telp)
+                                        <li>
+                                            <span class="meta-icon">📞</span>
+                                            <span class="meta-main">{{ $telp }}</span>
+                                        </li>
+                                    @endif
+                                </ul>
+
+                                <span class="mosque-visit">Kunjungi Website →</span>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            @else
+                <p class="mosques-empty">
+                    @if($keyword !== '')
+                        Tidak ada masjid ditemukan untuk "{{ $keyword }}". Coba kata kunci lain.
+                    @else
+                        Belum ada masjid yang terdaftar. Jadilah yang pertama!
+                    @endif
+                </p>
+            @endif
+        </div>
+    </section>
+
     {{-- ===== CTA DONASI ===== --}}
     <section class="cta-donasi" id="donasi">
         <div class="section-container">
@@ -241,7 +385,7 @@
                     <h4>Masjid</h4>
                     <ul>
                         <li><a href="{{ route('daftar.masjid') }}">Daftarkan Masjid</a></li>
-                        <li><a href="#">Cari Masjid</a></li>
+                        <li><a href="#masjid">Cari Masjid</a></li>
                         <li><a href="#">Jadwal Shalat</a></li>
                         <li><a href="#">Donasi</a></li>
                     </ul>
