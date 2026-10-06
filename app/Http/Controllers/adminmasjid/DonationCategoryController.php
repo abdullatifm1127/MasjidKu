@@ -7,6 +7,7 @@ use App\Models\DonationCategory;
 use App\Models\Mosque;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class DonationCategoryController extends Controller
@@ -21,6 +22,7 @@ class DonationCategoryController extends Controller
             'calc_type' => ['required', 'in:zakat,nominal'],
             'icon_key' => ['required', 'in:' . implode(',', array_keys(DonationCategory::iconOptions()))],
             'sort_order' => ['nullable', 'integer', 'min:0'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ]);
 
         $baseKey = Str::slug($data['title']);
@@ -28,6 +30,12 @@ class DonationCategoryController extends Controller
         $i = 1;
         while (DonationCategory::where('mosque_id', $mosque->id)->where('key', $key)->exists()) {
             $key = $baseKey . '-' . (++$i);
+        }
+
+        // Proses penyimpanan file gambar jika diunggah
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('donation-categories', 'public');
         }
 
         DonationCategory::create([
@@ -38,10 +46,11 @@ class DonationCategoryController extends Controller
             'calc_type' => $data['calc_type'],
             'icon_key' => $data['icon_key'],
             'sort_order' => $data['sort_order'] ?? 0,
+            'image' => $imagePath,
             'is_active' => true,
         ]);
 
-        return back()->with('success', 'Jenis donasi berhasil ditambahkan.');
+        return back()->with('success', 'Jenis donasi beserta foto berhasil ditambahkan.');
     }
 
     public function update(Request $request, DonationCategory $kategori)
@@ -54,18 +63,19 @@ class DonationCategoryController extends Controller
             'calc_type' => ['required', 'in:zakat,nominal'],
             'icon_key' => ['required', 'in:' . implode(',', array_keys(DonationCategory::iconOptions()))],
             'sort_order' => ['nullable', 'integer', 'min:0'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ]);
 
-        // PENTING: `key` SENGAJA TIDAK diregenerasi di sini lagi.
-        //
-        // Sebelumnya, kalau admin mengubah judul kategori, `key` ikut berubah
-        // (mis. "Infaq Jumat" -> infaq-jumat berubah jadi "Infaq Jumat Berkah" -> infaq-jumat-berkah).
-        // Karena foto di galeri (DonasiGaleri::kategori) menyimpan `key` lama sebagai
-        // referensi string, perubahan itu MEMUTUS tautan galeri -> kategori secara diam-diam:
-        // foto lama yang sudah diunggah tiba-tiba tampil sebagai kategori "Umum".
-        //
-        // `key` sekarang bersifat stabil (dibuat sekali saat kategori pertama kali dibuat).
-        // Admin tetap bebas mengubah judul tampilan (`title`) kapan pun tanpa efek samping ini.
+        // Proses penggantian foto jika ada file baru yang diunggah
+        if ($request->hasFile('image')) {
+            if ($kategori->image && Storage::disk('public')->exists($kategori->image)) {
+                Storage::disk('public')->delete($kategori->image);
+            }
+            $data['image'] = $request->file('image')->store('donation-categories', 'public');
+        } else {
+            unset($data['image']); // Pertahankan foto lama jika tidak mengunggah baru
+        }
+
         $kategori->update($data);
 
         return back()->with('success', 'Jenis donasi berhasil diperbarui.');
@@ -83,6 +93,10 @@ class DonationCategoryController extends Controller
     public function destroy(DonationCategory $kategori)
     {
         $this->authorizeMosque($kategori);
+
+        if ($kategori->image && Storage::disk('public')->exists($kategori->image)) {
+            Storage::disk('public')->delete($kategori->image);
+        }
 
         $kategori->delete();
 

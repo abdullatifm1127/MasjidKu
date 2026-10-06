@@ -17,6 +17,7 @@ class DonationCategory extends Model
         'calc_type',
         'icon_key',
         'sort_order',
+        'image', // <-- TAMBAHKAN BARIS INI
         'is_active',
     ];
 
