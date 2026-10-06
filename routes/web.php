@@ -20,6 +20,7 @@ use App\Http\Controllers\Donasi\DonasiController;
 use App\Http\Controllers\adminmasjid\DonasiAdminController;
 use App\Http\Controllers\adminmasjid\JamaahController;
 use App\Http\Controllers\adminmasjid\DonationCategoryController;
+use App\Http\Controllers\Auth\SocialAuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -103,6 +104,16 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.pr
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Login dengan Google & Facebook
+Route::middleware('guest')->group(function () {
+    Route::get('/auth/{provider}', [SocialAuthController::class, 'redirect'])
+        ->whereIn('provider', ['google', 'facebook'])
+        ->name('social.redirect');
+
+    Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])
+        ->whereIn('provider', ['google', 'facebook'])
+        ->name('social.callback');
+});
 /*
 |--------------------------------------------------------------------------
 | Super Admin Authentication Routes

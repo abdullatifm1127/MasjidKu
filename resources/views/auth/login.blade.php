@@ -51,7 +51,7 @@
         @endif
 
         {{-- ===== FORM ===== --}}
-       <form class="ln-form" method="POST" action="{{ route('login.process') }}">
+        <form class="ln-form" method="POST" action="{{ route('login.process') }}">
             @csrf
 
             {{-- Alamat Email --}}
@@ -124,7 +124,7 @@
 
             {{-- Social Login --}}
             <div class="ln-social">
-                <a href="#" class="btn-social">
+                <a href="{{ route('social.redirect', 'google') }}" class="btn-social">
                     <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
                         <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
                         <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/>
@@ -133,7 +133,7 @@
                     </svg>
                     Google
                 </a>
-                <a href="#" class="btn-social">
+                <a href="{{ route('social.redirect', 'facebook') }}" class="btn-social">
                     <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
                         <path fill="#3F51B5" d="M42 37a5 5 0 01-5 5H11a5 5 0 01-5-5V11a5 5 0 015-5h26a5 5 0 015 5v26z"/>
                         <path fill="#fff" d="M34.368 25H31v13h-5V25h-3v-4h3v-2.41C26 15.05 27.192 13 31.208 13H35v4h-2.514C31.022 17 31 17.516 31 18.085V21h4l-.632 4z"/>

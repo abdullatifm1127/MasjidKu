@@ -199,19 +199,19 @@
             @endif
 
             {{-- =====================================================
-                 TAB 1: KATEGORI
-                 ===================================================== --}}
+                TAB 1: KATEGORI
+                ===================================================== --}}
             @if ($tab === 'kategori')
                 <section class="dn-card-modern">
                     <h3><i class="fa-solid fa-layer-group text-teal-600"></i> Kelola Jenis &amp; Kategori Donasi</h3>
-                    <p>Atur jenis donasi yang akan otomatis tampil pada halaman publik.</p>
+                    <p>Atur jenis donasi beserta foto banner program yang akan tampil pada halaman publik.</p>
 
-                    {{-- Form Tambah Kategori --}}
-                    <form action="{{ route('admin.donasi.kategori.store') }}" method="POST" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; background: #f8fafc; padding: 1.25rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; margin-bottom: 1.5rem;">
+                    {{-- Form Tambah Kategori (ditambah enctype untuk upload file) --}}
+                    <form action="{{ route('admin.donasi.kategori.store') }}" method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; background: #f8fafc; padding: 1.25rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; margin-bottom: 1.5rem;">
                         @csrf
                         <div class="dn-field" style="margin: 0;">
                             <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Nama Jenis Donasi</label>
-                            <input type="text" name="title" class="form-control-modern" placeholder="Mis. Infaq Jumat" required maxlength="100">
+                            <input type="text" name="title" class="form-control-modern" placeholder="Mis. Bantuan Bencana Alam" required maxlength="100">
                         </div>
                         <div class="dn-field" style="margin: 0;">
                             <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Tipe Kalkulasi / Kategori</label>
@@ -233,6 +233,10 @@
                             <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Urutan Tampil</label>
                             <input type="number" name="sort_order" class="form-control-modern" min="0" value="{{ ($donationCategories->max('sort_order') ?? -1) + 1 }}">
                         </div>
+                        <div class="dn-field" style="grid-column: 1 / -1; margin: 0;">
+                            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Foto Program / Banner (Opsional)</label>
+                            <input type="file" name="image" class="form-control-modern" accept="image/*">
+                        </div>
                         <div style="grid-column: 1 / -1; margin: 0;">
                             <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Deskripsi Singkat</label>
                             <textarea name="description" class="form-control-modern" rows="2" placeholder="Penjelasan singkat mengenai program donasi ini..." maxlength="300"></textarea>
@@ -251,9 +255,13 @@
                                 <details style="border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1rem; background: #ffffff;">
                                     <summary style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-weight: 600;">
                                         <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                            <span style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;">
-                                                {!! $kategori->iconPath() !!}
-                                            </span>
+                                            @if(!empty($kategori->image))
+                                                <img src="{{ asset('storage/' . $kategori->image) }}" alt="" style="width: 40px; height: 30px; object-fit: cover; border-radius: 4px;">
+                                            @else
+                                                <span style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;">
+                                                    {!! $kategori->iconPath() !!}
+                                                </span>
+                                            @endif
                                             <span>{{ $kategori->title }}</span>
                                         </div>
                                         <div style="display: flex; gap: 0.5rem; align-items: center;">
@@ -265,7 +273,8 @@
                                     </summary>
 
                                     <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #f1f5f9;">
-                                        <form action="{{ route('admin.donasi.kategori.update', $kategori->id) }}" method="POST" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                                        {{-- Form Update Kategori (ditambah enctype untuk upload file) --}}
+                                        <form action="{{ route('admin.donasi.kategori.update', $kategori->id) }}" method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
                                             @csrf
                                             @method('PUT')
                                             <div>
@@ -291,6 +300,15 @@
                                             <div>
                                                 <label style="font-size: 0.8rem; font-weight: 600;">Urutan</label>
                                                 <input type="number" name="sort_order" class="form-control-modern" value="{{ $kategori->sort_order }}">
+                                            </div>
+                                            <div style="grid-column: 1 / -1;">
+                                                <label style="font-size: 0.8rem; font-weight: 600;">Ganti Foto Program / Banner</label>
+                                                @if(!empty($kategori->image))
+                                                    <div style="margin-bottom: 0.5rem;">
+                                                        <img src="{{ asset('storage/' . $kategori->image) }}" alt="Preview" style="max-height: 80px; border-radius: 6px;">
+                                                    </div>
+                                                @endif
+                                                <input type="file" name="image" class="form-control-modern" accept="image/*">
                                             </div>
                                             <div style="grid-column: 1 / -1;">
                                                 <label style="font-size: 0.8rem; font-weight: 600;">Deskripsi</label>

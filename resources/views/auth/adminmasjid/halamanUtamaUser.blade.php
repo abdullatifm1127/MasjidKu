@@ -74,27 +74,10 @@
         @endif
 
         <a href="#kontak" class="hu-nav-link">Hubungi</a>
-    </nav>
-
-            <button class="hu-ganti-btn" id="huGantiBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                     stroke-width="1.8" stroke="currentColor" width="14" height="14">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
-                </svg>
-                Ganti Masjid
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                     stroke-width="2.5" stroke="currentColor" width="12" height="12">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
-                </svg>
-            </button>
-
+    </nav>               
             <button class="hu-hamburger" id="huHamburger" aria-label="Menu">
                 <span></span><span></span><span></span>
             </button>
-
         </div>
     </header>
 
@@ -1131,80 +1114,104 @@
     </div>
     @endif
 
-    {{-- DONASI SECTION --}}
-    @if($modOn('donasi') && isset($mosque) && $mosque->package_type != 'free')
-    <section class="hu-donasi-v2-section" id="donasi" style="padding: 6rem 0; background-color: #0e3320; color: #ffffff; position: relative; overflow: hidden;">
-        <div class="hu-container" style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center;">
-                <div>
-                    <div style="display: inline-block; background: rgba(217, 119, 6, 0.2); color: #fbbf24; font-size: 0.75rem; font-weight: 700; padding: 0.35rem 0.85rem; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">
-                        Donasi & Sedekah Terbuka
-                    </div>
-                    <h2 style="font-size: 2.5rem; font-weight: 700; line-height: 1.2; margin-bottom: 1rem; font-family: 'Fraunces', serif;">
-                        Investasi Terbaik <br><span style="color: #fbbf24; font-style: italic;">Untuk Akhirat</span>
-                    </h2>
-                    <p style="font-size: 1rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 2rem;">
-                        Salurkan sebagian rezeki Anda untuk mendukung pembangunan, pemeliharaan, serta program operasional masjid. Setiap uluran tangan Anda sangat berarti bagi kemakmuran umat.
-                    </p>
-
-                    @php
-                        $terkumpul = $donasiTerkumpul ?? 0;
-                        $target = $donasiTarget ?? 500000000;
-                        $donasiPct = $target > 0 ? min(round($terkumpul / $target * 100), 100) : 0;
-                    @endphp
-
-                    <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1rem; padding: 1.5rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; font-size: 0.9rem;">
-                            <span style="color: #94a3b8;">Dana Terkumpul</span>
-                            <span style="font-weight: 700; color: #34d399;">{{ $donasiPct }}% Tercapai</span>
-                        </div>
-                        <div style="width: 100%; height: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 9999px; overflow: hidden; margin-bottom: 0.75rem;">
-                            <div style="width: {{ $donasiPct }}%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 9999px;"></div>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.95rem; font-weight: 600;">
-                            <span style="color: #ffffff;">Rp {{ number_format($terkumpul, 0, ',', '.') }}</span>
-                            <span style="color: #94a3b8;">Target: Rp {{ number_format($target, 0, ',', '.') }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <div style="background: #ffffff; color: #1e293b; border-radius: 1.25rem; padding: 2rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
-                        <h3 style="font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 1.25rem; text-align: center;">
-                            Pilih Nominal Donasi
-                        </h3>
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-bottom: 1.25rem;">
-                            <button type="button" class="hu-nominal-btn" data-val="50000" style="padding: 0.75rem; border: 2px solid #e2e8f0; background: #f8fafc; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Rp 50.000</button>
-                            <button type="button" class="hu-nominal-btn" data-val="100000" style="padding: 0.75rem; border: 2px solid #e2e8f0; background: #f8fafc; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Rp 100.000</button>
-                            <button type="button" class="hu-nominal-btn" data-val="250000" style="padding: 0.75rem; border: 2px solid #e2e8f0; background: #f8fafc; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Rp 250.000</button>
-                            <button type="button" class="hu-nominal-btn" data-val="500000" style="padding: 0.75rem; border: 2px solid #e2e8f0; background: #f8fafc; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Rp 500.000</button>
-                        </div>
-
-                        <div style="text-align: center; font-size: 0.85rem; color: #64748b; margin-bottom: 0.75rem;">Atau masukkan nominal lain</div>
-
-                        <div style="position: relative; margin-bottom: 1rem;">
-                            <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-weight: 600; color: #64748b;">Rp</span>
-                            <input type="number" id="donasiNominal" placeholder="0" min="1000" style="width: 100%; padding: 0.75rem 0.75rem 0.75rem 2.75rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-size: 1rem; font-weight: 600; outline: none; box-sizing: border-box;">
-                        </div>
-
-                        <div style="margin-bottom: 1.25rem;">
-                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Nama Donatur (Opsional)</label>
-                            <input type="text" class="hu-donasi-v2-input-name" placeholder="Hamba Allah" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-size: 0.95rem; outline: none; box-sizing: border-box;">
-                        </div>
-
-                        <a href="{{ route('masjid.donasi.publik', $mosque->slug) }}" style="display: block; width: 100%; background: #0d9488; color: #ffffff; text-align: center; padding: 0.85rem; border-radius: 0.75rem; font-weight: 700; text-decoration: none; box-sizing: border-box; transition: background 0.2s;">
-                            Lanjut Pembayaran →
-                        </a>
-
-                        <div style="text-align: center; font-size: 0.75rem; color: #94a3b8; margin-top: 1rem;">
-                            🔒 Pembayaran aman & terpercaya · QRIS / Transfer Bank / Dompet Digital
-                        </div>
-                    </div>
-                </div>
+    {{-- DONASI SECTION (GRID KARTU FOTO PROGRAM BESAR) --}}
+@if($modOn('donasi') && isset($mosque) && $mosque->package_type != 'free')
+<section class="hu-donasi-v2-section" id="donasi" style="padding: 6rem 0; background-color: #0e3320; color: #ffffff; position: relative; overflow: hidden;">
+    <div class="hu-container" style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;">
+        
+        {{-- Header Section --}}
+        <div style="text-align: center; max-width: 700px; margin: 0 auto 3.5rem auto;">
+            <div style="display: inline-block; background: rgba(217, 119, 6, 0.2); color: #fbbf24; font-size: 0.75rem; font-weight: 700; padding: 0.35rem 1rem; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">
+                Donasi & Sedekah Terbuka
             </div>
+            <h2 style="font-size: 2.5rem; font-weight: 700; line-height: 1.2; margin-bottom: 1rem; font-family: 'Fraunces', serif;">
+                Pilih Program Kebaikan <br><span style="color: #fbbf24; font-style: italic;">Untuk Bekal Akhirat</span>
+            </h2>
+            <p style="font-size: 1rem; color: #cbd5e1; line-height: 1.6;">
+                Salurkan sedekah terbaik Anda melalui berbagai program kemaslahatan umat, pemeliharaan masjid, dan bantuan sosial yang dikelola secara transparan.
+            </p>
         </div>
-    </section>
+
+        {{-- Grid Kartu Program Donasi Berbasis Foto Besar --}}
+        @php
+            $listCategories = (isset($categories) && count($categories) > 0) ? $categories : collect();
+        @endphp
+
+        @if($listCategories->count() > 0)
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem;">
+                @foreach($listCategories as $cat)
+                    @php
+                        // Hitung atau estimasi dana terkumpul per kategori (jika ada relasi, atau gunakan dummy/global)
+                        $catTerkumpul = $donasiTerkumpul ?? 1500000; 
+                        $catTarget = $mosque->donation_target ?? 50000000;
+                        $pct = $catTarget > 0 ? min(round($catTerkumpul / $catTarget * 100), 100) : 0;
+                    @endphp
+                    <div style="background: #ffffff; color: #1e293b; border-radius: 1.25rem; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.3s ease;">
+                        
+                        {{-- Foto Program di Atas Kartu --}}
+<div style="width: 100%; height: 220px; background: #0f766e; position: relative; overflow: hidden;">
+    @if(!empty($cat->image))
+        <img src="{{ asset('storage/' . $cat->image) }}" alt="{{ $cat->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+    @else
+        {{-- Foto dummy hanya tampil jika kolom image di database benar-benar kosong --}}
+        <img src="https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&w=600&q=80" alt="{{ $cat->title }}" style="width: 100%; height: 100%; object-fit: cover;">
     @endif
+    
+    <div style="position: absolute; top: 12px; left: 12px; background: rgba(13, 148, 136, 0.95); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
+        Aktif
+    </div>
+</div>
+
+                        {{-- Konten Detail Program --}}
+                        <div style="padding: 1.75rem; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <h3 style="font-size: 1.35rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem; font-family: 'Fraunces', serif;">
+                                    {{ $cat->title }}
+                                </h3>
+                                <p style="font-size: 0.9rem; color: #64748b; line-height: 1.5; margin-bottom: 1.5rem;">
+                                    {{ $cat->description ?? 'Mari ambil bagian dalam program kebaikan ini untuk membantu sesama dan memakmurkan rumah Allah.' }}
+                                </p>
+                            </div>
+
+                            <div>
+                                {{-- Progress Bar Dana --}}
+                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.85rem; padding: 1rem; margin-bottom: 1.25rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; font-size: 0.8rem;">
+                                        <span style="color: #64748b;">Terkumpul</span>
+                                        <span style="font-weight: 700; color: #0d9488;">{{ $pct }}%</span>
+                                    </div>
+                                    <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 9999px; overflow: hidden; margin-bottom: 0.5rem;">
+                                        <div style="width: {{ $pct }}%; height: 100%; background: linear-gradient(90deg, #0d9488, #14b8a6); border-radius: 9999px;"></div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600;">
+                                        <span style="color: #0f172a;">Rp {{ number_format($catTerkumpul, 0, ',', '.') }}</span>
+                                        <span style="color: #64748b; font-size: 0.75rem;">Target: Rp {{ number_format($catTarget, 0, ',', '.') }}</span>
+                                    </div>
+                                </div>
+
+                                {{-- Tombol Aksi Donasi --}}
+                                <a href="{{ route('masjid.donasi.publik', ['slug' => $mosque->slug, 'jenis' => $cat->key ?? $cat->id]) }}" style="display: block; width: 100%; background: #0d9488; color: #ffffff; text-align: center; padding: 0.8rem; border-radius: 0.75rem; font-weight: 700; text-decoration: none; box-sizing: border-box; transition: background 0.2s;">
+                                    Donasi Sekarang →
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                @endforeach
+            </div>
+        @else
+            {{-- Fallback Jika Belum Ada Kategori/Program yang Dibuat Admin --}}
+            <div style="background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255, 255, 255, 0.2); border-radius: 1rem; padding: 3rem; text-align: center; color: #cbd5e1;">
+                <p style="font-size: 1rem; margin-bottom: 1rem;">Belum ada program donasi khusus yang dipublikasikan saat ini.</p>
+                <a href="{{ route('masjid.donasi.publik', $mosque->slug) }}" style="display: inline-block; background: #0d9488; color: white; padding: 0.75rem 1.5rem; border-radius: 0.75rem; font-weight: 600; text-decoration: none;">
+                    Buka Halaman Donasi Umum →
+                </a>
+            </div>
+        @endif
+
+    </div>
+</section>
+@endif
 
     {{-- DOKUMENTASI PENYALURAN SECTION --}}
     @if($modOn('donasi') && isset($mosque) && $mosque->package_type != 'free')
