@@ -12,11 +12,12 @@ class Donasi extends Model
 
     protected $fillable = [
         'mosque_id',
-        'user_id',          // <--- TAMBAHKAN BARIS INI
+        'user_id',
         'jenis',
         'zakat_subtype',
         'nominal',
         'nama_donatur',
+        'keterangan',        // <-- BARU
         'metode_pembayaran',
         'no_referensi',
         'status',

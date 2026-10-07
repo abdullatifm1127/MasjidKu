@@ -89,13 +89,16 @@
                                         </span>
                                         <div>
                                             <span style="display: block; font-weight: 600; color: #1e293b; font-size: 0.95rem;">{{ $don->nama_donatur ?: 'Hamba Allah' }}</span>
-                                            <span style="display: flex; gap: 0.5rem; align-items: center; font-size: 0.75rem; color: #64748b; margin-top: 0.15rem;">
+                                            <span style="display: flex; gap: 0.5rem; align-items: center; font-size: 0.75rem; color: #64748b; margin-top: 0.15rem; flex-wrap: wrap;">
                                                 <span style="background: #e0f2fe; color: #0369a1; padding: 0.1rem 0.5rem; border-radius: 9999px; font-weight: 600;">{{ $don->category_title }}</span>
                                                 <span>•</span>
                                                 <span>{{ $don->created_at?->diffForHumans() }}</span>
                                                 <span>•</span>
                                                 <span style="color: {{ $don->status == 'diterima' ? '#16a34a' : '#b45309' }}; font-weight: 600; text-transform: capitalize;">{{ $don->status }}</span>
                                             </span>
+                                            @if (!empty($don->keterangan))
+                                                <span style="display: block; font-size: 0.75rem; color: #475569; margin-top: 0.25rem; font-style: italic;">“{{ $don->keterangan }}”</span>
+                                            @endif
                                         </div>
                                     </div>
                                     <span style="font-weight: 700; color: #0d9488; font-size: 0.95rem;">Rp {{ number_format($don->nominal, 0, ',', '.') }}</span>
@@ -211,6 +214,13 @@
                 <input type="text" id="donor-name" maxlength="60" placeholder="Tulis nama atau kosongkan untuk Hamba Allah">
             </div>
 
+            <div class="input-group">
+                <label for="donor-note">Keterangan / peruntukan donasi (opsional)</label>
+                <textarea id="donor-note" rows="3" maxlength="200"
+                          placeholder="Contoh: untuk pembangunan menara, santunan anak yatim, atau infaq atas nama keluarga"></textarea>
+                <small class="hint"><span id="note-count">0</span>/200 karakter</small>
+            </div>
+
             <div class="total-display">
                 <span>Total donasi</span>
                 <strong id="final-amount-text" aria-live="polite">Rp 0</strong>
@@ -233,12 +243,13 @@
             <div class="summary-box">
                 <div class="sb-row"><span>Kategori</span><b id="sum-cat">-</b></div>
                 <div class="sb-row"><span>Donatur</span><b id="sum-name">Hamba Allah</b></div>
+                <div class="sb-row"><span>Keterangan</span><b id="sum-note">-</b></div>
                 <div class="sb-row total"><span>Total transfer</span><b id="sum-total">Rp 0</b></div>
             </div>
 
             <fieldset class="payment-channels">
                 <legend class="sr-only">Pilih metode pembayaran</legend>
-                
+
                 {{-- QRIS Dinamis --}}
                 @if ($mosque->qris_image)
                     <label class="channel-option">
@@ -306,6 +317,7 @@
                 </div>
                 <div class="receipt-row"><span>Kategori</span><b id="res-cat">-</b></div>
                 <div class="receipt-row"><span>Jumlah</span><b id="res-total">Rp 0</b></div>
+                <div class="receipt-row"><span>Keterangan</span><b id="res-note">-</b></div>
                 <div class="receipt-row"><span>Status</span><b style="color:#b45309;">Menunggu verifikasi admin</b></div>
             </div>
 

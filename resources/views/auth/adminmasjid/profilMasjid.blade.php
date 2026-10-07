@@ -473,14 +473,6 @@
                                 @enderror
                             </div>
                         </div>
-
-                        <div class="pm-field">
-                            <label class="pm-label" for="website">WEBSITE</label>
-                            <input type="text" id="website" name="website"
-                                   class="pm-input"
-                                   value="{{ old('website', $mosque->website ?? '') }}"
-                                   placeholder="https://masjid.id">
-                        </div>
                     </div><!-- /.pm-section -->
                 </div><!-- /#tab-lokasi -->
 

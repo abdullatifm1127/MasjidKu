@@ -171,12 +171,6 @@
                                    placeholder="info@masjid.id"
                                    value="{{ old('email') }}" required>
                         </div>
-                        <div class="rm-group">
-                            <label>Website <span class="opt">(opsional)</span></label>
-                            <input class="rm-input" name="website" type="url"
-                                   placeholder="https://masjid.id"
-                                   value="{{ old('website') }}">
-                        </div>
                     </div>
                 </div>
 
