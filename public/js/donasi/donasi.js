@@ -7,6 +7,7 @@
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
     const MIN_AMOUNT = 5000; // catatan: server (DonasiController) hanya mewajibkan minimal 1.000
     const MAX_AMOUNT = 500000000; // batas wajar sisi klien saja, server tidak membatasi ini
+    const NOTE_MAX = 200;
 
     let state = {
         categoryKey: null,   // dikirim sebagai field "jenis" -> harus persis salah satu key kategori aktif
@@ -24,6 +25,10 @@
 
     function parseDigits(str) {
         return parseInt(String(str || '').replace(/[^\d]/g, ''), 10) || 0;
+    }
+
+    function getNote() {
+        return document.getElementById('donor-note')?.value.trim() || '';
     }
 
     /** Live-format a text input as a thousands-separated number, keeping the raw value on dataset.raw */
@@ -54,9 +59,8 @@
     }
 
     // ---------- step navigation ----------
-    // Catatan: hanya ada 4 panel (panel-1..panel-4). Tidak ada lagi layar "menunggu
-    // pembayaran" dengan polling status, karena backend saat ini (DonasiController@store)
-    // tidak terhubung ke payment gateway apa pun -- lihat komentar di donasi.blade.php.
+    // Hanya ada 4 panel (panel-1..panel-4). Backend (DonasiController@store) tidak
+    // terhubung ke payment gateway; donasi dicatat "pending" lalu diverifikasi admin.
 
     function changeStep(stepNum) {
         for (let i = 1; i <= 4; i++) {
@@ -90,6 +94,10 @@
             const name = nameInput ? nameInput.value.trim() : '';
             document.getElementById('sum-name').textContent = name !== '' ? name : 'Hamba Allah';
             document.getElementById('sum-total').textContent = formatRp(state.amount);
+
+            const note = getNote();
+            const sumNote = document.getElementById('sum-note');
+            if (sumNote) sumNote.textContent = note !== '' ? note : '-';
         }
     }
 
@@ -223,16 +231,12 @@
 
     // ---------- submit donation ----------
     //
-    // Payload HARUS memakai nama field yang divalidasi DonasiController@store:
-    //   jenis (key kategori), zakat_subtype (fitrah|mal, hanya jika calc_type zakat),
-    //   nominal, nama_donatur, metode_pembayaran (QRIS|Transfer Bank|Dompet Digital).
+    // Payload memakai nama field yang divalidasi DonasiController@store:
+    //   jenis, zakat_subtype (hanya zakat), nominal, nama_donatur,
+    //   keterangan (opsional, maks 200), metode_pembayaran.
     //
-    // Server saat ini TIDAK terhubung ke payment gateway apa pun -- ia hanya membuat
-    // baris donasi berstatus "pending" dan mengembalikan { success, no_referensi }.
-    // Karena itu JS tidak berpura-pura ada konfirmasi pembayaran otomatis: begitu server
-    // merespons sukses, kita tampilkan nomor referensi + status "menunggu verifikasi admin".
-    // Kalau request ke server gagal (jaringan/validasi), tampilkan error apa adanya —
-    // TIDAK ADA fallback yang memalsukan donasi "berhasil".
+    // user_id TIDAK dikirim dari klien (bisa dimanipulasi lewat DevTools).
+    // Server harus memakai auth()->id() untuk mengisinya.
 
     async function processDonation() {
         const confirmBtn = document.getElementById('confirm-btn');
@@ -241,9 +245,7 @@
         const errorEl = document.getElementById('submit-error');
         const payment = document.querySelector('input[name="payment"]:checked')?.value || 'QRIS';
         const donorName = document.getElementById('donor-name')?.value.trim() || '';
-        
-        // AMBIL USER ID DARI INPUT TERSEMBUNYI DI BLADE
-        const authUserIdInput = document.getElementById('auth-user-id');
+        const donorNote = getNote();
 
         setError(errorEl, '');
 
@@ -259,6 +261,10 @@
             setError(errorEl, `Nominal donasi minimal ${formatRp(MIN_AMOUNT)}.`);
             return;
         }
+        if (donorNote.length > NOTE_MAX) {
+            setError(errorEl, `Keterangan maksimal ${NOTE_MAX} karakter.`);
+            return;
+        }
 
         if (confirmBtn) confirmBtn.disabled = true;
         btnLabel && (btnLabel.textContent = 'Memproses...');
@@ -267,16 +273,15 @@
         const payload = {
             jenis: state.categoryKey,
             nominal: state.amount,
-            nama_donatur: donorName, 
+            nama_donatur: donorName,
+            keterangan: donorNote,
             metode_pembayaran: payment,
-            user_id: authUserIdInput ? authUserIdInput.value : null, // <--- SERTAKAN USER ID DI SINI
         };
         if (state.calcType === 'zakat') {
             payload.zakat_subtype = state.zakatSub;
         }
 
         try {
-            // ... (lanjutan kode fetch ke server tetap sama)
             const res = await fetch(submitUrl, {
                 method: 'POST',
                 headers: {
@@ -296,7 +301,7 @@
                 throw new Error(message);
             }
 
-            showReceipt(result);
+            showReceipt(result, donorNote);
         } catch (err) {
             setError(errorEl, err.message || 'Terjadi kesalahan jaringan. Silakan coba lagi.');
         } finally {
@@ -313,16 +318,20 @@
         return firstKey ? result.errors[firstKey][0] : null;
     }
 
-    function showReceipt(result) {
+    function showReceipt(result, note) {
         document.getElementById('res-code').textContent = result.no_referensi || '-';
         document.getElementById('res-cat').textContent = state.categoryTitle;
         document.getElementById('res-total').textContent = formatRp(state.amount);
 
-        const waText = encodeURIComponent(
-            `Alhamdulillah, saya baru saja berdonasi ${formatRp(state.amount)} untuk "${state.categoryTitle}" di Masjid. No. Referensi: ${result.no_referensi}.`
-        );
+        const resNote = document.getElementById('res-note');
+        if (resNote) resNote.textContent = note && note !== '' ? note : '-';
+
+        let waMsg = `Alhamdulillah, saya baru saja berdonasi ${formatRp(state.amount)} untuk "${state.categoryTitle}" di Masjid.`;
+        if (note) waMsg += ` Keterangan: ${note}.`;
+        waMsg += ` No. Referensi: ${result.no_referensi}.`;
+
         const shareLink = document.getElementById('share-wa');
-        if (shareLink) shareLink.href = `https://wa.me/?text=${waText}`;
+        if (shareLink) shareLink.href = `https://wa.me/?text=${encodeURIComponent(waMsg)}`;
 
         changeStep(4);
     }
@@ -331,10 +340,14 @@
         state = { categoryKey: null, categoryTitle: '', calcType: 'nominal', zakatSub: 'fitrah', amount: 0 };
 
         const donorName = document.getElementById('donor-name');
+        const donorNote = document.getElementById('donor-note');
+        const noteCount = document.getElementById('note-count');
         const customNominal = document.getElementById('custom-nominal');
         const harta = document.getElementById('m-harta');
 
         if (donorName) donorName.value = '';
+        if (donorNote) donorNote.value = '';
+        if (noteCount) noteCount.textContent = '0';
         if (customNominal) { customNominal.value = ''; customNominal.dataset.raw = '0'; }
         if (harta) { harta.value = ''; harta.dataset.raw = '0'; }
         document.getElementById('nisab-note')?.setAttribute('hidden', '');
@@ -381,6 +394,12 @@
 
         document.getElementById('f-jiwa')?.addEventListener('input', calcZakatFitrah);
         document.getElementById('f-nominal')?.addEventListener('input', calcZakatFitrah);
+
+        // Penghitung karakter keterangan
+        document.getElementById('donor-note')?.addEventListener('input', (e) => {
+            const counter = document.getElementById('note-count');
+            if (counter) counter.textContent = String(e.target.value.length);
+        });
 
         document.body.addEventListener('click', (e) => {
             const galItem = e.target.closest('.pub-gal-item');

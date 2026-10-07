@@ -41,6 +41,7 @@
         .dn-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
         .dn-table th { text-align: left; padding: .6rem .5rem; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
         .dn-table td { padding: .6rem .5rem; border-bottom: 1px solid #f1f5f9; }
+        .dn-table td.dn-note { max-width: 240px; word-break: break-word; color: #475569; }
 
         @media print {
             .ba2-sidebar, .ba2-topbar, .dn-tabs, .dn-noprint, .ba2-fab { display: none !important; }
@@ -206,7 +207,7 @@
                     <h3><i class="fa-solid fa-layer-group text-teal-600"></i> Kelola Jenis &amp; Kategori Donasi</h3>
                     <p>Atur jenis donasi beserta foto banner program yang akan tampil pada halaman publik.</p>
 
-                    {{-- Form Tambah Kategori (ditambah enctype untuk upload file) --}}
+                    {{-- Form Tambah Kategori --}}
                     <form action="{{ route('admin.donasi.kategori.store') }}" method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; background: #f8fafc; padding: 1.25rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; margin-bottom: 1.5rem;">
                         @csrf
                         <div class="dn-field" style="margin: 0;">
@@ -273,7 +274,7 @@
                                     </summary>
 
                                     <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #f1f5f9;">
-                                        {{-- Form Update Kategori (ditambah enctype untuk upload file) --}}
+                                        {{-- Form Update Kategori --}}
                                         <form action="{{ route('admin.donasi.kategori.update', $kategori->id) }}" method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
                                             @csrf
                                             @method('PUT')
@@ -657,6 +658,7 @@
                                         <th>No. Referensi</th>
                                         <th>Donatur</th>
                                         <th>Kategori</th>
+                                        <th>Keterangan</th>
                                         <th>Nominal</th>
                                         <th>Metode</th>
                                         <th>Status</th>
@@ -677,6 +679,7 @@
                                             <td style="font-weight: 600;">{{ $don->no_referensi }}</td>
                                             <td>{{ $don->nama_donatur }}</td>
                                             <td>{{ $don->category_title }}</td>
+                                            <td class="dn-note">{{ $don->keterangan ?: '-' }}</td>
                                             <td style="white-space:nowrap;">Rp {{ number_format($don->nominal, 0, ',', '.') }}</td>
                                             <td>{{ $don->metode_pembayaran }}</td>
                                             <td><span style="font-size: 0.72rem; padding: 0.2rem 0.55rem; border-radius: 999px; {{ $statusStyle }}">{{ ucfirst($don->status) }}</span></td>

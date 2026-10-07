@@ -16,11 +16,10 @@ use Illuminate\Validation\Rule;
  *   index() dibiarkan ada untuk kompatibilitas/masa depan, tapi tidak terhubung ke route manapun.
  * - Yang benar-benar dipakai dari controller ini adalah store(), untuk menerima
  *   POST /masjid/{slug}/donasi dari donasi.js (AJAX fetch).
- * - Signature diubah dari `Mosque $masjid` (route-model-binding) menjadi `string $slug`
- *   lalu resolve manual, supaya konsisten dengan pola yang sudah dipakai di
- *   PublicMosqueController@showDonasi (route Anda pakai segmen {slug}, bukan {masjid}).
- * - Kolom disamakan jadi `mosque_id` (bukan `masjid_id`) sesuai migration tabel `donasis`
- *   dan konfirmasi Anda. Pastikan $fillable di App\Models\Donasi juga memakai 'mosque_id'.
+ * - Signature memakai `string $slug` lalu resolve manual, konsisten dengan
+ *   PublicMosqueController@showDonasi.
+ * - Kolom memakai `mosque_id` sesuai migration tabel `donasis`.
+ *   Pastikan $fillable di App\Models\Donasi memuat 'mosque_id' dan 'keterangan'.
  */
 class DonasiController extends Controller
 {
@@ -70,6 +69,7 @@ class DonasiController extends Controller
             'zakat_subtype'     => ['nullable', Rule::in(['fitrah', 'mal'])],
             'nominal'           => ['required', 'numeric', 'min:1000'],
             'nama_donatur'      => ['nullable', 'string', 'max:100'],
+            'keterangan'        => ['nullable', 'string', 'max:200'],
             'metode_pembayaran' => ['required', Rule::in(['QRIS', 'Transfer Bank', 'Dompet Digital'])],
         ]);
 
@@ -77,11 +77,16 @@ class DonasiController extends Controller
 
         $donasi = Donasi::create([
             'mosque_id'         => $mosque->id,
-            'user_id'           => auth()->id() ?? auth('web')->id() ?? 1, // <-- Mengambil ID user, fallback ke ID 1 jika session terputus sementara
+            // Diambil dari sesi login saja (bukan dari request). Null jika donatur belum login.
+            // Kolom user_id di tabel donasis harus nullable.
+            'user_id'           => auth()->id(),
             'jenis'             => $data['jenis'],
             'zakat_subtype'     => $data['zakat_subtype'] ?? null,
             'nominal'           => $data['nominal'],
             'nama_donatur'      => $data['nama_donatur'] ?: 'Hamba Allah',
+            'keterangan'        => isset($data['keterangan']) && trim($data['keterangan']) !== ''
+                ? trim($data['keterangan'])
+                : null,
             'metode_pembayaran' => $data['metode_pembayaran'],
             'no_referensi'      => $noReferensi,
             'status'            => 'pending',
