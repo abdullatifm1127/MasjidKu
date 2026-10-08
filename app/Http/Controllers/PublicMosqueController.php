@@ -7,6 +7,7 @@ use App\Models\LandingPage;
 use App\Models\DonasiGaleri;
 use App\Models\DonationCategory;
 use App\Models\Donasi;
+use App\Models\Pengumuman;
 use App\Services\PrayerTimeService;
 use Illuminate\Http\Request;
 
@@ -53,6 +54,15 @@ class PublicMosqueController extends Controller
             ->take(3)
             ->get();
 
+        // Pengumuman: hanya yang berstatus "terbit" dan belum lewat tanggal berakhir
+        // (scope active() di model Pengumuman). Yang disematkan tampil paling atas.
+        $pengumumans = Pengumuman::where('mosque_id', $mosque->id)
+            ->active()
+            ->orderByDesc('is_pinned')
+            ->latest()
+            ->take(7)
+            ->get();
+
         $hasDonationFeature = $this->hasDonationFeature($mosque);
 
         // Perhitungan Dana Terkumpul Otomatis (Hanya status 'diterima')
@@ -82,6 +92,7 @@ class PublicMosqueController extends Controller
             'timezoneLabel'       => $prayerTimeService->timezoneLabel($timezone),
             'today'               => \Carbon\Carbon::now($timezone)->toDateString(),
             'acaras'              => $acaras,
+            'pengumumans'         => $pengumumans,
             'hasDonationFeature'  => $hasDonationFeature,
             'categories'          => $categories,
             'items'               => $items,
