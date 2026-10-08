@@ -28,35 +28,44 @@
                 <div class="ba2-brand-sub">{{ $mosque->city ?? 'Baitul Digital' }}</div>
             </div>
         </div>
+{{-- Nav --}}
+<nav class="ba2-nav">
+    <a href="{{ route('admin.dashboard') }}" class="ba2-nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+        <span class="ba2-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
+        <span class="ba2-nav-label">Dashboard</span>
+    </a>
+    <a href="{{ route('admin.landing-page') }}" class="ba2-nav-item">
+        <span class="ba2-nav-icon"><i class="fa-solid fa-globe"></i></span>
+        <span class="ba2-nav-label">Landing Page</span>
+    </a>
+    <a href="{{ route('admin.profil-masjid') }}" class="ba2-nav-item">
+        <span class="ba2-nav-icon"><i class="fa-solid fa-mosque"></i></span>
+        <span class="ba2-nav-label">Profil Masjid</span>
+    </a>
+    <a href="{{ route('admin.jadwal-sholat') }}" class="ba2-nav-item {{ request()->routeIs('admin.jadwal-sholat') ? 'active' : '' }}">
+        <span class="ba2-nav-icon"><i class="fa-solid fa-clock"></i></span>
+        <span class="ba2-nav-label">Jadwal Shalat</span>
+        <span class="ba2-nav-soon">dev</span>
+    </a>
 
-     {{-- Nav --}}
-        <nav class="ba2-nav">
-            <a href="{{ route('admin.dashboard') }}" class="ba2-nav-item active">
-                <span class="ba2-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
-                <span class="ba2-nav-label">Dashboard</span>
-            </a>
-            <a href="{{ route('admin.landing-page') }}" class="ba2-nav-item">
-                <span class="ba2-nav-icon"><i class="fa-solid fa-globe"></i></span>
-                <span class="ba2-nav-label">Landing Page</span>
-            </a>
-            <a href="{{ route('admin.profil-masjid') }}" class="ba2-nav-item">
-                <span class="ba2-nav-icon"><i class="fa-solid fa-mosque"></i></span>
-                <span class="ba2-nav-label">Profil Masjid</span>
-            </a>
-            <a href="{{ route('admin.jadwal-sholat') }}" class="ba2-nav-item {{ request()->routeIs('admin.jadwal-sholat') ? 'active' : '' }}">
-                <span class="ba2-nav-icon"><i class="fa-solid fa-clock"></i></span>
-                <span class="ba2-nav-label">Jadwal Shalat</span>
-                <span class="ba2-nav-soon">dev</span>
-            </a>
-            <a href="#" class="ba2-nav-item">
-                <span class="ba2-nav-icon"><i class="fa-solid fa-bullhorn"></i></span>
-                <span class="ba2-nav-label">Pengumuman</span>
-                <span class="ba2-nav-badge">3</span>
-            </a>
-            <a href="{{ route('admin.acara') }}" class="ba2-nav-item {{ request()->routeIs('admin.acara*') ? 'active' : '' }}">
-                <span class="ba2-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
-                <span class="ba2-nav-label">Kegiatan &amp; Acara</span>
-            </a>
+    {{-- PENGUMUMAN --}}
+    @php
+        $pengumumanAktif = isset($mosque)
+            ? \App\Models\Pengumuman::where('mosque_id', $mosque->id)->active()->count()
+            : 0;
+    @endphp
+    <a href="{{ route('admin.pengumuman') }}" class="ba2-nav-item {{ request()->routeIs('admin.pengumuman*') ? 'active' : '' }}">
+        <span class="ba2-nav-icon"><i class="fa-solid fa-bullhorn"></i></span>
+        <span class="ba2-nav-label">Pengumuman</span>
+        @if($pengumumanAktif > 0)
+            <span class="ba2-nav-badge">{{ $pengumumanAktif }}</span>
+        @endif
+    </a>
+
+    <a href="{{ route('admin.acara') }}" class="ba2-nav-item {{ request()->routeIs('admin.acara*') ? 'active' : '' }}">
+        <span class="ba2-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
+        <span class="ba2-nav-label">Kegiatan &amp; Acara</span>
+    </a>
 
             {{-- MENU DONASI DINAMIS BERDASARKAN PAKET MASJID --}}
             @if(isset($mosque) && $mosque->package_type === 'free')

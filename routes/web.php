@@ -21,6 +21,7 @@ use App\Http\Controllers\adminmasjid\DonasiAdminController;
 use App\Http\Controllers\adminmasjid\JamaahController;
 use App\Http\Controllers\adminmasjid\DonationCategoryController;
 use App\Http\Controllers\Auth\SocialAuthController;
+   use App\Http\Controllers\adminmasjid\PengumumanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -162,6 +163,13 @@ Route::middleware(['auth', 'check.status'])->group(function () {
     Route::get('/admin/beranda', function () {
         return view('auth.adminmasjid.berandaAdmin');
     })->name('admin.beranda');
+
+    //Pengumuman
+    Route::get('/pengumuman', [PengumumanController::class, 'index'])->name('admin.pengumuman');
+    Route::post('/pengumuman', [PengumumanController::class, 'store'])->name('admin.pengumuman.store');
+    Route::put('/pengumuman/{id}', [PengumumanController::class, 'update'])->name('admin.pengumuman.update');
+    Route::delete('/pengumuman/{id}', [PengumumanController::class, 'destroy'])->name('admin.pengumuman.destroy');
+    
 
     Route::get('/admin/jadwal-sholat', [JadwalSholatController::class, 'index'])->name('admin.jadwal-sholat');
     Route::put('/admin/jadwal-sholat', [JadwalSholatController::class, 'update'])->name('admin.jadwal-sholat.update');

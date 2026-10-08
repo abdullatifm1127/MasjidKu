@@ -12,7 +12,45 @@
 
     @php
         $modules = $mosque->active_modules ?? [];
-        $modOn = fn($key) => data_get($modules, $key, true); 
+        $modOn = fn($key) => data_get($modules, $key, true);
+
+        // =====================================================================
+        // DATA PENGUMUMAN — satu sumber untuk ticker + section pengumuman
+        // =====================================================================
+        $pnLabels = \App\Models\Pengumuman::CATEGORIES;
+
+        // Hanya pengumuman berstatus "terbit" dan belum lewat tanggal berakhir (scope active())
+        if (isset($pengumumans)) {
+            $pnList = collect($pengumumans);
+        } else {
+            // Cadangan: bila controller belum mengirim $pengumumans, ambil langsung
+            try {
+                $pnList = \App\Models\Pengumuman::where('mosque_id', $mosque->id)
+                    ->active()
+                    ->orderByDesc('is_pinned')
+                    ->orderByDesc('created_at')
+                    ->take(7)
+                    ->get();
+            } catch (\Throwable $e) {
+                $pnList = collect();
+            }
+        }
+
+        $pnFeatured = $pnList->first();
+        $pnRest     = $pnList->slice(1);
+
+        $pnData = function ($item) use ($pnLabels) {
+            return json_encode([
+                'title'    => $item->title,
+                'content'  => $item->content,
+                'category' => $pnLabels[$item->category] ?? ucfirst((string) $item->category),
+                'date'     => $item->created_at?->translatedFormat('d F Y'),
+                'expires'  => !empty($item->expires_at)
+                                ? \Carbon\Carbon::parse($item->expires_at)->translatedFormat('d F Y')
+                                : null,
+                'image'    => $item->image_url ?? null,
+            ]);
+        };
     @endphp
 
     {{-- TOP BAR: JADWAL SHALAT (modul: jadwal_shalat) --}}
@@ -61,41 +99,42 @@
                 </div>
             </a>
 
-          <nav class="hu-nav">
-        <a href="#beranda" class="hu-nav-link active">Beranda</a>
-        <a href="#profil" class="hu-nav-link">Profil</a>
-        @if($modOn('jadwal_shalat'))<a href="#shalat" class="hu-nav-link">Waktu Shalat</a>@endif
-        <a href="#program" class="hu-nav-link">Program & Fasilitas</a>
-        @if($modOn('kegiatan'))<a href="#acara" class="hu-nav-link">Acara</a>@endif
-        
-        @if(isset($mosque) && $mosque->package_type !== 'free')
-            <a href="#donasi" class="hu-nav-link">Donasi</a>
-            <a href="#penyaluran" class="hu-nav-link">Penyaluran</a>
-        @endif
+            <nav class="hu-nav">
+                <a href="#beranda" class="hu-nav-link active">Beranda</a>
+                <a href="#profil" class="hu-nav-link">Profil</a>
+                @if($modOn('jadwal_shalat'))<a href="#shalat" class="hu-nav-link">Waktu Shalat</a>@endif
+                @if($modOn('pengumuman'))<a href="#pengumuman" class="hu-nav-link">Pengumuman</a>@endif
+                <a href="#program" class="hu-nav-link">Program & Fasilitas</a>
+                @if($modOn('kegiatan'))<a href="#acara" class="hu-nav-link">Acara</a>@endif
 
-        <a href="#kontak" class="hu-nav-link">Hubungi</a>
-    </nav>               
+                @if(isset($mosque) && $mosque->package_type !== 'free')
+                    <a href="#donasi" class="hu-nav-link">Donasi</a>
+                    <a href="#penyaluran" class="hu-nav-link">Penyaluran</a>
+                @endif
+
+                <a href="#kontak" class="hu-nav-link">Hubungi</a>
+            </nav>
             <button class="hu-hamburger" id="huHamburger" aria-label="Menu">
                 <span></span><span></span><span></span>
             </button>
         </div>
     </header>
 
-    {{-- INFO TICKER (modul: pengumuman) --}}
+    {{-- INFO TICKER (modul: pengumuman) — memakai judul pengumuman dari database --}}
     @if($modOn('pengumuman'))
     <div class="hu-ticker">
         <span class="hu-ticker-label">INFO</span>
         <div class="hu-ticker-wrap">
             <div class="hu-ticker-track" id="huTickerTrack">
                 @php
-                    $announcements = $announcements ?? [
-                        'Santunan anak yatim setiap Jumat pertama dalam bulan',
-                        "Kajian Fiqih setiap Senin ba'da Isya",
-                        'Pendaftaran TPA/TPQ dibuka sampai akhir bulan',
-                    ];
+                    $announcements = $pnList->isNotEmpty()
+                        ? $pnList->pluck('title')->all()
+                        : [
+                            'Belum ada pengumuman terbaru dari pengurus masjid',
+                        ];
                 @endphp
                 @foreach($announcements as $info)
-                <span class="hu-ticker-text">{{ $info }}</span>
+                <a href="#pengumuman" class="hu-ticker-text" style="color:inherit;text-decoration:none;">{{ $info }}</a>
                 <span class="hu-ticker-dot">●</span>
                 @endforeach
             </div>
@@ -115,7 +154,7 @@
         @endif
 
         <div class="hu-hero-overlay" style="position: relative; z-index: 3;"></div>
-        
+
         <div class="hu-hero-content" style="position: relative; z-index: 4;">
             <div class="hu-hero-arabic">{{ $mosque->arabic_name ?? '' }}</div>
             <h1 class="hu-hero-title">{{ $landingPage->hero_title ?? $mosque->mosque_name ?? 'Selamat Datang' }}</h1>
@@ -132,7 +171,7 @@
                 @endif
             </div>
         </div>
-        
+
         <div class="hu-hero-scroll" style="position: relative; z-index: 4;">
             <span>SCROLL</span>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
@@ -141,7 +180,7 @@
         </div>
     </section>
 
-   {{-- PROFIL SECTION (final + modal pengurus): latar krem, panel pasir keemasan di belakang foto mihrab --}}
+    {{-- PROFIL SECTION: latar krem, panel pasir keemasan di belakang foto mihrab --}}
     @php
         $pfCap = $mosque->capacity ?? null;
         $pfCapText = is_numeric($pfCap) ? number_format((float) $pfCap, 0, ',', '.') : $pfCap;
@@ -202,7 +241,6 @@
 
             /* ===== foto: bingkai mihrab di atas panel pasir keemasan ===== */
             .pf-media { position: relative; width: 100%; max-width: 420px; margin: 0 auto; padding-bottom: 20px; }
-            /* panel pasir: meluas ke tepi kanan layar (desktop) */
             .pf-media::before { content: ''; position: absolute; z-index: 0; top: -64px; bottom: -64px; left: -80px; right: -100vw; border-radius: 44px 0 0 44px;
                 background:
                     radial-gradient(420px 320px at 70% 20%, rgba(255,255,255,.55), transparent 70%),
@@ -328,151 +366,149 @@
         </div>
     </section>
 
-{{-- MODAL PENGURUS & YAYASAN (dibuka oleh tombol #btnBukaPengurus) --}}
-@php
-    $pgPeople = collect([
-        ['role' => 'Ketua DKM',            'name' => $mosque->chairman_name  ?? null, 'phone' => $mosque->chairman_phone  ?? null],
-        ['role' => 'Imam Besar / Khatib',  'name' => $mosque->imam_name      ?? null, 'phone' => $mosque->imam_phone      ?? null],
-        ['role' => 'Sekretaris',           'name' => $mosque->secretary_name ?? null, 'phone' => $mosque->secretary_phone ?? null],
-        ['role' => 'Bendahara',            'name' => $mosque->treasurer_name ?? null, 'phone' => $mosque->treasurer_phone ?? null],
-    ])->filter(fn ($p) => !empty($p['name']))->values();
-@endphp
+    {{-- MODAL PENGURUS & YAYASAN (dibuka oleh tombol #btnBukaPengurus) --}}
+    @php
+        $pgPeople = collect([
+            ['role' => 'Ketua DKM',            'name' => $mosque->chairman_name  ?? null, 'phone' => $mosque->chairman_phone  ?? null],
+            ['role' => 'Imam Besar / Khatib',  'name' => $mosque->imam_name      ?? null, 'phone' => $mosque->imam_phone      ?? null],
+            ['role' => 'Sekretaris',           'name' => $mosque->secretary_name ?? null, 'phone' => $mosque->secretary_phone ?? null],
+            ['role' => 'Bendahara',            'name' => $mosque->treasurer_name ?? null, 'phone' => $mosque->treasurer_phone ?? null],
+        ])->filter(fn ($p) => !empty($p['name']))->values();
+    @endphp
 
-<dialog id="pfPengurusModal" class="pg-modal" aria-labelledby="pgTitle">
-    <style>
-        .pg-modal { width: min(720px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 0; border: 0; border-radius: 28px; overflow: hidden; color: #4b5a53;
-            background: #fbf8f0; box-shadow: 0 40px 90px rgba(11,40,30,.35); opacity: 0; transform: translateY(16px) scale(.98); transition: opacity .25s, transform .25s, overlay .25s allow-discrete, display .25s allow-discrete; }
-        .pg-modal[open] { opacity: 1; transform: none; }
-        @starting-style { .pg-modal[open] { opacity: 0; transform: translateY(16px) scale(.98); } }
-        .pg-modal::backdrop { background: rgba(20,28,24,.55); backdrop-filter: blur(4px); }
-        .pg-wrap { display: flex; flex-direction: column; max-height: calc(100vh - 48px); }
+    <dialog id="pfPengurusModal" class="pg-modal" aria-labelledby="pgTitle">
+        <style>
+            .pg-modal { width: min(720px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 0; border: 0; border-radius: 28px; overflow: hidden; color: #4b5a53;
+                background: #fbf8f0; box-shadow: 0 40px 90px rgba(11,40,30,.35); opacity: 0; transform: translateY(16px) scale(.98); transition: opacity .25s, transform .25s, overlay .25s allow-discrete, display .25s allow-discrete; }
+            .pg-modal[open] { opacity: 1; transform: none; }
+            @starting-style { .pg-modal[open] { opacity: 0; transform: translateY(16px) scale(.98); } }
+            .pg-modal::backdrop { background: rgba(20,28,24,.55); backdrop-filter: blur(4px); }
+            .pg-wrap { display: flex; flex-direction: column; max-height: calc(100vh - 48px); }
 
-        .pg-head { position: relative; flex: none; display: flex; align-items: center; gap: 16px; padding: 26px 28px 22px; border-bottom: 1px solid rgba(193,145,60,.35);
-            background:
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cpath d='M40 6l7 16.8L64 15l-7.8 17L74 40l-17.8 8L64 65l-17-7.8L40 74l-7-16.8L16 65l7.8-17L6 40l17.8-8L16 15l17 7.8z' fill='none' stroke='%23b8862d' stroke-opacity='.16' stroke-width='1'/%3E%3C/svg%3E"),
-                linear-gradient(160deg, #f3e8cc, #ecdcb0); }
-        .pg-arch { flex: none; width: 46px; height: 54px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px; clip-path: path('M0,54 L0,25 C0,16 16,11 23,0 C30,11 46,16 46,25 L46,54 Z'); background: linear-gradient(170deg, #f0d99a, #c1913c 60%, #8a6420); color: #0f4636; }
-        .pg-arch svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-        .pg-titles { min-width: 0; flex: 1; }
-        .pg-title { margin: 0; font-size: 1.45rem; line-height: 1.2; color: #0f4636; }
-        .pg-sub { margin: 4px 0 0; font-size: .9rem; color: #7a6a3e; }
-        .pg-close { flex: none; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(15,70,54,.2); border-radius: 50%; background: rgba(255,255,255,.6); color: #0f4636; cursor: pointer; transition: background .2s, transform .2s; }
-        .pg-close:hover { background: #fff; transform: rotate(90deg); }
-        .pg-close:focus-visible, .pg-call:focus-visible { outline: 2px solid #c1913c; outline-offset: 2px; }
-        .pg-close svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+            .pg-head { position: relative; flex: none; display: flex; align-items: center; gap: 16px; padding: 26px 28px 22px; border-bottom: 1px solid rgba(193,145,60,.35);
+                background:
+                    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cpath d='M40 6l7 16.8L64 15l-7.8 17L74 40l-17.8 8L64 65l-17-7.8L40 74l-7-16.8L16 65l7.8-17L6 40l17.8-8L16 15l17 7.8z' fill='none' stroke='%23b8862d' stroke-opacity='.16' stroke-width='1'/%3E%3C/svg%3E"),
+                    linear-gradient(160deg, #f3e8cc, #ecdcb0); }
+            .pg-arch { flex: none; width: 46px; height: 54px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px; clip-path: path('M0,54 L0,25 C0,16 16,11 23,0 C30,11 46,16 46,25 L46,54 Z'); background: linear-gradient(170deg, #f0d99a, #c1913c 60%, #8a6420); color: #0f4636; }
+            .pg-arch svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+            .pg-titles { min-width: 0; flex: 1; }
+            .pg-title { margin: 0; font-size: 1.45rem; line-height: 1.2; color: #0f4636; }
+            .pg-sub { margin: 4px 0 0; font-size: .9rem; color: #7a6a3e; }
+            .pg-close { flex: none; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(15,70,54,.2); border-radius: 50%; background: rgba(255,255,255,.6); color: #0f4636; cursor: pointer; transition: background .2s, transform .2s; }
+            .pg-close:hover { background: #fff; transform: rotate(90deg); }
+            .pg-close:focus-visible, .pg-call:focus-visible { outline: 2px solid #c1913c; outline-offset: 2px; }
+            .pg-close svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 
-        .pg-body { flex: 1; overflow-y: auto; padding: 26px 28px 30px; }
+            .pg-body { flex: 1; overflow-y: auto; padding: 26px 28px 30px; }
 
-        .pg-org { margin: 0 0 22px; padding: 4px 0 4px 18px; border-left: 3px solid #c1913c; }
-        .pg-org small { display: block; margin-bottom: 2px; font-size: .84rem; color: #8a6420; }
-        .pg-org strong { display: block; font-size: 1.3rem; line-height: 1.25; color: #0f4636; word-break: break-word; }
+            .pg-org { margin: 0 0 22px; padding: 4px 0 4px 18px; border-left: 3px solid #c1913c; }
+            .pg-org small { display: block; margin-bottom: 2px; font-size: .84rem; color: #8a6420; }
+            .pg-org strong { display: block; font-size: 1.3rem; line-height: 1.25; color: #0f4636; word-break: break-word; }
 
-        .pg-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 0; padding: 0; list-style: none; }
-        @media (max-width: 600px) {
-            .pg-list { grid-template-columns: 1fr; }
-            .pg-head { padding: 20px 18px 18px; }
-            .pg-body { padding: 20px 18px 24px; }
-        }
-        .pg-person { display: flex; flex-direction: column; gap: 14px; padding: 18px; border-radius: 4px 22px 22px 22px; background: #fff; border: 1px solid rgba(15,70,54,.1); }
-        .pg-person-top { display: flex; align-items: center; gap: 14px; min-width: 0; }
-        .pg-avatar { flex: none; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1.3rem; font-weight: 700; color: #0f4636;
-            background: linear-gradient(145deg, #f6e4b0, #d9ac55); box-shadow: 0 0 0 3px #fff, 0 0 0 4.5px rgba(193,145,60,.6); }
-        .pg-role { margin: 0; font-size: .82rem; color: #74847c; }
-        .pg-name { margin: 2px 0 0; font-size: 1.12rem; line-height: 1.25; font-weight: 700; color: #0f4636; word-break: break-word; }
-        .pg-call { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; font-size: .88rem; font-weight: 600; text-decoration: none; color: #0f4636; background: #f3e8cc; border: 1px solid rgba(193,145,60,.5); transition: background .2s; }
-        .pg-call:hover { background: #ecdcb0; }
-        .pg-call svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        .pg-nophone { font-size: .84rem; color: #9aa59f; }
-        .pg-empty { margin: 0; padding: 24px 0; text-align: center; color: #74847c; }
+            .pg-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 0; padding: 0; list-style: none; }
+            @media (max-width: 600px) {
+                .pg-list { grid-template-columns: 1fr; }
+                .pg-head { padding: 20px 18px 18px; }
+                .pg-body { padding: 20px 18px 24px; }
+            }
+            .pg-person { display: flex; flex-direction: column; gap: 14px; padding: 18px; border-radius: 4px 22px 22px 22px; background: #fff; border: 1px solid rgba(15,70,54,.1); }
+            .pg-person-top { display: flex; align-items: center; gap: 14px; min-width: 0; }
+            .pg-avatar { flex: none; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1.3rem; font-weight: 700; color: #0f4636;
+                background: linear-gradient(145deg, #f6e4b0, #d9ac55); box-shadow: 0 0 0 3px #fff, 0 0 0 4.5px rgba(193,145,60,.6); }
+            .pg-role { margin: 0; font-size: .82rem; color: #74847c; }
+            .pg-name { margin: 2px 0 0; font-size: 1.12rem; line-height: 1.25; font-weight: 700; color: #0f4636; word-break: break-word; }
+            .pg-call { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; font-size: .88rem; font-weight: 600; text-decoration: none; color: #0f4636; background: #f3e8cc; border: 1px solid rgba(193,145,60,.5); transition: background .2s; }
+            .pg-call:hover { background: #ecdcb0; }
+            .pg-call svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+            .pg-nophone { font-size: .84rem; color: #9aa59f; }
+            .pg-empty { margin: 0; padding: 24px 0; text-align: center; color: #74847c; }
 
-        @media (prefers-reduced-motion: reduce) { .pg-modal, .pg-close { transition: none; } }
-    </style>
+            @media (prefers-reduced-motion: reduce) { .pg-modal, .pg-close { transition: none; } }
+        </style>
 
-    <div class="pg-wrap">
-        <header class="pg-head">
-            <span class="pg-arch" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M21 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            </span>
-            <div class="pg-titles">
-                <h3 class="pg-title" id="pgTitle">Struktur Pengurus &amp; Yayasan</h3>
-                <p class="pg-sub">Kontak pengurus {{ $mosque->mosque_name ?? 'masjid' }}</p>
-            </div>
-            <button type="button" class="pg-close" data-pg-close aria-label="Tutup">
-                <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
-            </button>
-        </header>
-
-        <div class="pg-body">
-            @if(!empty($mosque->organization_name))
-                <div class="pg-org">
-                    <small>Organisasi / Yayasan</small>
-                    <strong>{{ $mosque->organization_name }}</strong>
+        <div class="pg-wrap">
+            <header class="pg-head">
+                <span class="pg-arch" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M21 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </span>
+                <div class="pg-titles">
+                    <h3 class="pg-title" id="pgTitle">Struktur Pengurus &amp; Yayasan</h3>
+                    <p class="pg-sub">Kontak pengurus {{ $mosque->mosque_name ?? 'masjid' }}</p>
                 </div>
-            @endif
+                <button type="button" class="pg-close" data-pg-close aria-label="Tutup">
+                    <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
+            </header>
 
-            @if($pgPeople->isNotEmpty())
-                <ul class="pg-list">
-                    @foreach($pgPeople as $person)
-                        @php
-                            $pgInitial = mb_strtoupper(mb_substr(trim($person['name']), 0, 1));
-                            $pgTel = preg_replace('/[^0-9+]/', '', (string) $person['phone']);
-                        @endphp
-                        <li class="pg-person">
-                            <div class="pg-person-top">
-                                <span class="pg-avatar" aria-hidden="true">{{ $pgInitial }}</span>
-                                <div style="min-width:0">
-                                    <p class="pg-role">{{ $person['role'] }}</p>
-                                    <p class="pg-name">{{ $person['name'] }}</p>
+            <div class="pg-body">
+                @if(!empty($mosque->organization_name))
+                    <div class="pg-org">
+                        <small>Organisasi / Yayasan</small>
+                        <strong>{{ $mosque->organization_name }}</strong>
+                    </div>
+                @endif
+
+                @if($pgPeople->isNotEmpty())
+                    <ul class="pg-list">
+                        @foreach($pgPeople as $person)
+                            @php
+                                $pgInitial = mb_strtoupper(mb_substr(trim($person['name']), 0, 1));
+                                $pgTel = preg_replace('/[^0-9+]/', '', (string) $person['phone']);
+                            @endphp
+                            <li class="pg-person">
+                                <div class="pg-person-top">
+                                    <span class="pg-avatar" aria-hidden="true">{{ $pgInitial }}</span>
+                                    <div style="min-width:0">
+                                        <p class="pg-role">{{ $person['role'] }}</p>
+                                        <p class="pg-name">{{ $person['name'] }}</p>
+                                    </div>
                                 </div>
-                            </div>
-                            @if(!empty($pgTel))
-                                <a class="pg-call" href="tel:{{ $pgTel }}">
-                                    <svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>
-                                    {{ $person['phone'] }}
-                                </a>
-                            @else
-                                <span class="pg-nophone">Nomor belum tersedia</span>
-                            @endif
-                        </li>
-                    @endforeach
-                </ul>
-            @elseif(empty($mosque->organization_name))
-                <p class="pg-empty">Data pengurus belum diisi di panel admin.</p>
-            @endif
+                                @if(!empty($pgTel))
+                                    <a class="pg-call" href="tel:{{ $pgTel }}">
+                                        <svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>
+                                        {{ $person['phone'] }}
+                                    </a>
+                                @else
+                                    <span class="pg-nophone">Nomor belum tersedia</span>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                @elseif(empty($mosque->organization_name))
+                    <p class="pg-empty">Data pengurus belum diisi di panel admin.</p>
+                @endif
+            </div>
         </div>
-    </div>
 
-    <script>
-        (function () {
-            var dlg = document.getElementById('pfPengurusModal');
-            var openBtn = document.getElementById('btnBukaPengurus');
-            if (!dlg) return;
+        <script>
+            (function () {
+                var dlg = document.getElementById('pfPengurusModal');
+                var openBtn = document.getElementById('btnBukaPengurus');
+                if (!dlg) return;
 
-            function openDlg() {
-                if (typeof dlg.showModal === 'function') { dlg.showModal(); } else { dlg.setAttribute('open', ''); }
-                document.documentElement.style.overflow = 'hidden';
-            }
-            function closeDlg() {
-                if (typeof dlg.close === 'function') { dlg.close(); } else { dlg.removeAttribute('open'); }
-            }
+                function openDlg() {
+                    if (typeof dlg.showModal === 'function') { dlg.showModal(); } else { dlg.setAttribute('open', ''); }
+                    document.documentElement.style.overflow = 'hidden';
+                }
+                function closeDlg() {
+                    if (typeof dlg.close === 'function') { dlg.close(); } else { dlg.removeAttribute('open'); }
+                }
 
-            // capture + stopImmediatePropagation: cegah script modal lama ikut terpanggil
-            if (openBtn) openBtn.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                openDlg();
-            }, true);
-            dlg.querySelectorAll('[data-pg-close]').forEach(function (b) { b.addEventListener('click', closeDlg); });
-            // klik area gelap di luar kotak = tutup
-            dlg.addEventListener('click', function (e) { if (e.target === dlg) closeDlg(); });
-            dlg.addEventListener('close', function () {
-                document.documentElement.style.overflow = '';
-                if (openBtn) openBtn.focus();
-            });
-        })();
-    </script>
-</dialog>
-    
+                if (openBtn) openBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    openDlg();
+                });
+                dlg.querySelectorAll('[data-pg-close]').forEach(function (b) { b.addEventListener('click', closeDlg); });
+                // klik area gelap di luar kotak = tutup
+                dlg.addEventListener('click', function (e) { if (e.target === dlg) closeDlg(); });
+                dlg.addEventListener('close', function () {
+                    document.documentElement.style.overflow = '';
+                    if (openBtn) openBtn.focus();
+                });
+            })();
+        </script>
+    </dialog>
+
     {{-- JADWAL SHALAT SECTION --}}
     @if($modOn('jadwal_shalat'))
     @php
@@ -952,6 +988,196 @@
     </section>
     @endif
 
+    {{-- ================================================================== --}}
+    {{-- PENGUMUMAN                                                         --}}
+    {{-- Grid kartu seragam; kartu pertama (disematkan / terbaru) melebar.  --}}
+    {{-- Data disiapkan di bagian atas file ($pnList, $pnLabels, $pnData).  --}}
+    {{-- ================================================================== --}}
+    @if($modOn('pengumuman'))
+    <section class="hu-section" id="pengumuman" aria-labelledby="pengumuman-title">
+        <style>
+            #pengumuman { position: relative; padding: 88px 0 96px; scroll-margin-top: 70px; background: #f8f4ea; }
+            @media (max-width: 760px) { #pengumuman { padding: 56px 0 64px; } }
+
+            .pn-wrap { --pn-green: #0f4636; --pn-green-d: #0b3328; --pn-gold: #c1913c; --pn-gold-l: #e2c37f; --pn-gold-d: #8a6420;
+                       --pn-ink: #1c2620; --pn-muted: #5f6f66; --pn-line: #e8e1cc; }
+            .pn-wrap *, .pn-wrap *::before, .pn-wrap *::after { box-sizing: border-box; }
+            .pn-ico { display: inline-block; width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -0.125em; }
+
+            /* ===== Judul section ===== */
+            .pn-head { max-width: 60ch; margin: 0 0 36px; }
+            .pn-wrap .pn-h2 { margin: 0 0 12px; font-family: 'Fraunces', Georgia, serif; font-size: clamp(2.4rem, 5vw, 3.6rem); line-height: 1.02; font-weight: 600; color: var(--pn-green); }
+            .pn-wrap .pn-sub { margin: 0; font-size: 1.04rem; line-height: 1.7; color: var(--pn-muted); }
+
+            /* ===== Grid kartu ===== */
+            .pn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+
+            .pn-card { display: flex; flex-direction: column; width: 100%; padding: 0; text-align: left; font: inherit; color: var(--pn-ink); cursor: pointer;
+                       background: #fff; border: 1px solid var(--pn-line); border-radius: 22px; overflow: hidden; box-shadow: 0 10px 26px rgba(15,70,54,.06);
+                       transition: transform .2s, border-color .2s, box-shadow .2s; }
+            .pn-card:hover { transform: translateY(-3px); border-color: var(--pn-gold); box-shadow: 0 18px 36px rgba(15,70,54,.12); }
+            .pn-card:focus-visible { outline: 3px solid var(--pn-gold); outline-offset: 3px; }
+
+            /* gambar: selalu memenuhi area (cover) supaya semua kartu rapi dan seragam */
+            .pn-media { position: relative; display: block; aspect-ratio: 16 / 10; overflow: hidden; background: var(--pn-green-d); }
+            .pn-media > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+            .pn-ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--pn-gold-l);
+                     background:
+                       radial-gradient(320px 160px at 100% 0%, rgba(193,145,60,.30), transparent 70%),
+                       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cpath d='M40 6l7 16.8L64 15l-7.8 17L74 40l-17.8 8L64 65l-17-7.8L40 74l-7-16.8L16 65l7.8-17L6 40l17.8-8L16 15l17 7.8z' fill='none' stroke='%23e2c37f' stroke-opacity='.12' stroke-width='1'/%3E%3C/svg%3E"),
+                       linear-gradient(150deg, #0f4636, #0b3328); }
+            .pn-ph .pn-ico { width: 2.8rem; height: 2.8rem; stroke-width: 1.4; }
+
+            /* label kategori (warna = jenis kabar) */
+            .pn-chip { display: inline-block; padding: 3px 12px; border-radius: 999px; font-size: .78rem; font-weight: 600; line-height: 1.5; background: #e4eee6; color: #0f4a38; }
+            .pn-c-kajian   { background: #e2ebf5; color: #1f4a73; }
+            .pn-c-kegiatan { background: #f6ead0; color: #7a5412; }
+            .pn-c-donasi   { background: #dcf0ed; color: #17615a; }
+            .pn-c-duka     { background: #e9e7e2; color: #45453f; }
+            .pn-media .pn-chip { position: absolute; z-index: 2; top: 14px; left: 14px; box-shadow: 0 4px 12px rgba(0,0,0,.18); }
+            .pn-pinned { position: absolute; z-index: 2; top: 14px; right: 14px; display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 999px; font-size: .76rem; font-weight: 700; background: var(--pn-gold); color: #1c1405; box-shadow: 0 4px 12px rgba(0,0,0,.18); }
+
+            .pn-body { display: flex; flex-direction: column; flex: 1; gap: 10px; padding: 20px 22px 22px; }
+            .pn-date { display: flex; align-items: center; gap: 7px; font-size: .84rem; color: var(--pn-gold-d); }
+            .pn-title { font-family: 'Fraunces', Georgia, serif; font-size: 1.22rem; line-height: 1.3; font-weight: 600; color: var(--pn-green); overflow-wrap: anywhere;
+                        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+            .pn-excerpt { font-size: .94rem; line-height: 1.7; color: var(--pn-muted); overflow-wrap: anywhere;
+                          display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+            .pn-more { display: inline-flex; align-items: center; gap: 6px; margin-top: auto; padding-top: 6px; font-size: .9rem; font-weight: 700; color: var(--pn-green); }
+            .pn-more .pn-ico { transition: transform .2s; }
+            .pn-card:hover .pn-more .pn-ico { transform: translateX(3px); }
+
+            /* kartu unggulan: melebar, gambar di kiri */
+            .pn-feature { grid-column: 1 / -1; flex-direction: row; }
+            .pn-feature .pn-media { flex: 0 0 46%; aspect-ratio: auto; min-height: 320px; }
+            .pn-feature .pn-body { justify-content: center; gap: 14px; padding: 36px 44px; }
+            .pn-feature .pn-title { font-size: clamp(1.7rem, 2.8vw, 2.3rem); line-height: 1.18; -webkit-line-clamp: 3; }
+            .pn-feature .pn-excerpt { font-size: 1.02rem; line-height: 1.8; -webkit-line-clamp: 4; max-width: 56ch; }
+            .pn-feature .pn-more { align-self: flex-start; margin-top: 8px; padding: 11px 24px; border-radius: 999px; background: var(--pn-green); color: #fff; }
+            .pn-feature:hover .pn-more { background: var(--pn-gold); color: #1c1405; }
+
+            @media (max-width: 760px) {
+                .pn-feature { flex-direction: column; }
+                .pn-feature .pn-media { flex: none; aspect-ratio: 16 / 10; min-height: 0; }
+                .pn-feature .pn-body { padding: 22px 22px 24px; }
+                .pn-grid { grid-template-columns: 1fr; gap: 18px; }
+            }
+
+            .pn-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 56px 24px; text-align: center; background: #fff; border: 1px dashed #d9d0b4; border-radius: 24px; color: var(--pn-muted); }
+            .pn-empty .pn-ico { width: 2.4rem; height: 2.4rem; color: var(--pn-gold); stroke-width: 1.5; }
+            .pn-empty b { font-family: 'Fraunces', Georgia, serif; font-size: 1.2rem; color: var(--pn-green); }
+
+            @media (prefers-reduced-motion: reduce) { .pn-card, .pn-more .pn-ico { transition: none; } .pn-card:hover { transform: none; } }
+
+            /* ===== Detail (dialog): poster tampil utuh ===== */
+            .pn-dialog { position: relative; width: min(680px, 94vw); max-height: 92vh; padding: 0; border: 0; border-radius: 28px; overflow-y: auto; font-family: inherit; color: var(--pn-ink); background: #fbf8f0; box-shadow: 0 40px 90px rgba(11,40,30,.4); }
+            .pn-dialog::backdrop { background: rgba(11,40,30,.62); backdrop-filter: blur(3px); }
+            .pn-close { position: absolute; top: 14px; right: 14px; z-index: 3; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(15,70,54,.2); border-radius: 50%; background: rgba(255,255,255,.9); color: var(--pn-green); font-size: 1.5rem; line-height: 1; cursor: pointer; }
+            .pn-close:hover { background: #fff; }
+            .pn-close:focus-visible { outline: 2px solid var(--pn-gold); outline-offset: 2px; }
+            .pn-dlg-media { position: relative; height: min(360px, 48vh); overflow: hidden; background: var(--pn-green-d); }
+            .pn-dlg-media .pn-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(18px) brightness(.72); transform: scale(1.25); }
+            .pn-dlg-media .pn-fit { position: relative; z-index: 1; display: block; width: 100%; height: 100%; object-fit: contain; }
+            .pn-dlg-body { padding: 28px 32px 34px; }
+            .pn-dlg-body h3 { margin: 14px 0 6px; font-family: 'Fraunces', Georgia, serif; font-size: 1.75rem; line-height: 1.2; font-weight: 600; color: var(--pn-green); overflow-wrap: anywhere; }
+            .pn-dlg-meta { margin: 0 0 18px; padding-bottom: 18px; font-size: .88rem; color: var(--pn-gold-d); border-bottom: 1px solid var(--pn-line); }
+            .pn-dlg-content { margin: 0; white-space: pre-line; font-size: 1rem; line-height: 1.85; color: #34423a; overflow-wrap: anywhere; }
+            @media (max-width: 640px) { .pn-dlg-body { padding: 22px 20px 28px; } .pn-dlg-body h3 { font-size: 1.45rem; } }
+        </style>
+
+        {{-- ikon (SVG inline, tidak butuh Font Awesome) --}}
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+            <symbol id="pn-i-megaphone" viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></symbol>
+            <symbol id="pn-i-pin" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></symbol>
+            <symbol id="pn-i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+            <symbol id="pn-i-next" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+        </svg>
+
+        <div class="hu-container pn-wrap">
+            <div class="pn-head">
+                <h2 class="pn-h2" id="pengumuman-title">Pengumuman</h2>
+                <p class="pn-sub">Kabar terbaru dari pengurus masjid untuk seluruh jamaah.</p>
+            </div>
+
+            @if($pnList->isNotEmpty())
+                <div class="pn-grid">
+                    @foreach($pnList as $pn)
+                        <button type="button" class="pn-card {{ $loop->first ? 'pn-feature' : '' }}" data-pn="{{ $pnData($pn) }}" aria-haspopup="dialog">
+                            <span class="pn-media">
+                                @if(!empty($pn->image_url))
+                                    <img src="{{ $pn->image_url }}" alt="Poster {{ $pn->title }}" @if(!$loop->first) loading="lazy" @endif>
+                                @else
+                                    <span class="pn-ph" aria-hidden="true"><svg class="pn-ico"><use href="#pn-i-megaphone"/></svg></span>
+                                @endif
+                                <span class="pn-chip pn-c-{{ $pn->category }}">{{ $pnLabels[$pn->category] ?? ucfirst((string) $pn->category) }}</span>
+                                @if(!empty($pn->is_pinned))
+                                    <span class="pn-pinned"><svg class="pn-ico" aria-hidden="true"><use href="#pn-i-pin"/></svg> Penting</span>
+                                @endif
+                            </span>
+                            <span class="pn-body">
+                                <span class="pn-date"><svg class="pn-ico" aria-hidden="true"><use href="#pn-i-cal"/></svg>{{ $pn->created_at?->translatedFormat('d F Y') }}</span>
+                                <span class="pn-title">{{ $pn->title }}</span>
+                                <span class="pn-excerpt">{{ $pn->content }}</span>
+                                <span class="pn-more">Baca selengkapnya <svg class="pn-ico" aria-hidden="true"><use href="#pn-i-next"/></svg></span>
+                            </span>
+                        </button>
+                    @endforeach
+                </div>
+            @else
+                <div class="pn-empty">
+                    <svg class="pn-ico" aria-hidden="true"><use href="#pn-i-megaphone"/></svg>
+                    <b>Belum ada pengumuman</b>
+                    <span>Pengumuman yang diterbitkan pengurus akan muncul di sini.</span>
+                </div>
+            @endif
+        </div>
+
+        <dialog class="pn-dialog pn-wrap" id="pnDialog" aria-labelledby="pnDlgTitle">
+            <button type="button" class="pn-close" id="pnClose" aria-label="Tutup">&times;</button>
+            <div class="pn-dlg-media" id="pnDlgMedia" hidden>
+                <img class="pn-bg" id="pnDlgBg" src="" alt="" aria-hidden="true">
+                <img class="pn-fit" id="pnDlgImg" src="" alt="">
+            </div>
+            <div class="pn-dlg-body">
+                <span class="pn-chip" id="pnDlgTag"></span>
+                <h3 id="pnDlgTitle"></h3>
+                <p class="pn-dlg-meta" id="pnDlgMeta"></p>
+                <p class="pn-dlg-content" id="pnDlgContent"></p>
+            </div>
+        </dialog>
+
+        <script>
+            (function () {
+                var dlg = document.getElementById('pnDialog');
+                if (!dlg) return;
+                var media = document.getElementById('pnDlgMedia');
+                var img = document.getElementById('pnDlgImg');
+                var bg = document.getElementById('pnDlgBg');
+
+                document.querySelectorAll('#pengumuman [data-pn]').forEach(function (card) {
+                    card.addEventListener('click', function () {
+                        var d = JSON.parse(card.dataset.pn);
+                        document.getElementById('pnDlgTag').textContent = d.category;
+                        document.getElementById('pnDlgTitle').textContent = d.title;
+                        document.getElementById('pnDlgMeta').textContent = (d.date || '') + (d.expires ? ', berlaku sampai ' + d.expires : '');
+                        document.getElementById('pnDlgContent').textContent = d.content;
+                        if (d.image) {
+                            img.src = d.image; bg.src = d.image; img.alt = 'Poster ' + d.title;
+                            media.hidden = false;
+                        } else {
+                            media.hidden = true; img.removeAttribute('src'); bg.removeAttribute('src');
+                        }
+                        dlg.showModal();
+                    });
+                });
+
+                document.getElementById('pnClose').addEventListener('click', function () { dlg.close(); });
+                dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
+            })();
+        </script>
+    </section>
+    @endif
+
     {{-- PROGRAM & FASILITAS SECTION --}}
     <section class="hu-section hu-program-section" id="program">
         <div class="hu-container">
@@ -1016,7 +1242,7 @@
                      data-time="{{ $a->event_time ?? '-' }}"
                      data-organizer="{{ $a->organizer ?? 'Pengurus Masjid' }}"
                      data-photo="{{ !empty($a->photo) ? asset('storage/'.$a->photo) : '' }}">
-                    
+
                     @if(!empty($a->photo))
                     <div class="hu-acara-v2-photo">
                         <img src="{{ asset('storage/'.$a->photo) }}" alt="{{ $a->title }}" loading="lazy">
@@ -1077,7 +1303,7 @@
                 @endphp
 
                 @forelse($allAcaras as $itemAcara)
-                    <div class="card-item-semua-acara" 
+                    <div class="card-item-semua-acara"
                          style="display: flex; gap: 1rem; align-items: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.85rem; border-radius: 0.75rem; cursor: pointer; transition: all 0.2s;"
                          data-title="{{ $itemAcara->title }}"
                          data-desc="{{ $itemAcara->description ?? 'Tidak ada deskripsi lengkap.' }}"
@@ -1085,7 +1311,7 @@
                          data-time="{{ $itemAcara->event_time ?? '-' }}"
                          data-organizer="{{ $itemAcara->organizer ?? 'Pengurus Masjid' }}"
                          data-photo="{{ !empty($itemAcara->photo) ? asset('storage/'.$itemAcara->photo) : '' }}">
-                        
+
                         {{-- Thumbnail Foto Acara --}}
                         <div style="width: 75px; height: 60px; border-radius: 0.5rem; background-color: #cbd5e1; background-size: cover; background-position: center; flex-shrink: 0; @if(!empty($itemAcara->photo)) background-image: url('{{ asset('storage/'.$itemAcara->photo) }}'); @else display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #64748b; @endif">
                             @if(empty($itemAcara->photo)) No Photo @endif
@@ -1115,103 +1341,101 @@
     @endif
 
     {{-- DONASI SECTION (GRID KARTU FOTO PROGRAM BESAR) --}}
-@if($modOn('donasi') && isset($mosque) && $mosque->package_type != 'free')
-<section class="hu-donasi-v2-section" id="donasi" style="padding: 6rem 0; background-color: #0e3320; color: #ffffff; position: relative; overflow: hidden;">
-    <div class="hu-container" style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;">
-        
-        {{-- Header Section --}}
-        <div style="text-align: center; max-width: 700px; margin: 0 auto 3.5rem auto;">
-            <div style="display: inline-block; background: rgba(217, 119, 6, 0.2); color: #fbbf24; font-size: 0.75rem; font-weight: 700; padding: 0.35rem 1rem; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">
-                Donasi & Sedekah Terbuka
+    @if($modOn('donasi') && isset($mosque) && $mosque->package_type != 'free')
+    <section class="hu-donasi-v2-section" id="donasi" style="padding: 6rem 0; background-color: #0e3320; color: #ffffff; position: relative; overflow: hidden;">
+        <div class="hu-container" style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;">
+
+            {{-- Header Section --}}
+            <div style="text-align: center; max-width: 700px; margin: 0 auto 3.5rem auto;">
+                <div style="display: inline-block; background: rgba(217, 119, 6, 0.2); color: #fbbf24; font-size: 0.75rem; font-weight: 700; padding: 0.35rem 1rem; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">
+                    Donasi & Sedekah Terbuka
+                </div>
+                <h2 style="font-size: 2.5rem; font-weight: 700; line-height: 1.2; margin-bottom: 1rem; font-family: 'Fraunces', serif;">
+                    Pilih Program Kebaikan <br><span style="color: #fbbf24; font-style: italic;">Untuk Bekal Akhirat</span>
+                </h2>
+                <p style="font-size: 1rem; color: #cbd5e1; line-height: 1.6;">
+                    Salurkan sedekah terbaik Anda melalui berbagai program kemaslahatan umat, pemeliharaan masjid, dan bantuan sosial yang dikelola secara transparan.
+                </p>
             </div>
-            <h2 style="font-size: 2.5rem; font-weight: 700; line-height: 1.2; margin-bottom: 1rem; font-family: 'Fraunces', serif;">
-                Pilih Program Kebaikan <br><span style="color: #fbbf24; font-style: italic;">Untuk Bekal Akhirat</span>
-            </h2>
-            <p style="font-size: 1rem; color: #cbd5e1; line-height: 1.6;">
-                Salurkan sedekah terbaik Anda melalui berbagai program kemaslahatan umat, pemeliharaan masjid, dan bantuan sosial yang dikelola secara transparan.
-            </p>
-        </div>
 
-        {{-- Grid Kartu Program Donasi Berbasis Foto Besar --}}
-        @php
-            $listCategories = (isset($categories) && count($categories) > 0) ? $categories : collect();
-        @endphp
+            {{-- Grid Kartu Program Donasi Berbasis Foto Besar --}}
+            @php
+                $listCategories = (isset($categories) && count($categories) > 0) ? $categories : collect();
+            @endphp
 
-        @if($listCategories->count() > 0)
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem;">
-                @foreach($listCategories as $cat)
-                    @php
-                        // Hitung atau estimasi dana terkumpul per kategori (jika ada relasi, atau gunakan dummy/global)
-                        $catTerkumpul = $donasiTerkumpul ?? 1500000; 
-                        $catTarget = $mosque->donation_target ?? 50000000;
-                        $pct = $catTarget > 0 ? min(round($catTerkumpul / $catTarget * 100), 100) : 0;
-                    @endphp
-                    <div style="background: #ffffff; color: #1e293b; border-radius: 1.25rem; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.3s ease;">
-                        
-                        {{-- Foto Program di Atas Kartu --}}
-<div style="width: 100%; height: 220px; background: #0f766e; position: relative; overflow: hidden;">
-    @if(!empty($cat->image))
-        <img src="{{ asset('storage/' . $cat->image) }}" alt="{{ $cat->title }}" style="width: 100%; height: 100%; object-fit: cover;">
-    @else
-        {{-- Foto dummy hanya tampil jika kolom image di database benar-benar kosong --}}
-        <img src="https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&w=600&q=80" alt="{{ $cat->title }}" style="width: 100%; height: 100%; object-fit: cover;">
-    @endif
-    
-    <div style="position: absolute; top: 12px; left: 12px; background: rgba(13, 148, 136, 0.95); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
-        Aktif
-    </div>
-</div>
+            @if($listCategories->count() > 0)
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem;">
+                    @foreach($listCategories as $cat)
+                        @php
+                            $catTerkumpul = $donasiTerkumpul ?? 1500000;
+                            $catTarget = $mosque->donation_target ?? 50000000;
+                            $pct = $catTarget > 0 ? min(round($catTerkumpul / $catTarget * 100), 100) : 0;
+                        @endphp
+                        <div style="background: #ffffff; color: #1e293b; border-radius: 1.25rem; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.3s ease;">
 
-                        {{-- Konten Detail Program --}}
-                        <div style="padding: 1.75rem; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
-                            <div>
-                                <h3 style="font-size: 1.35rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem; font-family: 'Fraunces', serif;">
-                                    {{ $cat->title }}
-                                </h3>
-                                <p style="font-size: 0.9rem; color: #64748b; line-height: 1.5; margin-bottom: 1.5rem;">
-                                    {{ $cat->description ?? 'Mari ambil bagian dalam program kebaikan ini untuk membantu sesama dan memakmurkan rumah Allah.' }}
-                                </p>
+                            {{-- Foto Program di Atas Kartu --}}
+                            <div style="width: 100%; height: 220px; background: #0f766e; position: relative; overflow: hidden;">
+                                @if(!empty($cat->image))
+                                    <img src="{{ asset('storage/' . $cat->image) }}" alt="{{ $cat->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                @else
+                                    <img src="https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&w=600&q=80" alt="{{ $cat->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                @endif
+
+                                <div style="position: absolute; top: 12px; left: 12px; background: rgba(13, 148, 136, 0.95); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
+                                    Aktif
+                                </div>
                             </div>
 
-                            <div>
-                                {{-- Progress Bar Dana --}}
-                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.85rem; padding: 1rem; margin-bottom: 1.25rem;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; font-size: 0.8rem;">
-                                        <span style="color: #64748b;">Terkumpul</span>
-                                        <span style="font-weight: 700; color: #0d9488;">{{ $pct }}%</span>
-                                    </div>
-                                    <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 9999px; overflow: hidden; margin-bottom: 0.5rem;">
-                                        <div style="width: {{ $pct }}%; height: 100%; background: linear-gradient(90deg, #0d9488, #14b8a6); border-radius: 9999px;"></div>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600;">
-                                        <span style="color: #0f172a;">Rp {{ number_format($catTerkumpul, 0, ',', '.') }}</span>
-                                        <span style="color: #64748b; font-size: 0.75rem;">Target: Rp {{ number_format($catTarget, 0, ',', '.') }}</span>
-                                    </div>
+                            {{-- Konten Detail Program --}}
+                            <div style="padding: 1.75rem; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <h3 style="font-size: 1.35rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem; font-family: 'Fraunces', serif;">
+                                        {{ $cat->title }}
+                                    </h3>
+                                    <p style="font-size: 0.9rem; color: #64748b; line-height: 1.5; margin-bottom: 1.5rem;">
+                                        {{ $cat->description ?? 'Mari ambil bagian dalam program kebaikan ini untuk membantu sesama dan memakmurkan rumah Allah.' }}
+                                    </p>
                                 </div>
 
-                                {{-- Tombol Aksi Donasi --}}
-                                <a href="{{ route('masjid.donasi.publik', ['slug' => $mosque->slug, 'jenis' => $cat->key ?? $cat->id]) }}" style="display: block; width: 100%; background: #0d9488; color: #ffffff; text-align: center; padding: 0.8rem; border-radius: 0.75rem; font-weight: 700; text-decoration: none; box-sizing: border-box; transition: background 0.2s;">
-                                    Donasi Sekarang →
-                                </a>
+                                <div>
+                                    {{-- Progress Bar Dana --}}
+                                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.85rem; padding: 1rem; margin-bottom: 1.25rem;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; font-size: 0.8rem;">
+                                            <span style="color: #64748b;">Terkumpul</span>
+                                            <span style="font-weight: 700; color: #0d9488;">{{ $pct }}%</span>
+                                        </div>
+                                        <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 9999px; overflow: hidden; margin-bottom: 0.5rem;">
+                                            <div style="width: {{ $pct }}%; height: 100%; background: linear-gradient(90deg, #0d9488, #14b8a6); border-radius: 9999px;"></div>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600;">
+                                            <span style="color: #0f172a;">Rp {{ number_format($catTerkumpul, 0, ',', '.') }}</span>
+                                            <span style="color: #64748b; font-size: 0.75rem;">Target: Rp {{ number_format($catTarget, 0, ',', '.') }}</span>
+                                        </div>
+                                    </div>
+
+                                    {{-- Tombol Aksi Donasi --}}
+                                    <a href="{{ route('masjid.donasi.publik', ['slug' => $mosque->slug, 'jenis' => $cat->key ?? $cat->id]) }}" style="display: block; width: 100%; background: #0d9488; color: #ffffff; text-align: center; padding: 0.8rem; border-radius: 0.75rem; font-weight: 700; text-decoration: none; box-sizing: border-box; transition: background 0.2s;">
+                                        Donasi Sekarang →
+                                    </a>
+                                </div>
                             </div>
+
                         </div>
+                    @endforeach
+                </div>
+            @else
+                {{-- Fallback jika belum ada kategori/program yang dibuat admin --}}
+                <div style="background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255, 255, 255, 0.2); border-radius: 1rem; padding: 3rem; text-align: center; color: #cbd5e1;">
+                    <p style="font-size: 1rem; margin-bottom: 1rem;">Belum ada program donasi khusus yang dipublikasikan saat ini.</p>
+                    <a href="{{ route('masjid.donasi.publik', $mosque->slug) }}" style="display: inline-block; background: #0d9488; color: white; padding: 0.75rem 1.5rem; border-radius: 0.75rem; font-weight: 600; text-decoration: none;">
+                        Buka Halaman Donasi Umum →
+                    </a>
+                </div>
+            @endif
 
-                    </div>
-                @endforeach
-            </div>
-        @else
-            {{-- Fallback Jika Belum Ada Kategori/Program yang Dibuat Admin --}}
-            <div style="background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255, 255, 255, 0.2); border-radius: 1rem; padding: 3rem; text-align: center; color: #cbd5e1;">
-                <p style="font-size: 1rem; margin-bottom: 1rem;">Belum ada program donasi khusus yang dipublikasikan saat ini.</p>
-                <a href="{{ route('masjid.donasi.publik', $mosque->slug) }}" style="display: inline-block; background: #0d9488; color: white; padding: 0.75rem 1.5rem; border-radius: 0.75rem; font-weight: 600; text-decoration: none;">
-                    Buka Halaman Donasi Umum →
-                </a>
-            </div>
-        @endif
-
-    </div>
-</section>
-@endif
+        </div>
+    </section>
+    @endif
 
     {{-- DOKUMENTASI PENYALURAN SECTION --}}
     @if($modOn('donasi') && isset($mosque) && $mosque->package_type != 'free')
@@ -1249,13 +1473,13 @@
                                         <span style="color: #0d9488; font-weight: 700;">Rp {{ number_format($item->nominal_terpakai ?? 0, 0, ',', '.') }}</span>
                                         <span style="color: #94a3b8;">{{ $formattedDate }}</span>
                                     </div>
-                                    <button type="button" 
-                                        class="btn-buka-detail" 
-                                        data-judul="{{ $item->judul }}" 
-                                        data-kategori="{{ $catTitle }}" 
-                                        data-deskripsi="{{ $item->deskripsi ?? 'Tidak ada deskripsi.' }}" 
-                                        data-nominal="Rp {{ number_format($item->nominal_terpakai ?? 0, 0, ',', '.') }}" 
-                                        data-tanggal="{{ $formattedDate }}" 
+                                    <button type="button"
+                                        class="btn-buka-detail"
+                                        data-judul="{{ $item->judul }}"
+                                        data-kategori="{{ $catTitle }}"
+                                        data-deskripsi="{{ $item->deskripsi ?? 'Tidak ada deskripsi.' }}"
+                                        data-nominal="Rp {{ number_format($item->nominal_terpakai ?? 0, 0, ',', '.') }}"
+                                        data-tanggal="{{ $formattedDate }}"
                                         data-foto="{{ $item->foto_url }}"
                                         style="background: none; border: none; padding: 0; font-size: 0.85rem; font-weight: 600; color: #0d9488; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem;">
                                         Lihat detail →
@@ -1291,67 +1515,6 @@
         </div>
     </div>
     @endif
-
-    {{-- MODAL POPUP DETAIL STRUKTUR PENGURUS MASJID --}}
-    <div id="modalStrukturPengurus" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
-        <div style="background: #fff; width: 100%; max-width: 550px; border-radius: 1rem; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); max-height: 90vh; display: flex; flex-direction: column;">
-            <div style="padding: 1.25rem 1.5rem; background: #0e3320; color: #fff; display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0;">Struktur Pengurus & Yayasan</h3>
-                <button type="button" id="tutupModalPengurus" style="background: rgba(255,255,255,0.2); color: #fff; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
-            </div>
-            <div style="padding: 1.5rem; overflow-y: auto; flex: 1;">
-                @if(!empty($mosque->organization_name))
-                    <div style="margin-bottom: 1rem; font-size: 0.95rem; color: #334155; background: #f8fafc; padding: 0.75rem 1rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
-                        <strong style="color: #0d9488;">Organisasi / Yayasan:</strong> {{ $mosque->organization_name }}
-                    </div>
-                @endif
-
-                <div style="display: flex; flex-direction: column; gap: 0.85rem;">
-                    @if(!empty($mosque->chairman_name))
-                    <div style="background: #f8fafc; padding: 0.85rem 1rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="font-size: 0.7rem; color: #64748b; font-weight: 600;">KETUA DKM</div>
-                            <div style="font-size: 1rem; font-weight: 700; color: #1e293b; margin-top: 0.1rem;">{{ $mosque->chairman_name }}</div>
-                        </div>
-                        @if(!empty($mosque->chairman_phone))
-                            <div style="font-size: 0.8rem; color: #0d9488; background: #e0f2fe; padding: 0.25rem 0.5rem; border-radius: 0.35rem;">📞 {{ $mosque->chairman_phone }}</div>
-                        @endif
-                    </div>
-                    @endif
-
-                    @if(!empty($mosque->imam_name))
-                    <div style="background: #f8fafc; padding: 0.85rem 1rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="font-size: 0.7rem; color: #64748b; font-weight: 600;">IMAM BESAR / KHATIB</div>
-                            <div style="font-size: 1rem; font-weight: 700; color: #1e293b; margin-top: 0.1rem;">{{ $mosque->imam_name }}</div>
-                        </div>
-                        @if(!empty($mosque->imam_phone))
-                            <div style="font-size: 0.8rem; color: #0d9488; background: #e0f2fe; padding: 0.25rem 0.5rem; border-radius: 0.35rem;">📞 {{ $mosque->imam_phone }}</div>
-                        @endif
-                    </div>
-                    @endif
-
-                    @if(!empty($mosque->secretary_name))
-                    <div style="background: #f8fafc; padding: 0.85rem 1rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="font-size: 0.7rem; color: #64748b; font-weight: 600;">SEKRETARIS</div>
-                            <div style="font-size: 1rem; font-weight: 700; color: #1e293b; margin-top: 0.1rem;">{{ $mosque->secretary_name }}</div>
-                        </div>
-                    </div>
-                    @endif
-
-                    @if(!empty($mosque->treasurer_name))
-                    <div style="background: #f8fafc; padding: 0.85rem 1rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="font-size: 0.7rem; color: #64748b; font-weight: 600;">BENDAHARA</div>
-                            <div style="font-size: 1rem; font-weight: 700; color: #1e293b; margin-top: 0.1rem;">{{ $mosque->treasurer_name }}</div>
-                        </div>
-                    </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </div>
 
     {{-- KONTAK SECTION --}}
     <section class="hu-hubungi-section" id="kontak">
@@ -1475,6 +1638,7 @@
                     <div class="hu-footer-v2-col-title">Tautan</div>
                     <a href="#profil" class="hu-footer-v2-link">Profil Masjid</a>
                     @if($modOn('jadwal_shalat'))<a href="#shalat" class="hu-footer-v2-link">Jadwal Shalat</a>@endif
+                    @if($modOn('pengumuman'))<a href="#pengumuman" class="hu-footer-v2-link">Pengumuman</a>@endif
                     <a href="#program" class="hu-footer-v2-link">Program & Fasilitas</a>
                     @if($modOn('kegiatan'))<a href="#acara" class="hu-footer-v2-link">Acara</a>@endif
                     @if($modOn('donasi'))<a href="#donasi" class="hu-footer-v2-link">Donasi</a>@endif
@@ -1516,21 +1680,7 @@
             });
         });
 
-        document.querySelectorAll('.hu-nominal-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                document.querySelectorAll('.hu-nominal-btn').forEach(b => {
-                    b.style.background = '#f8fafc';
-                    b.style.borderColor = '#e2e8f0';
-                    b.style.color = '#1e293b';
-                });
-                this.style.background = '#f0fdf4';
-                this.style.borderColor = '#10b981';
-                this.style.color = '#047857';
-                document.getElementById('donasiNominal').value = this.dataset.val;
-            });
-        });
-
-        // Script Interaksi Modal Detail Penyaluran
+        // Modal Detail Penyaluran
         const modal = document.getElementById('modalDetailPenyaluran');
         const btnTutup = document.getElementById('tutupModal');
 
@@ -1542,7 +1692,7 @@
                 document.getElementById('modalNominal').innerText = this.dataset.nominal;
                 document.getElementById('modalTanggal').innerText = this.dataset.tanggal;
                 document.getElementById('modalFoto').style.backgroundImage = `url('${this.dataset.foto}')`;
-                
+
                 modal.style.display = 'flex';
             });
         });
@@ -1554,30 +1704,31 @@
             modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
         }
 
-        // Script Interaksi Modal Detail Acara (Tunggal)
+        // Modal Detail Acara (tunggal)
         const modalAcara = document.getElementById('modalDetailAcara');
         const tutupModalAcara = document.getElementById('tutupModalAcara');
         const tutupModalAcaraAlt = document.getElementById('tutupModalAcaraAlt');
 
+        function isiModalAcara(el) {
+            document.getElementById('modalAcaraJudul').innerText = el.dataset.title;
+            document.getElementById('modalAcaraPenyelenggara').innerText = el.dataset.organizer;
+            document.getElementById('modalAcaraDeskripsi').innerText = el.dataset.desc;
+            document.getElementById('modalAcaraTanggal').innerText = el.dataset.date;
+            document.getElementById('modalAcaraWaktu').innerText = el.dataset.time;
+
+            const fotoUrl = el.dataset.photo;
+            const fotoDiv = document.getElementById('modalAcaraFoto');
+            if (fotoUrl) {
+                fotoDiv.style.backgroundImage = `url('${fotoUrl}')`;
+                fotoDiv.style.display = 'block';
+            } else {
+                fotoDiv.style.display = 'none';
+            }
+            modalAcara.style.display = 'flex';
+        }
+
         document.querySelectorAll('.btn-buka-acara').forEach(card => {
-            card.addEventListener('click', function() {
-                document.getElementById('modalAcaraJudul').innerText = this.dataset.title;
-                document.getElementById('modalAcaraPenyelenggara').innerText = this.dataset.organizer;
-                document.getElementById('modalAcaraDeskripsi').innerText = this.dataset.desc;
-                document.getElementById('modalAcaraTanggal').innerText = this.dataset.date;
-                document.getElementById('modalAcaraWaktu').innerText = this.dataset.time;
-
-                const fotoUrl = this.dataset.photo;
-                const fotoDiv = document.getElementById('modalAcaraFoto');
-                if (fotoUrl) {
-                    fotoDiv.style.backgroundImage = `url('${fotoUrl}')`;
-                    fotoDiv.style.display = 'block';
-                } else {
-                    fotoDiv.style.display = 'none';
-                }
-
-                modalAcara.style.display = 'flex';
-            });
+            card.addEventListener('click', function() { isiModalAcara(this); });
         });
 
         if (tutupModalAcara) {
@@ -1590,7 +1741,7 @@
             modalAcara.addEventListener('click', (e) => { if (e.target === modalAcara) modalAcara.style.display = 'none'; });
         }
 
-        // Script Interaksi Modal Daftar "Lihat Semua" Acara
+        // Modal daftar "Lihat Semua" acara
         const modalSemuaAcara = document.getElementById('modalSemuaAcara');
         const btnLihatSemuaAcara = document.getElementById('btnLihatSemuaAcara');
         const tutupModalSemuaAcara = document.getElementById('tutupModalSemuaAcara');
@@ -1612,50 +1763,13 @@
             });
         }
 
-        // Klik item dari dalam daftar "Lihat Semua" untuk membuka detail acara
+        // Klik item dari daftar "Lihat Semua" untuk membuka detail acara
         document.querySelectorAll('.card-item-semua-acara').forEach(card => {
             card.addEventListener('click', function() {
                 if (modalSemuaAcara) modalSemuaAcara.style.display = 'none';
-
-                document.getElementById('modalAcaraJudul').innerText = this.dataset.title;
-                document.getElementById('modalAcaraPenyelenggara').innerText = this.dataset.organizer;
-                document.getElementById('modalAcaraDeskripsi').innerText = this.dataset.desc;
-                document.getElementById('modalAcaraTanggal').innerText = this.dataset.date;
-                document.getElementById('modalAcaraWaktu').innerText = this.dataset.time;
-
-                const fotoUrl = this.dataset.photo;
-                const fotoDiv = document.getElementById('modalAcaraFoto');
-                if (fotoUrl) {
-                    fotoDiv.style.backgroundImage = `url('${fotoUrl}')`;
-                    fotoDiv.style.display = 'block';
-                } else {
-                    fotoDiv.style.display = 'none';
-                }
-
-                if (modalAcara) modalAcara.style.display = 'flex';
+                isiModalAcara(this);
             });
         });
-
-        // Script Interaksi Modal Struktur Pengurus
-        const modalPengurus = document.getElementById('modalStrukturPengurus');
-        const btnBukaPengurus = document.getElementById('btnBukaPengurus');
-        const tutupModalPengurus = document.getElementById('tutupModalPengurus');
-
-        if (btnBukaPengurus) {
-            btnBukaPengurus.addEventListener('click', () => {
-                modalPengurus.style.display = 'flex';
-            });
-        }
-        if (tutupModalPengurus) {
-            tutupModalPengurus.addEventListener('click', () => {
-                modalPengurus.style.display = 'none';
-            });
-        }
-        if (modalPengurus) {
-            modalPengurus.addEventListener('click', (e) => {
-                if (e.target === modalPengurus) modalPengurus.style.display = 'none';
-            });
-        }
     </script>
 </body>
 </html>
