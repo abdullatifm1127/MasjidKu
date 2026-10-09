@@ -8,6 +8,7 @@ use App\Http\Controllers\MosqueController;
 use App\Http\Controllers\SuperAdmin\PenggunaController;
 use App\Http\Controllers\SuperAdmin\BerandaSuperAdminController;
 use App\Http\Controllers\SuperAdmin\PengaturanController;
+use App\Http\Controllers\SuperAdmin\HalamanUtamaController; // <-- BARU
 use App\Http\Controllers\adminmasjid\LandingPageController;
 use App\Http\Controllers\adminmasjid\ProgramController;
 use App\Http\Controllers\adminmasjid\AcaraController;
@@ -21,7 +22,7 @@ use App\Http\Controllers\adminmasjid\DonasiAdminController;
 use App\Http\Controllers\adminmasjid\JamaahController;
 use App\Http\Controllers\adminmasjid\DonationCategoryController;
 use App\Http\Controllers\Auth\SocialAuthController;
-   use App\Http\Controllers\adminmasjid\PengumumanController;
+use App\Http\Controllers\adminmasjid\PengumumanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -115,6 +116,7 @@ Route::middleware('guest')->group(function () {
         ->whereIn('provider', ['google', 'facebook'])
         ->name('social.callback');
 });
+
 /*
 |--------------------------------------------------------------------------
 | Super Admin Authentication Routes
@@ -164,16 +166,15 @@ Route::middleware(['auth', 'check.status'])->group(function () {
         return view('auth.adminmasjid.berandaAdmin');
     })->name('admin.beranda');
 
-    //Pengumuman
+    // Pengumuman
     Route::get('/pengumuman', [PengumumanController::class, 'index'])->name('admin.pengumuman');
     Route::post('/pengumuman', [PengumumanController::class, 'store'])->name('admin.pengumuman.store');
     Route::put('/pengumuman/{id}', [PengumumanController::class, 'update'])->name('admin.pengumuman.update');
     Route::delete('/pengumuman/{id}', [PengumumanController::class, 'destroy'])->name('admin.pengumuman.destroy');
-    
 
     Route::get('/admin/jadwal-sholat', [JadwalSholatController::class, 'index'])->name('admin.jadwal-sholat');
     Route::put('/admin/jadwal-sholat', [JadwalSholatController::class, 'update'])->name('admin.jadwal-sholat.update');
-    
+
     // Rute untuk Shalat Eid / Khusus
     Route::post('/admin/jadwal-sholat/eid', [JadwalSholatController::class, 'storeEid'])->name('admin.jadwal-sholat.eid.store');
     Route::put('/admin/jadwal-sholat/eid/{eid}', [JadwalSholatController::class, 'updateEid'])->name('admin.jadwal-sholat.eid.update');
@@ -197,7 +198,7 @@ Route::middleware(['auth', 'check.status'])->group(function () {
         ->whereIn('tab', ['kategori', 'pengaturan', 'penyaluran', 'rekap'])
         ->name('admin.donasi.tab');
 
-    // Verifikasi status donasi masuk (sebelumnya berada di luar middleware auth)
+    // Verifikasi status donasi masuk
     Route::patch('/admin/donasi/{donasi}/status', [DonasiAdminController::class, 'updateStatus'])
         ->name('admin.donasi.status');
 
@@ -291,6 +292,11 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
     Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna');
     Route::post('/pengguna', [PenggunaController::class, 'store'])->name('pengguna.store');
     Route::put('/pengguna/{id}', [PenggunaController::class, 'update'])->name('pengguna.update');
+
+    // ===== EDIT HALAMAN UTAMA (BARU) =====
+    Route::get('/halaman-utama', [HalamanUtamaController::class, 'edit'])->name('halaman-utama.edit');
+    Route::put('/halaman-utama', [HalamanUtamaController::class, 'update'])->name('halaman-utama.update');
+    Route::delete('/halaman-utama/reset', [HalamanUtamaController::class, 'reset'])->name('halaman-utama.reset');
 
     Route::get('/pengaturan', [PengaturanController::class, 'index'])->name('pengaturan');
     Route::put('/pengaturan', [PengaturanController::class, 'update'])->name('pengaturan.update');

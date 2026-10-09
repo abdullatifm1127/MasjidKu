@@ -48,6 +48,13 @@
                 <span class="sa-nav-icon"><i class="fa-solid fa-users"></i></span>
                 <span class="sa-nav-label">Pengguna</span>
             </a>
+
+            {{-- MENU BARU --}}
+            <a href="{{ route('superadmin.halaman-utama.edit') }}" class="sa-nav-item">
+                <span class="sa-nav-icon"><i class="fa-solid fa-pen-to-square"></i></span>
+                <span class="sa-nav-label">Halaman Utama</span>
+            </a>
+
             <a href="{{ route('superadmin.pengaturan') }}" class="sa-nav-item">
                 <span class="sa-nav-icon"><i class="fa-solid fa-gear"></i></span>
                 <span class="sa-nav-label">Pengaturan</span>

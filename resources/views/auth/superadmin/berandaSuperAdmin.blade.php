@@ -49,78 +49,10 @@
                 <span class="sa-nav-label">Pengguna</span>
             </a>
 
-            <a href="{{ route('superadmin.pengaturan') }}" class="sa-nav-item">
-                <span class="sa-nav-icon"><i class="fa-solid fa-gear"></i></span>
-                <span class="sa-nav-label">Pengaturan</span>
-            </a>
-        </nav>
-
-        {{-- User footer --}}
-        <div class="sa-user-footer">
-            <div class="sa-user-avatar-sm">SA</div>
-            <div class="sa-user-info">
-                <div class="sa-user-name">Super Admin</div>
-                <div class="sa-user-email">admin@masjidku.id</div>
-            </div>
-            <a href="{{ route('logout') }}" class="sa-logout-btn"
-               onclick="event.preventDefault(); document.getElementById('sa-logout-form').submit();"
-               aria-label="Logout">
-                <i class="fa-solid fa-right-from-bracket"></i>
-            </a>
-            <form id="sa-logout-form" method="POST" action="{{ route('logout') }}" style="display:none;">@csrf</form>
-        </div>
-
-    </aside>
-
-    <!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Super Admin - SIM Masjid</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/superadmin/berandaSuperAdmin.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-</head>
-<body class="sa-page" id="saBody">
-
-    {{-- ===== SIDEBAR ===== --}}
-    <aside class="sa-sidebar" id="saSidebar">
-
-        {{-- Brand --}}
-        <div class="sa-brand">
-            <div class="sa-brand-avatar">SA</div>
-            <div class="sa-brand-info">
-                <strong>MasjidKu Admin</strong>
-                <span>Super Administrator</span>
-            </div>
-            <button class="sa-sidebar-toggle" id="saSidebarToggle" aria-label="Collapse sidebar">
-                <i class="fa-solid fa-chevron-left"></i>
-            </button>
-        </div>
-
-        {{-- Navigation --}}
-        <nav class="sa-nav">
-            <a href="{{ route('superadmin.dashboard') }}" class="sa-nav-item active">
-                <span class="sa-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
-                <span class="sa-nav-label">Dashboard</span>
-            </a>
-
-            <a href="{{ route('superadmin.verifikasi') }}" class="sa-nav-item sa-nav-has-badge">
-                <span class="sa-nav-icon"><i class="fa-solid fa-shield-halved"></i></span>
-                <span class="sa-nav-label">Verifikasi Pendaftaran</span>
-                <span class="sa-nav-badge-dot amber"></span>
-            </a>
-
-            <a href="{{ route('superadmin.manajemen-masjid') }}" class="sa-nav-item">
-                <span class="sa-nav-icon"><i class="fa-solid fa-mosque"></i></span>
-                <span class="sa-nav-label">Manajemen Masjid</span>
-            </a>
-
-            <a href="{{ route('superadmin.pengguna') }}" class="sa-nav-item">
-                <span class="sa-nav-icon"><i class="fa-solid fa-users"></i></span>
-                <span class="sa-nav-label">Pengguna</span>
+            {{-- MENU BARU --}}
+            <a href="{{ route('superadmin.halaman-utama.edit') }}" class="sa-nav-item">
+                <span class="sa-nav-icon"><i class="fa-solid fa-pen-to-square"></i></span>
+                <span class="sa-nav-label">Halaman Utama</span>
             </a>
 
             <a href="{{ route('superadmin.pengaturan') }}" class="sa-nav-item">

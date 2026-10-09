@@ -24,31 +24,41 @@
                 <i class="fa-solid fa-chevron-left"></i>
             </button>
         </div>
-
+{{-- Navigation --}}
         <nav class="sa-nav">
-            <a href="{{ route('superadmin.dashboard') }}" class="sa-nav-item">
+            <a href="{{ route('superadmin.dashboard') }}" class="sa-nav-item active">
                 <span class="sa-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
                 <span class="sa-nav-label">Dashboard</span>
             </a>
+
             <a href="{{ route('superadmin.verifikasi') }}" class="sa-nav-item sa-nav-has-badge">
                 <span class="sa-nav-icon"><i class="fa-solid fa-shield-halved"></i></span>
                 <span class="sa-nav-label">Verifikasi Pendaftaran</span>
                 <span class="sa-nav-badge-dot amber"></span>
             </a>
-            <a href="{{ route('superadmin.manajemen-masjid') }}" class="sa-nav-item active">
+
+            <a href="{{ route('superadmin.manajemen-masjid') }}" class="sa-nav-item">
                 <span class="sa-nav-icon"><i class="fa-solid fa-mosque"></i></span>
                 <span class="sa-nav-label">Manajemen Masjid</span>
             </a>
+
             <a href="{{ route('superadmin.pengguna') }}" class="sa-nav-item">
                 <span class="sa-nav-icon"><i class="fa-solid fa-users"></i></span>
                 <span class="sa-nav-label">Pengguna</span>
             </a>
+
+            {{-- MENU BARU --}}
+            <a href="{{ route('superadmin.halaman-utama.edit') }}" class="sa-nav-item">
+                <span class="sa-nav-icon"><i class="fa-solid fa-pen-to-square"></i></span>
+                <span class="sa-nav-label">Halaman Utama</span>
+            </a>
+
             <a href="{{ route('superadmin.pengaturan') }}" class="sa-nav-item">
                 <span class="sa-nav-icon"><i class="fa-solid fa-gear"></i></span>
                 <span class="sa-nav-label">Pengaturan</span>
             </a>
         </nav>
-
+        
         <div class="sa-user-footer">
             <div class="sa-user-avatar-sm">SA</div>
             <div class="sa-user-info">
