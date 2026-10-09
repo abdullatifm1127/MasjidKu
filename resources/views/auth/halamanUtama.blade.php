@@ -16,6 +16,9 @@
     use Illuminate\Support\Str;
     use Illuminate\Support\Facades\Schema;
 
+    // Isi teks halaman utama (bawaan + hasil edit Super Admin)
+    $c = \App\Models\SiteSetting::content();
+
     $safe = function (callable $fn, $default = null) { try { return $fn(); } catch (\Throwable $e) { return $default; } };
     $has  = fn ($model, $table) => class_exists($model) && Schema::hasTable($table);
     $approved = fn () => \App\Models\Mosque::where('status', 'approved');
@@ -33,8 +36,8 @@
     $keyword = trim(request('lokasi', ''));
     $query = $approved();
     if ($keyword !== '') {
-        $cols = collect(Schema::getColumnListing('mosques'))->filter(fn ($c) => preg_match('/^(nama|name)|alamat|address|city|kota|kabupaten|kecamatan|kelurahan|desa|provinsi|province/i', $c));
-        $query->where(function ($w) use ($cols, $keyword) { foreach ($cols as $c) { $w->orWhere($c, 'like', "%{$keyword}%"); } });
+        $cols = collect(Schema::getColumnListing('mosques'))->filter(fn ($col) => preg_match('/^(nama|name)|alamat|address|city|kota|kabupaten|kecamatan|kelurahan|desa|provinsi|province/i', $col));
+        $query->where(function ($w) use ($cols, $keyword) { foreach ($cols as $col) { $w->orWhere($col, 'like', "%{$keyword}%"); } });
     }
     $registeredMosques = $query->latest()->take($keyword !== '' ? 30 : 6)->get();
     $mosque = auth()->check() ? $safe(fn () => \App\Models\Mosque::where('user_id', auth()->id())->first()) : null;
@@ -59,7 +62,7 @@
         ];
     };
     $latest = $registeredMosques->take(3)->map($view);
-    $email  = config('mail.from.address');
+    $email  = $c['kontak']['email'] ?: config('mail.from.address');
 @endphp
 
 {{-- ===== TOPBAR ===== --}}
@@ -116,15 +119,15 @@
 <section class="hero" id="beranda">
     <div class="hero-inner">
         <div class="hero-content">
-            <p class="bismillah" lang="ar">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</p>
-            <span class="hero-badge">🌙 Platform Masjid Digital</span>
-            <h1 class="hero-title">Kelola Masjid Anda<br>dengan <span class="text-green">Lebih Mudah</span></h1>
-            <p class="hero-subtitle">Satu platform lengkap untuk mengelola keuangan, jadwal shalat, program dakwah, dan komunitas masjid Anda.</p>
+            @if($c['hero']['show_bismillah'])<p class="bismillah" lang="ar">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</p>@endif
+            <span class="hero-badge">{{ $c['hero']['badge'] }}</span>
+            <h1 class="hero-title">{{ $c['hero']['title_1'] }}<br>{{ $c['hero']['title_2'] }} <span class="text-green">{{ $c['hero']['title_highlight'] }}</span></h1>
+            <p class="hero-subtitle">{{ $c['hero']['subtitle'] }}</p>
             <div class="hero-actions">
-                <a href="{{ route('daftar.masjid') }}" class="btn-primary">Daftarkan Masjid
+                <a href="{{ route('daftar.masjid') }}" class="btn-primary">{{ $c['hero']['btn_primary'] }}
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
                 </a>
-                <a href="#tentang" class="btn-secondary">Pelajari Lebih Lanjut</a>
+                <a href="#tentang" class="btn-secondary">{{ $c['hero']['btn_secondary'] }}</a>
             </div>
             <div class="hero-stats">
                 <div class="stat-item"><strong>{{ number_format($stats['masjid'], 0, ',', '.') }}</strong><span>Masjid Terdaftar</span></div>
@@ -137,8 +140,8 @@
 
         <div class="hero-visual">
             <div class="arch"><div class="arch-in">
-                <small>Baru bergabung</small>
-                <h2>Masjid Terverifikasi</h2>
+                <small>{{ $c['hero']['card_small'] }}</small>
+                <h2>{{ $c['hero']['card_title'] }}</h2>
                 @forelse($latest as $l)
                     <a href="{{ $l->link }}" class="join-item">
                         <span class="join-avatar">@if($l->foto)<img src="{{ $l->foto }}" alt="" loading="lazy">@else🕌@endif</span>
@@ -169,30 +172,22 @@
 
 {{-- ===== STRIP ===== --}}
 <div class="strip"><div class="strip-inner">
-    <div class="strip-item"><i>✔</i>Setiap masjid diverifikasi tim kami</div>
-    <div class="strip-item"><i>📊</i>Laporan kas terbuka untuk jamaah</div>
-    <div class="strip-item"><i>📱</i>Bisa diakses dari ponsel</div>
-    <div class="strip-item"><i>🇮🇩</i>Dibuat untuk masjid di Indonesia</div>
+    @foreach($c['strip'] as $s)
+        <div class="strip-item"><i>{{ $s['icon'] }}</i>{{ $s['text'] }}</div>
+    @endforeach
 </div></div>
 
 {{-- ===== FITUR ===== --}}
 <section class="features" id="tentang">
     <div class="section-container">
         <div class="section-header">
-            <span class="section-badge">Fitur Unggulan</span>
-            <h2>Semua yang Anda Butuhkan dalam Satu Platform</h2>
-            <p>Dirancang khusus untuk kebutuhan masjid modern di Indonesia.</p>
+            <span class="section-badge">{{ $c['features_head']['badge'] }}</span>
+            <h2>{{ $c['features_head']['title'] }}</h2>
+            <p>{{ $c['features_head']['desc'] }}</p>
         </div>
         <div class="features-grid">
-            @foreach([
-                ['💰','Manajemen Keuangan','Catat pemasukan, pengeluaran, dan laporan keuangan masjid secara transparan dan mudah dipahami.'],
-                ['📅','Jadwal & Agenda','Kelola jadwal imam, khatib, kajian, dan acara masjid dalam satu kalender terintegrasi.'],
-                ['📢','Pengumuman Digital','Kirim informasi dan pengumuman kepada jamaah melalui notifikasi dan papan pengumuman digital.'],
-                ['🤲','Pengelolaan Donasi','Terima donasi online dan offline, kelola zakat, infaq, dan sedekah dengan laporan yang transparan.'],
-                ['📖','Program Dakwah','Daftarkan dan pantau program TPA, tahfidz, majelis taklim, dan kegiatan dakwah lainnya.'],
-                ['👥','Data Jamaah','Kelola data anggota jamaah, pantau kehadiran, dan bangun komunitas masjid yang solid.'],
-            ] as [$ic, $ti, $de])
-                <div class="feature-card"><div class="feature-icon">{{ $ic }}</div><h3>{{ $ti }}</h3><p>{{ $de }}</p></div>
+            @foreach($c['features'] as $f)
+                <div class="feature-card"><div class="feature-icon">{{ $f['icon'] }}</div><h3>{{ $f['title'] }}</h3><p>{{ $f['desc'] }}</p></div>
             @endforeach
         </div>
     </div>
@@ -202,14 +197,14 @@
 <section class="steps" id="cara-kerja">
     <div class="section-container">
         <div class="section-header">
-            <span class="section-badge">Cara Kerja</span>
-            <h2>Mulai dalam Tiga Langkah</h2>
-            <p>Dari membuat akun sampai masjid Anda tampil di MasjidKu.</p>
+            <span class="section-badge">{{ $c['steps_head']['badge'] }}</span>
+            <h2>{{ $c['steps_head']['title'] }}</h2>
+            <p>{{ $c['steps_head']['desc'] }}</p>
         </div>
         <div class="steps-grid">
-            <div class="step"><h3>Buat akun</h3><p>Daftar dengan akun pribadi Anda sebagai pengurus atau takmir masjid.</p></div>
-            <div class="step"><h3>Daftarkan masjid</h3><p>Isi data masjid: nama, alamat, kontak, dan foto agar mudah ditemukan jamaah.</p></div>
-            <div class="step"><h3>Tunggu verifikasi</h3><p>Setelah data kami periksa dan disetujui, dashboard masjid langsung terbuka.</p></div>
+            @foreach($c['steps'] as $st)
+                <div class="step"><h3>{{ $st['title'] }}</h3><p>{{ $st['desc'] }}</p></div>
+            @endforeach
         </div>
     </div>
 </section>
@@ -218,9 +213,9 @@
 <section class="programs" id="program">
     <div class="section-container">
         <div class="section-header">
-            <span class="section-badge">Program</span>
-            <h2>Program Unggulan Masjid</h2>
-            <p>Berbagai program untuk membangun jamaah yang berkualitas.</p>
+            <span class="section-badge">{{ $c['program_head']['badge'] }}</span>
+            <h2>{{ $c['program_head']['title'] }}</h2>
+            <p>{{ $c['program_head']['desc'] }}</p>
         </div>
         @if($programs->count())
             <div class="programs-grid">
@@ -264,9 +259,9 @@
 <section class="mosques" id="masjid">
     <div class="section-container">
         <div class="section-header">
-            <span class="section-badge">Masjid Terdaftar</span>
-            <h2>Masjid yang Sudah Bergabung</h2>
-            <p>Daftar masjid yang telah terverifikasi dan menggunakan platform MasjidKu.</p>
+            <span class="section-badge">{{ $c['masjid_head']['badge'] }}</span>
+            <h2>{{ $c['masjid_head']['title'] }}</h2>
+            <p>{{ $c['masjid_head']['desc'] }}</p>
         </div>
         <form method="GET" action="{{ url('/') }}#masjid" class="mosque-search" role="search">
             <div class="mosque-search-box">
@@ -317,19 +312,19 @@
 <section class="donasi" id="donasi">
     <div class="section-container">
         <div class="section-header">
-            <span class="section-badge">Donasi</span>
-            <h2>Berbagi Kebaikan Lewat Masjid</h2>
-            <p>Pilih masjid terverifikasi, lalu salurkan zakat, infaq, sedekah, dan wakaf Anda.</p>
+            <span class="section-badge">{{ $c['donasi_head']['badge'] }}</span>
+            <h2>{{ $c['donasi_head']['title'] }}</h2>
+            <p>{{ $c['donasi_head']['desc'] }}</p>
         </div>
         <div class="donasi-grid">
-            @foreach([['💎','Zakat','Tunaikan kewajiban zakat mal dan fitrah melalui masjid.'],['🤲','Infaq','Dukung operasional dan kegiatan masjid sehari-hari.'],['🌱','Sedekah','Berbagi untuk jamaah dan warga yang membutuhkan.'],['🏗️','Wakaf','Bantu pembangunan dan perawatan sarana masjid.']] as [$ic,$ti,$de])
-                <a href="#masjid" class="donasi-card"><i>{{ $ic }}</i><h3>{{ $ti }}</h3><p>{{ $de }}</p></a>
+            @foreach($c['donasi'] as $d)
+                <a href="#masjid" class="donasi-card"><i>{{ $d['icon'] }}</i><h3>{{ $d['title'] }}</h3><p>{{ $d['desc'] }}</p></a>
             @endforeach
         </div>
         <div class="ayat">
-            <p class="ar" lang="ar">مَنْ ذَا الَّذِيْ يُقْرِضُ اللّٰهَ قَرْضًا حَسَنًا فَيُضٰعِفَهٗ لَهٗٓ اَضْعَافًا كَثِيْرَةً</p>
-            <p>"Siapakah yang mau memberi pinjaman kepada Allah, pinjaman yang baik, maka Allah melipatgandakannya."</p>
-            <small>QS. Al-Baqarah: 245</small>
+            <p class="ar" lang="ar">{{ $c['ayat']['arab'] }}</p>
+            <p>"{{ $c['ayat']['arti'] }}"</p>
+            <small>{{ $c['ayat']['sumber'] }}</small>
         </div>
     </div>
 </section>
@@ -338,9 +333,9 @@
 <section class="programs articles" id="artikel">
     <div class="section-container">
         <div class="section-header">
-            <span class="section-badge">Artikel</span>
-            <h2>Menambah Ilmu, Mencerahkan Iman</h2>
-            <p>Selamat datang di ruang literasi masjid untuk menambah ilmu dan mencerahkan iman.</p>
+            <span class="section-badge">{{ $c['artikel_head']['badge'] }}</span>
+            <h2>{{ $c['artikel_head']['title'] }}</h2>
+            <p>{{ $c['artikel_head']['desc'] }}</p>
         </div>
         @if($articles->count())
             <div class="programs-grid">
@@ -365,17 +360,12 @@
 {{-- ===== FAQ ===== --}}
 <section class="faq" id="faq">
     <div class="section-container">
-        <div class="section-header"><span class="section-badge">FAQ</span><h2>Pertanyaan yang Sering Diajukan</h2></div>
+        <div class="section-header"><span class="section-badge">{{ $c['faq_head']['badge'] }}</span><h2>{{ $c['faq_head']['title'] }}</h2></div>
         <div class="faq-list">
-            @foreach([
-                ['Bagaimana cara mendaftarkan masjid?','Buat akun lebih dulu, lalu pilih "Daftarkan Masjid" dan isi data masjid Anda. Setelah dikirim, data akan diperiksa oleh tim MasjidKu.'],
-                ['Apa arti status "Menunggu Verifikasi"?','Data masjid Anda sudah kami terima dan sedang diperiksa. Statusnya bisa dipantau dari tombol di pojok kanan atas setelah Anda masuk.'],
-                ['Apa yang bisa dilakukan setelah masjid disetujui?','Tombol berubah menjadi "Dashboard Masjid". Dari sana Anda bisa mengelola keuangan, jadwal, pengumuman, donasi, program, dan data jamaah.'],
-                ['Bagaimana jamaah menemukan masjid saya?','Masjid yang sudah terverifikasi tampil pada daftar di halaman ini dan bisa dicari berdasarkan nama, kelurahan, atau kota.'],
-                ['Dari mana jadwal shalat berasal?','Jadwal dihitung berdasarkan kota yang dipilih dengan metode Kementerian Agama RI, lewat layanan Aladhan.'],
-                ['Bagaimana cara menyalurkan donasi?','Pilih masjid terverifikasi pada daftar, buka profilnya, lalu ikuti petunjuk donasi yang disediakan pengurus masjid tersebut.'],
-            ] as [$q, $a])
-                <details><summary>{{ $q }}</summary><p>{{ $a }}</p></details>
+            @foreach($c['faq'] as $fq)
+                @if(!empty($fq['q']))
+                    <details><summary>{{ $fq['q'] }}</summary><p>{{ $fq['a'] }}</p></details>
+                @endif
             @endforeach
         </div>
     </div>
@@ -384,11 +374,11 @@
 {{-- ===== KONTAK ===== --}}
 <section id="kontak-info">
     <div class="section-container">
-        <div class="section-header"><span class="section-badge">Kontak</span><h2>Hubungi Kami</h2><p>Ada pertanyaan seputar pendaftaran atau penggunaan MasjidKu?</p></div>
+        <div class="section-header"><span class="section-badge">Kontak</span><h2>{{ $c['kontak']['title'] }}</h2><p>{{ $c['kontak']['desc'] }}</p></div>
         <div class="kontak-grid">
             <div class="kontak-card"><i>✉️</i><div><h3>Email</h3>@if($email)<a href="mailto:{{ $email }}">{{ $email }}</a>@else<p>Segera tersedia</p>@endif</div></div>
-            <div class="kontak-card"><i>📍</i><div><h3>Pusat Layanan</h3><p>Baitul Digital, Indonesia</p></div></div>
-            <div class="kontak-card"><i>🕒</i><div><h3>Jam Layanan</h3><p>Senin sampai Jumat, 08.00 sampai 17.00 WIB</p></div></div>
+            <div class="kontak-card"><i>📍</i><div><h3>Pusat Layanan</h3><p>{{ $c['kontak']['alamat'] }}</p></div></div>
+            <div class="kontak-card"><i>🕒</i><div><h3>Jam Layanan</h3><p>{{ $c['kontak']['jam'] }}</p></div></div>
         </div>
     </div>
 </section>
@@ -396,11 +386,11 @@
 {{-- ===== CTA ===== --}}
 <section class="cta-donasi">
     <div class="section-container"><div class="cta-box"><div class="cta-text">
-        <h2>Siap Merapikan Pengelolaan Masjid Anda?</h2>
-        <p>Daftarkan masjid Anda dan mulai kelola keuangan, jadwal, dan jamaah dari satu tempat.</p>
+        <h2>{{ $c['cta']['title'] }}</h2>
+        <p>{{ $c['cta']['desc'] }}</p>
         <div class="cta-actions">
-            <a href="{{ route('daftar.masjid') }}" class="btn-primary">Daftarkan Masjid</a>
-            <a href="#faq" class="btn-secondary">Baca FAQ</a>
+            <a href="{{ route('daftar.masjid') }}" class="btn-primary">{{ $c['cta']['btn_primary'] }}</a>
+            <a href="#faq" class="btn-secondary">{{ $c['cta']['btn_secondary'] }}</a>
         </div>
     </div></div></div>
 </section>
@@ -412,11 +402,11 @@
     <div class="footer-inner">
         <div class="footer-brand">
             <a href="{{ url('/') }}" class="navbar-brand"><span class="brand-icon">🕌</span><span class="brand-text">Masjid<strong>Ku</strong></span></a>
-            <p>Platform digital untuk kemakmuran masjid Indonesia.</p>
+            <p>{{ $c['footer']['tagline'] }}</p>
             <div class="footer-social">
-                <a href="#" aria-label="Instagram"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>
-                <a href="#" aria-label="Facebook"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
-                <a href="#" aria-label="YouTube"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+                <a href="{{ $c['footer']['instagram'] ?: '#' }}" target="_blank" rel="noopener" aria-label="Instagram"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>
+                <a href="{{ $c['footer']['facebook'] ?: '#' }}" target="_blank" rel="noopener" aria-label="Facebook"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+                <a href="{{ $c['footer']['youtube'] ?: '#' }}" target="_blank" rel="noopener" aria-label="YouTube"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
             </div>
         </div>
         <div class="footer-links">
@@ -432,7 +422,7 @@
         </div>
     </div>
     <div class="footer-bottom">
-        <p>&copy; {{ date('Y') }} Baitul Digital. Semua hak dilindungi.</p>
+        <p>&copy; {{ date('Y') }} {{ $c['footer']['copyright'] }}</p>
         <div class="footer-bottom-links"><a href="#">Privasi</a><a href="#">Syarat</a><a href="#">Cookie</a></div>
     </div>
 </footer>
