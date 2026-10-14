@@ -330,27 +330,46 @@
 </section>
 
 {{-- ===== ARTIKEL ===== --}}
-<section class="programs articles" id="artikel">
+@php
+    $ikonArt  = ['pdf'=>'📕','doc'=>'📘','docx'=>'📘','xls'=>'📗','xlsx'=>'📗','ppt'=>'📙','pptx'=>'📙','zip'=>'🗜️','txt'=>'📄'];
+    $warnaArt = ['g1','g2','g3'];
+@endphp
+<section class="articles" id="artikel">
     <div class="section-container">
         <div class="section-header">
             <span class="section-badge">{{ $c['artikel_head']['badge'] }}</span>
             <h2>{{ $c['artikel_head']['title'] }}</h2>
             <p>{{ $c['artikel_head']['desc'] }}</p>
         </div>
+
         @if($articles->count())
-            <div class="programs-grid">
+            <div class="art-grid">
                 @foreach($articles as $a)
-                    <a href="{{ url('/artikel/' . $a->slug) }}" class="program-card">
-                        <div class="program-body">
-                            <span class="program-tag">{{ $a->created_at->translatedFormat('d F Y') }}</span>
-                            <h3>{{ $a->judul }}</h3>
-                            <p>{{ Str::limit($a->ringkasan ?? strip_tags($a->isi), 120) }}</p>
-                            <span class="program-link">Baca artikel →</span>
+                    @php $menit = max(1, (int) ceil(str_word_count(strip_tags($a->isi ?? '')) / 200)); @endphp
+                    <a href="{{ url('/artikel/' . $a->slug) }}" class="art-card">
+                        <div class="art-cover {{ $warnaArt[$loop->index % 3] }}">
+                            <span class="art-ico">{{ $ikonArt[$a->file_ext] ?? '📰' }}</span>
+                            <span class="art-date">{{ $a->created_at->translatedFormat('d M Y') }}</span>
+                        </div>
+                        <div class="art-body">
+                            <h3>{{ $a->title }}</h3>
+                            <p>{{ Str::limit(strip_tags($a->isi), 130) }}</p>
+
+                            @if($a->file || $a->link)
+                                <div class="art-chips">
+                                    @if($a->file)<span>📎 {{ strtoupper($a->file_ext) }}</span>@endif
+                                    @if($a->link)<span>🔗 {{ $a->link_host }}</span>@endif
+                                </div>
+                            @endif
+
+                            <div class="art-foot">
+                                <span>⏱ {{ $menit }} menit baca</span>
+                                <b>Baca artikel →</b>
+                            </div>
                         </div>
                     </a>
                 @endforeach
             </div>
-            <div class="center"><a href="{{ url('/artikel') }}" class="btn-primary btn-dark">Baca Artikel Sekarang</a></div>
         @else
             <div class="empty-box">Artikel pertama akan segera hadir.</div>
         @endif

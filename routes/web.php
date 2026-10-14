@@ -9,6 +9,7 @@ use App\Http\Controllers\SuperAdmin\PenggunaController;
 use App\Http\Controllers\SuperAdmin\BerandaSuperAdminController;
 use App\Http\Controllers\SuperAdmin\PengaturanController;
 use App\Http\Controllers\SuperAdmin\HalamanUtamaController; // <-- BARU
+use App\Http\Controllers\SuperAdmin\ArtikelController; // <-- BARU
 use App\Http\Controllers\adminmasjid\LandingPageController;
 use App\Http\Controllers\adminmasjid\ProgramController;
 use App\Http\Controllers\adminmasjid\AcaraController;
@@ -36,6 +37,12 @@ Route::get('/', function () {
     }
     return view('auth.halamanUtama', compact('userMosque'));
 })->name('home');
+
+// Halaman baca artikel (publik)
+Route::get('/artikel/{slug}', function ($slug) {
+    $artikel = \App\Models\Article::where('slug', $slug)->where('is_published', true)->firstOrFail();
+    return view('artikel.show', compact('artikel'));
+})->name('artikel.show');
 
 /*
 |--------------------------------------------------------------------------
@@ -297,6 +304,11 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
     Route::get('/halaman-utama', [HalamanUtamaController::class, 'edit'])->name('halaman-utama.edit');
     Route::put('/halaman-utama', [HalamanUtamaController::class, 'update'])->name('halaman-utama.update');
     Route::delete('/halaman-utama/reset', [HalamanUtamaController::class, 'reset'])->name('halaman-utama.reset');
+
+    // ===== ARTIKEL (dikelola dari tab Artikel di Halaman Utama) =====
+    Route::post('/artikel', [ArtikelController::class, 'simpan'])->name('artikel.simpan');
+    Route::patch('/artikel/{id}/terbit', [ArtikelController::class, 'terbit'])->name('artikel.terbit');
+    Route::delete('/artikel/{id}', [ArtikelController::class, 'hapus'])->name('artikel.hapus');
 
     Route::get('/pengaturan', [PengaturanController::class, 'index'])->name('pengaturan');
     Route::put('/pengaturan', [PengaturanController::class, 'update'])->name('pengaturan.update');
