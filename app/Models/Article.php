@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Article extends Model
 {
-    protected $fillable = ['title', 'slug', 'isi', 'file', 'file_nama', 'is_published'];
+    protected $fillable = ['title', 'slug', 'isi', 'file', 'file_nama', 'link', 'is_published'];
 
     protected $casts = ['is_published' => 'boolean'];
 
@@ -26,5 +26,13 @@ class Article extends Model
     public function getJudulAttribute(): ?string
     {
         return $this->title;
+    }
+
+    // Nama situs dari link: $artikel->link_host (mis. "detik.com")
+    public function getLinkHostAttribute(): ?string
+    {
+        if (!$this->link) return null;
+        $host = parse_url($this->link, PHP_URL_HOST);
+        return $host ? preg_replace('/^www\./', '', $host) : null;
     }
 }

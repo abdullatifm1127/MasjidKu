@@ -26,10 +26,13 @@ class ArtikelController extends Controller
             'judul' => ['required', 'max:200'],
             'isi'   => ['required'],
             'file'  => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip', 'max:10240'], // maks 10 MB
+            'link'  => ['nullable', 'url', 'starts_with:http://,https://', 'max:500'],                    // BARU
         ], [
-            'file.mimes' => 'Format file harus PDF, Word, Excel, PowerPoint, TXT, atau ZIP.',
-            'file.max'   => 'Ukuran file maksimal 10 MB.',
-            'file.uploaded' => 'File gagal diunggah. Cek batas upload_max_filesize di php.ini.',
+            'file.mimes'       => 'Format file harus PDF, Word, Excel, PowerPoint, TXT, atau ZIP.',
+            'file.max'         => 'Ukuran file maksimal 10 MB.',
+            'file.uploaded'    => 'File gagal diunggah. Cek batas upload_max_filesize di php.ini.',
+            'link.url'         => 'Link tidak valid. Salin alamat lengkap dari browser.',                  // BARU
+            'link.starts_with' => 'Link harus diawali http:// atau https://',                              // BARU
         ]);
         if ($cek->fails()) {
             return $this->kembali($request->filled('id') ? ['edit' => $request->input('id')] : [])
@@ -40,6 +43,7 @@ class ArtikelController extends Controller
         $data = [
             'title'        => $request->input('judul'),
             'isi'          => $request->input('isi'),
+            'link'         => $request->input('link') ?: null, // BARU: kosong = hapus link
             'is_published' => $request->boolean('is_published'),
         ];
 
