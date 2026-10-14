@@ -340,15 +340,18 @@
         @if($articles->count())
             <div class="programs-grid">
                 @foreach($articles as $a)
-                    <a href="{{ url('/artikel/' . $a->slug) }}" class="program-card">
-                        <div class="program-body">
-                            <span class="program-tag">{{ $a->created_at->translatedFormat('d F Y') }}</span>
-                            <h3>{{ $a->judul }}</h3>
-                            <p>{{ Str::limit($a->ringkasan ?? strip_tags($a->isi), 120) }}</p>
-                            <span class="program-link">Baca artikel →</span>
-                        </div>
-                    </a>
-                @endforeach
+    <a href="{{ url('/artikel/' . $a->slug) }}" class="program-card">
+        <div class="program-body">
+            <span class="program-tag">{{ $a->created_at->translatedFormat('d F Y') }}</span>
+            <h3>{{ $a->title }}</h3>
+            <p>{{ Str::limit(strip_tags($a->isi), 120) }}</p>
+            @if($a->file)
+                <p class="program-tag">📎 Lampiran {{ strtoupper($a->file_ext) }}</p>
+            @endif
+            <span class="program-link">Baca artikel →</span>
+        </div>
+    </a>
+@endforeach
             </div>
             <div class="center"><a href="{{ url('/artikel') }}" class="btn-primary btn-dark">Baca Artikel Sekarang</a></div>
         @else

@@ -3,15 +3,24 @@
 namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Article;
 use App\Models\SiteSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class HalamanUtamaController extends Controller
 {
-    public function edit()
+    public function edit(Request $request)
     {
-        // abort_unless(auth()->user()->role === 'superadmin', 403); // sesuaikan dengan kolom role Anda
-        return view('auth.superadmin.halamanUtamaSuperAdmin', ['c' => SiteSetting::content()]);
+        // abort_unless(auth()->user()->role === 'superadmin', 403); // sesuaikan kolom role Anda
+
+        $ada = Schema::hasTable('articles');
+
+        return view('auth.superadmin.halamanUtamaSuperAdmin', [
+            'c'        => SiteSetting::content(),
+            'artikels' => $ada ? Article::orderByDesc('id')->get() : collect(),
+            'edit'     => ($ada && $request->filled('edit')) ? Article::find($request->query('edit')) : null,
+        ]);
     }
 
     public function update(Request $request)

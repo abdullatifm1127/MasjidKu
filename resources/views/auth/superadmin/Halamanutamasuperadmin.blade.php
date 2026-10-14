@@ -49,7 +49,7 @@
     @if($errors->any())<div class="hu-err">@foreach($errors->all() as $e)<div>• {{ $e }}</div>@endforeach</div>@endif
 
     <div class="hu-tabs">
-        @foreach(['hero'=>'Hero','strip'=>'Strip','fitur'=>'Fitur','cara'=>'Cara Kerja','judul'=>'Judul Section','donasi'=>'Donasi & Ayat','faq'=>'FAQ','kontak'=>'Kontak & CTA','footer'=>'Footer'] as $id => $label)
+        @foreach(['hero'=>'Hero','strip'=>'Strip','fitur'=>'Fitur','cara'=>'Cara Kerja','judul'=>'Judul Section','artikel'=>'Artikel','donasi'=>'Donasi & Ayat','faq'=>'FAQ','kontak'=>'Kontak & CTA','footer'=>'Footer'] as $id => $label)
             <button type="button" class="hu-tab {{ $loop->first ? 'active' : '' }}" data-tab="{{ $id }}">{{ $label }}</button>
         @endforeach
     </div>
@@ -148,7 +148,7 @@
                     {!! $head($key) !!}
                 </div>
             @endforeach
-            <p class="hu-note">Isi kartu Program, Artikel, Masjid, dan Agenda tetap dikelola dari menu masing-masing.</p>
+            <p class="hu-note">Isi artikel ada di tab Artikel. Kartu Program, Masjid, dan Agenda dikelola dari menu masing-masing.</p>
         </div>
 
         {{-- DONASI & AYAT --}}
@@ -239,20 +239,97 @@
     </form>
 
     <form id="huReset" method="POST" action="{{ route('superadmin.halaman-utama.reset') }}">@csrf @method('DELETE')</form>
-</div>
-</main>
+
+    {{-- ARTIKEL (form terpisah dari form pengaturan di atas) --}}
+@php
+    $ikonFile = ['pdf'=>'📕','doc'=>'📘','docx'=>'📘','xls'=>'📗','xlsx'=>'📗','ppt'=>'📙','pptx'=>'📙','zip'=>'🗜️','txt'=>'📄'];
+@endphp
+<div class="hu-panel" data-panel="artikel">
+    <div class="hu-card">
+        <h2>{{ $edit ? 'Edit artikel' : 'Tulis artikel baru' }}</h2>
+        <p class="sub">Artikel yang diterbitkan tampil di bagian Artikel halaman utama.</p>
+
+        <form method="POST" action="{{ route('superadmin.artikel.simpan') }}" enctype="multipart/form-data">
+            @csrf
+            @if($edit)<input type="hidden" name="id" value="{{ $edit->id }}">@endif
+
+            <div class="hu-grid">
+                {!! $f('judul', 'Judul', $edit->title ?? '', ['cls' => 'full']) !!}
+                {!! $f('isi', 'Isi artikel (pisahkan paragraf dengan baris kosong)', $edit->isi ?? '', ['cls' => 'full', 'type' => 'textarea']) !!}
+
+                <div class="hu-field full">
+                    <label>Lampiran file (PDF, Word, Excel, PowerPoint, TXT, ZIP; boleh kosong, maks 10 MB)</label>
+                    @if($edit && $edit->file)
+                        <p class="hu-note">
+                            File saat ini:
+                            <a href="{{ $edit->file_url }}" target="_blank">{{ $edit->file_nama ?? basename($edit->file) }}</a>
+                            (pilih file baru di bawah untuk menggantinya)
+                        </p>
+                    @endif
+                    <input type="file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip">
+                </div>
+
+                <div class="hu-field full">
+                    <label class="hu-check">
+                        <input type="checkbox" name="is_published" value="1" {{ old('is_published', $edit->is_published ?? true) ? 'checked' : '' }}>
+                        Terbitkan sekarang
+                    </label>
+                </div>
+            </div>
+
+            <div class="hu-art-btns">
+                <button type="submit" class="hu-btn primary">Simpan Artikel</button>
+                @if($edit)<a href="{{ route('superadmin.halaman-utama.edit', ['tab' => 'artikel']) }}" class="hu-btn ghost">Batal</a>@endif
+            </div>
+        </form>
+    </div>
+
+    <div class="hu-card">
+        <h2>Daftar artikel</h2>
+        @forelse($artikels as $a)
+            <div class="hu-art-item">
+                <div class="hu-art-thumb">{{ $ikonFile[$a->file_ext] ?? '📰' }}</div>
+
+                <div class="hu-art-info">
+                    <h3>{{ $a->title }}</h3>
+                    <div class="hu-art-meta">
+                        <span class="hu-badge {{ $a->is_published ? 'terbit' : 'draft' }}">{{ $a->is_published ? 'Terbit' : 'Draft' }}</span>
+                        <span>{{ $a->created_at?->translatedFormat('d M Y') }}</span>
+                        @if($a->file)<span>📎 {{ $a->file_nama ?? strtoupper($a->file_ext) }}</span>@endif
+                    </div>
+                </div>
+
+                <div class="hu-art-acts">
+                    @if($a->is_published)<a href="{{ route('artikel.show', $a->slug) }}" target="_blank" class="hu-btn ghost sm">Lihat</a>@endif
+                    <a href="{{ route('superadmin.halaman-utama.edit', ['tab' => 'artikel', 'edit' => $a->id]) }}" class="hu-btn ghost sm">Edit</a>
+                    <form method="POST" action="{{ route('superadmin.artikel.terbit', $a->id) }}">@csrf @method('PATCH')
+                        <button type="submit" class="hu-btn ghost sm">{{ $a->is_published ? 'Jadikan Draft' : 'Terbitkan' }}</button>
+                    </form>
+                    <form method="POST" action="{{ route('superadmin.artikel.hapus', $a->id) }}" onsubmit="return confirm('Hapus artikel ini?')">@csrf @method('DELETE')
+                        <button type="submit" class="hu-btn danger sm">Hapus</button>
+                    </form>
+                </div>
+            </div>
+        @empty
+            <p class="hu-note">Belum ada artikel.</p>
+        @endforelse
+    </div>
 </div>
 
 <script>
+    var wrap = document.querySelector('.hu-wrap');
+    function openTab(id) {
+        var btn = document.querySelector('.hu-tab[data-tab="' + id + '"]');
+        if (!btn) return;
+        document.querySelectorAll('.hu-tab').forEach(function (x) { x.classList.toggle('active', x === btn); });
+        document.querySelectorAll('.hu-panel').forEach(function (p) { p.classList.toggle('active', p.dataset.panel === id); });
+        wrap.classList.toggle('mode-artikel', id === 'artikel');
+    }
     document.querySelectorAll('.hu-tab').forEach(function (t) {
-        t.addEventListener('click', function () {
-            document.querySelectorAll('.hu-tab').forEach(function (x) { x.classList.toggle('active', x === t); });
-            document.querySelectorAll('.hu-panel').forEach(function (p) { p.classList.toggle('active', p.dataset.panel === t.dataset.tab); });
-            location.hash = t.dataset.tab;
-        });
+        t.addEventListener('click', function () { openTab(t.dataset.tab); history.replaceState(null, '', '#' + t.dataset.tab); });
     });
-    var h = location.hash.slice(1);
-    if (h) { var b = document.querySelector('.hu-tab[data-tab="' + h + '"]'); if (b) b.click(); }
+    var start = new URLSearchParams(location.search).get('tab') || location.hash.slice(1);
+    if (start) openTab(start);
 </script>
 </body>
 </html>
