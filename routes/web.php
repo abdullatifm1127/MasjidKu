@@ -24,6 +24,7 @@ use App\Http\Controllers\adminmasjid\JamaahController;
 use App\Http\Controllers\adminmasjid\DonationCategoryController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\adminmasjid\PengumumanController;
+use App\Http\Controllers\SuperAdmin\PaymentSettingController; // <-- BARU
 
 /*
 |--------------------------------------------------------------------------
@@ -60,6 +61,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Rute untuk membuat Snap Token Midtrans via Ajax/Axios
     Route::post('/masjid/pembayaran/create', [PaymentController::class, 'createTransaction'])->name('masjid.payment.create');
+
+    // Rute untuk menyimpan pembayaran manual (upload bukti transfer)
+    Route::post('/masjid/pembayaran/manual', [PaymentController::class, 'storeManualPayment'])->name('payment.manual.store');
 
     // Rute Pembatalan Pendaftaran/Pembayaran
     Route::get('/masjid/batalkan', [PaymentController::class, 'cancelRegistration'])->name('masjid.cancel');
@@ -261,6 +265,10 @@ Route::middleware(['auth', 'check.status'])->group(function () {
 Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(function () {
     Route::get('/dashboard', [BerandaSuperAdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/verifikasi', [MosqueController::class, 'verifikasi'])->name('verifikasi');
+
+    // ===== PENGATURAN PEMBAYARAN (BARU) =====
+    Route::get('/pembayaran', [PaymentSettingController::class, 'index'])->name('pembayaran.index');
+    Route::post('/pembayaran/{id}', [PaymentSettingController::class, 'update'])->name('pembayaran.update');
 
     Route::put('/verifikasi/{id}/approve', [MosqueController::class, 'approveVerifikasi'])
         ->name('verifikasi.approve');

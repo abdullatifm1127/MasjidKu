@@ -5,6 +5,7 @@
         ['dashboard',     'superadmin.dashboard',          'fa-table-cells-large', 'Dashboard'],
         ['verifikasi',    'superadmin.verifikasi',         'fa-shield-halved',     'Verifikasi Pendaftaran'],
         ['manajemen',     'superadmin.manajemen-masjid',   'fa-mosque',            'Manajemen Masjid'],
+        ['pembayaran',    'superadmin.pembayaran.index',   'fa-credit-card',       'Pembayaran'], // <--- Menu Pembayaran Ditambahkan di Sini
         ['pengguna',      'superadmin.pengguna',           'fa-users',             'Pengguna'],
         ['halaman-utama', 'superadmin.halaman-utama.edit', 'fa-pen-to-square',     'Halaman Utama'],
         ['pengaturan',    'superadmin.pengaturan',         'fa-gear',              'Pengaturan'],

@@ -3,334 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upgrade & Perpanjangan Langganan Masjid - MasjidKu</title>
+    <title>Upgrade & Perpanjangan Langganan Masjid - SIM Masjid</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --ink: #191919;
-            --muted: #6b6b6b;
-            --line: #e7e5e0;
-            --paper: #faf9f6;
-            --accent: #2f7a4f;
-            --accent-soft: #eef7f0;
-        }
-
-        * { box-sizing: border-box; }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--paper);
-            color: var(--ink);
-            margin: 0;
-            padding: 56px 24px;
-        }
-
-        .wrap {
-            max-width: 1080px;
-            margin: 0 auto;
-        }
-
-        .page-head {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .page-head h1 {
-            font-size: 30px;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            margin: 0 0 8px;
-        }
-
-        .page-head p {
-            color: var(--muted);
-            font-size: 15px;
-            margin: 0;
-        }
-
-        .plans {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            align-items: stretch;
-            margin-bottom: 40px;
-        }
-
-        .plan {
-            position: relative;
-        }
-
-        .plan input[type="radio"] {
-            position: absolute;
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .plan-card {
-            border: 1px solid var(--line);
-            border-radius: 16px;
-            background: #fff;
-            padding: 28px 26px;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            cursor: pointer;
-            transition: border-color .15s ease, box-shadow .15s ease;
-        }
-
-        .plan input:checked + .plan-card {
-            border-color: var(--ink);
-            box-shadow: 0 0 0 1px var(--ink);
-        }
-
-        .plan-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 1.5px solid var(--ink);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 18px;
-        }
-
-        .plan-icon svg { width: 18px; height: 18px; }
-
-        .plan-name {
-            font-size: 20px;
-            font-weight: 700;
-            margin: 0 0 4px;
-        }
-
-        .plan-tag {
-            color: var(--muted);
-            font-size: 13.5px;
-            margin: 0 0 20px;
-        }
-
-        .plan-price {
-            display: flex;
-            align-items: baseline;
-            gap: 6px;
-            margin-bottom: 4px;
-        }
-
-        .plan-price .amount {
-            font-size: 30px;
-            font-weight: 800;
-            letter-spacing: -0.01em;
-        }
-
-        .plan-note {
-            font-size: 12.5px;
-            color: var(--muted);
-            margin: 0 0 20px;
-            min-height: 18px;
-        }
-
-        .plan-select {
-            width: 100%;
-            padding: 11px 16px;
-            border-radius: 8px;
-            border: 1px solid var(--ink);
-            background: #fff;
-            color: var(--ink);
-            font-weight: 600;
-            font-size: 14px;
-            text-align: center;
-        }
-
-        .plan input:checked + .plan-card .plan-select {
-            background: var(--ink);
-            color: #fff;
-        }
-
-        .plan-select::before {
-            content: "Pilih paket ini";
-        }
-
-        .plan input:checked + .plan-card .plan-select::before {
-            content: "✓ Paket dipilih";
-        }
-
-        .plan-divider {
-            border: none;
-            border-top: 1px solid var(--line);
-            margin: 24px 0 18px;
-        }
-
-        .plan-feats {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            flex-grow: 1;
-        }
-
-        .plan-feats li {
-            font-size: 13.5px;
-            color: #333;
-            display: flex;
-            gap: 10px;
-            line-height: 1.4;
-        }
-
-        .plan-feats li svg {
-            flex-shrink: 0;
-            margin-top: 2px;
-            width: 14px;
-            height: 14px;
-            color: var(--accent);
-        }
-
-        .plan.featured .plan-card { border-color: var(--ink); }
-        .plan-badge {
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--ink);
-            color: #fff;
-            font-size: 11px;
-            font-weight: 700;
-            padding: 4px 12px;
-            border-radius: 100px;
-            letter-spacing: 0.02em;
-        }
-
-        .actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .btn-back {
-            color: var(--muted);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .btn-back:hover { color: var(--ink); }
-
-        .btn-submit {
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            padding: 13px 28px;
-            font-weight: 700;
-            font-size: 14.5px;
-            cursor: pointer;
-        }
-
-        .btn-submit:hover { background: #235c3c; }
-
-        @media (max-width: 860px) {
-            .plans { grid-template-columns: 1fr; }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/paymentmasjid/perpanjanganLangganan.css') }}">
 </head>
 <body>
 
-    <div class="wrap">
+@php
+    $monthly = isset($packages['package_monthly']) ? json_decode($packages['package_monthly']->config_data, true) : ['price' => 100000, 'features' => []];
+    $yearly  = isset($packages['package_yearly'])  ? json_decode($packages['package_yearly']->config_data, true)  : ['price' => 1000000, 'features' => []];
 
-        <div class="page-head">
-            <h1>Upgrade & Perpanjangan Langganan Masjid</h1>
-            <p>Pilih paket durasi langganan pilihan Anda. Pembayaran diproses otomatis via Midtrans.</p>
+    $monthlyName = $packages['package_monthly']->method_name ?? 'Paket 1 Bulan';
+    $yearlyName  = $packages['package_yearly']->method_name ?? 'Paket 1 Tahun';
+
+    $monthlyPrice = $monthly['price'] ?? 100000;
+    $yearlyPrice  = $yearly['price'] ?? 1000000;
+
+    // Format value untuk controller: Harga_Bulan
+    $monthlyCode = $monthlyPrice . '_1';
+    $yearlyCode  = $yearlyPrice . '_12';
+
+    // Hemat paket tahunan dibanding 12x bulanan
+    $hemat = max(0, ($monthlyPrice * 12) - $yearlyPrice);
+    $hematPersen = $monthlyPrice > 0 ? round($hemat / ($monthlyPrice * 12) * 100) : 0;
+
+@endphp
+
+{{-- ===== BANNER ===== --}}
+<header class="hero">
+    <div class="topline">
+        <a href="{{ url('/') }}" class="brand">Masjid<b>Ku</b></a>
+        <a href="{{ route('dashboard') }}" class="back">← Kembali ke Dashboard</a>
+    </div>
+    <span class="eyebrow">Langganan Masjid</span>
+    <h1>Pilih paket yang cocok untuk masjid Anda</h1>
+    <p>Pembayaran diproses otomatis lewat Midtrans. Paket aktif setelah pembayaran berhasil.</p>
+</header>
+
+<div class="wrap">
+    <form action="{{ route('masjid.perpanjangan.store') }}" method="POST" id="planForm">
+        @csrf
+
+        <div class="plans">
+
+            {{-- ===== FREE ===== --}}
+            <label class="plan">
+                <input type="radio" name="package" value="0_0" data-name="Free" data-price="0" data-dur="Gratis" required>
+                <div class="card">
+                    <span class="tick">✓</span>
+                    <div class="icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+                    </div>
+                    <p class="name">Free</p>
+                    <p class="tag">Fitur dasar website masjid</p>
+                    <div class="price"><span class="amount">Rp 0</span></div>
+                    <p class="note">Masa uji coba terbatas</p>
+                    <hr class="divider">
+                    <ul class="feats">
+                        <li>Profil & informasi dasar</li>
+                        <li>Jadwal sholat otomatis</li>
+                    </ul>
+                    <div class="choose"></div>
+                </div>
+            </label>
+
+            {{-- ===== 1 BULAN (dinamis dari Superadmin) ===== --}}
+            <label class="plan">
+                <input type="radio" name="package" value="{{ $monthlyCode }}" data-name="{{ $monthlyName }}" data-price="{{ $monthlyPrice }}" data-dur="1 bulan" checked>
+                <div class="card">
+                    <span class="tick">✓</span>
+                    <div class="icon green">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M3 12h4M17 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
+                    </div>
+                    <p class="name">{{ $monthlyName }}</p>
+                    <p class="tag">Pengelolaan sehari-hari</p>
+                    <div class="price"><span class="rp">Rp</span><span class="amount">{{ number_format($monthlyPrice, 0, ',', '.') }}</span><span class="per">/ bulan</span></div>
+                    <p class="note">Bayar per bulan, tanpa komitmen panjang</p>
+                    <hr class="divider">
+                    <ul class="feats">
+                        @forelse($monthly['features'] ?? [] as $feature)
+                            <li>{{ $feature }}</li>
+                        @empty
+                            <li class="none">Fitur belum diatur</li>
+                        @endforelse
+                    </ul>
+                    <div class="choose"></div>
+                </div>
+            </label>
+
+            {{-- ===== 1 TAHUN (dinamis dari Superadmin) ===== --}}
+            <label class="plan featured">
+                <span class="badge">★ Paling direkomendasikan</span>
+                <input type="radio" name="package" value="{{ $yearlyCode }}" data-name="{{ $yearlyName }}" data-price="{{ $yearlyPrice }}" data-dur="12 bulan">
+                <div class="card">
+                    <span class="tick">✓</span>
+                    <div class="icon gold">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l4 4 5-7 5 7 4-4-2 11H5L3 8z"/></svg>
+                    </div>
+                    <p class="name">{{ $yearlyName }}</p>
+                    <p class="tag">Bebas repot tiap bulan</p>
+                    <div class="price"><span class="rp">Rp</span><span class="amount">{{ number_format($yearlyPrice, 0, ',', '.') }}</span><span class="per">/ tahun</span></div>
+                    <p class="note">
+                        Setara Rp {{ number_format(round($yearlyPrice / 12), 0, ',', '.') }} / bulan
+                        @if($hematPersen > 0) &nbsp;<span class="save">Hemat {{ $hematPersen }}%</span>@endif
+                    </p>
+                    <hr class="divider">
+                    <ul class="feats">
+                        @forelse($yearly['features'] ?? [] as $feature)
+                            <li>{{ $feature }}</li>
+                        @empty
+                            <li class="none">Fitur belum diatur</li>
+                        @endforelse
+                    </ul>
+                    <div class="choose"></div>
+                </div>
+            </label>
         </div>
 
-        <form action="{{ route('masjid.perpanjangan.store') }}" method="POST">
-            @csrf
+        {{-- ===== KEUNGGULAN ===== --}}
+        <div class="trust">
+            <div><i>🔒</i><p style="margin:0"><b>Pembayaran aman</b><span>Diproses oleh Midtrans</span></p></div>
+            <div><i>💳</i><p style="margin:0"><b>Banyak pilihan bayar</b><span>QRIS, e-wallet, dan virtual account</span></p></div>
+            <div><i>⚡</i><p style="margin:0"><b>Aktif otomatis</b><span>Setelah pembayaran berhasil</span></p></div>
+        </div>
 
-            <div class="plans">
-                <!-- Paket Free -->
-                <label class="plan">
-                    <input type="radio" name="package" value="0_0" required>
-                    <div class="plan-card">
-                        <div class="plan-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-                        </div>
-                        <p class="plan-name">Free</p>
-                        <p class="plan-tag">Fitur dasar website masjid</p>
-                        <div class="plan-price"><span class="amount">Rp 0</span></div>
-                        <p class="plan-note">Masa uji coba terbatas</p>
-                        <span class="plan-select"></span>
-                        <hr class="plan-divider">
-                        <ul class="plan-feats">
-                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Profil & informasi dasar</li>
-                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Jadwal sholat otomatis</li>
-                        </ul>
-                    </div>
-                </label>
-
-                <!-- Paket 1 Bulan -->
-                <label class="plan">
-                    <input type="radio" name="package" value="100000_1" checked>
-                    <div class="plan-card">
-                        <div class="plan-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v4M12 17v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M3 12h4M17 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
-                        </div>
-                        <p class="plan-name">Paket 1 Bulan</p>
-                        <p class="plan-tag">Pengelolaan sehari-hari</p>
-                        <div class="plan-price"><span class="amount">Rp 100rb</span></div>
-                        <p class="plan-note">Rp 100.000 / bulan</p>
-                        <span class="plan-select"></span>
-                        <hr class="plan-divider">
-                        <ul class="plan-feats">
-                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Akses penuh fitur standar</li>
-                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Masa aktif 30 hari</li>
-                        </ul>
-                    </div>
-                </label>
-
-                <!-- Paket 1 Tahun -->
-                <label class="plan featured">
-                    <span class="plan-badge">Paling direkomendasikan</span>
-                    <input type="radio" name="package" value="1000000_12">
-                    <div class="plan-card">
-                        <div class="plan-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v4M12 17v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M3 12h4M17 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
-                        </div>
-                        <p class="plan-name">Paket 1 Tahun</p>
-                        <p class="plan-tag">Bebas repot tiap bulan</p>
-                        <div class="plan-price"><span class="amount">Rp 1jt</span></div>
-                        <p class="plan-note">Setara Rp 83.300 / bulan</p>
-                        <span class="plan-select"></span>
-                        <hr class="plan-divider">
-                        <ul class="plan-feats">
-                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Masa aktif penuh 12 bulan</li>
-                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>Harga per bulan paling hemat</li>
-                        </ul>
-                    </div>
-                </label>
+        {{-- ===== BAR BAWAH ===== --}}
+        <div class="bar">
+            <div class="bar-in">
+                <div class="sum">
+                    <small>Paket dipilih</small>
+                    <strong id="sumName">-</strong><span class="tot" id="sumTotal"></span>
+                </div>
+                <div class="actions">
+                    <a href="{{ route('dashboard') }}" class="btn-back">Batal</a>
+                    <button type="submit" class="btn-submit" id="submit-btn">Lanjutkan ke Pembayaran Otomatis</button>
+                </div>
             </div>
+        </div>
+    </form>
+</div>
 
-            <div class="actions">
-                <a href="{{ url('/dashboard') }}" class="btn-back">← Kembali ke Dashboard</a>
-                <button type="submit" class="btn-submit" id="submit-btn">Lanjutkan ke Pembayaran Otomatis</button>
-            </div>
-        </form>
-    </div>
+<script>
+    var radios = document.querySelectorAll('input[name="package"]');
+    var submitBtn = document.getElementById('submit-btn');
+    var sumName = document.getElementById('sumName');
+    var sumTotal = document.getElementById('sumTotal');
 
-    <script>
-        const packageRadios = document.querySelectorAll('input[name="package"]');
-        const submitBtn = document.getElementById('submit-btn');
+    function updateSummary() {
+        var sel = document.querySelector('input[name="package"]:checked');
+        if (!sel) return;
+        var gratis = sel.value.indexOf('0_') === 0;
+        var harga = parseInt(sel.dataset.price, 10) || 0;
 
-        function updateButtonText() {
-            const selected = document.querySelector('input[name="package"]:checked');
-            if (selected && selected.value.startsWith('0_')) {
-                submitBtn.textContent = 'Simpan & Gunakan Paket Free';
-            } else {
-                submitBtn.textContent = 'Lanjutkan ke Pembayaran Otomatis';
-            }
-        }
+        sumName.textContent = sel.dataset.name + ' · ' + sel.dataset.dur;
+        sumTotal.textContent = gratis ? 'Gratis' : 'Rp ' + harga.toLocaleString('id-ID');
+        submitBtn.textContent = gratis ? 'Simpan & Gunakan Paket Free' : 'Lanjutkan ke Pembayaran Otomatis';
+    }
 
-        packageRadios.forEach(radio => radio.addEventListener('change', updateButtonText));
-        updateButtonText();
-    </script>
+    radios.forEach(function (r) { r.addEventListener('change', updateSummary); });
+    updateSummary();
+</script>
 </body>
 </html>

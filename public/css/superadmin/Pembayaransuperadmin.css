@@ -1,0 +1,116 @@
+/* ==========================================================
+   Pengaturan Pembayaran & Paket (Super Admin)
+   Dipakai bersama berandaSuperAdmin.css
+   ========================================================== */
+.pb-wrap{max-width:1180px;margin:0 auto;padding:6px 0 40px}
+
+/* ---------- Banner atas ---------- */
+.pb-hero{position:relative;overflow:hidden;border-radius:22px;padding:34px 36px;margin-bottom:34px;color:#fff;
+    background:linear-gradient(120deg,#0f3d24 0%,#14532d 55%,#1d7a45 100%);
+    display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
+.pb-hero::before{content:"";position:absolute;right:-60px;top:-80px;width:320px;height:320px;border-radius:50%;background:rgba(245,166,35,.18)}
+.pb-hero::after{content:"";position:absolute;right:120px;bottom:-110px;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.07)}
+.pb-hero > *{position:relative;z-index:1}
+.pb-hero h1{margin:0 0 8px;font-size:32px;line-height:1.2;color:#fff}
+.pb-hero p{margin:0;max-width:540px;color:#d1fae5;font-size:16px;line-height:1.6}
+.pb-chips{display:flex;gap:12px;flex-wrap:wrap}
+.pb-chip{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:14px;padding:12px 18px;min-width:130px;backdrop-filter:blur(4px)}
+.pb-chip strong{display:block;font-size:26px;line-height:1.1}
+.pb-chip span{font-size:13px;color:#d1fae5}
+
+/* ---------- Alert ---------- */
+.pb-alert{display:flex;align-items:center;gap:10px;padding:15px 20px;border-radius:14px;margin-bottom:26px;font-size:15px;background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
+.pb-alert i{font-size:18px}
+
+/* ---------- Judul bagian ---------- */
+.pb-section{margin:6px 0 18px}
+.pb-section h2{margin:0;font-size:22px;color:#111827}
+.pb-section p{margin:4px 0 0;color:#6b7280;font-size:15px}
+.pb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-bottom:38px}
+
+/* ---------- Kartu ---------- */
+.pb-card{background:#fff;border:1px solid #e5e7eb;border-radius:20px;box-shadow:0 2px 10px rgba(15,23,42,.05);display:flex;flex-direction:column;overflow:hidden;transition:box-shadow .2s,transform .2s}
+.pb-card:hover{box-shadow:0 10px 28px rgba(15,23,42,.09)}
+.pb-card form{display:flex;flex-direction:column;flex:1}
+.pb-card-head{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:22px 24px;border-bottom:1px solid #f1f5f9}
+.pb-title{display:flex;align-items:center;gap:14px;min-width:0}
+.pb-icon{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;font-size:21px;color:#fff;flex:none;background:linear-gradient(135deg,#14532d,#22a35a)}
+.pb-icon.gold{background:linear-gradient(135deg,#d97706,#f5a623)}
+.pb-icon.blue{background:linear-gradient(135deg,#1d4ed8,#3b82f6)}
+.pb-card.off .pb-icon{background:#cbd5e1}
+.pb-title h3{margin:0 0 5px;font-size:18px;color:#111827;line-height:1.3}
+.pb-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:3px 11px;border-radius:999px;background:#dcfce7;color:#166534}
+.pb-pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pb-card.off .pb-pill{background:#f1f5f9;color:#64748b}
+.pb-body{padding:24px;flex:1;display:flex;flex-direction:column}
+.pb-foot{padding:0 24px 24px}
+
+/* ---------- Saklar ---------- */
+.pb-switch{display:flex;align-items:center;gap:10px;cursor:pointer;flex:none;font-size:14px;font-weight:600;color:#475569}
+.pb-switch input{position:absolute;opacity:0;width:0;height:0}
+.pb-track{position:relative;width:50px;height:28px;background:#cbd5e1;border-radius:999px;transition:.2s;flex:none}
+.pb-track::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.pb-switch input:checked + .pb-track{background:#16a34a}
+.pb-switch input:checked + .pb-track::after{transform:translateX(22px)}
+.pb-switch input:focus-visible + .pb-track{outline:3px solid #bbf7d0}
+
+/* ---------- Isian ---------- */
+.pb-desc{margin:0 0 20px;color:#64748b;font-size:14.5px;line-height:1.6}
+.pb-field{margin-bottom:18px}
+.pb-field label{display:block;font-size:13.5px;font-weight:700;color:#334155;margin-bottom:8px}
+.pb-field input[type=text],.pb-field input[type=password],.pb-field input[type=number],.pb-field textarea{
+    width:100%;border:1.5px solid #e2e8f0;border-radius:12px;padding:13px 15px;font:inherit;font-size:15.5px;
+    box-sizing:border-box;background:#f8fafc;color:#0f172a;transition:.15s}
+.pb-field textarea{resize:vertical;min-height:130px;line-height:1.7}
+.pb-field input:focus,.pb-field textarea:focus{outline:none;border-color:#16a34a;background:#fff;box-shadow:0 0 0 4px rgba(22,163,74,.13)}
+.pb-field small{display:block;margin-top:7px;color:#94a3b8;font-size:13px}
+.pb-secret{position:relative}
+.pb-secret input{padding-right:50px !important}
+.pb-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:38px;height:38px;border:0;background:transparent;color:#64748b;cursor:pointer;border-radius:10px;font-size:16px}
+.pb-eye:hover{background:#e2e8f0}
+.pb-mode{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:10px;margin-bottom:18px;width:fit-content}
+.pb-mode.sandbox{background:#fef3c7;color:#92400e}
+.pb-mode.live{background:#dcfce7;color:#166534}
+.pb-mode.kosong{background:#f1f5f9;color:#64748b}
+.pb-row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* ---------- Pratinjau kartu rekening ---------- */
+.pb-bank{border-radius:18px;padding:22px 24px;margin-bottom:22px;color:#fff;position:relative;overflow:hidden;
+    background:linear-gradient(135deg,#0f766e,#134e4a)}
+.pb-bank::after{content:"";position:absolute;right:-40px;top:-50px;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.1)}
+.pb-bank small{display:block;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:#99f6e4;margin-bottom:4px}
+.pb-bank .bank{font-size:19px;font-weight:700;margin-bottom:16px;position:relative;z-index:1}
+.pb-bank .num{font-size:25px;font-weight:600;letter-spacing:.12em;margin-bottom:16px;word-break:break-all;position:relative;z-index:1}
+.pb-bank .an{font-size:15px;font-weight:600;position:relative;z-index:1}
+
+/* ---------- Paket (gaya kartu harga) ---------- */
+.pb-plan{text-align:center;padding:26px 24px 22px;background:linear-gradient(180deg,#f0fdf4,#fff);border-bottom:1px solid #f1f5f9}
+.pb-plan .nama{font-size:14px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:.08em}
+.pb-plan-price{margin:8px 0 2px;display:flex;justify-content:center;align-items:baseline;gap:6px;color:#0f172a}
+.pb-plan-price small{font-size:18px;font-weight:700;color:#64748b}
+.pb-plan-price strong{font-size:42px;line-height:1.1;letter-spacing:-.02em}
+.pb-plan-price em{font-style:normal;font-size:15px;color:#64748b}
+.pb-features{list-style:none;margin:16px 0 0;padding:0;text-align:left;display:grid;gap:9px}
+.pb-features li{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;color:#334155;line-height:1.5}
+.pb-features li::before{content:"\f00c";font-family:"Font Awesome 6 Free";font-weight:900;font-size:11px;width:20px;height:20px;border-radius:50%;background:#dcfce7;color:#16a34a;display:grid;place-items:center;flex:none;margin-top:2px}
+.pb-features .kosong{color:#94a3b8}
+.pb-features .kosong::before{display:none}
+.pb-name-input{width:100%;font-size:18px !important;font-weight:700 !important;padding:11px 14px !important}
+.pb-price{display:flex}
+.pb-price span{display:grid;place-items:center;padding:0 16px;background:#e2e8f0;border-radius:12px 0 0 12px;font-weight:700;color:#334155}
+.pb-price input{border-radius:0 12px 12px 0 !important}
+
+/* ---------- Tombol ---------- */
+.pb-btn{width:100%;border:0;border-radius:13px;padding:15px 18px;font:inherit;font-size:16px;font-weight:700;color:#fff;cursor:pointer;
+    background:linear-gradient(135deg,#14532d,#16a34a);transition:.15s;box-shadow:0 4px 12px rgba(22,163,74,.25)}
+.pb-btn:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(22,163,74,.3)}
+.pb-spacer{flex:1}
+.pb-empty{grid-column:1/-1;text-align:center;color:#64748b;padding:50px 10px;background:#fff;border:2px dashed #cbd5e1;border-radius:18px}
+
+@media(max-width:900px){
+    .pb-grid{grid-template-columns:1fr}
+    .pb-hero{padding:26px 22px}
+    .pb-hero h1{font-size:25px}
+    .pb-row2{grid-template-columns:1fr}
+    .pb-card-head{flex-wrap:wrap}
+}
