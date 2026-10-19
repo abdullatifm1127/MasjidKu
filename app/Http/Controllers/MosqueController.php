@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Subscription;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class MosqueController extends Controller
 {
@@ -463,9 +464,17 @@ class MosqueController extends Controller
         return redirect()->route('masjid.payment');
     }
 
-    public function createRenewal()
+   public function createRenewal()
     {
-        return view('paymentmasjid.perpanjangan');
+        $mosque = Mosque::where('user_id', Auth::id())->first();
+
+        // Ambil data paket bulanan dan tahunan dari tabel payment_settings
+        $packages = DB::table('payment_settings')
+            ->whereIn('code', ['package_monthly', 'package_yearly'])
+            ->get()
+            ->keyBy('code');
+
+        return view('paymentmasjid.perpanjangan', compact('mosque', 'packages'));
     }
 
    public function cancelRegistration()

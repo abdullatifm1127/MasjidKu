@@ -675,3 +675,224 @@ body.sa-page {
     .sa-stats-grid { grid-template-columns: 1fr; }
     .sa-mosque-kelola { display: none; }
 }
+
+
+/* ==========================================================
+   DASHBOARD BARU (prefix db-) - digabung ke file ini
+   ========================================================== */
+
+/* ==========================================================
+   Dashboard Super Admin - tampilan baru (prefix db-)
+   Dimuat SETELAH berandaSuperAdmin.css. Tidak mengubah kelas sa-*.
+   ========================================================== */
+
+.db-wrap{
+    --g9:#0f3d22; --g7:#14532d; --g6:#15803d; --g1:#dcfce7; --g0:#f0fdf4;
+    --gold:#b8892b; --ink:#17251c; --muted:#667085; --line:#e4e9e4;
+    --shadow:0 1px 2px rgba(15,61,34,.05),0 6px 20px rgba(15,61,34,.06);
+    width:100%;max-width:1400px;margin:0 auto;padding:8px 0 40px;color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+.db-wrap button,.db-wrap input{font-family:inherit}
+.db-wrap [hidden]{display:none!important}
+.db-wrap h1,.db-wrap h2,.db-wrap p{margin:0}
+
+/* ---------- Banner ---------- */
+.db-hero{
+    display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:stretch;
+    padding:30px 34px;border-radius:20px;color:#fff;position:relative;overflow:hidden;margin-bottom:18px;
+    background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cpath d='M28 4l6 14 14-6-6 14 14 6-14 6 6 14-14-6-6 14-6-14-14 6 6-14-14-6 14-6-6-14 14 6z' fill='none' stroke='%23ffffff' stroke-opacity='.09' stroke-width='1.2'/%3E%3C/svg%3E"),
+        linear-gradient(120deg,var(--g9) 0%,var(--g7) 55%,#1c7a43 100%);
+    box-shadow:0 10px 30px rgba(15,61,34,.25);
+}
+.db-hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--gold),#e3bf6a 50%,var(--gold))}
+.db-hero-main{flex:1 1 380px;min-width:0}
+.db-hero h1{font-size:30px;line-height:1.2;font-weight:700;letter-spacing:-.01em;margin-top:10px}
+.db-hero-main > p{margin-top:6px;color:rgba(255,255,255,.82);font-size:16px}
+#dbClock{font-variant-numeric:tabular-nums;font-weight:600;color:#f3d68a}
+
+.db-live{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;letter-spacing:.06em;
+    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);padding:4px 12px;border-radius:999px}
+.db-live-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 0 rgba(74,222,128,.7);animation:dbPing 1.8s infinite}
+@keyframes dbPing{70%{box-shadow:0 0 0 9px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
+
+.db-qa{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.db-qa-btn{
+    display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:12px;font-size:14.5px;font-weight:600;
+    color:#fff;text-decoration:none;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.3);
+    backdrop-filter:blur(4px);transition:background .15s,color .15s,transform .12s;
+}
+.db-qa-btn:hover{background:#fff;color:var(--g7)}
+.db-qa-btn:active{transform:translateY(1px)}
+.db-qa-count{background:#f59e0b;color:#3b2a00;font-size:12px;font-weight:800;padding:1px 8px;border-radius:999px}
+
+.db-hero-side{flex:0 1 330px;display:flex;flex-direction:column;justify-content:space-between;gap:18px;min-width:260px}
+.db-refresh{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex-wrap:wrap}
+.db-refresh-btn{
+    border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.13);color:#fff;font:inherit;font-weight:600;
+    font-size:13.5px;padding:8px 14px;border-radius:999px;cursor:pointer;display:inline-flex;gap:8px;align-items:center;
+    transition:background .15s,color .15s;
+}
+.db-refresh-btn:hover{background:#fff;color:var(--g7)}
+.db-auto{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.85);cursor:pointer}
+.db-auto b{font-variant-numeric:tabular-nums;color:#f3d68a;display:inline-block;min-width:1.4em;text-align:center}
+.db-auto input{accent-color:#4ade80;width:16px;height:16px}
+.db-hero-donasi{background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:16px 18px}
+.db-hero-donasi span{font-size:13px;color:rgba(255,255,255,.78)}
+.db-hero-donasi strong{display:block;font-size:26px;font-weight:700;margin:2px 0 10px;font-variant-numeric:tabular-nums}
+.db-hero-track{height:8px;border-radius:999px;background:rgba(255,255,255,.2);overflow:hidden}
+.db-hero-track i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#e3bf6a,#f6dc9a)}
+.db-hero-donasi small{display:block;margin-top:8px;font-size:12.5px;color:rgba(255,255,255,.75)}
+
+/* ---------- Peringatan ---------- */
+.db-alert{
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 18px;margin-bottom:18px;border-radius:14px;
+    background:#fffbeb;border:1px solid #fde68a;border-left:5px solid #f59e0b;color:#7c4a03;text-decoration:none;font-size:15px;
+    transition:box-shadow .15s;
+}
+.db-alert:hover{box-shadow:0 6px 18px rgba(245,158,11,.2)}
+.db-alert-ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#fde68a;color:#92400e;animation:dbWobble 2.4s ease-in-out infinite}
+@keyframes dbWobble{0%,60%,100%{transform:rotate(0)}70%{transform:rotate(-12deg)}80%{transform:rotate(10deg)}90%{transform:rotate(-6deg)}}
+.db-alert-go{margin-left:auto;font-weight:700;color:#92400e;display:inline-flex;gap:8px;align-items:center}
+
+/* ---------- Statistik ---------- */
+.db-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:18px}
+.db-stat{
+    display:flex;gap:16px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;
+    padding:20px 22px;box-shadow:var(--shadow);min-width:0;
+}
+.db-stat.needs{border-color:#fcd34d;background:linear-gradient(180deg,#fff,#fffdf5)}
+.db-stat-ico{flex:none;width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:21px}
+.db-stat-ico.green{background:var(--g1);color:var(--g7)}
+.db-stat-ico.gold{background:#fdf3d3;color:#92660f}
+.db-stat-ico.amber{background:#fef3c7;color:#b45309}
+.db-stat-label{font-size:14px;color:var(--muted);font-weight:500}
+.db-stat-value{font-size:30px;font-weight:700;line-height:1.15;margin:2px 0;font-variant-numeric:tabular-nums;color:var(--g9)}
+.db-stat-value.small{font-size:22px}
+.db-stat-sub{font-size:13px;color:var(--muted)}
+
+/* ---------- Layout utama ---------- */
+.db-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px;margin-bottom:18px;align-items:start}
+.db-side{display:flex;flex-direction:column;gap:18px;min-width:0}
+
+/* ---------- Kartu ---------- */
+.db-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 26px;box-shadow:var(--shadow);min-width:0}
+.db-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px}
+.db-card-head h2{font-size:19px;font-weight:700;color:var(--g9)}
+.db-card-head p{font-size:14px;color:var(--muted);margin-top:2px}
+.db-link{font-size:14px;font-weight:600;color:var(--g6);text-decoration:none;white-space:nowrap;display:inline-flex;gap:6px;align-items:center}
+.db-link:hover{color:var(--g9)}
+
+/* Pencarian & chip filter */
+.db-tools{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.db-search{position:relative;flex:1 1 220px}
+.db-search i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#98a2b3;font-size:14px}
+.db-search input{
+    width:100%;box-sizing:border-box;border:1.5px solid #d5dbd5;border-radius:11px;padding:11px 14px 11px 40px;
+    font:inherit;font-size:15px;background:#fcfdfc;transition:border-color .15s,box-shadow .15s;
+}
+.db-search input:focus{outline:none;border-color:var(--g6);box-shadow:0 0 0 4px rgba(22,163,74,.15);background:#fff}
+.db-chips{display:flex;gap:6px;flex-wrap:wrap}
+.db-chipbtn{
+    border:1px solid var(--line);background:#fff;color:#4b5563;font:inherit;font-size:13.5px;font-weight:600;
+    padding:7px 14px;border-radius:999px;cursor:pointer;transition:background .15s,color .15s,border-color .15s;
+}
+.db-chipbtn:hover{background:var(--g0);color:var(--g7)}
+.db-chipbtn.active{background:var(--g7);border-color:var(--g7);color:#fff}
+.db-chipbtn:focus-visible,.db-kelola:focus-visible,.db-qa-btn:focus-visible,.db-refresh-btn:focus-visible{outline:3px solid rgba(22,163,74,.4);outline-offset:2px}
+
+/* ---------- Daftar masjid ---------- */
+.db-mlist{max-height:600px;overflow:auto;margin:0 -10px;padding:0 10px}
+.db-mrow{display:flex;gap:14px;align-items:center;padding:16px 10px;margin:0 -10px;border-bottom:1px solid #eef2ee;border-radius:12px;transition:background .15s}
+.db-mrow:hover{background:#f8faf8}
+.db-mrow:last-of-type{border-bottom:0}
+.db-avatar{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:18px}
+.db-minfo{flex:1;min-width:0}
+.db-mtitle{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.db-mname{font-weight:700;font-size:16px}
+.db-badge{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px}
+.db-badge.aktif{background:var(--g1);color:#166534}
+.db-badge.pending{background:#fef3c7;color:#92400e}
+.db-badge.lain{background:#eef2f6;color:#475467}
+.db-mmeta{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin:3px 0 8px}
+.db-mmeta i{margin-right:4px;font-size:12px}
+.db-bar{height:7px;border-radius:999px;background:#eaeeea;overflow:hidden}
+.db-bar.big{height:10px}
+.db-bar i{display:block;height:100%;border-radius:999px;background:#16a34a;transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.db-bar i.pending{background:#f59e0b}
+.db-bar i.lain{background:#98a2b3}
+.db-bar i.gold{background:linear-gradient(90deg,#d6a62f,#f0cf7a)}
+.db-mdonasi{display:flex;gap:8px;flex-wrap:wrap;align-items:baseline;margin-top:6px;font-size:13px;color:var(--muted)}
+.db-mdonasi b{font-size:14.5px;color:var(--g9)}
+.db-kelola{
+    flex:none;text-decoration:none;font-size:13.5px;font-weight:700;color:var(--g7);background:var(--g0);
+    border:1px solid #bfe5c9;padding:8px 16px;border-radius:10px;transition:background .15s,color .15s;
+}
+.db-kelola:hover{background:var(--g7);color:#fff}
+
+/* ---------- Donut ---------- */
+.db-donut-wrap{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.db-donut{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;flex:none}
+.db-donut-hole{width:104px;height:104px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px var(--line)}
+.db-donut-hole strong{font-size:28px;line-height:1;color:var(--g9)}
+.db-donut-hole span{font-size:12.5px;color:var(--muted);margin-top:3px}
+.db-legend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:14.5px;flex:1;min-width:140px}
+.db-legend li{display:flex;align-items:center;gap:10px}
+.db-legend i{width:12px;height:12px;border-radius:4px;flex:none}
+.db-legend b{margin-left:auto;font-variant-numeric:tabular-nums}
+
+/* ---------- Feed aktivitas ---------- */
+.db-feed{list-style:none;margin:14px 0 0;padding:0;max-height:430px;overflow:auto;position:relative}
+.db-act{display:flex;gap:12px;align-items:flex-start;padding:12px 0;position:relative}
+.db-act + .db-act{border-top:1px dashed #e8ece8}
+.db-act-ico{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:15px}
+.db-act-ico.donasi{background:#fdf3d3;color:#92660f}
+.db-act-ico.masjid{background:var(--g1);color:var(--g7)}
+.db-act-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.db-act-tx strong{font-size:14.5px;line-height:1.35}
+.db-act-tx span{font-size:13px;color:var(--muted);line-height:1.4}
+.db-act-time{flex:none;font-size:12px;color:#98a2b3;white-space:nowrap;padding-top:2px}
+
+/* ---------- Peringkat ---------- */
+.db-rank{display:grid;gap:18px}
+.db-rank-row{display:flex;gap:16px;align-items:center}
+.db-rank-no{
+    flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:15px;
+    background:#eef2ee;color:#475467;
+}
+.db-rank-no.n1{background:linear-gradient(135deg,#f0cf7a,#c9972a);color:#3b2a00}
+.db-rank-no.n2{background:linear-gradient(135deg,#e5e7eb,#b6bcc6);color:#2f3744}
+.db-rank-no.n3{background:linear-gradient(135deg,#f0c9a2,#c98a55);color:#4a2a10}
+.db-rank-body{flex:1;min-width:0}
+.db-rank-top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:7px}
+.db-rank-name{font-weight:700;font-size:15.5px}
+.db-rank-val{font-weight:700;color:var(--g9);font-variant-numeric:tabular-nums}
+.db-rank-foot{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:6px}
+.db-rank-foot b{color:#92660f}
+
+/* ---------- Kosong ---------- */
+.db-empty{text-align:center;padding:30px 16px;color:var(--muted);list-style:none}
+.db-empty i{display:block;font-size:34px;color:#b9c6b9;margin-bottom:10px}
+.db-empty p{font-size:14.5px}
+
+/* ---------- Responsif ---------- */
+@media(max-width:1200px){
+    .db-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .db-grid{grid-template-columns:1fr}
+}
+@media(max-width:700px){
+    .db-hero{padding:22px 20px;border-radius:16px}
+    .db-hero h1{font-size:24px}
+    .db-hero-side{flex-basis:100%}
+    .db-refresh{justify-content:flex-start}
+    .db-stats{grid-template-columns:1fr}
+    .db-card{padding:20px 16px}
+    .db-mrow{flex-wrap:wrap}
+    .db-kelola{width:100%;text-align:center;box-sizing:border-box}
+    .db-qa-btn{flex:1 1 calc(50% - 10px);justify-content:center}
+}
+
+@media(prefers-reduced-motion:reduce){
+    .db-wrap *{animation:none!important;transition:none!important}
+}

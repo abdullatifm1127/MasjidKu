@@ -23,16 +23,19 @@ class CheckMosqueStatus
             $mosque = Mosque::where('user_id', $user->id)->first();
 
             if ($mosque) {
-                // 3. Cek jika akun berstatus pending/nonaktif dari admin
-                if ($mosque->status !== 'approved' && $mosque->package_type !== 'free') {
+                // 3. Izinkan akses ke dashboard jika statusnya pending (sedang menunggu verifikasi) 
+                // atau approved, asalkan tidak berstatus 'rejected' atau 'nonaktif'
+                if ($mosque->status === 'rejected' || $mosque->status === 'Nonaktif') {
                     auth()->logout();
                     return redirect()->route('login')
-                        ->with('error', 'Akun masjid Anda masih berstatus Pending atau Nonaktif. Silakan tunggu persetujuan Superadmin.');
+                        ->with('error', 'Akun masjid Anda ditolak atau dinonaktifkan oleh Superadmin.');
                 }
 
-                // 4. CEK PEMBAYARAN: Jika paket bukan 'free', pastikan payment_status sudah 'approved' (lunas)
-                if ($mosque->package_type !== 'free' && $mosque->payment_status !== 'approved') {
-                    // Tambahkan pengecualian untuk rute perpanjangan di sini
+                // 4. PENGATURAN PEMBAYARAN:
+                // Jika paket bukan 'free' dan pembayaran belum approved, 
+                // TETAPI user sudah mengunggah bukti bayar (status pending), izinkan mereka akses dashboard.
+                // Jika benar-benar belum bayar sama sekali (unpaid & belum ada bukti), baru arahkan ke halaman pembayaran.
+                if ($mosque->package_type !== 'free' && $mosque->payment_status === 'unpaid' && empty($mosque->payment_proof)) {
                     if (!$request->is('masjid/pembayaran*') && !$request->is('masjid/batalkan*') && !$request->is('masjid/perpanjangan*')) {
                         return redirect()->route('masjid.payment')
                             ->with('error', 'Silakan selesaikan pembayaran langganan Anda terlebih dahulu.');

@@ -280,4 +280,63 @@ class PaymentController extends Controller
 
         return redirect()->route('dashboard')->with('info', 'Pembayaran dibatalkan.');
     }
+
+    // Menangani pengiriman bukti pembayaran transfer manual
+    public function storeManualPayment(Request $request)
+    {
+        $request->validate([
+            'proof_of_payment' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $mosque = Mosque::where('user_id', Auth::id())->first();
+
+        if (!$mosque) {
+            return redirect()->route('daftar.masjid')->with('error', 'Data masjid tidak ditemukan.');
+        }
+
+        $pendingRenewal = session('pending_renewal');
+        $packageType = $pendingRenewal ? $pendingRenewal['package'] : ($mosque->package_type ?? '100000_1');
+        $orderId = $pendingRenewal ? $pendingRenewal['order_id'] : ('MOSQUE-MANUAL-' . $mosque->id . '-' . time());
+
+        // Hitung nominal harga
+        if (str_contains($packageType, '_')) {
+            list($grossAmount,) = explode('_', $packageType);
+            $grossAmount = (int) $grossAmount;
+        } else {
+            $grossAmount = ($packageType === '1000000_12') ? 1000000 : 100000;
+        }
+
+        // Upload file bukti transfer foto
+        if ($request->hasFile('proof_of_payment')) {
+            $path = $request->file('proof_of_payment')->store('bukti-pembayaran', 'public');
+        } else {
+            return back()->with('error', 'Bukti pembayaran wajib diunggah.');
+        }
+
+        // Update data masjid
+        $mosque->update([
+            'order_id'       => $orderId,
+            'package_type'   => $packageType,
+            'payment_status' => 'pending', // Menunggu verifikasi admin
+        ]);
+
+        // Simpan ke riwayat subscriptions
+        Subscription::updateOrCreate(
+            ['order_id' => $orderId],
+            [
+                'mosque_id'          => $mosque->id,
+                'package_type'       => $packageType,
+                'amount'             => $grossAmount,
+                'status'             => 'pending',
+                'transaction_status' => 'manual_pending',
+                'payment_type'       => 'manual_transfer',
+                'raw_notification'   => ['proof_of_payment' => $path],
+            ]
+        );
+
+        session()->forget('pending_renewal');
+
+        return redirect()->route('dashboard')
+            ->with('success', 'Bukti pembayaran berhasil dikirim. Mohon tunggu verifikasi dari Superadmin.');
+    }
 }
