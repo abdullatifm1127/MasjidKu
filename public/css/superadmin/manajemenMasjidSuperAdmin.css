@@ -105,6 +105,56 @@
 
 .mm-btn-tambah:hover { background: #0e3320; }
 
+/* =============================================================
+   FILTER LANGGANAN
+   ============================================================= */
+.mm-lg-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.mm-lg-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+    margin-right: 4px;
+}
+
+.mm-lg-tab {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    border-radius: 8px;
+    border: 1.5px solid #e5e7eb;
+    background: #fff;
+    color: #4b5563;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.18s;
+}
+
+.mm-lg-tab:hover { border-color: #9ca3af; color: #111827; }
+.mm-lg-tab.active { background: #1a4731; border-color: #1a4731; color: #fff; }
+
+.mm-lg-warn {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #92400e;
+    background: #fef9c3;
+    border: 1.5px solid #fde68a;
+    border-radius: 8px;
+}
+
 .mm-table-wrap {
     background: #fff;
     border: 1px solid #e5e7eb;
@@ -250,6 +300,45 @@
     opacity: 0.7;
 }
 
+/* Column: Langganan */
+.mm-td-langganan,
+.mm-th-langganan { min-width: 200px; }
+
+.mm-lg-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 11px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    border-radius: 8px;
+    border: 1.5px solid transparent;
+    white-space: nowrap;
+}
+
+.mm-lg-badge::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.mm-lg-badge.aktif    { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
+.mm-lg-badge.segera   { background: #fef9c3; color: #92400e; border-color: #fde68a; }
+.mm-lg-badge.habis    { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+.mm-lg-badge.menunggu { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+.mm-lg-badge.free     { background: #f3f4f6; color: #6b7280; border-color: #e5e7eb; }
+
+.mm-lg-sub {
+    margin-top: 5px;
+    font-size: 0.74rem;
+    line-height: 1.45;
+    color: #6b7280;
+}
+
+.mm-lg-sub b { color: #374151; font-weight: 600; }
+
 /* Column: Donasi */
 .mm-td-donasi { min-width: 140px; }
 
@@ -292,13 +381,17 @@
     text-decoration: none;
     padding: 5px 8px;
     border-radius: 6px;
-    transition: background 0.16s;
     opacity: 0;
     transition: opacity 0.18s, background 0.18s;
 }
 
 .mm-row:hover .mm-kelola-link { opacity: 1; }
 .mm-kelola-link:hover { background: #f0fdf4; }
+
+/* Layar sentuh tidak punya hover, jadi tautan selalu terlihat */
+@media (hover: none) {
+    .mm-kelola-link { opacity: 1; }
+}
 
 /* Empty state */
 .mm-empty {
@@ -466,15 +559,19 @@
 
 /* =============================================================
    RESPONSIVE
+   (judul kolom ikut disembunyikan agar sejajar dengan isinya)
    ============================================================= */
 @media (max-width: 900px) {
     .mm-toolbar { flex-direction: column; align-items: flex-start; }
     .mm-toolbar-right { width: 100%; justify-content: space-between; }
     .mm-search { width: 100%; }
-    .mm-td-imam { display: none; }
+    .mm-td-imam,
+    .mm-th-imam { display: none; }
+    .mm-lg-warn { margin-left: 0; width: 100%; }
 }
 
 @media (max-width: 640px) {
-    .mm-td-kota { display: none; }
+    .mm-td-kota,
+    .mm-th-kota { display: none; }
     .mm-modal-grid { grid-template-columns: 1fr; }
 }
