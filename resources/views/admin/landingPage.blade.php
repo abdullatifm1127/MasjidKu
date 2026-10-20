@@ -28,61 +28,66 @@
             </div>
             </div>
 
-        <nav class="lp-nav">
-            <a href="{{ route('admin.dashboard') }}" class="lp-nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                <span class="lp-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
-                <span class="lp-nav-label">Dashboard</span>
-            </a>
+       <nav class="lp-nav">
+    <a href="{{ route('admin.dashboard') }}" class="lp-nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+        <span class="lp-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
+        <span class="lp-nav-label">Dashboard</span>
+    </a>
 
-            <a href="{{ route('admin.landing-page') }}" class="lp-nav-item {{ request()->routeIs('admin.landing-page') ? 'active' : '' }}">
-                <span class="lp-nav-icon"><i class="fa-solid fa-globe"></i></span>
-                <span class="lp-nav-label">Landing Page</span>
-            </a>
+    <a href="{{ route('admin.landing-page') }}" class="lp-nav-item {{ request()->routeIs('admin.landing-page*') ? 'active' : '' }}">
+        <span class="lp-nav-icon"><i class="fa-solid fa-globe"></i></span>
+        <span class="lp-nav-label">Landing Page</span>
+    </a>
 
-            <a href="{{ route('admin.profil-masjid') }}" class="lp-nav-item {{ request()->routeIs('admin.profil-masjid') ? 'active' : '' }}">
-                <span class="lp-nav-icon"><i class="fa-solid fa-mosque"></i></span>
-                <span class="lp-nav-label">Profil Masjid</span>
-            </a>
+    <a href="{{ route('admin.profil-masjid') }}" class="lp-nav-item {{ request()->routeIs('admin.profil-masjid*') ? 'active' : '' }}">
+        <span class="lp-nav-icon"><i class="fa-solid fa-mosque"></i></span>
+        <span class="lp-nav-label">Profil Masjid</span>
+    </a>
 
-            <a href="{{ route('admin.jadwal-sholat') }}" class="lp-nav-item {{ request()->routeIs('admin.jadwal-sholat') ? 'active' : '' }}">
-                <span class="lp-nav-icon"><i class="fa-solid fa-clock"></i></span>
-                <span class="lp-nav-label">Jadwal Shalat</span>
-            </a>
+    <a href="{{ route('admin.jadwal-sholat') }}" class="lp-nav-item {{ request()->routeIs('admin.jadwal-sholat*') ? 'active' : '' }}">
+        <span class="lp-nav-icon"><i class="fa-solid fa-clock"></i></span>
+        <span class="lp-nav-label">Jadwal Shalat</span>
+    </a>
 
-            <a href="#" class="lp-nav-item">
-                <span class="lp-nav-icon"><i class="fa-solid fa-bullhorn"></i></span>
-                <span class="lp-nav-label">Pengumuman</span>
-                <span class="lp-nav-badge">3</span>
-            </a>
-
-           <a href="{{ route('admin.acara') }}" class="lp-nav-item {{ request()->routeIs('admin.acara*') ? 'active' : '' }}">
-                <span class="lp-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
-                <span class="lp-nav-label">Kegiatan &amp; Acara</span>
-            </a>
-
-            {{-- MENU DONASI DINAMIS BERDASARKAN PAKET MASJID --}}
-        @if(isset($mosque) && $mosque->package_type === 'free')
-            {{-- Jika Paket Free: Diarahkan langsung ke halaman perpanjangan/pilihan paket --}}
-            <a href="{{ route('masjid.perpanjangan.create') }}" class="lp-nav-item" style="opacity: 0.8;" title="Upgrade paket untuk membuka fitur donasi">
-                <span class="lp-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
-                <span class="lp-nav-label">Donasi</span>
-                <span class="lp-nav-soon" style="background: #e74c3c; color: white;">Locked</span>
-            </a>
-        @else
-            {{-- Jika Paket Berbayar: Aktif dan mengarah ke menu donasi admin --}}
-            <a href="{{ route('admin.donasi') }}" class="lp-nav-item">
-                <span class="lp-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
-                <span class="lp-nav-label">Donasi</span>
-                <span class="lp-nav-soon" style="background: #27ae60; color: white;">Aktif</span>
-            </a>
+    {{-- MENU PENGUMUMAN DINAMIS --}}
+    @php
+        $pengumumanAktif = isset($mosque)
+            ? \App\Models\Pengumuman::where('mosque_id', $mosque->id)->active()->count()
+            : 0;
+    @endphp
+    <a href="{{ route('admin.pengumuman') }}" class="lp-nav-item {{ request()->routeIs('admin.pengumuman*') ? 'active' : '' }}">
+        <span class="lp-nav-icon"><i class="fa-solid fa-bullhorn"></i></span>
+        <span class="lp-nav-label">Pengumuman</span>
+        @if($pengumumanAktif > 0)
+            <span class="lp-nav-badge">{{ $pengumumanAktif }}</span>
         @endif
+    </a>
 
-            <a href="{{ route('admin.jamaah') }}" class="lp-nav-item">
-    <span class="lp-nav-icon"><i class="fa-solid fa-users"></i></span>
-    <span class="lp-nav-label">Data Jamaah</span>
-</a>
-        </nav>
+    <a href="{{ route('admin.acara') }}" class="lp-nav-item {{ request()->routeIs('admin.acara*') ? 'active' : '' }}">
+        <span class="lp-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
+        <span class="lp-nav-label">Kegiatan &amp; Acara</span>
+    </a>
 
+    {{-- MENU DONASI DINAMIS BERDASARKAN PAKET MASJID --}}
+    @if(isset($mosque) && $mosque->package_type === 'free')
+        <a href="{{ route('masjid.perpanjangan.create') }}" class="lp-nav-item {{ request()->routeIs('masjid.perpanjangan*') ? 'active' : '' }}" style="opacity: 0.8;" title="Upgrade paket untuk membuka fitur donasi">
+            <span class="lp-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+            <span class="lp-nav-label">Donasi</span>
+            <span class="lp-nav-soon" style="background: #e74c3c; color: white;">Locked</span>
+        </a>
+    @else
+        <a href="{{ route('admin.donasi') }}" class="lp-nav-item {{ request()->routeIs('admin.donasi*') ? 'active' : '' }}">
+            <span class="lp-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+            <span class="lp-nav-label">Donasi</span>
+            <span class="lp-nav-soon" style="background: #27ae60; color: white;">Aktif</span>
+        </a>
+    @endif
+
+    <a href="{{ route('admin.jamaah') }}" class="lp-nav-item {{ request()->routeIs('admin.jamaah*') ? 'active' : '' }}">
+        <span class="lp-nav-icon"><i class="fa-solid fa-users"></i></span>
+        <span class="lp-nav-label">Data Jamaah</span>
+    </a>
+</nav>
         <div class="lp-user">
             <div class="lp-user-avatar">{{ substr(auth()->user()->name ?? 'A', 0, 2) }}</div>
             <div class="lp-user-info">

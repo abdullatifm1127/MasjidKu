@@ -357,31 +357,33 @@ class MosqueController extends Controller
 
         return redirect()->route('superadmin.verifikasi')->with('success', 'Berhasil disetujui.');
     }
-
     public function rejectVerifikasi($id)
-    {
-        $mosque = Mosque::findOrFail($id);
+{
+    $mosque = Mosque::findOrFail($id);
 
-        if ($mosque->status === 'pending') {
-            $mosque->update(['status' => 'rejected']);
-        }
-
-        $pendingSubscription = $mosque->subscriptions()
-            ->where('status', 'pending')
-            ->latest()
-            ->first();
-
-        if ($pendingSubscription) {
-            $pendingSubscription->update(['status' => 'rejected']);
-            $mosque->update([
-                'payment_status'      => 'rejected',
-                'has_online_donation' => false,
-                'package_type'        => 'free',
-            ]);
-        }
-
-        return redirect()->route('superadmin.verifikasi')->with('error', 'Ditolak.');
+    // Hapus file bukti pembayaran lama jika ada
+    if ($mosque->payment_proof && \Illuminate\Support\Facades\Storage::disk('public')->exists($mosque->payment_proof)) {
+        \Illuminate\Support\Facades\Storage::disk('public')->delete($mosque->payment_proof);
     }
+
+    // Reset status masjid dan status pembayaran agar bisa diulang dari awal
+    $mosque->update([
+        'status'         => 'pending', 
+        'payment_status' => 'unpaid', // KUNCI UTAMA: Ubah ke unpaid agar halaman pembayaran terbuka kembali
+        'payment_proof'  => null,      // Kosongkan bukti foto lama
+    ]);
+
+    $pendingSubscription = $mosque->subscriptions()
+        ->where('status', 'pending')
+        ->latest()
+        ->first();
+
+    if ($pendingSubscription) {
+        $pendingSubscription->update(['status' => 'rejected']);
+    }
+
+    return redirect()->route('superadmin.verifikasi')->with('error', 'Verifikasi ditolak. Masjid diminta melakukan pembayaran ulang.');
+}
 
     public function destroyVerifikasi($id)
     {
