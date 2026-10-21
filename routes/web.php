@@ -26,6 +26,7 @@ use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\adminmasjid\PengumumanController;
 use App\Http\Controllers\SuperAdmin\PaymentSettingController;
 use App\Http\Controllers\adminmasjid\ThemeController;
+use App\Http\Controllers\Superadmin\ThemeManagementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -317,4 +318,8 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
     Route::get('/pengaturan', [PengaturanController::class, 'index'])->name('pengaturan');
     Route::put('/pengaturan', [PengaturanController::class, 'update'])->name('pengaturan.update');
     Route::delete('/pengaturan/reset', [PengaturanController::class, 'reset'])->name('pengaturan.reset');
+
+    Route::get('/themes', [ThemeManagementController::class, 'index'])->name('themes.index');
+    Route::post('/themes', [ThemeManagementController::class, 'store'])->name('themes.store');
+    Route::delete('/themes/{id}', [ThemeManagementController::class, 'destroy'])->name('themes.destroy');
 });

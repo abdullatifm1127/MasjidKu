@@ -10,6 +10,7 @@ use App\Models\Donasi;
 use App\Models\Pengumuman;
 use App\Services\PrayerTimeService;
 use Illuminate\Http\Request;
+use App\Models\Theme;
 
 class PublicMosqueController extends Controller
 {
@@ -40,11 +41,13 @@ class PublicMosqueController extends Controller
     /** Tema aktif masjid (mendukung preview via parameter query). */
     protected function themeFor(Mosque $mosque, ?string $preview = null): string
 {
-    $theme = strtolower(trim((string) ($preview ?: ($mosque->theme ?? 'default'))));
+    $themeKey = strtolower(trim((string) ($preview ?: ($mosque->theme ?? 'default'))));
+    
+    // Cek apakah tema ada dan aktif di database
+    $exists = Theme::where('key', $themeKey)->where('is_active', true)->exists();
 
-    return in_array($theme, self::THEMES, true) ? $theme : 'default';
+    return $exists ? $themeKey : 'default';
 }
-
     public function show(string $slug, PrayerTimeService $prayerTimeService, Request $request)
     {
         $mosque = Mosque::where('slug', $slug)
