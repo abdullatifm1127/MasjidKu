@@ -12,6 +12,55 @@
 </head>
 <body class="sa-page" id="saBody">
 
+@php
+    /**
+     * Status langganan satu masjid.
+     * kode : aktif | segera | habis | menunggu | free
+     * grup : berlangganan | tidak | habis   (dipakai untuk filter)
+     */
+    $hitungLangganan = function ($m) {
+        $status   = strtolower((string) ($m->payment_status ?? ''));
+        $paket    = strtolower((string) ($m->package_type ?? ''));
+        $lunas    = in_array($status, ['approved', 'paid', 'settlement', 'capture', 'lunas'], true);
+        $berbayar = $paket !== '' && $paket !== 'free';
+
+        $akhirRaw = data_get($m, 'subscription_ends_at');   // kosong bila kolomnya belum ada
+        $akhir    = $akhirRaw ? \Illuminate\Support\Carbon::parse($akhirRaw) : null;
+        $sisa     = $akhir ? (int) now()->startOfDay()->diffInDays($akhir->copy()->startOfDay(), false) : null;
+
+        // Nama paket dari kode "harga_bulan", mis. 100000_1 -> 1 Bulan
+        $paketLabel = null;
+        if ($berbayar && str_contains($paket, '_')) {
+            [$harga, $bulan] = array_pad(explode('_', $paket), 2, 1);
+            $bulan = max(1, (int) $bulan);
+            $lama  = $bulan % 12 === 0 ? ($bulan / 12) . ' Tahun' : $bulan . ' Bulan';
+            $paketLabel = $lama . ' · Rp ' . number_format((int) $harga, 0, ',', '.');
+        }
+
+        if ($status === 'pending') {
+            $kode = 'menunggu'; $label = 'Menunggu verifikasi'; $grup = 'tidak';
+        } elseif ($lunas && $berbayar && !($akhir && $akhir->isPast())) {
+            $kode = ($sisa !== null && $sisa <= 7) ? 'segera' : 'aktif';
+            $label = $kode === 'segera' ? 'Segera berakhir' : 'Berlangganan';
+            $grup = 'berlangganan';
+        } elseif ($akhir && $akhir->isPast()) {
+            $kode = 'habis'; $label = 'Berakhir'; $grup = 'habis';
+        } else {
+            $kode = 'free'; $label = 'Tidak berlangganan'; $grup = 'tidak';
+        }
+
+        return compact('kode', 'label', 'grup', 'akhir', 'sisa', 'paketLabel');
+    };
+
+    $lg = [];
+    foreach ($masjids as $mm) { $lg[$mm->id] = $hitungLangganan($mm); }
+
+    $nBerlangganan = count(array_filter($lg, fn ($x) => $x['grup'] === 'berlangganan'));
+    $nTidak        = count(array_filter($lg, fn ($x) => $x['grup'] === 'tidak'));
+    $nHabis        = count(array_filter($lg, fn ($x) => $x['grup'] === 'habis'));
+    $nSegera       = count(array_filter($lg, fn ($x) => $x['kode'] === 'segera'));
+@endphp
+
     {{-- ===== SIDEBAR ===== --}}
     <aside class="sa-sidebar" id="saSidebar">
         <div class="sa-brand">
@@ -24,46 +73,47 @@
                 <i class="fa-solid fa-chevron-left"></i>
             </button>
         </div>
-{{-- Navigation --}}
-       <nav class="sa-nav">
-    <a href="{{ route('superadmin.dashboard') }}" class="sa-nav-item {{ request()->routeIs('superadmin.dashboard') ? 'active' : '' }}">
-        <span class="sa-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
-        <span class="sa-nav-label">Dashboard</span>
-    </a>
 
-    <a href="{{ route('superadmin.verifikasi') }}" class="sa-nav-item sa-nav-has-badge {{ request()->routeIs('superadmin.verifikasi*') ? 'active' : '' }}">
-        <span class="sa-nav-icon"><i class="fa-solid fa-shield-halved"></i></span>
-        <span class="sa-nav-label">Verifikasi Pendaftaran</span>
-        <span class="sa-nav-badge-dot amber"></span>
-    </a>
+        {{-- Navigation --}}
+        <nav class="sa-nav">
+            <a href="{{ route('superadmin.dashboard') }}" class="sa-nav-item {{ request()->routeIs('superadmin.dashboard') ? 'active' : '' }}">
+                <span class="sa-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
+                <span class="sa-nav-label">Dashboard</span>
+            </a>
 
-    <a href="{{ route('superadmin.manajemen-masjid') }}" class="sa-nav-item {{ request()->routeIs('superadmin.manajemen-masjid*') ? 'active' : '' }}">
-        <span class="sa-nav-icon"><i class="fa-solid fa-mosque"></i></span>
-        <span class="sa-nav-label">Manajemen Masjid</span>
-    </a>
+            <a href="{{ route('superadmin.verifikasi') }}" class="sa-nav-item sa-nav-has-badge {{ request()->routeIs('superadmin.verifikasi*') ? 'active' : '' }}">
+                <span class="sa-nav-icon"><i class="fa-solid fa-shield-halved"></i></span>
+                <span class="sa-nav-label">Verifikasi Pendaftaran</span>
+                <span class="sa-nav-badge-dot amber"></span>
+            </a>
 
-    {{-- MENU PEMBAYARAN --}}
-    <a href="{{ route('superadmin.pembayaran.index') }}" class="sa-nav-item {{ request()->routeIs('superadmin.pembayaran*') ? 'active' : '' }}">
-        <span class="sa-nav-icon"><i class="fa-solid fa-credit-card"></i></span>
-        <span class="sa-nav-label">Pembayaran</span>
-    </a>
+            <a href="{{ route('superadmin.manajemen-masjid') }}" class="sa-nav-item {{ request()->routeIs('superadmin.manajemen-masjid*') ? 'active' : '' }}">
+                <span class="sa-nav-icon"><i class="fa-solid fa-mosque"></i></span>
+                <span class="sa-nav-label">Manajemen Masjid</span>
+            </a>
 
-    <a href="{{ route('superadmin.pengguna') }}" class="sa-nav-item {{ request()->routeIs('superadmin.pengguna*') ? 'active' : '' }}">
-        <span class="sa-nav-icon"><i class="fa-solid fa-users"></i></span>
-        <span class="sa-nav-label">Pengguna</span>
-    </a>
+            {{-- MENU PEMBAYARAN --}}
+            <a href="{{ route('superadmin.pembayaran.index') }}" class="sa-nav-item {{ request()->routeIs('superadmin.pembayaran*') ? 'active' : '' }}">
+                <span class="sa-nav-icon"><i class="fa-solid fa-credit-card"></i></span>
+                <span class="sa-nav-label">Pembayaran</span>
+            </a>
 
-    <a href="{{ route('superadmin.halaman-utama.edit') }}" class="sa-nav-item {{ request()->routeIs('superadmin.halaman-utama*') ? 'active' : '' }}">
-        <span class="sa-nav-icon"><i class="fa-solid fa-pen-to-square"></i></span>
-        <span class="sa-nav-label">Halaman Utama</span>
-    </a>
+            <a href="{{ route('superadmin.pengguna') }}" class="sa-nav-item {{ request()->routeIs('superadmin.pengguna*') ? 'active' : '' }}">
+                <span class="sa-nav-icon"><i class="fa-solid fa-users"></i></span>
+                <span class="sa-nav-label">Pengguna</span>
+            </a>
 
-    <a href="{{ route('superadmin.pengaturan') }}" class="sa-nav-item {{ request()->routeIs('superadmin.pengaturan*') ? 'active' : '' }}">
-        <span class="sa-nav-icon"><i class="fa-solid fa-gear"></i></span>
-        <span class="sa-nav-label">Pengaturan</span>
-    </a>
-</nav>
-        
+            <a href="{{ route('superadmin.halaman-utama.edit') }}" class="sa-nav-item {{ request()->routeIs('superadmin.halaman-utama*') ? 'active' : '' }}">
+                <span class="sa-nav-icon"><i class="fa-solid fa-pen-to-square"></i></span>
+                <span class="sa-nav-label">Halaman Utama</span>
+            </a>
+
+            <a href="{{ route('superadmin.pengaturan') }}" class="sa-nav-item {{ request()->routeIs('superadmin.pengaturan*') ? 'active' : '' }}">
+                <span class="sa-nav-icon"><i class="fa-solid fa-gear"></i></span>
+                <span class="sa-nav-label">Pengaturan</span>
+            </a>
+        </nav>
+
         <div class="sa-user-footer">
             <div class="sa-user-avatar-sm">SA</div>
             <div class="sa-user-info">
@@ -108,7 +158,7 @@
 
             {{-- ===== TOOLBAR ===== --}}
             <div class="mm-toolbar">
-                {{-- Filter tabs dinamis --}}
+                {{-- Filter tabs status --}}
                 <div class="mm-filter-tabs">
                     <button class="mm-filter-tab active" data-filter="semua">Semua ({{ $totalSemua }})</button>
                     <button class="mm-filter-tab" data-filter="aktif">Aktif ({{ $totalAktif }})</button>
@@ -129,6 +179,18 @@
                 </div>
             </div>
 
+            {{-- ===== FILTER LANGGANAN ===== --}}
+            <div class="mm-lg-bar">
+                <span class="mm-lg-label">Langganan:</span>
+                <button class="mm-lg-tab active" data-lg="semua">Semua</button>
+                <button class="mm-lg-tab" data-lg="berlangganan">Berlangganan ({{ $nBerlangganan }})</button>
+                <button class="mm-lg-tab" data-lg="tidak">Tidak berlangganan ({{ $nTidak }})</button>
+                <button class="mm-lg-tab" data-lg="habis">Berakhir ({{ $nHabis }})</button>
+                @if($nSegera > 0)
+                    <span class="mm-lg-warn"><i class="fa-solid fa-triangle-exclamation"></i> {{ $nSegera }} masjid segera berakhir</span>
+                @endif
+            </div>
+
             {{-- ===== TABEL ===== --}}
             <div class="mm-table-wrap">
                 <table class="mm-table" id="mmTable">
@@ -138,6 +200,7 @@
                             <th class="mm-th-kota">Kota</th>
                             <th class="mm-th-imam">Imam</th>
                             <th class="mm-th-status">Status</th>
+                            <th class="mm-th-langganan">Langganan</th>
                             <th class="mm-th-donasi">Donasi</th>
                             <th class="mm-th-aksi"></th>
                         </tr>
@@ -155,8 +218,11 @@
                             } else {
                                 $statusClass = $m->status;
                             }
+
+                            $l   = $lg[$m->id];
+                            $pct = max(0, min(100, (int) ($m->persentase ?? 0)));
                         @endphp
-                        <tr class="mm-row" data-status="{{ $statusClass }}"
+                        <tr class="mm-row" data-status="{{ $statusClass }}" data-langganan="{{ $l['grup'] }}"
                             data-search="{{ strtolower($m->mosque_name.' '.$m->city) }}">
                             <td class="mm-td-masjid">
                                 <div class="mm-mosque-cell">
@@ -181,13 +247,25 @@
                                     <i class="fa-solid fa-chevron-down mm-select-arrow"></i>
                                 </div>
                             </td>
+                            <td class="mm-td-langganan">
+                                <span class="mm-lg-badge {{ $l['kode'] }}">{{ $l['label'] }}</span>
+                                <div class="mm-lg-sub">
+                                    @if($l['paketLabel'])<b>{{ $l['paketLabel'] }}</b><br>@endif
+                                    @if($l['akhir'])
+                                        {{ $l['kode'] === 'habis' ? 'Berakhir' : 'Sampai' }} {{ $l['akhir']->translatedFormat('d M Y') }}
+                                        @if($l['sisa'] !== null && $l['sisa'] >= 0) · {{ $l['sisa'] }} hari lagi @endif
+                                    @elseif($l['kode'] === 'aktif')
+                                        Tanggal berakhir belum tercatat
+                                    @endif
+                                </div>
+                            </td>
                             <td class="mm-td-donasi">
                                 <div class="mm-donasi-wrap">
                                     <div class="mm-donasi-bar-track">
                                         <div class="mm-donasi-bar-fill"
-                                             style="width:75%; background:#f59e0b"></div>
+                                             style="width:{{ $pct }}%; background:#f59e0b"></div>
                                     </div>
-                                    <span class="mm-donasi-pct">75%</span>
+                                    <span class="mm-donasi-pct">{{ $pct }}%</span>
                                 </div>
                             </td>
                             <td class="mm-td-aksi">
@@ -273,47 +351,59 @@
         </div>
     </div>
 
-   <script>
+    <script>
         // Sidebar toggle
         document.getElementById('saSidebarToggle').addEventListener('click', () => {
             document.getElementById('saSidebar').classList.toggle('collapsed');
             document.getElementById('saMain').classList.toggle('expanded');
         });
 
-        // Filter tabs
-        const filterTabs = document.querySelectorAll('.mm-filter-tab');
+        // ===== Filter: status + langganan + pencarian (digabung) =====
         const rows = document.querySelectorAll('.mm-row');
+        let filterStatus = 'semua';
+        let filterLangganan = 'semua';
 
-        filterTabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                filterTabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                applyFilter(tab.dataset.filter, document.getElementById('mmSearch').value.trim().toLowerCase());
-            });
-        });
-
-        // Search
-        document.getElementById('mmSearch').addEventListener('input', function () {
-            const activeFilter = document.querySelector('.mm-filter-tab.active').dataset.filter;
-            applyFilter(activeFilter, this.value.trim().toLowerCase());
-        });
-
-        function applyFilter(filter, search) {
+        function applyFilter() {
+            const search = document.getElementById('mmSearch').value.trim().toLowerCase();
             let visible = 0;
+
             rows.forEach(row => {
-                const matchFilter = filter === 'semua' || row.dataset.status === filter;
-                const matchSearch = !search || row.dataset.search.includes(search);
-                const show = matchFilter && matchSearch;
+                const okStatus = filterStatus === 'semua' || row.dataset.status === filterStatus;
+                const okLg     = filterLangganan === 'semua' || row.dataset.langganan === filterLangganan;
+                const okSearch = !search || row.dataset.search.includes(search);
+                const show = okStatus && okLg && okSearch;
+
                 row.style.display = show ? '' : 'none';
                 if (show) visible++;
             });
+
             document.getElementById('mmEmpty').style.display = visible === 0 ? 'flex' : 'none';
         }
+
+        document.querySelectorAll('.mm-filter-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.mm-filter-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                filterStatus = tab.dataset.filter;
+                applyFilter();
+            });
+        });
+
+        document.querySelectorAll('.mm-lg-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.mm-lg-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                filterLangganan = tab.dataset.lg;
+                applyFilter();
+            });
+        });
+
+        document.getElementById('mmSearch').addEventListener('input', applyFilter);
 
         // Status select color update & AJAX Database Update
         function mmChangeStatus(sel) {
             sel.className = 'mm-status-select ' + sel.value;
-            
+
             const mosqueId = sel.dataset.id;
             const newStatus = sel.value;
 
@@ -329,8 +419,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Opsional: Bisa memuat ulang halaman secara otomatis jika ingin memperbarui angka di tab filter secara akurat
-                    location.reload(); 
+                    location.reload(); // memperbarui angka di tab filter
                 } else {
                     alert('Gagal memperbarui status masjid.');
                 }

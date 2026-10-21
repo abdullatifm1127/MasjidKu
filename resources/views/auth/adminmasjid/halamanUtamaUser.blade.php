@@ -1,14 +1,21 @@
+@php
+    $themeKey = strtolower(trim($theme ?? ($mosque->theme ?? 'default')));
+    $allowedThemes = ['default', 'emerald', 'terracotta', 'corporate'];
+    if (!in_array($themeKey, $allowedThemes, true)) {
+        $themeKey = 'default';
+    }
+@endphp
+
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="{{ $themeKey }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $mosque->mosque_name ?? 'Masjid' }} — Halaman Utama</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,ital@9..144,300..700,0;9..144,400..600,1&family=Inter:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/adminmasjid/halamanUtamaUser.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/adminmasjid/temaHalamanUtama.css') }}">
 </head>
-<body>
+<body class="theme-{{ $themeKey }}">
 
     @php
         $modules = $mosque->active_modules ?? [];

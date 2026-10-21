@@ -34,11 +34,11 @@
         <span class="ba2-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
         <span class="ba2-nav-label">Dashboard</span>
     </a>
-    <a href="{{ route('admin.landing-page') }}" class="ba2-nav-item">
+    <a href="{{ route('admin.landing-page') }}" class="ba2-nav-item {{ request()->routeIs('admin.landing-page*') ? 'active' : '' }}">
         <span class="ba2-nav-icon"><i class="fa-solid fa-globe"></i></span>
         <span class="ba2-nav-label">Landing Page</span>
     </a>
-    <a href="{{ route('admin.profil-masjid') }}" class="ba2-nav-item">
+    <a href="{{ route('admin.profil-masjid') }}" class="ba2-nav-item {{ request()->routeIs('admin.profil-masjid*') ? 'active' : '' }}">
         <span class="ba2-nav-icon"><i class="fa-solid fa-mosque"></i></span>
         <span class="ba2-nav-label">Profil Masjid</span>
     </a>
@@ -67,29 +67,32 @@
         <span class="ba2-nav-label">Kegiatan &amp; Acara</span>
     </a>
 
-            {{-- MENU DONASI DINAMIS BERDASARKAN PAKET MASJID --}}
-            @if(isset($mosque) && $mosque->package_type === 'free')
-            {{-- Jika Paket Free: Diarahkan langsung ke halaman perpanjangan/pilihan paket yang sudah Anda miliki --}}
-            <a href="{{ route('masjid.perpanjangan.create') }}" class="ba2-nav-item" style="opacity: 0.8;" title="Upgrade paket untuk membuka fitur donasi">
-                <span class="ba2-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
-                <span class="ba2-nav-label">Donasi</span>
-                <span class="ba2-nav-soon" style="background: #e74c3c; color: white;">Locked</span>
-            </a>
-            @else
-                {{-- Jika Paket Berbayar: Aktif dan mengarah ke menu donasi admin --}}
-                <a href="{{ route('admin.donasi') }}" class="ba2-nav-item">
-                    <span class="ba2-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
-                    <span class="ba2-nav-label">Donasi</span>
-                    <span class="ba2-nav-soon" style="background: #27ae60; color: white;">Aktif</span>
-                </a>
-            @endif
+    {{-- MENU DONASI DINAMIS BERDASARKAN PAKET MASJID --}}
+    @if(isset($mosque) && $mosque->package_type === 'free')
+        <a href="{{ route('masjid.perpanjangan.create') }}" class="ba2-nav-item {{ request()->routeIs('masjid.perpanjangan*') ? 'active' : '' }}" style="opacity: 0.8;" title="Upgrade paket untuk membuka fitur donasi">
+            <span class="ba2-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+            <span class="ba2-nav-label">Donasi</span>
+            <span class="ba2-nav-soon" style="background: #e74c3c; color: white;">Locked</span>
+        </a>
+    @else
+        <a href="{{ route('admin.donasi') }}" class="ba2-nav-item {{ request()->routeIs('admin.donasi*') ? 'active' : '' }}">
+            <span class="ba2-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+            <span class="ba2-nav-label">Donasi</span>
+            <span class="ba2-nav-soon" style="background: #27ae60; color: white;">Aktif</span>
+        </a>
+    @endif
 
-            <a href="{{ route('admin.jamaah') }}" class="ba2-nav-item">
-    <span class="ba2-nav-icon"><i class="fa-solid fa-users"></i></span>
-    <span class="ba2-nav-label">Data Jamaah</span>
-    <!-- Jika sudah siap digunakan, badge "dev" ini bisa dihapus atau diubah -->
-</a>
-        </nav>
+    <a href="{{ route('admin.jamaah') }}" class="ba2-nav-item {{ request()->routeIs('admin.jamaah*') ? 'active' : '' }}">
+        <span class="ba2-nav-icon"><i class="fa-solid fa-users"></i></span>
+        <span class="ba2-nav-label">Data Jamaah</span>
+    </a>
+
+    {{-- MENU TEMA TAMPILAN --}}
+    <a href="{{ route('admin.tema') }}" class="ba2-nav-item {{ request()->routeIs('admin.tema*') ? 'active' : '' }}">
+        <span class="ba2-nav-icon"><i class="fa-solid fa-palette"></i></span>
+        <span class="ba2-nav-label">Tema Tampilan</span>
+    </a>
+</nav>
 
         
         {{-- User footer --}}

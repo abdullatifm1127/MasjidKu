@@ -250,6 +250,12 @@
         <span class="ba2-nav-icon"><i class="fa-solid fa-users"></i></span>
         <span class="ba2-nav-label">Data Jamaah</span>
     </a>
+
+    {{-- MENU TEMA TAMPILAN --}}
+    <a href="{{ route('admin.tema') }}" class="ba2-nav-item {{ request()->routeIs('admin.tema*') ? 'active' : '' }}">
+        <span class="ba2-nav-icon"><i class="fa-solid fa-palette"></i></span>
+        <span class="ba2-nav-label">Tema Tampilan</span>
+    </a>
 </nav>
 
         <div class="ba2-user">

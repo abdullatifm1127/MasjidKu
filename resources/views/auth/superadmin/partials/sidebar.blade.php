@@ -5,9 +5,10 @@
         ['dashboard',     'superadmin.dashboard',          'fa-table-cells-large', 'Dashboard'],
         ['verifikasi',    'superadmin.verifikasi',         'fa-shield-halved',     'Verifikasi Pendaftaran'],
         ['manajemen',     'superadmin.manajemen-masjid',   'fa-mosque',            'Manajemen Masjid'],
-        ['pembayaran',    'superadmin.pembayaran.index',   'fa-credit-card',       'Pembayaran'], // <--- Menu Pembayaran Ditambahkan di Sini
+        ['pembayaran',    'superadmin.pembayaran.index',   'fa-credit-card',       'Pembayaran'],
         ['pengguna',      'superadmin.pengguna',           'fa-users',             'Pengguna'],
         ['halaman-utama', 'superadmin.halaman-utama.edit', 'fa-pen-to-square',     'Halaman Utama'],
+        ['themes',        'superadmin.themes.index',       'fa-palette',           'Manajemen Tema'], // <--- Menu Manajemen Tema Ditambahkan di Sini
         ['pengaturan',    'superadmin.pengaturan',         'fa-gear',              'Pengaturan'],
     ];
 @endphp

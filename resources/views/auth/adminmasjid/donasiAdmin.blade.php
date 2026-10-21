@@ -87,7 +87,7 @@
             </div>
         </div>
 
-        <nav class="ba2-nav">
+       <nav class="ba2-nav">
     <a href="{{ route('admin.dashboard') }}" class="ba2-nav-item {{ request()->routeIs('admin.dashboard*') ? 'active' : '' }}">
         <span class="ba2-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
         <span class="ba2-nav-label">Dashboard</span>
@@ -136,8 +136,8 @@
             <i class="fa-solid fa-chevron-down ba2-caret"></i>
         </a>
         <div class="ba2-sub">
-            @foreach ($subLabels as $key =>$label)
-                <a href="{{ route('admin.donasi.tab', $key) }}" class="{{ isset($tab) &&$tab === $key ? 'active' : '' }}">{{ $label }}</a>
+            @foreach ($subLabels as $key => $label)
+                <a href="{{ route('admin.donasi.tab', $key) }}" class="{{ isset($tab) && $tab === $key ? 'active' : '' }}">{{ $label }}</a>
             @endforeach
         </div>
     </div>
@@ -145,6 +145,12 @@
     <a href="{{ route('admin.jamaah') }}" class="ba2-nav-item {{ request()->routeIs('admin.jamaah*') ? 'active' : '' }}">
         <span class="ba2-nav-icon"><i class="fa-solid fa-users"></i></span>
         <span class="ba2-nav-label">Data Jamaah</span>
+    </a>
+
+    {{-- MENU TEMA TAMPILAN --}}
+    <a href="{{ route('admin.tema') }}" class="ba2-nav-item {{ request()->routeIs('admin.tema*') ? 'active' : '' }}">
+        <span class="ba2-nav-icon"><i class="fa-solid fa-palette"></i></span>
+        <span class="ba2-nav-label">Tema Tampilan</span>
     </a>
 </nav>
 
