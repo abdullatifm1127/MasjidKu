@@ -11,7 +11,7 @@ class LoginController extends Controller
     // Menampilkan halaman login super admin
     public function showLoginForm()
     {
-        return view('auth.superadmin.halamanloginSuperAdmin'); // Sesuaikan letak file blade Anda
+        return view('auth.superadmin.halamanloginsuperadmin');
     }
 
     // Memproses data saat tombol Masuk ditekan

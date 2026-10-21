@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Mosque;
+use App\Models\Acara;
+use App\Models\Pengumuman;
+use App\Models\Donasi;
+use App\Models\Jamaah;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -130,35 +134,31 @@ class MosqueController extends Controller
             ->with('success', 'Masjid berhasil didaftarkan dan menunggu verifikasi admin.');
     }
 
-   public function dashboard()
-{
-    $mosque = Mosque::where('user_id', Auth::id())->first();
+    public function dashboard()
+    {
+        $mosque = Mosque::where('user_id', Auth::id())->first();
 
-    if (!$mosque) {
-        return redirect()->route('daftar.masjid');
+        if (!$mosque) {
+            return redirect()->route('daftar.masjid');
+        }
+
+        if ($mosque->status === 'pending') {
+            return redirect()->route('waiting');
+        }
+
+        $totalAcara        = Acara::where('mosque_id', $mosque->id)->count();
+        $totalPengumuman   = Pengumuman::where('mosque_id', $mosque->id)->count();
+        $totalJamaah       = Jamaah::where('mosque_id', $mosque->id)->where('status', 'aktif')->count();
+        $totalDonasiBulanIni = Donasi::totalBulanIni($mosque->id);
+
+        return view('auth.adminmasjid.berandaAdmin', compact(
+            'mosque',
+            'totalAcara',
+            'totalPengumuman',
+            'totalJamaah',
+            'totalDonasiBulanIni'
+        ));
     }
-
-    if ($mosque->status === 'pending') {
-        return redirect()->route('waiting');
-    }
-
-    // Hitung data nyata dari database (Sesuaikan dengan nama Model Anda jika ada)
-    // Jika tabelnya belum ada, bisa di-default ke 0 dulu agar tidak error
-    $totalAcara = class_exists('\App\Models\Acara') ? \App\Models\Acara::where('mosque_id', $mosque->id)->count() : 0;
-    $totalPengumuman = class_exists('\App\Models\Pengumuman') ? \App\Models\Pengumuman::where('mosque_id', $mosque->id)->count() : 0;
-    
-    // Contoh data jamaah & donasi (ubah sesuai tabel Anda nantinya)
-    $totalJamaah = 0; 
-    $totalDonasiBulanIni = 0;
-
-    return view('auth.adminmasjid.berandaAdmin', compact(
-        'mosque', 
-        'totalAcara', 
-        'totalPengumuman', 
-        'totalJamaah', 
-        'totalDonasiBulanIni'
-    ));
-}
 
     /**
      * Halaman edit Profil Masjid (admin).

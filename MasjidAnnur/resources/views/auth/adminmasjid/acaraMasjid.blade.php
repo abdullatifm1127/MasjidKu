@@ -55,15 +55,13 @@
     <span class="lp-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
     <span class="lp-nav-label">Kegiatan &amp; Acara</span>
 </a>
-            <a href="#" class="lp-nav-item">
+            <a href="{{ route('admin.donasi') }}" class="lp-nav-item">
                 <span class="lp-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
                 <span class="lp-nav-label">Donasi</span>
-                <span class="lp-nav-soon">dev</span>
             </a>
-            <a href="#" class="lp-nav-item">
+            <a href="{{ route('admin.jamaah') }}" class="lp-nav-item">
                 <span class="lp-nav-icon"><i class="fa-solid fa-users"></i></span>
                 <span class="lp-nav-label">Data Jamaah</span>
-                <span class="lp-nav-soon">dev</span>
             </a>
         </nav>
 

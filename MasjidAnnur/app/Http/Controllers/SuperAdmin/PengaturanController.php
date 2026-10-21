@@ -37,10 +37,9 @@ class PengaturanController extends Controller
         return back()->with('success', 'Pengaturan berhasil disimpan!');
     }
     public function reset()
-{
-    // Logika untuk menghapus data tenant di sini
-    // Contoh: Tenant::truncate();
-
-    return back()->with('success', 'Semua data tenant berhasil dihapus.');
-}
+    {
+        // Fitur reset data tenant belum diimplementasi.
+        // Jangan jalankan sebelum logika penghapusan selesai dibuat.
+        return back()->with('error', 'Fitur reset data belum tersedia.');
+    }
 }

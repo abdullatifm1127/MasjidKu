@@ -21,9 +21,24 @@ class JadwalSholatController extends Controller
         return view('auth.adminmasjid.jadwalSholat', compact('mosque'));
     }
 
-    // Tambahkan method update jika nanti ada fitur simpan/ubah jadwal shalat
+    // Jadwal shalat diambil dari API publik berdasarkan koordinat/kota masjid.
+    // Method update ini disiapkan untuk menyimpan preferensi kota/koordinat jika admin ingin override.
     public function update(Request $request)
     {
-        // Logika update jadwal shalat di sini...
+        $mosque = Mosque::where('user_id', Auth::id())->first();
+
+        if (!$mosque) {
+            return redirect()->route('admin.jadwal-sholat')->with('error', 'Data masjid belum tersedia.');
+        }
+
+        $validated = $request->validate([
+            'city'     => 'nullable|string|max:100',
+            'province' => 'nullable|string|max:100',
+        ]);
+
+        // Simpan override kota untuk kalkulasi jadwal shalat
+        $mosque->update(array_filter($validated));
+
+        return redirect()->route('admin.jadwal-sholat')->with('success', 'Pengaturan lokasi jadwal shalat berhasil disimpan.');
     }
 }
