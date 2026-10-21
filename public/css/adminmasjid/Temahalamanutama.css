@@ -367,3 +367,263 @@
     & .hu-footer-v2-link:hover, & .hu-footer-v2-link-active { color: #fff; }
     & .hu-footer-v2-grid { border-bottom-color: rgba(255, 255, 255, .1); }
 }
+
+/* =========================================================================
+   UPGRADE v4
+   - EMERALD   : TERANG premium (putih kehijauan + hero/kartu shalat/footer hijau pekat + emas)
+   - TERRACOTTA: TERANG hangat (krem + bata + saffron, hero/footer cokelat tua)
+   - CORPORATE : GELAP, tidak diubah
+   CARA PASANG: HAPUS tema-upgrade.css / v2 / v3 yang lama, lalu tempel
+   SELURUH isi file ini di PALING BAWAH file CSS tema Anda (setelah Bagian 4).
+   Nama tema, config, dan blade tidak berubah. Hanya tampilan.
+   ========================================================================= */
+
+/* -------------------------------------------------------------------------
+   A) PALET & BENTUK  (--k-gold = aksen kedua untuk sorotan)
+   ------------------------------------------------------------------------- */
+
+/* EMERALD (terang) */
+:root[data-theme="emerald"] {
+    --k-bg: #f2f9f5;  --k-alt: #e6f3ec;  --k-surface: #ffffff;  --k-surface-2: #f4faf7;
+    --k-border: #cfe6da;  --k-text: #2b463b;  --k-head: #082a20;  --k-muted: #547064;
+    --k-accent: #047857;  --k-accent-h: #059669;  --k-accent-d: #065f46;  --k-accent-l: #34d399;
+    --k-accent-soft: #d9f3e6;  --k-accent-ink: #065f46;  --k-time: #047857;
+    --k-dark: #04281f;  --k-pray: #04281f;  --k-nav: rgba(255, 255, 255, .86);
+    --k-foot: #04281f;  --k-foot-text: #9cc4b3;
+    --k-btn1-bg: #f0cd72;  --k-btn1-fg: #2d2203;
+    --k-gold: #f0cd72;
+    --k-hero: linear-gradient(135deg, #03231a 0%, #065f46 50%, #0e9f74 120%);
+    --k-shadow: 0 22px 44px -22px rgba(4, 87, 62, .4), 0 6px 14px -8px rgba(4, 40, 31, .16);
+    --k-r: 22px;  --k-r-sm: 14px;
+}
+
+/* TERRACOTTA (terang) */
+:root[data-theme="terracotta"] {
+    --k-bg: #fbf4e8;  --k-alt: #f5e7cf;  --k-surface: #fffdf9;  --k-surface-2: #fcf3e2;
+    --k-border: #e8cfa0;  --k-text: #45342b;  --k-head: #2a140a;  --k-muted: #6d5748;
+    --k-accent: #b5400f;  --k-accent-h: #cf4f17;  --k-accent-d: #8a2f08;  --k-accent-l: #f0b13d;
+    --k-accent-soft: #fae3c0;  --k-accent-ink: #8a2f08;  --k-time: #b5400f;
+    --k-dark: #3d1507;  --k-pray: #3d1507;  --k-nav: rgba(255, 249, 236, .92);
+    --k-foot: #2a140a;  --k-foot-text: #c4ab93;
+    --k-btn1-bg: #f6c45e;  --k-btn1-fg: #3d1507;
+    --k-gold: #f0b13d;
+    --k-hero: linear-gradient(135deg, #34100a 0%, #a63a0c 52%, #e29a2f 130%);
+    --k-shadow: 0 18px 36px -16px rgba(111, 38, 8, .4), 0 4px 10px -6px rgba(111, 38, 8, .2);
+    --k-r: 14px;  --k-r-sm: 10px;
+}
+
+/* CORPORATE (gelap, tidak diubah) */
+:root[data-theme="corporate"] {
+    --k-bg: #04060f;  --k-alt: #080d1d;  --k-surface: #0b1224;  --k-surface-2: rgba(30, 41, 75, .5);
+    --k-border: #1c2848;  --k-text: #c7d2e6;  --k-head: #ffffff;  --k-muted: #8b99b8;
+    --k-accent: #2563eb;  --k-accent-h: #3b82f6;  --k-accent-d: #1d4ed8;  --k-accent-l: #67e8f9;
+    --k-accent-soft: #12204a;  --k-accent-ink: #93c5fd;  --k-time: #7dd3fc;
+    --k-dark: #0b1224;  --k-pray: #070b1a;  --k-nav: #0b1224;
+    --k-foot: #070b1a;  --k-foot-text: #8b99b8;
+    --k-btn1-bg: #2563eb;  --k-btn1-fg: #ffffff;
+    --k-gold: #67e8f9;
+    --k-hero: linear-gradient(135deg, #050818 0%, #1b2a7a 50%, #0a1030 100%);
+    --k-shadow: 0 24px 48px -16px rgba(0, 0, 0, .75), 0 0 0 1px rgba(96, 165, 250, .08);
+    --k-r: 18px;  --k-r-sm: 12px;
+}
+
+/* -------------------------------------------------------------------------
+   B) EFEK BERSAMA
+   ------------------------------------------------------------------------- */
+:root:where([data-theme="emerald"], [data-theme="terracotta"], [data-theme="corporate"]):not(#t) {
+    & .hu-hero { position: relative; overflow: hidden; min-height: 80vh; }
+    & .hu-hero-title { font-weight: 800; font-size: clamp(2.4rem, 6vw, 4.4rem); text-shadow: 0 6px 30px rgba(0, 0, 0, .3); }
+    & .hu-hero-arabic { color: var(--k-gold); text-shadow: 0 0 26px color-mix(in srgb, var(--k-gold) 45%, transparent); }
+    & .hu-btn-primary, & .hu-btn-outline { transition: transform .2s, box-shadow .2s, filter .2s; }
+    & .hu-btn-primary:hover, & .hu-btn-outline:hover { transform: translateY(-2px); }
+    & .pn-card, & .hu-acara-v2-card, & .pf-stat, & .hu-hubungi-card, & #shalat .hx-card { transition: transform .25s, box-shadow .25s, border-color .25s; }
+    & .pn-card:hover, & .hu-acara-v2-card:hover, & .pf-stat:hover, & .hu-hubungi-card:hover, & #shalat .hx-card:hover { transform: translateY(-5px); box-shadow: var(--k-shadow); }
+    & .hu-program-v2-item, & .hu-fasilitas-item { transition: transform .25s, box-shadow .25s, border-color .25s; }
+    & .hu-program-v2-item:hover, & .hu-fasilitas-item:hover { transform: translateX(6px); box-shadow: var(--k-shadow); }
+    & #donasi [style*="border-radius: 1.25rem"] { transition: transform .25s; }
+    & #donasi [style*="border-radius: 1.25rem"]:hover { transform: translateY(-6px); }
+    & .pf-section .pf-kicker { letter-spacing: .16em; }
+    & .pf-since small { color: var(--k-gold); }
+    & .hu-acara-v2-month { color: var(--k-gold); }
+    & .hu-footer-v2-arabic, & .hu-footer-v2-col-title { color: var(--k-gold); }
+    & .hu-footer-v2 { border-top: 3px solid var(--k-gold); }
+}
+
+/* -------------------------------------------------------------------------
+   C) EMERALD TERANG PREMIUM
+   ------------------------------------------------------------------------- */
+:root[data-theme="emerald"]:not(#t) {
+    & body {
+        background:
+            radial-gradient(900px 520px at 100% 0%, rgba(16, 185, 129, .12), transparent 60%),
+            radial-gradient(800px 480px at 0% 45%, rgba(240, 205, 114, .14), transparent 60%),
+            var(--k-bg);
+    }
+    & .hu-section-title, & .pf-section .pf-title, & .pn-wrap .pn-h2 { font-weight: 800; }
+
+    & .hu-navbar { -webkit-backdrop-filter: blur(16px) saturate(170%); backdrop-filter: blur(16px) saturate(170%); border-bottom: 1px solid rgba(4, 120, 87, .12); }
+    & .hu-nav-link { border-radius: 999px; padding-inline: 14px; }
+    & .hu-nav-link:hover { background: var(--k-accent-soft); }
+    & .hu-nav-link.active { background: linear-gradient(135deg, var(--k-accent-h), var(--k-accent-d)); color: #fff; box-shadow: 0 8px 18px -8px var(--k-accent); }
+    & .hu-brand-icon { border-radius: 50%; background: linear-gradient(135deg, #10b981, #065f46); box-shadow: 0 8px 18px -6px rgba(4, 87, 62, .65); }
+    & .hu-ticker { background: linear-gradient(90deg, var(--k-accent-soft), #fbf3d6); }
+    & .hu-ticker-label { border-radius: 999px; background: linear-gradient(135deg, var(--k-accent-h), var(--k-accent-d)); }
+
+    & .hu-hero-overlay {
+        background:
+            radial-gradient(45% 55% at 82% 8%, rgba(52, 211, 153, .40), transparent 70%),
+            radial-gradient(40% 50% at 6% 95%, rgba(240, 205, 114, .24), transparent 70%),
+            radial-gradient(rgba(255, 255, 255, .08) 1.2px, transparent 1.4px) 0 0 / 30px 30px;
+    }
+    & .hu-hero::after { display: block; content: ""; position: absolute; left: -5%; right: -5%; bottom: -1px; height: 70px; background: var(--k-bg); border-radius: 50% 50% 0 0 / 100% 100% 0 0; pointer-events: none; }
+    & .hu-hero-title { background: linear-gradient(180deg, #ffffff 35%, #bbf7d0); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
+    & .hu-btn-primary, & .hu-btn-outline { border-radius: 999px; padding-inline: 1.8rem; }
+    & .hu-btn-primary { background: linear-gradient(135deg, #f7dc8d, #e0aa3e); color: #2d2203; box-shadow: 0 14px 30px -10px rgba(224, 170, 62, .7); }
+    & .hu-btn-outline { background: rgba(255, 255, 255, .1); backdrop-filter: blur(6px); border-color: rgba(255, 255, 255, .45); color: #fff; }
+
+    & .pf-arch, & .pf-arch-img { border-radius: 40px; }
+    & .pf-arch-img { outline: 6px solid #fff; box-shadow: 0 34px 60px -26px rgba(4, 87, 62, .6); }
+    & .pf-since { border-radius: 999px; background: linear-gradient(135deg, #10b981, #065f46); }
+    & .pf-prog { border-radius: 999px; }
+    & .pf-stat { border-radius: 22px; border: 1px solid var(--k-border); border-top: 4px solid var(--k-accent-l); background: linear-gradient(180deg, #fff, var(--k-accent-soft)); }
+    & .pf-section .pf-vision { border-left: 0; border-top: 4px solid var(--k-gold); border-radius: var(--k-r); }
+
+    /* kartu shalat utama gelap = titik fokus */
+    & #shalat .hx-hero { background: linear-gradient(135deg, #03231a, #065f46 70%, #0a7a58); color: #e6f7ef; border: 1px solid rgba(240, 205, 114, .45); border-radius: 32px; box-shadow: 0 30px 60px -24px rgba(4, 87, 62, .7); }
+    & #shalat .hx-lbl, & #shalat .hx-hero-meta { color: #a9dcc5; }
+    & #shalat .hx-hero-meta b, & #shalat .hx-cd b, & #shalat .hx-cd span { color: #fff; }
+    & #shalat .hx-hero-name { color: var(--k-gold); }
+    & #shalat .hx-cd div { background: rgba(255, 255, 255, .09); border-color: rgba(240, 205, 114, .35); border-radius: 16px; }
+    & #shalat .hx-card { border-radius: 24px; background: #fff; box-shadow: 0 12px 24px -16px rgba(4, 87, 62, .35); }
+    & #shalat .hx-card.is-active { background: linear-gradient(160deg, #0e9f74, #065f46); border-color: transparent; color: #fff; box-shadow: 0 20px 36px -14px rgba(4, 87, 62, .7); }
+    & #shalat .hx-card.is-active .hx-ar, & #shalat .hx-card.is-active .hx-time, & #shalat .hx-card.is-active .hx-name { color: #fff; }
+    & #shalat .hx-badge.now, & #shalat .hx-card.is-active .hx-badge.now { background: var(--k-gold); color: #2d2203; }
+    & #shalat .hx-time { font-variant-numeric: tabular-nums; }
+
+    & .pn-card, & .hu-acara-v2-card { overflow: hidden; border-radius: 26px; }
+    & .pn-card::before, & .hu-acara-v2-card::before { content: ""; display: block; height: 4px; background: linear-gradient(90deg, var(--k-accent), var(--k-accent-l), var(--k-gold)); }
+    & .pn-feature .pn-more, & .pn-chip, & .pn-pinned, & .hu-acara-v2-badge { border-radius: 999px; }
+    & .pn-feature .pn-more { background: linear-gradient(135deg, var(--k-accent-h), var(--k-accent-d)); }
+    & .hu-program-v2-item, & .hu-fasilitas-item { border-radius: 999px; padding-inline: 24px; }
+    & .hu-program-v2-num, & .hu-fasilitas-num { border-radius: 50%; background: linear-gradient(135deg, #10b981, #065f46); color: #fff; }
+    & .hu-acara-v2-date { background: linear-gradient(160deg, #0e9f74, #065f46); border-radius: 18px; }
+
+    & #donasi { background: linear-gradient(180deg, var(--k-alt), #d6efe2) !important; }
+    & #donasi [style*="border-radius: 1.25rem"] { border-top: 4px solid var(--k-accent-l); border-radius: 26px !important; }
+    & #donasi [style*="border-radius: 0.75rem"] { border-radius: 999px !important; background: linear-gradient(135deg, #0e9f74, #065f46) !important; box-shadow: 0 12px 22px -10px rgba(4, 87, 62, .7); }
+    & .hu-hubungi-icon { border-radius: 50%; background: linear-gradient(135deg, #10b981, #065f46); color: #fff; }
+    & .hu-footer-v2 { background: radial-gradient(60% 90% at 85% 0%, rgba(52, 211, 153, .18), transparent 70%), linear-gradient(180deg, #05382b, #021a13); }
+}
+
+/* -------------------------------------------------------------------------
+   D) TERRACOTTA TERANG HANGAT
+   ------------------------------------------------------------------------- */
+:root[data-theme="terracotta"]:not(#t) {
+    & body {
+        background:
+            radial-gradient(900px 520px at 100% 0%, rgba(240, 177, 61, .16), transparent 60%),
+            radial-gradient(800px 480px at 0% 50%, rgba(181, 64, 15, .07), transparent 60%),
+            var(--k-bg);
+    }
+    & .hu-section-title, & .pf-section .pf-title, & .pn-wrap .pn-h2, & .hu-hero-title { font-family: var(--k-font-head); }
+    & .hu-navbar { border-bottom: 3px double var(--k-accent); }
+    & .hu-brand-name { font-family: var(--k-font-head); }
+    & .hu-brand-icon { border-radius: 50% 50% 8px 8px; background: linear-gradient(160deg, #cf4f17, #7a2a07); box-shadow: 0 8px 16px -6px rgba(122, 42, 7, .6); }
+    & .hu-nav-link.active { box-shadow: inset 0 -3px 0 var(--k-accent-l), inset 0 -4px 0 var(--k-accent); }
+    & .hu-ticker { background: linear-gradient(90deg, var(--k-accent-soft), #fff1d2); }
+    & .hu-ticker-label { background: var(--k-accent); }
+
+    & .hu-hero-overlay {
+        background:
+            radial-gradient(50% 55% at 50% 0%, rgba(240, 177, 61, .35), transparent 70%),
+            radial-gradient(45% 50% at 92% 100%, rgba(207, 79, 23, .5), transparent 70%),
+            repeating-conic-gradient(from 45deg at 50% 50%, rgba(255, 255, 255, .06) 0 25%, transparent 0 50%) 0 0 / 44px 44px;
+    }
+    & .hu-hero::after { display: block; content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 26px; background: radial-gradient(circle at 13px 0, transparent 12px, var(--k-bg) 13px) 0 0 / 26px 26px repeat-x; pointer-events: none; }
+    & .hu-hero-title { font-weight: 700; letter-spacing: -.01em; color: #fff8ec; text-shadow: 0 0 40px rgba(240, 177, 61, .4), 0 6px 30px rgba(0, 0, 0, .4); }
+    & .hu-btn-primary, & .hu-btn-outline { border-radius: 12px; }
+    & .hu-btn-primary { background: linear-gradient(180deg, #fbd883, #f0b13d); color: #3d1507; border: 2px solid #fde3a0; box-shadow: 0 14px 28px -10px rgba(240, 177, 61, .7); }
+    & .hu-btn-outline { background: rgba(255, 255, 255, .08); color: #fff8ec; }
+
+    & .pf-arch, & .pf-arch-img { border-radius: 999px 999px 16px 16px; }          /* mihrab */
+    & .pf-arch-img { border: 6px solid #fffdf9; outline: 2px solid var(--k-accent); box-shadow: 0 30px 56px -22px rgba(111, 38, 8, .6); }
+    & .pf-section .pf-vision { border-left: 5px solid var(--k-accent); background: repeating-linear-gradient(135deg, #fffdf9 0 14px, #fcf3e2 14px 28px); }
+    & .pf-since { border-radius: 12px; border: 2px dashed rgba(255, 255, 255, .55); background: linear-gradient(160deg, #cf4f17, #7a2a07); }
+    & .pf-stat { border-bottom: 4px solid var(--k-accent); }
+
+    & #shalat .hx-hero { background: linear-gradient(135deg, #34100a, #8a2f08 70%, #a63a0c); color: #fdebd6; border: 2px solid var(--k-accent-l); outline: 4px double rgba(240, 177, 61, .5); outline-offset: -10px; border-radius: 16px; box-shadow: 0 30px 56px -22px rgba(111, 38, 8, .7); }
+    & #shalat .hx-lbl, & #shalat .hx-hero-meta { color: #f6d3ad; }
+    & #shalat .hx-hero-meta b, & #shalat .hx-cd b, & #shalat .hx-cd span { color: #fff; }
+    & #shalat .hx-hero-name { color: var(--k-gold); font-family: var(--k-font-head); }
+    & #shalat .hx-cd div { background: rgba(255, 255, 255, .08); border-color: rgba(240, 177, 61, .4); border-radius: 12px; }
+    & #shalat .hx-card { border-radius: 999px 999px 14px 14px; padding-top: 22px; background: var(--k-surface); box-shadow: 0 12px 24px -16px rgba(111, 38, 8, .4); }   /* kartu berkubah */
+    & #shalat .hx-card.is-active { background: linear-gradient(160deg, #cf4f17, #6e2508); color: #fff; border-color: var(--k-accent-l); box-shadow: 0 20px 36px -14px rgba(111, 38, 8, .7); }
+    & #shalat .hx-card.is-active .hx-ar, & #shalat .hx-card.is-active .hx-time, & #shalat .hx-card.is-active .hx-name { color: #fde3a0; }
+    & #shalat .hx-badge.now, & #shalat .hx-card.is-active .hx-badge.now { background: var(--k-accent-l); color: #3d1507; }
+    & #shalat .hx-time { font-family: var(--k-font-head); }
+
+    & .pn-card, & .hu-acara-v2-card { border-top: 5px solid var(--k-accent); }
+    & .pn-card:hover, & .hu-acara-v2-card:hover { border-top-color: var(--k-accent-l); }
+    & .hu-program-v2-item, & .hu-fasilitas-item { border-radius: 8px 44px 8px 44px; border-left: 4px solid var(--k-accent); }   /* gaya ukiran daun */
+    & .hu-program-v2-num, & .hu-fasilitas-num { border-radius: 50% 50% 4px 4px; background: linear-gradient(160deg, #cf4f17, #8a2f08); color: #fff; font-family: var(--k-font-head); }
+    & .hu-program-v2-name, & .hu-fasilitas-name, & .hu-acara-v2-judul { font-family: var(--k-font-head); }
+    & .hu-acara-v2-date { border-radius: 999px 999px 8px 8px; background: linear-gradient(160deg, #cf4f17, #7a2a07); }
+
+    & #donasi { background: linear-gradient(180deg, var(--k-alt), #efd9b0) !important; }
+    & #donasi [style*="border-radius: 1.25rem"] { border-top: 5px solid var(--k-accent); }
+    & #donasi [style*="border-radius: 0.75rem"] { background: linear-gradient(180deg, #cf4f17, #8a2f08) !important; box-shadow: 0 12px 22px -10px rgba(111, 38, 8, .7); }
+    & .hu-hubungi-icon { border-radius: 50% 50% 4px 4px; background: linear-gradient(160deg, #cf4f17, #8a2f08); color: #fff; }
+    & .hu-footer-v2 { background: radial-gradient(60% 90% at 85% 0%, rgba(240, 177, 61, .14), transparent 70%), linear-gradient(180deg, #3a170a, #1f0e06); border-top: 4px double var(--k-accent-l); }
+}
+
+/* -------------------------------------------------------------------------
+   E) CORPORATE (gelap, sama persis, tidak diubah)
+   ------------------------------------------------------------------------- */
+:root[data-theme="corporate"]:not(#t) {
+    & .hu-navbar { background: rgba(9, 14, 30, .72); -webkit-backdrop-filter: blur(16px) saturate(170%); backdrop-filter: blur(16px) saturate(170%); border-bottom: 1px solid rgba(96, 165, 250, .18); }
+    & .hu-nav-link.active { box-shadow: inset 0 -2px 0 var(--k-accent-l), 0 8px 18px -10px var(--k-accent-l); color: var(--k-accent-l); }
+    & .hu-brand-icon { background: linear-gradient(135deg, #3b82f6, #4f46e5); box-shadow: 0 0 22px -2px rgba(79, 70, 229, .75); }
+    & .hu-ticker { background: #0b1530; }
+    & .hu-ticker-label { background: linear-gradient(135deg, #2563eb, #4f46e5); }
+
+    & .hu-hero-overlay {
+        background:
+            radial-gradient(45% 55% at 82% 8%, rgba(59, 130, 246, .45), transparent 70%),
+            radial-gradient(40% 50% at 8% 95%, rgba(124, 58, 237, .32), transparent 70%),
+            linear-gradient(rgba(148, 163, 184, .07) 1px, transparent 1px) 0 0 / 44px 44px,
+            linear-gradient(90deg, rgba(148, 163, 184, .07) 1px, transparent 1px) 0 0 / 44px 44px;
+    }
+    & .hu-hero::after { display: block; content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 110px; background: linear-gradient(to bottom, transparent, var(--k-bg)); pointer-events: none; }
+    & .hu-hero-title { background: linear-gradient(180deg, #fff 35%, #a5b4fc); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
+    & .hu-btn-primary { background: linear-gradient(135deg, #2563eb, #4f46e5); color: #fff; box-shadow: 0 0 30px -4px rgba(79, 70, 229, .8); }
+    & .hu-btn-outline { background: rgba(255, 255, 255, .05); backdrop-filter: blur(6px); border-color: rgba(103, 232, 249, .5); }
+
+    & .pf-arch, & .pf-arch-img { border-radius: 22px; box-shadow: 0 0 0 1px rgba(96, 165, 250, .3), 0 30px 60px -20px rgba(79, 70, 229, .55); }
+    & .pf-stat, & .pf-section .pf-vision, & .pn-card, & .hu-acara-v2-card, & .hu-hubungi-card, & #shalat .hx-card, & #shalat .hx-eid-card, & #shalat .kx-mini, & #shalat .kx-detail {
+        background: linear-gradient(160deg, rgba(30, 41, 75, .7), rgba(11, 18, 36, .88));
+        -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+        border: 1px solid rgba(96, 165, 250, .16);
+    }
+    & .pf-section .pf-vision { border-left: 4px solid var(--k-accent-l); }
+    & .pn-card:hover, & .hu-acara-v2-card:hover, & .pf-stat:hover, & .hu-hubungi-card:hover, & #shalat .hx-card:hover { border-color: rgba(103, 232, 249, .55); box-shadow: 0 0 34px -8px rgba(79, 70, 229, .6); }
+    & .pf-since { background: linear-gradient(135deg, #2563eb, #4f46e5); box-shadow: 0 0 28px -4px rgba(79, 70, 229, .7); }
+
+    & #shalat .hx-hero { background: linear-gradient(135deg, #0e1a4a, #1b2a7a 60%, #24349a); border: 1px solid rgba(103, 232, 249, .35); box-shadow: 0 0 56px -14px rgba(79, 70, 229, .7); }
+    & #shalat .hx-hero-name { color: var(--k-accent-l); text-shadow: 0 0 24px rgba(103, 232, 249, .5); }
+    & #shalat .hx-card.is-active { background: linear-gradient(160deg, #2563eb, #1b2a7a); border-color: var(--k-accent-l); box-shadow: 0 0 34px -6px rgba(103, 232, 249, .5); color: #fff; }
+    & #shalat .hx-card.is-active .hx-ar, & #shalat .hx-card.is-active .hx-time, & #shalat .hx-card.is-active .hx-name { color: #fff; }
+    & #shalat .hx-badge.now, & #shalat .hx-card.is-active .hx-badge.now { background: var(--k-accent-l); color: #06222b; }
+    & #shalat .hx-time { font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+
+    & .pn-card::before, & .hu-acara-v2-card::before { content: ""; display: block; height: 2px; background: linear-gradient(90deg, transparent, var(--k-accent-l), transparent); }
+    & .hu-program-v2-item, & .hu-fasilitas-item { background: linear-gradient(90deg, rgba(79, 70, 229, .16), rgba(11, 18, 36, .6)); border-color: rgba(96, 165, 250, .16); border-radius: 14px; }
+    & .hu-program-v2-item:hover, & .hu-fasilitas-item:hover { border-color: var(--k-accent-l); box-shadow: 0 0 26px -8px rgba(103, 232, 249, .5); }
+    & .hu-program-v2-num, & .hu-fasilitas-num { background: linear-gradient(135deg, #2563eb, #4f46e5); color: #fff; box-shadow: 0 0 16px -2px rgba(79, 70, 229, .7); }
+    & .hu-acara-v2-date { background: linear-gradient(160deg, #2563eb, #4f46e5); }
+
+    & #donasi { background: radial-gradient(60% 50% at 50% 0%, rgba(79, 70, 229, .22), transparent 70%), var(--k-alt) !important; }
+    & #donasi [style*="border-radius: 1.25rem"] { background: linear-gradient(160deg, rgba(30, 41, 75, .8), rgba(11, 18, 36, .92)) !important; border: 1px solid rgba(96, 165, 250, .2); }
+    & #donasi [style*="border-radius: 0.75rem"] { background: linear-gradient(135deg, #2563eb, #4f46e5) !important; box-shadow: 0 0 22px -6px rgba(79, 70, 229, .85); }
+    & .hu-hubungi-icon { background: rgba(79, 70, 229, .22); color: var(--k-accent-l); box-shadow: 0 0 18px -4px rgba(103, 232, 249, .45); }
+    & .hu-footer-v2 { background: radial-gradient(60% 90% at 50% 0%, rgba(79, 70, 229, .2), transparent 70%), #050917; border-top: 1px solid rgba(103, 232, 249, .35); }
+}
