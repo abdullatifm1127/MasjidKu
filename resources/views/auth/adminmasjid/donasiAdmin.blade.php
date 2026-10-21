@@ -464,9 +464,32 @@
             @endif
 
             {{-- =====================================================
-                 TAB 3: PENYALURAN (dokumentasi realisasi)
+                 TAB 3: PENYALURAN (ringkasan otomatis per program + dokumentasi)
                  ===================================================== --}}
             @if ($tab === 'penyaluran')
+                @php
+                    // Rekap otomatis tiap program donasi (infaq, zakat, dll): dana masuk, tersalurkan, sisa
+                    $rekapProgram = $donationCategories->map(function ($c) use ($mosque, $items) {
+                        $key    = strtolower(trim((string) $c->key));
+                        $masuk  = \App\Models\Donasi::where('mosque_id', $mosque->id)
+                                    ->where('jenis', $c->key)->where('status', 'diterima')->sum('nominal');
+                        $docs   = $items->filter(fn ($i) => strtolower(trim((string) $i->kategori)) === $key);
+                        $keluar = $docs->sum('nominal_terpakai');
+                        return (object) [
+                            'key'    => $c->key,
+                            'title'  => $c->title,
+                            'image'  => $c->image,
+                            'active' => $c->is_active,
+                            'masuk'  => $masuk,
+                            'keluar' => $keluar,
+                            'sisa'   => $masuk - $keluar,
+                            'pct'    => $masuk > 0 ? min(round($keluar / $masuk * 100), 100) : 0,
+                            'dok'    => $docs->count(),
+                        ];
+                    });
+                    $dokUmum = $items->filter(fn ($i) => trim((string) $i->kategori) === '')->count();
+                @endphp
+
                 <div class="dn-grid-dashboard" style="margin-bottom: 1.5rem;">
                     <div class="dn-card-modern">
                         <h3><i class="fa-solid fa-sack-dollar text-teal-600"></i> Total Diterima</h3>
@@ -482,18 +505,18 @@
                     </div>
                 </div>
 
-                <section class="dn-card-modern" style="margin-bottom: 1.5rem;">
+                <section class="dn-card-modern" id="dn-form-galeri" style="margin-bottom: 1.5rem;">
                     <h3><i class="fa-solid fa-images text-teal-600"></i> Dokumentasi Penyaluran</h3>
-                    <p>Unggah foto bukti nyata penyaluran dana ke jamaah.</p>
+                    <p>Unggah foto bukti nyata penyaluran dana ke jamaah. Pilih program agar otomatis masuk ke penyaluran program tersebut.</p>
                     <form action="{{ route('admin.donasi.galeri.store') }}" method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
                         @csrf
                         <div>
                             <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Judul Kegiatan</label>
-                            <input type="text" name="judul" class="form-control-modern" placeholder="Mis. Sembako Ramadhan" value="{{ old('judul') }}" required maxlength="120">
+                            <input type="text" name="judul" id="dn-judul" class="form-control-modern" placeholder="Mis. Sembako Ramadhan" value="{{ old('judul') }}" required maxlength="120">
                         </div>
                         <div>
-                            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Kategori</label>
-                            <select name="kategori" class="form-control-modern">
+                            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Kategori / Program</label>
+                            <select name="kategori" id="dn-kategori-select" class="form-control-modern">
                                 <option value="">Umum</option>
                                 @foreach ($donationCategories as $cat)
                                     <option value="{{ $cat->key }}" {{ old('kategori') === $cat->key ? 'selected' : '' }}>{{ $cat->title }}</option>
@@ -525,12 +548,40 @@
 
                 <section class="dn-card-modern">
                     <h3><i class="fa-solid fa-photo-film text-teal-600"></i> Galeri Dokumentasi Tersimpan</h3>
-                    <p>Total {{ $items->count() }} foto telah dipublikasikan ke halaman donasi.</p>
+                    <p>Setiap program donasi (infaq, zakat, dll) otomatis masuk ke galeri ini dan ke halaman publik. Ditambah {{ $items->count() }} foto dokumentasi yang sudah diunggah.</p>
 
-                    @if ($items->isEmpty())
+                    @if ($items->isEmpty() && $rekapProgram->isEmpty())
                         <div class="dn-empty" style="text-align: center; padding: 2rem; color: #64748b;">Belum ada dokumentasi foto yang diunggah.</div>
                     @else
                         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+                            {{-- Kartu program otomatis (dari menu Kategori) --}}
+                            @foreach ($rekapProgram as $rp)
+                                <div style="border: 1px solid #99f6e4; border-radius: 0.75rem; overflow: hidden; background: #ffffff; display: flex; flex-direction: column; position: relative;">
+                                    <div style="position: relative; height: 160px; background-size: cover; background-position: center; background-color: #0f766e; {{ !empty($rp->image) ? "background-image:url('" . asset('storage/' . $rp->image) . "');" : 'background-image: linear-gradient(150deg,#0f766e,#115e59);' }}">
+                                        <span style="position:absolute; top:10px; left:10px; background:rgba(13,148,136,.95); color:#fff; padding:3px 10px; border-radius:999px; font-size:.65rem; font-weight:700; text-transform:uppercase;">Program &middot; Otomatis</span>
+                                    </div>
+                                    <div style="padding: 1rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap:.75rem;">
+                                        <div>
+                                            <span style="font-size: 0.7rem; background: #e0f2fe; color: #0369a1; padding: 0.2rem 0.5rem; border-radius: 999px; font-weight: 600;">{{ $rp->title }}</span>
+                                            <h4 style="font-size: 0.95rem; font-weight: 700; color: #1e293b; margin: 0.5rem 0 0.5rem 0;">Penyaluran {{ $rp->title }}</h4>
+                                            <div style="display:grid; gap:3px; font-size:.78rem;">
+                                                <div style="display:flex; justify-content:space-between;"><span style="color:#64748b;">Dana masuk</span><b style="color:#10b981;">Rp {{ number_format($rp->masuk, 0, ',', '.') }}</b></div>
+                                                <div style="display:flex; justify-content:space-between;"><span style="color:#64748b;">Tersalurkan</span><b style="color:#ef4444;">Rp {{ number_format($rp->keluar, 0, ',', '.') }}</b></div>
+                                                <div style="display:flex; justify-content:space-between;"><span style="color:#64748b;">Sisa dana</span><b style="color:#0f172a;">Rp {{ number_format($rp->sisa, 0, ',', '.') }}</b></div>
+                                            </div>
+                                            <div style="margin-top:.5rem; width:100%; height:6px; background:#e2e8f0; border-radius:999px; overflow:hidden;">
+                                                <div style="width: {{ $rp->pct }}%; height:100%; background: linear-gradient(90deg,#0d9488,#14b8a6);"></div>
+                                            </div>
+                                            <div style="margin-top:4px; font-size:.7rem; color:#94a3b8;">{{ $rp->pct }}% tersalurkan &middot; {{ $rp->dok }} dokumentasi foto</div>
+                                        </div>
+                                        <button type="button" class="btn-primary-modern dn-pick-program" data-kategori="{{ $rp->key }}" style="justify-content:center; padding:.45rem .8rem; font-size:.78rem;">
+                                            <i class="fa-solid fa-plus"></i> Tambah Dokumentasi
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
+
+                            {{-- Foto dokumentasi yang diunggah --}}
                             @foreach ($items as $item)
                                 <div style="border: 1px solid #e2e8f0; border-radius: 0.75rem; overflow: hidden; background: #ffffff; display: flex; flex-direction: column; position: relative;">
                                     <div style="height: 160px; background-size: cover; background-position: center; background-image:url('{{ $item->foto_url }}')"></div>
@@ -538,7 +589,10 @@
                                         <div>
                                             @php
                                                 $catTitle = 'Umum';
-                                                $matched = $donationCategories->firstWhere('key', $item->kategori);
+                                                $itemKat  = strtolower(trim((string) $item->kategori));
+                                                $matched  = $itemKat === '' ? null : $donationCategories->first(
+                                                    fn ($c) => strtolower(trim((string) $c->key)) === $itemKat
+                                                );
                                                 if ($matched) { $catTitle = $matched->title; }
                                             @endphp
                                             <span style="font-size: 0.7rem; background: #e0f2fe; color: #0369a1; padding: 0.2rem 0.5rem; border-radius: 999px; font-weight: 600;">{{ $catTitle }}</span>
@@ -561,6 +615,20 @@
                         </div>
                     @endif
                 </section>
+
+                <script>
+                    // Tombol "Tambah Dokumentasi" di kartu program: pilih kategori otomatis lalu geser ke formulir
+                    document.querySelectorAll('.dn-pick-program').forEach(function (btn) {
+                        btn.addEventListener('click', function () {
+                            var sel = document.getElementById('dn-kategori-select');
+                            if (sel) sel.value = this.dataset.kategori;
+                            var form = document.getElementById('dn-form-galeri');
+                            if (form) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            var judul = document.getElementById('dn-judul');
+                            if (judul) setTimeout(function () { judul.focus({ preventScroll: true }); }, 400);
+                        });
+                    });
+                </script>
             @endif
 
             {{-- =====================================================

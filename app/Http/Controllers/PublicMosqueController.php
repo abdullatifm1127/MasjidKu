@@ -144,6 +144,20 @@ class PublicMosqueController extends Controller
             ->orderBy('sort_order')
             ->get();
 
+        // Tambahkan kalkulasi otomatis Uang Masuk, Uang Keluar, dan Sisa Saldo per kategori
+        $categories->transform(function ($cat) use ($mosque) {
+    $cat->total_masuk = Donasi::where('mosque_id', $mosque->id)
+        ->where('jenis', $cat->key)
+        ->where('status', 'diterima')
+        ->sum('nominal');
+
+    $cat->total_keluar = DonasiGaleri::where('mosque_id', $mosque->id)
+        ->where('kategori', $cat->key)
+        ->sum('nominal_terpakai');
+
+    return $cat;
+});
+
         $categoriesJson = $categories->toJson();
 
         $recentDonations = collect();

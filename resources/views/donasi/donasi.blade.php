@@ -38,38 +38,56 @@
         </ol>
 
         <div role="status" aria-live="polite" class="sr-only" id="step-announcer"></div>
-
-        <!-- STEP 1: PILIH KATEGORI & GALERI DOKUMENTASI -->
-        <section class="panel-card" id="panel-1" aria-labelledby="panel-1-title">
-            <div class="panel-title">
-                <h2 id="panel-1-title">Pilih kategori donasi</h2>
-                <p>Tentukan jenis kebaikan yang ingin Anda salurkan hari ini.</p>
-            </div>
-
-            @if ($categories->isEmpty())
-                <p class="empty-box">Belum ada kategori donasi yang tersedia. Silakan kembali lagi nanti.</p>
-            @else
-                <div class="category-list">
-                    @foreach ($categories as $cat)
-                        <button type="button"
-                                class="category-item"
-                                data-key="{{ $cat->key }}"
-                                data-title="{{ $cat->title }}"
-                                data-calc-type="{{ strtolower(trim($cat->calc_type ?? 'nominal')) }}">
-                            <span class="ci-icon" aria-hidden="true">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                    {!! $cat->iconPath() !!}
-                                </svg>
-                            </span>
-                            <span class="ci-info">
-                                <span class="ci-info-title">{{ $cat->title }}</span>
-                                <span class="ci-info-desc">{{ $cat->description }}</span>
-                            </span>
-                            <span class="ci-arrow" aria-hidden="true">&rsaquo;</span>
-                        </button>
-                    @endforeach
+<!-- STEP 1: PILIH KATEGORI & GALERI DOKUMENTASI -->
+            <section class="panel-card" id="panel-1" aria-labelledby="panel-1-title">
+                <div class="panel-title">
+                    <h2 id="panel-1-title">Pilih kategori donasi</h2>
+                    <p>Tentukan jenis kebaikan yang ingin Anda salurkan hari ini.</p>
                 </div>
-            @endif
+
+                @if ($categories->isEmpty())
+    <p class="empty-box">Belum ada kategori donasi yang tersedia. Silakan kembali lagi nanti.</p>
+@else
+    <div class="category-list">
+        @foreach ($categories as $cat)
+            @php
+                $fotoKategori = $cat->image ? asset('storage/' . $cat->image) : null;
+            @endphp
+
+            <button type="button"
+                    class="category-item"
+                    data-key="{{ $cat->key }}"
+                    data-title="{{ $cat->title }}"
+                    data-calc-type="{{ strtolower(trim($cat->calc_type ?? 'nominal')) }}"
+                    style="display: flex; align-items: center; gap: 1rem; text-align: left; padding: 1rem;">
+                
+                {{-- Tampilkan Foto Kategori --}}
+                @if($fotoKategori)
+                    <div style="width: 64px; height: 64px; border-radius: 0.5rem; background-size: cover; background-position: center; background-image: url('{{ $fotoKategori }}'); flex-shrink: 0;"></div>
+                @else
+                    <span class="ci-icon" aria-hidden="true" style="flex-shrink: 0;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            {!! $cat->iconPath() !!}
+                        </svg>
+                    </span>
+                @endif
+
+                {{-- Informasi Kategori & Transparansi Keuangan --}}
+                <span class="ci-info" style="flex: 1;">
+                    <span class="ci-info-title" style="font-size: 1.05rem; font-weight: 700; color: #1e293b;">{{ $cat->title }}</span>
+                    <span class="ci-info-desc" style="display: block; font-size: 0.85rem; color: #64748b; margin-top: 0.15rem;">{{ $cat->description }}</span>
+                    
+                    <span style="display: flex; gap: 1rem; font-size: 0.75rem; margin-top: 0.5rem; flex-wrap: wrap;">
+                        <span style="color: #10b981; font-weight: 600;">Masuk: Rp {{ number_format($cat->total_masuk ?? 0, 0, ',', '.') }}</span>
+                        <span style="color: #ef4444; font-weight: 600;">Keluar: Rp {{ number_format($cat->total_keluar ?? 0, 0, ',', '.') }}</span>
+                    </span>
+                </span>
+
+                <span class="ci-arrow" aria-hidden="true">&rsaquo;</span>
+            </button>
+        @endforeach
+    </div>
+@endif
 
             <!-- RIWAYAT DONASI PRIBADI -->
             @auth
@@ -120,12 +138,70 @@
                     <p>Bukti transparansi penyaluran dana kebaikan dari jamaah.</p>
                 </div>
 
-                @if(isset($items) && $items->isNotEmpty())
+                @php
+                    $galItems   = isset($items) ? $items : collect();
+                    $galPrograms = isset($categories) ? $categories : collect();
+                    $galFallbackFoto = 'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&w=600&q=80';
+                    $galToday   = \Carbon\Carbon::now()->translatedFormat('d F Y');
+                @endphp
+
+                @if($galPrograms->isNotEmpty() || $galItems->isNotEmpty())
                     <div class="public-gallery-grid">
-                        @foreach($items as $gal)
+
+                        {{-- Kartu program otomatis (infaq, zakat, dll) --}}
+                        @foreach($galPrograms as $prog)
                             @php
-                                $galCatTitle = optional($categories->firstWhere('key', $gal->kategori))->title ?? 'Penyaluran';
-                                $galDate = $gal->tanggal ? \Carbon\Carbon::parse($gal->tanggal)->translatedFormat('d F Y') : '';
+                                $pMasuk  = (float) ($prog->total_masuk ?? 0);
+                                $pKeluar = (float) ($prog->total_keluar ?? 0);
+                                $pSisa   = $pMasuk - $pKeluar;
+                                $pFoto   = !empty($prog->image) ? asset('storage/' . $prog->image) : $galFallbackFoto;
+                                $pKey    = strtolower(trim((string) $prog->key));
+                                $pDok    = $galItems->filter(fn ($g) => strtolower(trim((string) $g->kategori)) === $pKey)->count();
+                                $pDesc   = 'Dana masuk Rp ' . number_format($pMasuk, 0, ',', '.')
+                                         . ' · Tersalurkan Rp ' . number_format($pKeluar, 0, ',', '.')
+                                         . ' · Sisa Rp ' . number_format($pSisa, 0, ',', '.')
+                                         . ' · ' . $pDok . ' dokumentasi foto.'
+                                         . (!empty($prog->description) ? ' ' . $prog->description : '');
+                            @endphp
+                            <figure class="pub-gal-item"
+                                    tabindex="0"
+                                    role="button"
+                                    aria-haspopup="dialog"
+                                    data-title="Penyaluran {{ $prog->title }}"
+                                    data-desc="{{ $pDesc }}"
+                                    data-category="{{ $prog->title }}"
+                                    data-photo="{{ $pFoto }}"
+                                    data-amount="Rp {{ number_format($pKeluar, 0, ',', '.') }}"
+                                    data-date="Per {{ $galToday }}">
+                                <div class="pub-gal-img" style="background-image: url('{{ $pFoto }}')" role="img" aria-label="Penyaluran {{ $prog->title }}"></div>
+                                <figcaption class="pub-gal-info">
+                                    <span class="pub-tag">{{ $prog->title }}</span>
+                                    <h4>Penyaluran {{ $prog->title }}</h4>
+                                    <p>Masuk Rp {{ number_format($pMasuk, 0, ',', '.') }} &middot; Sisa Rp {{ number_format($pSisa, 0, ',', '.') }}</p>
+                                    <div class="pub-meta">
+                                        <span>Tersalur Rp {{ number_format($pKeluar, 0, ',', '.') }}</span>
+                                        <span>{{ $pDok }} foto</span>
+                                    </div>
+                                    <span class="pub-gal-more">Lihat detail &rsaquo;</span>
+                                </figcaption>
+                            </figure>
+                        @endforeach
+
+                        {{-- Foto dokumentasi yang diunggah admin --}}
+                        @foreach($galItems as $gal)
+                            @php
+                                $galKat      = strtolower(trim((string) $gal->kategori));
+                                $galProgram  = $galKat === '' ? null : $galPrograms->first(function ($c) use ($galKat) {
+                                    return in_array($galKat, [
+                                        strtolower(trim((string) $c->key)),
+                                        strtolower(trim((string) $c->id)),
+                                        strtolower(trim((string) $c->title)),
+                                    ], true);
+                                });
+                                $galCatTitle = $galProgram->title ?? ($galKat === '' ? 'Umum' : 'Penyaluran');
+                                $galDate     = $gal->tanggal ? \Carbon\Carbon::parse($gal->tanggal)->translatedFormat('d F Y') : '';
+                                $galFoto     = $gal->foto_url ?? asset('storage/' . $gal->foto);
+                                $galNominal  = number_format($gal->nominal_terpakai ?? 0, 0, ',', '.');
                             @endphp
                             <figure class="pub-gal-item"
                                     tabindex="0"
@@ -134,16 +210,16 @@
                                     data-title="{{ $gal->judul }}"
                                     data-desc="{{ $gal->deskripsi }}"
                                     data-category="{{ $galCatTitle }}"
-                                    data-photo="{{ asset('storage/' . $gal->foto) }}"
-                                    data-amount="Rp {{ number_format($gal->nominal_terpakai ?? 0, 0, ',', '.') }}"
+                                    data-photo="{{ $galFoto }}"
+                                    data-amount="Rp {{ $galNominal }}"
                                     data-date="{{ $galDate }}">
-                                <div class="pub-gal-img" style="background-image: url('{{ asset('storage/' . $gal->foto) }}')" role="img" aria-label="{{ $gal->judul }}"></div>
+                                <div class="pub-gal-img" style="background-image: url('{{ $galFoto }}')" role="img" aria-label="{{ $gal->judul }}"></div>
                                 <figcaption class="pub-gal-info">
                                     <span class="pub-tag">{{ $galCatTitle }}</span>
                                     <h4>{{ $gal->judul }}</h4>
-                                    <p>{{ Str::limit($gal->deskripsi, 60) }}</p>
+                                    <p>{{ \Illuminate\Support\Str::limit($gal->deskripsi, 60) }}</p>
                                     <div class="pub-meta">
-                                        <span>Rp {{ number_format($gal->nominal_terpakai ?? 0, 0, ',', '.') }}</span>
+                                        <span>Rp {{ $galNominal }}</span>
                                         <span>{{ $galDate }}</span>
                                     </div>
                                     <span class="pub-gal-more">Lihat detail &rsaquo;</span>
@@ -152,7 +228,7 @@
                         @endforeach
                     </div>
                 @else
-                    <p class="empty-box empty-box--tight">Belum ada dokumentasi foto penyaluran yang diunggah.</p>
+                    <p class="empty-box empty-box--tight">Belum ada program donasi maupun dokumentasi penyaluran.</p>
                 @endif
             </div>
         </section>
