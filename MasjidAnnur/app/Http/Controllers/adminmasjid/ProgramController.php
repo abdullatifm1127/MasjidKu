@@ -20,9 +20,8 @@ class ProgramController extends Controller
             return redirect()->route('daftar.masjid')->with('error', 'Anda belum mendaftarkan masjid.');
         }
 
-        $programs = $mosque->programs ?? [];
-
-        return view('auth.adminmasjid.programMasjid', compact('mosque', 'programs'));
+        // Program dikelola melalui tab "Program" di halaman Profil Masjid
+        return redirect()->route('admin.profil-masjid')->with('info', 'Kelola program unggulan melalui tab Program di bawah.');
     }
 
     /**

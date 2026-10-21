@@ -50,9 +50,7 @@ Route::get('/', function (\Illuminate\Http\Request $request) {
 | Halaman Publik Masjid & Jadwal Sholat (Menggunakan Controller)
 |--------------------------------------------------------------------------
 */
-Route::get('/masjid/{slug}', [PublicMosqueController::class, 'show'])->name('masjid.show');
-
-// Alias tambahan agar jika ada bagian lain yang memanggil route('masjid.publik') tetap mengarah ke controller yang sama
+// Satu route dengan dua nama — masjid.show adalah alias masjid.publik
 Route::get('/masjid/{slug}', [PublicMosqueController::class, 'show'])->name('masjid.publik');
 
 Route::middleware(['auth'])->get('/masjidUser', function () {
@@ -144,20 +142,15 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/admin/profil-masjid', [MosqueController::class, 'updateProfil'])
         ->name('admin.profil-masjid.update');
 
-    Route::get('/admin/beranda', function () {
-        return view('auth.adminmasjid.berandaAdmin');
-    })->name('admin.beranda');
+    Route::get('/admin/beranda', [MosqueController::class, 'dashboard'])
+        ->name('admin.beranda');
 
-    Route::get('/admin/jadwal-sholat', function () {
-        return view('auth.adminmasjid.jadwalSholat');
-    })->name('admin.jadwal-sholat');
+    // Jadwal Sholat
+    Route::get('/admin/jadwal-sholat', [JadwalSholatController::class, 'index'])
+        ->name('admin.jadwal-sholat');
 
-  // Di dalam group middleware 'auth' admin:
-Route::get('/admin/jadwal-sholat', [JadwalSholatController::class, 'index'])
-    ->name('admin.jadwal-sholat');
-    // Jika nanti ada form update jadwal shalat, tambahkan juga route PUT-nya:
-Route::put('/admin/jadwal-sholat', [JadwalSholatController::class, 'update'])
-    ->name('admin.jadwal-sholat.update');
+    Route::put('/admin/jadwal-sholat', [JadwalSholatController::class, 'update'])
+        ->name('admin.jadwal-sholat.update');
 
     // ===== Program Unggulan =====
     Route::get('/admin/program', [ProgramController::class, 'index'])
@@ -277,6 +270,7 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
     Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna');
     Route::post('/pengguna', [PenggunaController::class, 'store'])->name('pengguna.store');
     Route::put('/pengguna/{id}', [PenggunaController::class, 'update'])->name('pengguna.update');
+    Route::delete('/pengguna/{id}', [PenggunaController::class, 'destroy'])->name('pengguna.destroy');
 
     Route::get('/pengaturan', [PengaturanController::class, 'index'])->name('pengaturan');
     Route::put('/pengaturan', [PengaturanController::class, 'update'])->name('pengaturan.update');

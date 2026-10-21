@@ -16,7 +16,6 @@ class LandingPage extends Model
         'hero_subtitle',
         'hero_desc',
         'hero_image',
-        'hero_background',
         'btn_primary',
         'btn_primary_url',
         'btn_secondary',
