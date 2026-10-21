@@ -25,7 +25,7 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             position: relative;
         }
-        .ba2-theme-card:hover {
+        .ba2-theme-card:hover:not(.locked) {
             border-color: #047857;
             transform: translateY(-3px);
         }
@@ -61,6 +61,23 @@
             border-color: #047857;
             background-color: #f0fdf4;
             box-shadow: 0 0 0 2px #047857;
+        }
+        .ba2-theme-card.locked {
+            opacity: 0.65;
+            cursor: not-allowed;
+            background-color: #f8fafc;
+        }
+        .ba2-locked-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ef4444;
+            color: white;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: bold;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
     </style>
 </head>
@@ -179,32 +196,43 @@
                     
                     @php
                         $currentTheme = strtolower(trim(optional($mosque)->theme ?? 'default'));
+                        $isBerbayar = (optional($mosque)->package_type ?? 'free') !== 'free'
+                            && strtolower(trim(optional($mosque)->payment_status ?? '')) === 'approved';
                     @endphp
 
+                    @if(!$isBerbayar)
+                        <div style="background: #fffbeb; border: 1px solid #fde68a; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; color: #92400e; font-size: 14px;">
+                            <i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px;"></i> Anda menggunakan <b>Paket Free</b>. Pilihan tema kustom (Emerald, Terracotta, Corporate) terkunci. Upgrade ke paket berbayar untuk membuka semua tema.
+                        </div>
+                    @endif
+
                     <div class="ba2-theme-grid">
-                        <!-- Tema 0: Default Original -->
-                        <div class="ba2-theme-card {{ in_array($currentTheme, ['', 'default']) ? 'selected' : '' }}" onclick="changeTheme('default', this)">
+                        <!-- Tema 0: Default Original (Selalu Bisa Dipilih) -->
+                        <div class="ba2-theme-card {{ in_array($currentTheme, ['', 'default']) ? 'selected' : '' }}" onclick="changeTheme('default', this, false)">
                             <div class="ba2-theme-preview theme-preview-default">Default Bawaan</div>
                             <div class="ba2-theme-title">Default Asli</div>
                             <div class="ba2-theme-desc">Tampilan asli bawaan sistem tanpa modifikasi warna khusus.</div>
                         </div>
 
                         <!-- Tema 1: Emerald -->
-                        <div class="ba2-theme-card {{ $currentTheme == 'emerald' ? 'selected' : '' }}" onclick="changeTheme('emerald', this)">
+                        <div class="ba2-theme-card {{ !$isBerbayar ? 'locked' : '' }} {{ $currentTheme == 'emerald' ? 'selected' : '' }}" onclick="changeTheme('emerald', this, {{ $isBerbayar ? 'false' : 'true' }})">
+                            @if(!$isBerbayar)<span class="ba2-locked-badge"><i class="fa-solid fa-lock"></i> Locked</span>@endif
                             <div class="ba2-theme-preview theme-preview-emerald">Modern Minimalis</div>
                             <div class="ba2-theme-title">Emerald Minimalist</div>
                             <div class="ba2-theme-desc">Nuansa hijau zamrud yang bersih dan segar.</div>
                         </div>
 
                         <!-- Tema 2: Terracotta -->
-                        <div class="ba2-theme-card {{ $currentTheme == 'terracotta' ? 'selected' : '' }}" onclick="changeTheme('terracotta', this)">
+                        <div class="ba2-theme-card {{ !$isBerbayar ? 'locked' : '' }} {{ $currentTheme == 'terracotta' ? 'selected' : '' }}" onclick="changeTheme('terracotta', this, {{ $isBerbayar ? 'false' : 'true' }})">
+                            @if(!$isBerbayar)<span class="ba2-locked-badge"><i class="fa-solid fa-lock"></i> Locked</span>@endif
                             <div class="ba2-theme-preview theme-preview-terracotta">Klasik Nusantara</div>
                             <div class="ba2-theme-title">Warm Terracotta</div>
                             <div class="ba2-theme-desc">Nuansa terakota hangat khas masjid tradisional.</div>
                         </div>
 
                         <!-- Tema 3: Corporate -->
-                        <div class="ba2-theme-card {{ $currentTheme == 'corporate' ? 'selected' : '' }}" onclick="changeTheme('corporate', this)">
+                        <div class="ba2-theme-card {{ !$isBerbayar ? 'locked' : '' }} {{ $currentTheme == 'corporate' ? 'selected' : '' }}" onclick="changeTheme('corporate', this, {{ $isBerbayar ? 'false' : 'true' }})">
+                            @if(!$isBerbayar)<span class="ba2-locked-badge"><i class="fa-solid fa-lock"></i> Locked</span>@endif
                             <div class="ba2-theme-preview theme-preview-corporate">Executive Professional</div>
                             <div class="ba2-theme-title">Corporate Navy</div>
                             <div class="ba2-theme-desc">Gaya korporat dark mode elegan.</div>
@@ -212,7 +240,12 @@
                     </div>
 
                     <script>
-                        function changeTheme(themeName, element) {
+                        function changeTheme(themeName, element, isLocked) {
+                            if (isLocked) {
+                                alert("Tema ini terkunci! Fitur ganti tema hanya tersedia untuk masjid berbayar.");
+                                return;
+                            }
+
                             fetch("{{ route('admin.tema.update') }}", {
                                 method: "POST",
                                 headers: {
@@ -226,10 +259,9 @@
                                 if (data.success) {
                                     document.querySelectorAll('.ba2-theme-card').forEach(card => card.classList.remove('selected'));
                                     element.classList.add('selected');
-                                    
                                     alert("Tema berhasil diubah! Silakan refresh halaman web masjid Anda.");
                                 } else {
-                                    alert("Gagal mengubah tema.");
+                                    alert(data.message || "Gagal mengubah tema.");
                                 }
                             })
                             .catch(error => {
