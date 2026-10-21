@@ -74,6 +74,12 @@
         </a>
     </nav>
 
+    {{-- MENU TEMA TAMPILAN --}}
+<a href="{{ route('admin.tema') }}" class="ba2-nav-item {{ request()->routeIs('admin.tema*') ? 'active' : '' }}">
+    <span class="ba2-nav-icon"><i class="fa-solid fa-palette"></i></span>
+    <span class="ba2-nav-label">Tema Tampilan</span>
+</a>
+
     <div class="ba2-user">
         <div class="ba2-user-avatar">{{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($userName, 0, 2)) }}</div>
         <div class="ba2-user-info">

@@ -13,17 +13,37 @@ use Illuminate\Http\Request;
 
 class PublicMosqueController extends Controller
 {
+    /** Tema yang tersedia di halaman publik masjid. */
+    protected const THEMES = ['default', 'emerald', 'terracotta', 'corporate'];
+
     /**
-     * Fitur donasi aktif jika paket bukan free DAN pembayaran sudah approved.
-     * Dipakai di show() dan showDonasi() supaya aturannya sama di kedua halaman.
-     * (package_type tersimpan sebagai 'free', '100000_1', atau '1000000_12',
-     *  bukan 'premium' / 'pro' / 'paid'.)
+     * Fitur donasi aktif jika paket bukan free, pembayaran sudah approved,
+     * dan masa langganan belum berakhir (bila tanggal berakhirnya tercatat).
      */
     protected function hasDonationFeature(Mosque $mosque): bool
     {
-        return ($mosque->package_type ?? 'free') !== 'free'
+        $berbayar = ($mosque->package_type ?? 'free') !== 'free'
             && strtolower(trim($mosque->payment_status ?? '')) === 'approved';
+
+        if (!$berbayar) {
+            return false;
+        }
+
+        $akhir = data_get($mosque, 'subscription_ends_at');
+        if ($akhir && \Carbon\Carbon::parse($akhir)->isPast()) {
+            return false;
+        }
+
+        return true;
     }
+
+    /** Tema aktif masjid (mendukung preview via parameter query). */
+    protected function themeFor(Mosque $mosque, ?string $preview = null): string
+{
+    $theme = strtolower(trim((string) ($preview ?: ($mosque->theme ?? 'default'))));
+
+    return in_array($theme, self::THEMES, true) ? $theme : 'default';
+}
 
     public function show(string $slug, PrayerTimeService $prayerTimeService, Request $request)
     {
@@ -39,7 +59,6 @@ class PublicMosqueController extends Controller
 
         $prayers = $prayerTimeService->forMosque($mosque);
 
-        // Jadwal bulanan: filter divalidasi, data di-cache, dan aman bila API gagal
         $timezone = $prayerTimeService->timezoneFor($mosque);
         [$bulan, $tahun] = $prayerTimeService->resolvePeriod(
             $request->input('bulan'),
@@ -54,8 +73,6 @@ class PublicMosqueController extends Controller
             ->take(3)
             ->get();
 
-        // Pengumuman: hanya yang berstatus "terbit" dan belum lewat tanggal berakhir
-        // (scope active() di model Pengumuman). Yang disematkan tampil paling atas.
         $pengumumans = Pengumuman::where('mosque_id', $mosque->id)
             ->active()
             ->orderByDesc('is_pinned')
@@ -65,7 +82,6 @@ class PublicMosqueController extends Controller
 
         $hasDonationFeature = $this->hasDonationFeature($mosque);
 
-        // Perhitungan Dana Terkumpul Otomatis (Hanya status 'diterima')
         $donasiTerkumpul = Donasi::where('mosque_id', $mosque->id)
             ->where('status', 'diterima')
             ->sum('nominal');
@@ -80,6 +96,10 @@ class PublicMosqueController extends Controller
         $items = DonasiGaleri::where('mosque_id', $mosque->id)
             ->latest()
             ->get();
+
+        // Membaca tema aktif dari database atau parameter preview_theme di URL
+        $preview = $request->query('preview_theme');
+        $theme = $this->themeFor($mosque, is_string($preview) ? $preview : null);
 
         return view('auth.adminmasjid.halamanUtamaUser', [
             'mosque'              => $mosque,
@@ -98,15 +118,15 @@ class PublicMosqueController extends Controller
             'items'               => $items,
             'donasiTerkumpul'     => $donasiTerkumpul,
             'donasiTarget'        => $donasiTarget,
+            'theme'               => $theme, // Dikirim ke Blade untuk atribut data-theme
         ]);
     }
 
-    public function showDonasi(string $slug)
+    public function showDonasi(string $slug, Request $request)
     {
         $mosque = Mosque::where('slug', $slug)->firstOrFail();
 
         if (!$this->hasDonationFeature($mosque)) {
-            // Route lama 'masjid.detail' tidak ada di web.php; yang benar 'masjid.publik'
             return redirect()->route('masjid.publik', $slug);
         }
 
@@ -123,7 +143,6 @@ class PublicMosqueController extends Controller
 
         $categoriesJson = $categories->toJson();
 
-        // Riwayat Donasi Pribadi (hanya milik akun yang sedang login, status 'diterima' atau 'pending')
         $recentDonations = collect();
 
         if (auth()->check()) {
@@ -140,6 +159,9 @@ class PublicMosqueController extends Controller
                 });
         }
 
+        $preview = $request->query('preview_theme');
+        $theme = $this->themeFor($mosque, is_string($preview) ? $preview : null);
+
         return view('donasi.donasi', [
             'mosque'             => $mosque,
             'zakatFitrahDefault' => $zakatFitrahDefault,
@@ -147,6 +169,7 @@ class PublicMosqueController extends Controller
             'categories'         => $categories,
             'categoriesJson'     => $categoriesJson,
             'recentDonations'    => $recentDonations,
+            'theme'              => $theme,
         ]);
     }
 }

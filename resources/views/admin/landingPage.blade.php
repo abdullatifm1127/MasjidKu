@@ -29,7 +29,7 @@
             </div>
 
        <nav class="lp-nav">
-    <a href="{{ route('admin.dashboard') }}" class="lp-nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+    <a href="{{ route('admin.dashboard') }}" class="lp-nav-item {{ request()->routeIs('admin.dashboard*') ? 'active' : '' }}">
         <span class="lp-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
         <span class="lp-nav-label">Dashboard</span>
     </a>
@@ -87,7 +87,14 @@
         <span class="lp-nav-icon"><i class="fa-solid fa-users"></i></span>
         <span class="lp-nav-label">Data Jamaah</span>
     </a>
+
+    {{-- MENU TEMA TAMPILAN --}}
+    <a href="{{ route('admin.tema') }}" class="lp-nav-item {{ request()->routeIs('admin.tema*') ? 'active' : '' }}">
+        <span class="lp-nav-icon"><i class="fa-solid fa-palette"></i></span>
+        <span class="lp-nav-label">Tema Tampilan</span>
+    </a>
 </nav>
+
         <div class="lp-user">
             <div class="lp-user-avatar">{{ substr(auth()->user()->name ?? 'A', 0, 2) }}</div>
             <div class="lp-user-info">
