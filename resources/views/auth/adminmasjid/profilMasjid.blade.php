@@ -29,8 +29,7 @@
                 <div class="ba2-brand-sub">{{ $mosque->city ?? 'Baitul Digital' }}</div>
             </div>
         </div>
-
-       {{-- Nav --}}
+{{-- Nav --}}
 <nav class="ba2-nav">
     <a href="{{ route('admin.dashboard') }}" class="ba2-nav-item {{ request()->routeIs('admin.dashboard*') ? 'active' : '' }}">
         <span class="ba2-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
@@ -90,8 +89,13 @@
         <span class="ba2-nav-icon"><i class="fa-solid fa-users"></i></span>
         <span class="ba2-nav-label">Data Jamaah</span>
     </a>
+
+    {{-- MENU TEMA TAMPILAN (DITAMBAHKAN DI SINI) --}}
+    <a href="{{ route('admin.tema') }}" class="ba2-nav-item {{ request()->routeIs('admin.tema*') ? 'active' : '' }}">
+        <span class="ba2-nav-icon"><i class="fa-solid fa-palette"></i></span>
+        <span class="ba2-nav-label">Tema Tampilan</span>
+    </a>
 </nav>
-        </nav>
 
         {{-- User footer --}}
         <div class="ba2-user">
