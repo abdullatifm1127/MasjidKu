@@ -11,6 +11,8 @@ use Illuminate\Support\Str;
 
 class Mosque extends Model
 {
+    use \App\Models\Concerns\HasSubscription;
+
     use HasFactory;
 
     protected $fillable = [
@@ -125,7 +127,7 @@ class Mosque extends Model
      */
     public function checkAndExpireSubscription(): void
     {
-        if ($this->package_type === 'paid'
+        if ($this->package_type !== 'free'
             && $this->subscription_expires_at
             && $this->subscription_expires_at->isPast()) {
             $this->update([

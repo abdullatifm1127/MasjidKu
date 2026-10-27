@@ -8,9 +8,11 @@ use App\Models\DonasiGaleri;
 use App\Models\DonationCategory;
 use App\Models\Mosque;
 use App\Models\MosqueBankAccount;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class DonasiAdminController extends Controller
@@ -51,8 +53,13 @@ class DonasiAdminController extends Controller
 
         // Paket masih free / pembayaran belum lunas -> arahkan ke halaman pembayaran
         if (!$this->hasDonationFeature($mosque)) {
+            $packageType = session('pending_renewal')['package'] ?? $mosque->package_type ?? '100000_1';
+            $paket = \App\Support\PackagePricing::resolve($packageType);
+
             return view('paymentmasjid.payment', [
-                'mosque' => $mosque
+                'mosque'          => $mosque,
+                'packageName'     => $paket['name'],
+                'amountFormatted' => 'Rp ' . number_format($paket['amount'], 0, ',', '.'),
             ]);
         }
 
@@ -62,11 +69,43 @@ class DonasiAdminController extends Controller
 
         $categoryTitles = $donationCategories->pluck('title', 'key');
 
+        // Uang masuk (donasi diterima) per jenis/kategori
+        $masukPerJenis = Donasi::where('mosque_id', $mosque->id)
+            ->where('status', 'diterima')
+            ->selectRaw('jenis, SUM(nominal) as total')
+            ->groupBy('jenis')
+            ->pluck('total', 'jenis');
+
+        // Uang keluar (penyaluran) per kategori
+        $keluarPerKategori = DonasiGaleri::where('mosque_id', $mosque->id)
+            ->selectRaw('kategori, SUM(nominal_terpakai) as total')
+            ->groupBy('kategori')
+            ->pluck('total', 'kategori');
+
+        // Riwayat per kategori (dipakai tab Kategori untuk edit uang masuk/keluar)
+        $riwayatKeluar = collect();
+        $riwayatMasuk  = collect();
+        if ($tab === 'kategori') {
+            $riwayatKeluar = DonasiGaleri::where('mosque_id', $mosque->id)
+                ->latest('tanggal')->latest('id')->get()
+                ->groupBy(fn ($i) => strtolower(trim((string) $i->kategori)));
+
+            // Hanya donasi yang dicatat manual (MNL-) yang boleh diedit/dihapus dari sini
+            $riwayatMasuk = Donasi::where('mosque_id', $mosque->id)
+                ->where('no_referensi', 'like', 'MNL-%')
+                ->latest()->get()
+                ->groupBy('jenis');
+        }
+
         $data = [
             'mosque'             => $mosque,
             'tab'                => $tab,
+            'riwayatKeluar'      => $riwayatKeluar,
+            'riwayatMasuk'       => $riwayatMasuk,
             'donationCategories' => $donationCategories,
             'bankAccounts'       => $mosque->bankAccounts,
+            'masukPerJenis'      => $masukPerJenis,
+            'keluarPerKategori'  => $keluarPerKategori,
             'summary'            => [
                 'total_diterima'    => (int) Donasi::where('mosque_id', $mosque->id)->where('status', 'diterima')->sum('nominal'),
                 'total_menunggu'    => (int) Donasi::where('mosque_id', $mosque->id)->where('status', 'pending')->sum('nominal'),
@@ -136,12 +175,12 @@ class DonasiAdminController extends Controller
 
         $data = $request->validate([
             'zakat_fitrah_default' => ['required', 'numeric', 'min:0'],
-            'zakat_nisab' => ['required', 'numeric', 'min:0'],
+            'zakat_nisab'          => ['required', 'numeric', 'min:0'],
         ]);
 
         $mosque->update([
             'zakat_fitrah_default' => $data['zakat_fitrah_default'],
-            'zakat_nisab' => $data['zakat_nisab'],
+            'zakat_nisab'          => $data['zakat_nisab'],
         ]);
 
         return back()->with('success', 'Pengaturan zakat fitrah berhasil disimpan.');
@@ -155,6 +194,10 @@ class DonasiAdminController extends Controller
         return $this->updateSettings($request);
     }
 
+    // ==========================================
+    // GALERI / DOKUMENTASI PENYALURAN
+    // ==========================================
+
     /**
      * POST /admin/donasi/galeri
      */
@@ -166,9 +209,10 @@ class DonasiAdminController extends Controller
             'judul'            => 'required|string|max:150',
             'kategori'         => 'nullable|string|max:50',
             'deskripsi'        => 'nullable|string|max:1000',
+            'tujuan'           => 'nullable|string|max:150',
             'tanggal'          => 'required|date|before_or_equal:today',
             'nominal_terpakai' => 'nullable|numeric|min:0',
-            'foto'             => 'required|image|max:4096', // maks 4MB
+            'foto'             => 'required|image|max:4096',
         ]);
 
         $path = $request->file('foto')->store('donasi-galeri', 'public');
@@ -178,12 +222,74 @@ class DonasiAdminController extends Controller
             'judul'            => $data['judul'],
             'kategori'         => $data['kategori'] ?: null,
             'deskripsi'        => $data['deskripsi'] ?? null,
+            'tujuan'           => $data['tujuan'] ?? null,
             'tanggal'          => $data['tanggal'],
             'nominal_terpakai' => $data['nominal_terpakai'] ?? null,
             'foto'             => $path,
         ]);
 
         return back()->with('success', 'Foto realisasi donasi berhasil ditambahkan.');
+    }
+
+    /**
+     * PUT /admin/donasi/galeri/{id}
+     */
+    public function updateGaleri(Request $request, int $id)
+    {
+        $mosque = $this->mosque();
+        $item = DonasiGaleri::where('mosque_id', $mosque->id)->findOrFail($id);
+
+        // Buang baris rincian yang kosong total
+        $request->merge([
+            'rincian' => collect($request->input('rincian', []))
+                ->filter(fn ($r) => filled($r['label'] ?? null) || filled($r['nominal'] ?? null))
+                ->values()
+                ->all(),
+        ]);
+
+        $data = $request->validate([
+            'judul'                => 'required|string|max:150',
+            'kategori'             => 'nullable|string|max:50',
+            'deskripsi'            => 'nullable|string|max:1000',
+            'tujuan'               => 'nullable|string|max:150',
+            'tanggal'              => 'required|date|before_or_equal:today',
+            'nominal_terpakai'     => 'nullable|numeric|min:0',
+            'foto'                 => 'nullable|image|max:4096',
+            'rincian'              => 'nullable|array',
+            'rincian.*.label'      => 'required|string|max:150',
+            'rincian.*.nominal'    => 'required|numeric|min:0',
+            'rincian.*.keterangan' => 'nullable|string|max:200',
+        ]);
+
+        $rincian = collect($data['rincian'] ?? [])->map(fn ($r) => [
+            'label'      => $r['label'],
+            'nominal'    => (float) $r['nominal'],
+            'keterangan' => $r['keterangan'] ?? null,
+        ])->values()->all();
+
+        // Uang keluar = jumlah rincian (jika ada rincian). Jika tidak, pakai isian manual.
+        $totalKeluar = count($rincian)
+            ? collect($rincian)->sum('nominal')
+            : ($data['nominal_terpakai'] ?? null);
+
+        if ($request->hasFile('foto')) {
+            if ($item->foto) {
+                Storage::disk('public')->delete($item->foto);
+            }
+            $item->foto = $request->file('foto')->store('donasi-galeri', 'public');
+        }
+
+        $item->fill([
+            'judul'            => $data['judul'],
+            'kategori'         => $data['kategori'] ?: null,
+            'deskripsi'        => $data['deskripsi'] ?? null,
+            'tujuan'           => $data['tujuan'] ?? null,
+            'tanggal'          => $data['tanggal'],
+            'nominal_terpakai' => $totalKeluar,
+            'rincian'          => $rincian ?: null,
+        ])->save();
+
+        return back()->with('success', 'Data penyaluran berhasil diperbarui.');
     }
 
     /**
@@ -195,11 +301,180 @@ class DonasiAdminController extends Controller
 
         $item = DonasiGaleri::where('mosque_id', $mosque->id)->findOrFail($id);
 
-        Storage::disk('public')->delete($item->foto);
+        // Foto boleh kosong (penyaluran yang dicatat tanpa foto)
+        if ($item->foto) {
+            Storage::disk('public')->delete($item->foto);
+        }
         $item->delete();
 
-        return back()->with('success', 'Foto dihapus.');
+        return back()->with('success', 'Data penyaluran dihapus.');
     }
+
+    // ==========================================
+    // CATAT UANG MASUK & KELUAR PER KATEGORI
+    // ==========================================
+
+    /**
+     * POST /admin/donasi/kategori/{id}/uang-masuk
+     * Catat donasi tunai/manual (langsung berstatus diterima).
+     */
+    public function storeUangMasuk(Request $request, int $id)
+    {
+        $mosque = $this->mosque();
+        $cat = DonationCategory::where('mosque_id', $mosque->id)->findOrFail($id);
+
+        $data = $request->validate([
+            'nama_donatur'      => ['nullable', 'string', 'max:100'],
+            'nominal'           => ['required', 'numeric', 'min:1000'],
+            'tanggal'           => ['required', 'date', 'before_or_equal:today'],
+            'metode_pembayaran' => ['required', 'string', 'max:50'],
+            'keterangan'        => ['nullable', 'string', 'max:500'],
+        ]);
+
+        // forceFill supaya aman dari $fillable pada model Donasi
+        $donasi = new Donasi();
+        $donasi->forceFill([
+            'mosque_id'         => $mosque->id,
+            'jenis'             => $cat->key,
+            'nominal'           => $data['nominal'],
+            'status'            => 'diterima',
+            'no_referensi'      => 'MNL-' . strtoupper(Str::random(8)),
+            'nama_donatur'      => $data['nama_donatur'] ?: 'Hamba Allah',
+            'metode_pembayaran' => $data['metode_pembayaran'],
+            'keterangan'        => $data['keterangan'] ?? null,
+            'created_at'        => Carbon::parse($data['tanggal'])->setTimeFrom(now()),
+        ])->save();
+
+        return back()->with('success', 'Uang masuk untuk "' . $cat->title . '" berhasil dicatat.');
+    }
+
+    /**
+     * POST /admin/donasi/kategori/{id}/penyaluran
+     * Catat uang keluar / penyaluran (foto opsional).
+     */
+    public function storePenyaluran(Request $request, int $id)
+    {
+        $mosque = $this->mosque();
+        $cat = DonationCategory::where('mosque_id', $mosque->id)->findOrFail($id);
+
+        $data = $request->validate([
+            'judul'            => ['nullable', 'string', 'max:150'],
+            'tanggal'          => ['required', 'date', 'before_or_equal:today'],
+            'nominal_terpakai' => ['required', 'numeric', 'min:1'],
+            'tujuan'           => ['nullable', 'string', 'max:150'],
+            'deskripsi'        => ['nullable', 'string', 'max:1000'],
+            'foto'             => ['nullable', 'image', 'max:4096'],
+        ]);
+
+        // Cegah uang keluar melebihi sisa dana program
+        $masuk = (float) Donasi::where('mosque_id', $mosque->id)
+            ->where('jenis', $cat->key)
+            ->where('status', 'diterima')
+            ->sum('nominal');
+
+        $keluar = (float) DonasiGaleri::where('mosque_id', $mosque->id)
+            ->where('kategori', $cat->key)
+            ->sum('nominal_terpakai');
+
+        $sisa = $masuk - $keluar;
+
+        if ($data['nominal_terpakai'] > $sisa) {
+            return back()->withInput()->withErrors([
+                'nominal_terpakai' => 'Nominal melebihi sisa dana program "' . $cat->title
+                    . '" (Rp ' . number_format(max($sisa, 0), 0, ',', '.') . '). Catat uang masuk terlebih dahulu.',
+            ]);
+        }
+
+        DonasiGaleri::create([
+            'mosque_id'        => $mosque->id,
+            'judul'            => $data['judul'] ?: 'Penyaluran ' . $cat->title,
+            'kategori'         => $cat->key,
+            'deskripsi'        => $data['deskripsi'] ?? null,
+            'tujuan'           => $data['tujuan'] ?: 'Penyaluran Tunai / Kas Masjid',
+            'tanggal'          => $data['tanggal'],
+            'nominal_terpakai' => $data['nominal_terpakai'],
+            'foto'             => $request->hasFile('foto')
+                                    ? $request->file('foto')->store('donasi-galeri', 'public')
+                                    : null,
+        ]);
+
+        return back()->with('success', 'Penyaluran "' . $cat->title . '" berhasil dicatat.');
+    }
+
+    /**
+     * PUT /admin/donasi/uang-masuk/{id}
+     * Edit donasi yang dicatat manual (no. referensi MNL-...).
+     */
+    public function updateUangMasuk(Request $request, int $id)
+    {
+        $mosque = $this->mosque();
+        $donasi = Donasi::where('mosque_id', $mosque->id)
+            ->where('no_referensi', 'like', 'MNL-%')
+            ->findOrFail($id);
+
+        $data = $request->validate([
+            'nama_donatur'      => ['nullable', 'string', 'max:100'],
+            'nominal'           => ['required', 'numeric', 'min:1000'],
+            'tanggal'           => ['required', 'date', 'before_or_equal:today'],
+            'metode_pembayaran' => ['required', 'string', 'max:50'],
+            'keterangan'        => ['nullable', 'string', 'max:500'],
+        ]);
+
+        // Uang masuk baru tidak boleh lebih kecil dari uang yang sudah keluar
+        $masukLain = (float) Donasi::where('mosque_id', $mosque->id)
+            ->where('jenis', $donasi->jenis)->where('status', 'diterima')
+            ->where('id', '!=', $donasi->id)->sum('nominal');
+        $keluar = (float) DonasiGaleri::where('mosque_id', $mosque->id)
+            ->where('kategori', $donasi->jenis)->sum('nominal_terpakai');
+
+        if ($donasi->status === 'diterima' && ($masukLain + $data['nominal']) < $keluar) {
+            return back()->withInput()->withErrors([
+                'nominal' => 'Uang masuk tidak boleh lebih kecil dari uang yang sudah disalurkan (Rp '
+                    . number_format($keluar, 0, ',', '.') . ').',
+            ]);
+        }
+
+        $donasi->forceFill([
+            'nama_donatur'      => $data['nama_donatur'] ?: 'Hamba Allah',
+            'nominal'           => $data['nominal'],
+            'metode_pembayaran' => $data['metode_pembayaran'],
+            'keterangan'        => $data['keterangan'] ?? null,
+            'created_at'        => Carbon::parse($data['tanggal'])->setTimeFrom($donasi->created_at ?? now()),
+        ])->save();
+
+        return back()->with('success', 'Uang masuk ' . $donasi->no_referensi . ' berhasil diperbarui.');
+    }
+
+    /**
+     * DELETE /admin/donasi/uang-masuk/{id}
+     */
+    public function destroyUangMasuk(int $id)
+    {
+        $mosque = $this->mosque();
+        $donasi = Donasi::where('mosque_id', $mosque->id)
+            ->where('no_referensi', 'like', 'MNL-%')
+            ->findOrFail($id);
+
+        $masukLain = (float) Donasi::where('mosque_id', $mosque->id)
+            ->where('jenis', $donasi->jenis)->where('status', 'diterima')
+            ->where('id', '!=', $donasi->id)->sum('nominal');
+        $keluar = (float) DonasiGaleri::where('mosque_id', $mosque->id)
+            ->where('kategori', $donasi->jenis)->sum('nominal_terpakai');
+
+        if ($donasi->status === 'diterima' && $masukLain < $keluar) {
+            return back()->withErrors([
+                'nominal' => 'Tidak bisa dihapus: dana program akan lebih kecil dari uang yang sudah disalurkan.',
+            ]);
+        }
+
+        $donasi->delete();
+
+        return back()->with('success', 'Catatan uang masuk dihapus.');
+    }
+
+    // ==========================================
+    // STATUS DONASI
+    // ==========================================
 
     /**
      * PATCH /admin/donasi/{donasi}/status

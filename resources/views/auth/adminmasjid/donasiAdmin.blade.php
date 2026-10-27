@@ -43,6 +43,18 @@
         .dn-table td { padding: .6rem .5rem; border-bottom: 1px solid #f1f5f9; }
         .dn-table td.dn-note { max-width: 240px; word-break: break-word; color: #475569; }
 
+        /* ===== Edit penyaluran (rincian) ===== */
+        .rincian-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: .4rem; margin-bottom: .5rem; }
+        .rincian-row .rincian-label { grid-column: 1 / -1; }
+        .rincian-hapus { background: #fee2e2; border: 1px solid #fecaca; border-radius: .4rem; padding: 0 .7rem; cursor: pointer; }
+        .rincian-tambah { background: #f1f5f9; border: 1px solid #cbd5e1; padding: .35rem .7rem; border-radius: .4rem; cursor: pointer; font-size: .78rem; }
+
+        /* ===== Catat uang masuk / keluar per kategori ===== */
+        .dn-flow-box { display: grid; gap: .5rem; padding: 1rem; border-radius: .75rem; }
+        .dn-flow-box .form-control-modern { padding: .55rem .8rem; font-size: .85rem; }
+        .dn-flow-in  { background: #f0fdf4; border: 1px solid #bbf7d0; }
+        .dn-flow-out { background: #fef2f2; border: 1px solid #fecaca; }
+
         @media print {
             .ba2-sidebar, .ba2-topbar, .dn-tabs, .dn-noprint, .ba2-fab { display: none !important; }
             .ba2-main { margin: 0 !important; }
@@ -87,72 +99,72 @@
             </div>
         </div>
 
-       <nav class="ba2-nav">
-    <a href="{{ route('admin.dashboard') }}" class="ba2-nav-item {{ request()->routeIs('admin.dashboard*') ? 'active' : '' }}">
-        <span class="ba2-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
-        <span class="ba2-nav-label">Dashboard</span>
-    </a>
+        <nav class="ba2-nav">
+            <a href="{{ route('admin.dashboard') }}" class="ba2-nav-item {{ request()->routeIs('admin.dashboard*') ? 'active' : '' }}">
+                <span class="ba2-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
+                <span class="ba2-nav-label">Dashboard</span>
+            </a>
 
-    <a href="{{ route('admin.landing-page') }}" class="ba2-nav-item {{ request()->routeIs('admin.landing-page*') ? 'active' : '' }}">
-        <span class="ba2-nav-icon"><i class="fa-solid fa-globe"></i></span>
-        <span class="ba2-nav-label">Landing Page</span>
-    </a>
+            <a href="{{ route('admin.landing-page') }}" class="ba2-nav-item {{ request()->routeIs('admin.landing-page*') ? 'active' : '' }}">
+                <span class="ba2-nav-icon"><i class="fa-solid fa-globe"></i></span>
+                <span class="ba2-nav-label">Landing Page</span>
+            </a>
 
-    <a href="{{ route('admin.profil-masjid') }}" class="ba2-nav-item {{ request()->routeIs('admin.profil-masjid*') ? 'active' : '' }}">
-        <span class="ba2-nav-icon"><i class="fa-solid fa-mosque"></i></span>
-        <span class="ba2-nav-label">Profil Masjid</span>
-    </a>
+            <a href="{{ route('admin.profil-masjid') }}" class="ba2-nav-item {{ request()->routeIs('admin.profil-masjid*') ? 'active' : '' }}">
+                <span class="ba2-nav-icon"><i class="fa-solid fa-mosque"></i></span>
+                <span class="ba2-nav-label">Profil Masjid</span>
+            </a>
 
-    <a href="{{ route('admin.jadwal-sholat') }}" class="ba2-nav-item {{ request()->routeIs('admin.jadwal-sholat*') ? 'active' : '' }}">
-        <span class="ba2-nav-icon"><i class="fa-solid fa-clock"></i></span>
-        <span class="ba2-nav-label">Jadwal Shalat</span>
-    </a>
+            <a href="{{ route('admin.jadwal-sholat') }}" class="ba2-nav-item {{ request()->routeIs('admin.jadwal-sholat*') ? 'active' : '' }}">
+                <span class="ba2-nav-icon"><i class="fa-solid fa-clock"></i></span>
+                <span class="ba2-nav-label">Jadwal Shalat</span>
+            </a>
 
-    {{-- MENU PENGUMUMAN DINAMIS --}}
-    @php
-        $pengumumanAktif = isset($mosque)
-            ? \App\Models\Pengumuman::where('mosque_id', $mosque->id)->active()->count()
-            : 0;
-    @endphp
-    <a href="{{ route('admin.pengumuman') }}" class="ba2-nav-item {{ request()->routeIs('admin.pengumuman*') ? 'active' : '' }}">
-        <span class="ba2-nav-icon"><i class="fa-solid fa-bullhorn"></i></span>
-        <span class="ba2-nav-label">Pengumuman</span>
-        @if($pengumumanAktif > 0)
-            <span class="ba2-nav-badge" style="background: #e74c3c; color: white; padding: 2px 6px; border-radius: 10px; font-size: 11px; font-weight: bold;">{{ $pengumumanAktif }}</span>
-        @endif
-    </a>
+            {{-- MENU PENGUMUMAN DINAMIS --}}
+            @php
+                $pengumumanAktif = isset($mosque)
+                    ? \App\Models\Pengumuman::where('mosque_id', $mosque->id)->active()->count()
+                    : 0;
+            @endphp
+            <a href="{{ route('admin.pengumuman') }}" class="ba2-nav-item {{ request()->routeIs('admin.pengumuman*') ? 'active' : '' }}">
+                <span class="ba2-nav-icon"><i class="fa-solid fa-bullhorn"></i></span>
+                <span class="ba2-nav-label">Pengumuman</span>
+                @if($pengumumanAktif > 0)
+                    <span class="ba2-nav-badge" style="background: #e74c3c; color: white; padding: 2px 6px; border-radius: 10px; font-size: 11px; font-weight: bold;">{{ $pengumumanAktif }}</span>
+                @endif
+            </a>
 
-    <a href="{{ route('admin.acara') }}" class="ba2-nav-item {{ request()->routeIs('admin.acara*') ? 'active' : '' }}">
-        <span class="ba2-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
-        <span class="ba2-nav-label">Kegiatan &amp; Acara</span>
-    </a>
+            <a href="{{ route('admin.acara') }}" class="ba2-nav-item {{ request()->routeIs('admin.acara*') ? 'active' : '' }}">
+                <span class="ba2-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
+                <span class="ba2-nav-label">Kegiatan &amp; Acara</span>
+            </a>
 
-    {{-- Donasi + submenu --}}
-    <div class="ba2-nav-group {{ request()->routeIs('admin.donasi*') ? 'open' : '' }}">
-        <a href="#" class="ba2-nav-item {{ request()->routeIs('admin.donasi*') ? 'active' : '' }}"
-            onclick="this.closest('.ba2-nav-group').classList.toggle('open'); return false;">
-            <span class="ba2-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
-            <span class="ba2-nav-label">Donasi</span>
-            <i class="fa-solid fa-chevron-down ba2-caret"></i>
-        </a>
-        <div class="ba2-sub">
-            @foreach ($subLabels as $key => $label)
-                <a href="{{ route('admin.donasi.tab', $key) }}" class="{{ isset($tab) && $tab === $key ? 'active' : '' }}">{{ $label }}</a>
-            @endforeach
-        </div>
-    </div>
+            {{-- Donasi + submenu --}}
+            <div class="ba2-nav-group {{ request()->routeIs('admin.donasi*') ? 'open' : '' }}">
+                <a href="#" class="ba2-nav-item {{ request()->routeIs('admin.donasi*') ? 'active' : '' }}"
+                    onclick="this.closest('.ba2-nav-group').classList.toggle('open'); return false;">
+                    <span class="ba2-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+                    <span class="ba2-nav-label">Donasi</span>
+                    <i class="fa-solid fa-chevron-down ba2-caret"></i>
+                </a>
+                <div class="ba2-sub">
+                    @foreach ($subLabels as $key => $label)
+                        <a href="{{ route('admin.donasi.tab', $key) }}" class="{{ isset($tab) && $tab === $key ? 'active' : '' }}">{{ $label }}</a>
+                    @endforeach
+                </div>
+            </div>
 
-    <a href="{{ route('admin.jamaah') }}" class="ba2-nav-item {{ request()->routeIs('admin.jamaah*') ? 'active' : '' }}">
-        <span class="ba2-nav-icon"><i class="fa-solid fa-users"></i></span>
-        <span class="ba2-nav-label">Data Jamaah</span>
-    </a>
+            <a href="{{ route('admin.jamaah') }}" class="ba2-nav-item {{ request()->routeIs('admin.jamaah*') ? 'active' : '' }}">
+                <span class="ba2-nav-icon"><i class="fa-solid fa-users"></i></span>
+                <span class="ba2-nav-label">Data Jamaah</span>
+            </a>
 
-    {{-- MENU TEMA TAMPILAN --}}
-    <a href="{{ route('admin.tema') }}" class="ba2-nav-item {{ request()->routeIs('admin.tema*') ? 'active' : '' }}">
-        <span class="ba2-nav-icon"><i class="fa-solid fa-palette"></i></span>
-        <span class="ba2-nav-label">Tema Tampilan</span>
-    </a>
-</nav>
+            {{-- MENU TEMA TAMPILAN --}}
+            <a href="{{ route('admin.tema') }}" class="ba2-nav-item {{ request()->routeIs('admin.tema*') ? 'active' : '' }}">
+                <span class="ba2-nav-icon"><i class="fa-solid fa-palette"></i></span>
+                <span class="ba2-nav-label">Tema Tampilan</span>
+            </a>
+        </nav>
 
         <div class="ba2-user">
             <div class="ba2-user-avatar">{{ substr(auth()->user()->name ?? 'A', 0, 2) }}</div>
@@ -224,7 +236,7 @@
             @if ($tab === 'kategori')
                 <section class="dn-card-modern">
                     <h3><i class="fa-solid fa-layer-group text-teal-600"></i> Kelola Jenis &amp; Kategori Donasi</h3>
-                    <p>Atur jenis donasi beserta foto banner program yang akan tampil pada halaman publik.</p>
+                    <p>Atur jenis donasi beserta foto banner program yang akan tampil pada halaman publik. Uang masuk dan uang keluar tiap program bisa dicatat langsung di sini.</p>
 
                     {{-- Form Tambah Kategori --}}
                     <form action="{{ route('admin.donasi.kategori.store') }}" method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; background: #f8fafc; padding: 1.25rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; margin-bottom: 1.5rem;">
@@ -272,6 +284,11 @@
                     @else
                         <div class="dn-kategori-list" style="display: flex; flex-direction: column; gap: 1rem;">
                             @foreach ($donationCategories as $kategori)
+                                @php
+                                    $kMasuk  = (float) ($masukPerJenis[$kategori->key] ?? 0);
+                                    $kKeluar = (float) ($keluarPerKategori[$kategori->key] ?? 0);
+                                    $kSisa   = $kMasuk - $kKeluar;
+                                @endphp
                                 <details style="border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1rem; background: #ffffff;">
                                     <summary style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-weight: 600;">
                                         <div style="display: flex; align-items: center; gap: 0.75rem;">
@@ -353,12 +370,175 @@
                                                 <button type="submit" style="background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 0.4rem 0.8rem; border-radius: 0.4rem; cursor: pointer; font-size: 0.85rem;">Hapus</button>
                                             </form>
                                         </div>
+
+                                        {{-- ===== Ringkasan + catat uang masuk / keluar ===== --}}
+                                        <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px dashed #cbd5e1;">
+                                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .75rem; margin-bottom: 1rem;">
+                                                <div style="background: #f0fdf4; border-radius: .6rem; padding: .7rem;">
+                                                    <div style="font-size: .7rem; color: #64748b;">Uang Masuk</div>
+                                                    <b style="color: #15803d;">Rp {{ number_format($kMasuk, 0, ',', '.') }}</b>
+                                                </div>
+                                                <div style="background: #fef2f2; border-radius: .6rem; padding: .7rem;">
+                                                    <div style="font-size: .7rem; color: #64748b;">Uang Keluar</div>
+                                                    <b style="color: #dc2626;">Rp {{ number_format($kKeluar, 0, ',', '.') }}</b>
+                                                </div>
+                                                <div style="background: #f8fafc; border-radius: .6rem; padding: .7rem;">
+                                                    <div style="font-size: .7rem; color: #64748b;">Sisa Dana</div>
+                                                    <b>Rp {{ number_format($kSisa, 0, ',', '.') }}</b>
+                                                </div>
+                                            </div>
+
+                                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                                                {{-- Catat Uang Masuk --}}
+                                                <form action="{{ route('admin.donasi.kategori.uangmasuk', $kategori->id) }}" method="POST" class="dn-flow-box dn-flow-in">
+                                                    @csrf
+                                                    <b style="font-size: .85rem; color: #15803d;"><i class="fa-solid fa-arrow-down"></i> Catat Uang Masuk</b>
+                                                    <input type="text" name="nama_donatur" class="form-control-modern" placeholder="Nama donatur (kosong = Hamba Allah)" maxlength="100">
+                                                    <input type="number" name="nominal" class="form-control-modern" placeholder="Nominal (Rp)" min="1000" required>
+                                                    <input type="date" name="tanggal" class="form-control-modern" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required>
+                                                    <select name="metode_pembayaran" class="form-control-modern" required>
+                                                        <option>Tunai</option>
+                                                        <option>Transfer Bank</option>
+                                                        <option>QRIS</option>
+                                                    </select>
+                                                    <input type="text" name="keterangan" class="form-control-modern" placeholder="Keterangan (opsional)" maxlength="500">
+                                                    <button type="submit" class="btn-primary-modern" style="justify-content: center; padding: .55rem 1rem; font-size: .85rem;">Simpan Uang Masuk</button>
+                                                </form>
+
+                                                {{-- Catat Uang Keluar --}}
+                                                <form action="{{ route('admin.donasi.kategori.penyaluran', $kategori->id) }}" method="POST" enctype="multipart/form-data" class="dn-flow-box dn-flow-out">
+                                                    @csrf
+                                                    <b style="font-size: .85rem; color: #dc2626;"><i class="fa-solid fa-arrow-up"></i> Catat Uang Keluar (Penyaluran)</b>
+                                                    <input type="text" name="judul" class="form-control-modern" placeholder="Judul (kosong = Penyaluran {{ $kategori->title }})" maxlength="150">
+                                                    <input type="number" name="nominal_terpakai" class="form-control-modern" placeholder="Nominal keluar (Rp)" min="1" required>
+                                                    <input type="date" name="tanggal" class="form-control-modern" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required>
+                                                    <input type="text" name="tujuan" class="form-control-modern" placeholder="Dikirim ke / tujuan (mis. BRI 1234xxx)" maxlength="150">
+                                                    <textarea name="deskripsi" rows="2" class="form-control-modern" placeholder="Keterangan penggunaan dana" maxlength="1000"></textarea>
+                                                    <input type="file" name="foto" accept="image/png, image/jpeg" class="form-control-modern" style="padding: .4rem; font-size: .8rem;">
+                                                    <button type="submit" class="btn-primary-modern" style="justify-content: center; padding: .55rem 1rem; font-size: .85rem; background: #dc2626;">Simpan Uang Keluar</button>
+                                                </form>
+                                            </div>
+
+                                            {{-- ===== Riwayat uang masuk & keluar (bisa diedit) ===== --}}
+                                            @php
+                                                $rk = $riwayatKeluar[strtolower(trim((string) $kategori->key))] ?? collect();
+                                                $rm = $riwayatMasuk[$kategori->key] ?? collect();
+                                            @endphp
+
+                                            <div style="margin-top: 1.25rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; align-items: start;">
+
+                                                {{-- Riwayat Uang Masuk (manual) --}}
+                                                <div>
+                                                    <b style="font-size: .85rem; color: #15803d;">Riwayat Uang Masuk (catatan manual)</b>
+                                                    @forelse ($rm as $m)
+                                                        <details style="margin-top: .5rem; border: 1px solid #bbf7d0; border-radius: .6rem; padding: .6rem; background: #fff;">
+                                                            <summary style="cursor: pointer; font-size: .8rem; font-weight: 600; display: flex; justify-content: space-between; gap: .5rem;">
+                                                                <span>{{ optional($m->created_at)->format('d/m/Y') }} · {{ $m->nama_donatur }}</span>
+                                                                <span style="color: #15803d;">Rp {{ number_format($m->nominal, 0, ',', '.') }}</span>
+                                                            </summary>
+                                                            <form action="{{ route('admin.donasi.uangmasuk.update', $m->id) }}" method="POST" style="display: grid; gap: .5rem; margin-top: .6rem;">
+                                                                @csrf @method('PUT')
+                                                                <input type="text" name="nama_donatur" class="form-control-modern" value="{{ $m->nama_donatur }}" placeholder="Nama donatur" maxlength="100">
+                                                                <input type="number" name="nominal" class="form-control-modern" value="{{ (int) $m->nominal }}" min="1000" required>
+                                                                <input type="date" name="tanggal" class="form-control-modern" value="{{ optional($m->created_at)->format('Y-m-d') }}" max="{{ date('Y-m-d') }}" required>
+                                                                <select name="metode_pembayaran" class="form-control-modern" required>
+                                                                    @foreach (['Tunai', 'Transfer Bank', 'QRIS'] as $mt)
+                                                                        <option {{ $m->metode_pembayaran === $mt ? 'selected' : '' }}>{{ $mt }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                                <input type="text" name="keterangan" class="form-control-modern" value="{{ $m->keterangan }}" placeholder="Keterangan" maxlength="500">
+                                                                <button type="submit" class="btn-primary-modern" style="justify-content: center; padding: .45rem 1rem; font-size: .8rem;">Simpan Perubahan</button>
+                                                            </form>
+                                                            <form action="{{ route('admin.donasi.uangmasuk.destroy', $m->id) }}" method="POST" onsubmit="return confirm('Hapus catatan uang masuk ini?');" style="margin-top: .4rem;">
+                                                                @csrf @method('DELETE')
+                                                                <button type="submit" style="width: 100%; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: .35rem; border-radius: .4rem; cursor: pointer; font-size: .75rem;">Hapus</button>
+                                                            </form>
+                                                        </details>
+                                                    @empty
+                                                        <div style="margin-top: .5rem; font-size: .78rem; color: #94a3b8;">Belum ada catatan manual. Donasi online diverifikasi di tab Rekap Data.</div>
+                                                    @endforelse
+                                                </div>
+
+                                                {{-- Riwayat Uang Keluar --}}
+                                                <div>
+                                                    <b style="font-size: .85rem; color: #dc2626;">Riwayat Uang Keluar (Penyaluran)</b>
+                                                    @forelse ($rk as $g)
+                                                        <details style="margin-top: .5rem; border: 1px solid #fecaca; border-radius: .6rem; padding: .6rem; background: #fff;">
+                                                            <summary style="cursor: pointer; font-size: .8rem; font-weight: 600; display: flex; justify-content: space-between; gap: .5rem;">
+                                                                <span>{{ optional($g->tanggal)->format('d/m/Y') }} · {{ \Illuminate\Support\Str::limit($g->judul, 28) }}</span>
+                                                                <span style="color: #dc2626;">Rp {{ number_format((float) $g->nominal_terpakai, 0, ',', '.') }}</span>
+                                                            </summary>
+                                                            <form action="{{ route('admin.donasi.galeri.update', $g->id) }}" method="POST" enctype="multipart/form-data" style="display: grid; gap: .5rem; margin-top: .6rem;">
+                                                                @csrf @method('PUT')
+                                                                <input type="hidden" name="kategori" value="{{ $kategori->key }}">
+                                                                <input type="text" name="judul" class="form-control-modern" value="{{ $g->judul }}" placeholder="Judul" required maxlength="150">
+                                                                <input type="date" name="tanggal" class="form-control-modern" value="{{ optional($g->tanggal)->format('Y-m-d') }}" max="{{ date('Y-m-d') }}" required>
+                                                                <input type="number" name="nominal_terpakai" class="form-control-modern" value="{{ $g->nominal_terpakai !== null ? (int) $g->nominal_terpakai : '' }}" placeholder="Uang keluar (Rp)" min="0">
+                                                                <small style="color: #94a3b8; font-size: .7rem;">Kalau rincian di bawah diisi, angka ini otomatis diganti jumlah rincian.</small>
+                                                                <input type="text" name="tujuan" class="form-control-modern" value="{{ $g->tujuan }}" placeholder="Dikirim ke rekening / tujuan" maxlength="150">
+                                                                <textarea name="deskripsi" rows="2" class="form-control-modern" placeholder="Keterangan" maxlength="1000">{{ $g->deskripsi }}</textarea>
+
+                                                                <div>
+                                                                    <label style="font-size: .75rem; font-weight: 600;">Dipakai untuk apa saja</label>
+                                                                    <div class="rincian-wrap" data-next="{{ count($g->rincian ?? []) }}" style="margin: .4rem 0;">
+                                                                        @foreach ($g->rincian ?? [] as $i => $r)
+                                                                            <div class="rincian-row">
+                                                                                <input type="text" name="rincian[{{ $i }}][label]" value="{{ $r['label'] ?? '' }}" class="form-control-modern rincian-label" placeholder="Untuk apa (mis. Beli semen)">
+                                                                                <input type="number" name="rincian[{{ $i }}][nominal]" value="{{ (int) ($r['nominal'] ?? 0) }}" class="form-control-modern" placeholder="Nominal" min="0">
+                                                                                <input type="text" name="rincian[{{ $i }}][keterangan]" value="{{ $r['keterangan'] ?? '' }}" class="form-control-modern" placeholder="Keterangan">
+                                                                                <button type="button" class="rincian-hapus">✕</button>
+                                                                            </div>
+                                                                        @endforeach
+                                                                    </div>
+                                                                    <button type="button" class="rincian-tambah">+ Tambah Rincian</button>
+                                                                </div>
+
+                                                                @if ($g->foto_url)
+                                                                    <img src="{{ $g->foto_url }}" alt="Foto" style="max-height: 70px; border-radius: 6px;">
+                                                                @endif
+                                                                <input type="file" name="foto" accept="image/png, image/jpeg" class="form-control-modern" style="padding: .4rem; font-size: .8rem;">
+                                                                <button type="submit" class="btn-primary-modern" style="justify-content: center; padding: .45rem 1rem; font-size: .8rem;">Simpan Perubahan</button>
+                                                            </form>
+                                                            <form action="{{ route('admin.donasi.galeri.destroy', $g->id) }}" method="POST" onsubmit="return confirm('Hapus catatan penyaluran ini?');" style="margin-top: .4rem;">
+                                                                @csrf @method('DELETE')
+                                                                <button type="submit" style="width: 100%; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: .35rem; border-radius: .4rem; cursor: pointer; font-size: .75rem;">Hapus</button>
+                                                            </form>
+                                                        </details>
+                                                    @empty
+                                                        <div style="margin-top: .5rem; font-size: .78rem; color: #94a3b8;">Belum ada penyaluran untuk program ini.</div>
+                                                    @endforelse
+                                                </div>
+                                            </div>
+
+                                        </div>
                                     </div>
                                 </details>
                             @endforeach
                         </div>
                     @endif
                 </section>
+            @endif
+
+                        @if ($tab === 'kategori')
+                <script>
+                    // Tambah / hapus baris rincian penggunaan dana (tab Kategori)
+                    document.addEventListener('click', function (e) {
+                        if (e.target.classList.contains('rincian-tambah')) {
+                            var wrap = e.target.previousElementSibling;
+                            var i = parseInt(wrap.dataset.next, 10);
+                            wrap.dataset.next = i + 1;
+                            wrap.insertAdjacentHTML('beforeend',
+                                '<div class="rincian-row">' +
+                                '<input type="text" name="rincian[' + i + '][label]" class="form-control-modern rincian-label" placeholder="Untuk apa (mis. Beli semen)">' +
+                                '<input type="number" name="rincian[' + i + '][nominal]" class="form-control-modern" placeholder="Nominal" min="0">' +
+                                '<input type="text" name="rincian[' + i + '][keterangan]" class="form-control-modern" placeholder="Keterangan">' +
+                                '<button type="button" class="rincian-hapus">✕</button></div>');
+                        }
+                        if (e.target.classList.contains('rincian-hapus')) {
+                            e.target.closest('.rincian-row').remove();
+                        }
+                    });
+                </script>
             @endif
 
             {{-- =====================================================
@@ -464,9 +644,31 @@
             @endif
 
             {{-- =====================================================
-                 TAB 3: PENYALURAN (dokumentasi realisasi)
+                 TAB 3: PENYALURAN (ringkasan otomatis per program + dokumentasi)
                  ===================================================== --}}
             @if ($tab === 'penyaluran')
+                @php
+                    // Rekap otomatis tiap program donasi (infaq, zakat, dll): dana masuk, tersalurkan, sisa
+                    $rekapProgram = $donationCategories->map(function ($c) use ($mosque, $items) {
+                        $key    = strtolower(trim((string) $c->key));
+                        $masuk  = (float) \App\Models\Donasi::where('mosque_id', $mosque->id)
+                                    ->where('jenis', $c->key)->where('status', 'diterima')->sum('nominal');
+                        $docs   = $items->filter(fn ($i) => strtolower(trim((string) $i->kategori)) === $key);
+                        $keluar = (float) $docs->sum('nominal_terpakai');
+                        return (object) [
+                            'key'    => $c->key,
+                            'title'  => $c->title,
+                            'image'  => $c->image,
+                            'active' => $c->is_active,
+                            'masuk'  => $masuk,
+                            'keluar' => $keluar,
+                            'sisa'   => $masuk - $keluar,
+                            'pct'    => $masuk > 0 ? min(round($keluar / $masuk * 100), 100) : 0,
+                            'dok'    => $docs->filter(fn ($i) => !empty($i->foto))->count(),
+                        ];
+                    });
+                @endphp
+
                 <div class="dn-grid-dashboard" style="margin-bottom: 1.5rem;">
                     <div class="dn-card-modern">
                         <h3><i class="fa-solid fa-sack-dollar text-teal-600"></i> Total Diterima</h3>
@@ -482,18 +684,18 @@
                     </div>
                 </div>
 
-                <section class="dn-card-modern" style="margin-bottom: 1.5rem;">
+                <section class="dn-card-modern" id="dn-form-galeri" style="margin-bottom: 1.5rem;">
                     <h3><i class="fa-solid fa-images text-teal-600"></i> Dokumentasi Penyaluran</h3>
-                    <p>Unggah foto bukti nyata penyaluran dana ke jamaah.</p>
+                    <p>Unggah foto bukti nyata penyaluran dana ke jamaah. Pilih program agar otomatis masuk ke penyaluran program tersebut. Untuk mencatat uang keluar tanpa foto, gunakan menu Kategori.</p>
                     <form action="{{ route('admin.donasi.galeri.store') }}" method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
                         @csrf
                         <div>
                             <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Judul Kegiatan</label>
-                            <input type="text" name="judul" class="form-control-modern" placeholder="Mis. Sembako Ramadhan" value="{{ old('judul') }}" required maxlength="120">
+                            <input type="text" name="judul" id="dn-judul" class="form-control-modern" placeholder="Mis. Sembako Ramadhan" value="{{ old('judul') }}" required maxlength="120">
                         </div>
                         <div>
-                            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Kategori</label>
-                            <select name="kategori" class="form-control-modern">
+                            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Kategori / Program</label>
+                            <select name="kategori" id="dn-kategori-select" class="form-control-modern">
                                 <option value="">Umum</option>
                                 @foreach ($donationCategories as $cat)
                                     <option value="{{ $cat->key }}" {{ old('kategori') === $cat->key ? 'selected' : '' }}>{{ $cat->title }}</option>
@@ -508,9 +710,13 @@
                             <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Nominal Terpakai (Rp)</label>
                             <input type="number" min="0" step="1000" name="nominal_terpakai" class="form-control-modern" placeholder="0" value="{{ old('nominal_terpakai') }}">
                         </div>
+                        <div>
+                            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Dikirim ke Rekening / Tujuan</label>
+                            <input type="text" name="tujuan" class="form-control-modern" placeholder="Mis. Panitia Pembangunan / BRI 1234xxx" value="{{ old('tujuan') }}" maxlength="150">
+                        </div>
                         <div style="grid-column: 1 / -1;">
                             <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Deskripsi</label>
-                            <textarea name="deskripsi" class="form-control-modern" rows="2" placeholder="Ceritakan singkat..." maxlength="300">{{ old('deskripsi') }}</textarea>
+                            <textarea name="deskripsi" class="form-control-modern" rows="2" placeholder="Ceritakan singkat..." maxlength="1000">{{ old('deskripsi') }}</textarea>
                         </div>
                         <div style="grid-column: 1 / -1;">
                             <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Pilih Foto (JPG/PNG, maks. 2MB)</label>
@@ -525,20 +731,51 @@
 
                 <section class="dn-card-modern">
                     <h3><i class="fa-solid fa-photo-film text-teal-600"></i> Galeri Dokumentasi Tersimpan</h3>
-                    <p>Total {{ $items->count() }} foto telah dipublikasikan ke halaman donasi.</p>
+                    <p>Setiap program donasi (infaq, zakat, dll) otomatis masuk ke galeri ini dan ke halaman publik. Ditambah {{ $items->count() }} catatan penyaluran yang sudah tersimpan. Klik <b>Edit Penyaluran</b> pada kartu untuk mengubah uang keluar, tujuan, keterangan, dan rincian penggunaan dana.</p>
 
-                    @if ($items->isEmpty())
-                        <div class="dn-empty" style="text-align: center; padding: 2rem; color: #64748b;">Belum ada dokumentasi foto yang diunggah.</div>
+                    @if ($items->isEmpty() && $rekapProgram->isEmpty())
+                        <div class="dn-empty" style="text-align: center; padding: 2rem; color: #64748b;">Belum ada dokumentasi penyaluran.</div>
                     @else
-                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; margin-top: 1rem; align-items: start;">
+                            {{-- Kartu program otomatis (dari menu Kategori) --}}
+                            @foreach ($rekapProgram as $rp)
+                                <div style="border: 1px solid #99f6e4; border-radius: 0.75rem; overflow: hidden; background: #ffffff; display: flex; flex-direction: column; position: relative;">
+                                    <div style="position: relative; height: 160px; background-size: cover; background-position: center; background-color: #0f766e; {{ !empty($rp->image) ? "background-image:url('" . asset('storage/' . $rp->image) . "');" : 'background-image: linear-gradient(150deg,#0f766e,#115e59);' }}">
+                                        <span style="position:absolute; top:10px; left:10px; background:rgba(13,148,136,.95); color:#fff; padding:3px 10px; border-radius:999px; font-size:.65rem; font-weight:700; text-transform:uppercase;">Program &middot; Otomatis</span>
+                                    </div>
+                                    <div style="padding: 1rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap:.75rem;">
+                                        <div>
+                                            <span style="font-size: 0.7rem; background: #e0f2fe; color: #0369a1; padding: 0.2rem 0.5rem; border-radius: 999px; font-weight: 600;">{{ $rp->title }}</span>
+                                            <h4 style="font-size: 0.95rem; font-weight: 700; color: #1e293b; margin: 0.5rem 0 0.5rem 0;">Penyaluran {{ $rp->title }}</h4>
+                                            <div style="display:grid; gap:3px; font-size:.78rem;">
+                                                <div style="display:flex; justify-content:space-between;"><span style="color:#64748b;">Dana masuk</span><b style="color:#10b981;">Rp {{ number_format($rp->masuk, 0, ',', '.') }}</b></div>
+                                                <div style="display:flex; justify-content:space-between;"><span style="color:#64748b;">Tersalurkan</span><b style="color:#ef4444;">Rp {{ number_format($rp->keluar, 0, ',', '.') }}</b></div>
+                                                <div style="display:flex; justify-content:space-between;"><span style="color:#64748b;">Sisa dana</span><b style="color:#0f172a;">Rp {{ number_format($rp->sisa, 0, ',', '.') }}</b></div>
+                                            </div>
+                                            <div style="margin-top:.5rem; width:100%; height:6px; background:#e2e8f0; border-radius:999px; overflow:hidden;">
+                                                <div style="width: {{ $rp->pct }}%; height:100%; background: linear-gradient(90deg,#0d9488,#14b8a6);"></div>
+                                            </div>
+                                            <div style="margin-top:4px; font-size:.7rem; color:#94a3b8;">{{ $rp->pct }}% tersalurkan &middot; {{ $rp->dok }} dokumentasi foto</div>
+                                        </div>
+                                        <button type="button" class="btn-primary-modern dn-pick-program" data-kategori="{{ $rp->key }}" style="justify-content:center; padding:.45rem .8rem; font-size:.78rem;">
+                                            <i class="fa-solid fa-plus"></i> Tambah Dokumentasi
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
+
+                            {{-- Catatan penyaluran (dengan atau tanpa foto) --}}
                             @foreach ($items as $item)
                                 <div style="border: 1px solid #e2e8f0; border-radius: 0.75rem; overflow: hidden; background: #ffffff; display: flex; flex-direction: column; position: relative;">
-                                    <div style="height: 160px; background-size: cover; background-position: center; background-image:url('{{ $item->foto_url }}')"></div>
+                                    <div style="height: 160px; background-size: cover; background-position: center; {{ $item->foto_url ? "background-image:url('" . $item->foto_url . "');" : 'background-image: linear-gradient(150deg,#0f766e,#115e59);' }}"></div>
                                     <div style="padding: 1rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
                                         <div>
                                             @php
                                                 $catTitle = 'Umum';
-                                                $matched = $donationCategories->firstWhere('key', $item->kategori);
+                                                $itemKat  = strtolower(trim((string) $item->kategori));
+                                                $matched  = $itemKat === '' ? null : $donationCategories->first(
+                                                    fn ($c) => strtolower(trim((string) $c->key)) === $itemKat
+                                                );
                                                 if ($matched) { $catTitle = $matched->title; }
                                             @endphp
                                             <span style="font-size: 0.7rem; background: #e0f2fe; color: #0369a1; padding: 0.2rem 0.5rem; border-radius: 999px; font-weight: 600;">{{ $catTitle }}</span>
@@ -547,8 +784,76 @@
                                             @if ($item->nominal_terpakai)
                                                 <p style="font-size: 0.8rem; color: #0f766e; font-weight: 600; margin: 0.25rem 0 0;">Rp {{ number_format($item->nominal_terpakai, 0, ',', '.') }}</p>
                                             @endif
+                                            @if ($item->tujuan)
+                                                <p style="font-size: 0.75rem; color: #64748b; margin: 0.25rem 0 0;">Tujuan: {{ $item->tujuan }}</p>
+                                            @endif
                                         </div>
-                                        <form action="{{ route('admin.donasi.galeri.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus foto ini?');" style="margin-top: 1rem; display: flex; justify-content: flex-end;">
+
+                                        {{-- ===== EDIT PENYALURAN ===== --}}
+                                        <details style="margin-top:.75rem; border-top:1px solid #f1f5f9; padding-top:.75rem;">
+                                            <summary style="cursor:pointer; font-weight:600; font-size:.82rem; color:#0f766e;">✏️ Edit Penyaluran</summary>
+
+                                            <form action="{{ route('admin.donasi.galeri.update', $item->id) }}" method="POST" enctype="multipart/form-data"
+                                                  style="display:flex; flex-direction:column; gap:.7rem; margin-top:.75rem;">
+                                                @csrf
+                                                @method('PUT')
+
+                                                <div>
+                                                    <label style="font-size:.75rem; font-weight:600;">Judul</label>
+                                                    <input type="text" name="judul" class="form-control-modern" value="{{ $item->judul }}" required maxlength="150">
+                                                </div>
+                                                <div>
+                                                    <label style="font-size:.75rem; font-weight:600;">Program</label>
+                                                    <select name="kategori" class="form-control-modern">
+                                                        <option value="">Umum</option>
+                                                        @foreach ($donationCategories as $cat)
+                                                            <option value="{{ $cat->key }}" {{ $item->kategori === $cat->key ? 'selected' : '' }}>{{ $cat->title }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label style="font-size:.75rem; font-weight:600;">Dikirim ke Rekening / Tujuan</label>
+                                                    <input type="text" name="tujuan" class="form-control-modern" value="{{ $item->tujuan }}" maxlength="150">
+                                                </div>
+                                                <div>
+                                                    <label style="font-size:.75rem; font-weight:600;">Tanggal</label>
+                                                    <input type="date" name="tanggal" class="form-control-modern" value="{{ optional($item->tanggal)->format('Y-m-d') }}" max="{{ date('Y-m-d') }}" required>
+                                                </div>
+                                                <div>
+                                                    <label style="font-size:.75rem; font-weight:600;">Uang Keluar (Rp)</label>
+                                                    <input type="number" name="nominal_terpakai" class="form-control-modern" min="0" step="1" value="{{ $item->nominal_terpakai !== null ? (int) $item->nominal_terpakai : '' }}">
+                                                    <small style="color:#94a3b8; font-size:.7rem;">Kalau rincian di bawah diisi, angka ini otomatis diganti jumlah rincian.</small>
+                                                </div>
+                                                <div>
+                                                    <label style="font-size:.75rem; font-weight:600;">Keterangan</label>
+                                                    <textarea name="deskripsi" rows="3" class="form-control-modern" maxlength="1000">{{ $item->deskripsi }}</textarea>
+                                                </div>
+
+                                                <div>
+                                                    <label style="font-size:.75rem; font-weight:600;">Dipakai untuk apa saja</label>
+                                                    <div class="rincian-wrap" data-next="{{ count($item->rincian ?? []) }}" style="margin:.4rem 0;">
+                                                        @foreach ($item->rincian ?? [] as $i => $r)
+                                                            <div class="rincian-row">
+                                                                <input type="text" name="rincian[{{ $i }}][label]" value="{{ $r['label'] ?? '' }}" class="form-control-modern rincian-label" placeholder="Untuk apa (mis. Beli semen)">
+                                                                <input type="number" name="rincian[{{ $i }}][nominal]" value="{{ (int) ($r['nominal'] ?? 0) }}" class="form-control-modern" placeholder="Nominal" min="0">
+                                                                <input type="text" name="rincian[{{ $i }}][keterangan]" value="{{ $r['keterangan'] ?? '' }}" class="form-control-modern" placeholder="Keterangan">
+                                                                <button type="button" class="rincian-hapus">✕</button>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                    <button type="button" class="rincian-tambah">+ Tambah Rincian</button>
+                                                </div>
+
+                                                <div>
+                                                    <label style="font-size:.75rem; font-weight:600;">{{ $item->foto ? 'Ganti Foto (opsional)' : 'Tambah Foto (opsional)' }}</label>
+                                                    <input type="file" name="foto" accept="image/png, image/jpeg" class="form-control-modern" style="padding:.4rem; font-size:.8rem;">
+                                                </div>
+
+                                                <button type="submit" class="btn-primary-modern" style="justify-content:center; padding:.5rem 1rem; font-size:.82rem;">Simpan Perubahan</button>
+                                            </form>
+                                        </details>
+
+                                        <form action="{{ route('admin.donasi.galeri.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus catatan penyaluran ini?');" style="margin-top: 1rem; display: flex; justify-content: flex-end;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" style="background: #fee2e2; color: #991b1b; border: none; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;" aria-label="Hapus">
@@ -561,6 +866,38 @@
                         </div>
                     @endif
                 </section>
+
+                <script>
+                    // Tombol "Tambah Dokumentasi" di kartu program: pilih kategori otomatis lalu geser ke formulir
+                    document.querySelectorAll('.dn-pick-program').forEach(function (btn) {
+                        btn.addEventListener('click', function () {
+                            var sel = document.getElementById('dn-kategori-select');
+                            if (sel) sel.value = this.dataset.kategori;
+                            var form = document.getElementById('dn-form-galeri');
+                            if (form) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            var judul = document.getElementById('dn-judul');
+                            if (judul) setTimeout(function () { judul.focus({ preventScroll: true }); }, 400);
+                        });
+                    });
+
+                    // Tambah / hapus baris rincian penggunaan dana
+                    document.addEventListener('click', function (e) {
+                        if (e.target.classList.contains('rincian-tambah')) {
+                            var wrap = e.target.previousElementSibling;
+                            var i = parseInt(wrap.dataset.next, 10);
+                            wrap.dataset.next = i + 1;
+                            wrap.insertAdjacentHTML('beforeend',
+                                '<div class="rincian-row">' +
+                                '<input type="text" name="rincian[' + i + '][label]" class="form-control-modern rincian-label" placeholder="Untuk apa (mis. Beli semen)">' +
+                                '<input type="number" name="rincian[' + i + '][nominal]" class="form-control-modern" placeholder="Nominal" min="0">' +
+                                '<input type="text" name="rincian[' + i + '][keterangan]" class="form-control-modern" placeholder="Keterangan">' +
+                                '<button type="button" class="rincian-hapus">✕</button></div>');
+                        }
+                        if (e.target.classList.contains('rincian-hapus')) {
+                            e.target.closest('.rincian-row').remove();
+                        }
+                    });
+                </script>
             @endif
 
             {{-- =====================================================

@@ -63,13 +63,9 @@ class PaymentController extends Controller
         }
 
         // Tentukan teks dan nominal untuk ditampilkan di layar (1 Bulan = Rp 100.000)
-        if ($packageType === '1000000_12') {
-            $packageName = 'Langganan 1 Tahun';
-            $amountFormatted = 'Rp 1.000.000';
-        } else {
-            $packageName = 'Langganan 1 Bulan';
-            $amountFormatted = 'Rp 100.000';
-        }
+        $paket = \App\Support\PackagePricing::resolve($packageType);
+        $packageName = $paket['name'];
+        $amountFormatted = 'Rp ' . number_format($paket['amount'], 0, ',', '.');
 
         return view('paymentmasjid.payment', compact('mosque', 'packageName', 'amountFormatted'));
     }
@@ -94,12 +90,7 @@ class PaymentController extends Controller
         }
 
         // AMBIL NOMINAL HARGA SECARA OTOMATIS (1 Bulan = 100000, 1 Tahun = 1000000)
-        if (str_contains($packageType, '_')) {
-            list($grossAmount, $durationMonths) = explode('_', $packageType);
-            $grossAmount = (int) $grossAmount;
-        } else {
-            $grossAmount = ($packageType === '1000000_12') ? 1000000 : 100000;
-        }
+        $grossAmount = \App\Support\PackagePricing::amount($packageType);
 
         // Simpan order_id dan package_type terbaru ke database
         $mosque->update([
@@ -243,6 +234,11 @@ class PaymentController extends Controller
                 $mosque->payment_status = 'pending';
             }
 
+            // Simpan tanggal berakhir ke masjid supaya paket otomatis mati saat habis
+            if ($isPaid && $expiredDate) {
+                $mosque->subscription_expires_at = $expiredDate;
+            }
+
             $mosque->save();
         }
 
@@ -299,12 +295,7 @@ class PaymentController extends Controller
         $orderId = $pendingRenewal ? $pendingRenewal['order_id'] : ('MOSQUE-MANUAL-' . $mosque->id . '-' . time());
 
         // Hitung nominal harga
-        if (str_contains($packageType, '_')) {
-            list($grossAmount,) = explode('_', $packageType);
-            $grossAmount = (int) $grossAmount;
-        } else {
-            $grossAmount = ($packageType === '1000000_12') ? 1000000 : 100000;
-        }
+        $grossAmount = \App\Support\PackagePricing::amount($packageType);
 
         // Upload file bukti transfer foto
         if ($request->hasFile('proof_of_payment')) {

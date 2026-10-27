@@ -39,30 +39,41 @@ class ThemeController extends Controller
     }
 
     /**
-     * (Opsional) Jika ingin menyimpan preferensi tema ke database di masa mendatang,
-     * Anda bisa menambahkan method update atau menyimpan ke kolom khusus pada tabel mosques.
+     * Menyimpan preferensi tema ke database dengan validasi paket berbayar.
      */
     public function update(Request $request)
     {
         $request->validate([
-    'theme' => 'required|string|in:default,emerald,terracotta,corporate',
-]);
+            'theme' => 'required|string|in:default,emerald,terracotta,corporate',
+        ]);
 
         $mosque = Mosque::where('user_id', Auth::id())->first();
 
-        if ($mosque) {
-            $mosque->theme = $request->theme;
-            $mosque->save();
-
+        if (!$mosque) {
             return response()->json([
-                'success' => true,
-                'message' => 'Tema berhasil diperbarui.'
-            ]);
+                'success' => false,
+                'message' => 'Masjid tidak ditemukan.'
+            ], 404);
         }
 
+        // Cek apakah paket masjid berbayar dan status pembayarannya approved
+        $isBerbayar = ($mosque->package_type ?? 'free') !== 'free'
+            && strtolower(trim($mosque->payment_status ?? '')) === 'approved';
+
+        // Jika mencoba memilih tema selain default tapi statusnya bukan berbayar, tolak
+        if (!$isBerbayar && $request->theme !== 'default') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Fitur ganti tema hanya tersedia untuk masjid berbayar. Paket Free hanya dapat menggunakan tema Default.'
+            ], 403);
+        }
+
+        $mosque->theme = $request->theme;
+        $mosque->save();
+
         return response()->json([
-            'success' => false,
-            'message' => 'Masjid tidak ditemukan.'
-        ], 404);
+            'success' => true,
+            'message' => 'Tema berhasil diperbarui.'
+        ]);
     }
 }

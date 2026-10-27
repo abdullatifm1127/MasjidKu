@@ -309,7 +309,7 @@
     <div>
         <input type="radio" name="package_type" value="100000_1" style="margin-right: 6px;"> 
         <strong style="color: #1e293b;">Paket 1 Bulan</strong><br>
-        <span style="color: #16a34a; font-weight: 700; font-size: 1.1rem; display: inline-block; margin-top: 4px;">Rp 100.000 / bln</span>
+        <span style="color: #16a34a; font-weight: 700; font-size: 1.1rem; display: inline-block; margin-top: 4px;">{{ \App\Support\PackagePricing::rupiah(1) }} / bln</span>
     </div>
     <p style="font-size: 0.85rem; color: #64748b; margin-top: 8px; margin-bottom: 0;">Mengaktifkan fitur donasi online penuh & dukungan prioritas.</p>
 </label>
@@ -319,7 +319,7 @@
     <div>
         <input type="radio" name="package_type" value="1000000_12" style="margin-right: 6px;"> 
         <strong style="color: #1e293b;">Paket 1 Tahun</strong><br>
-        <span style="color: #16a34a; font-weight: 700; font-size: 1.1rem; display: inline-block; margin-top: 4px;">Rp 1.000.000 / thn</span>
+        <span style="color: #16a34a; font-weight: 700; font-size: 1.1rem; display: inline-block; margin-top: 4px;">{{ \App\Support\PackagePricing::rupiah(12) }} / thn</span>
     </div>
     <p style="font-size: 0.85rem; color: #64748b; margin-top: 8px; margin-bottom: 0;">Hemat lebih banyak dengan masa aktif penuh 12 bulan.</p>
 </label>

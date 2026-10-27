@@ -14,17 +14,14 @@
     $pendingRenewal = session('pending_renewal');
     $rawPackage = $pendingRenewal['package'] ?? ($mosque->package_type ?? '100000_1');
 
-    $nominal = 100000;
-    if ($rawPackage === '1000000_12') {
-        $nominal = 1000000;
-    } elseif (str_contains($rawPackage, '_')) {
-        $nominal = (int) explode('_', $rawPackage)[0];
-    }
+    // Masjid yang masih "free" / kode paket kosong -> pakai paket bulanan sebagai default pembelian
+    $kodePaket = (empty($rawPackage) || $rawPackage === 'free') ? '100000_1' : $rawPackage;
 
-    // Lama langganan dibaca dari kode paket (harga_bulan)
-    $bulan = str_contains($rawPackage, '_') ? (int) explode('_', $rawPackage)[1] : 1;
-    $bulan = $bulan > 0 ? $bulan : 1;
-    $namaPaket = $bulan % 12 === 0 ? 'Langganan ' . ($bulan / 12) . ' Tahun' : 'Langganan ' . $bulan . ' Bulan';
+    // Harga & nama paket dari PackagePricing (mengikuti pengaturan Super Admin).
+    // Bila controller sudah mengirim $amount / $packageName, nilai itu yang dipakai.
+    $paketHarga = \App\Support\PackagePricing::resolve($kodePaket);
+    $nominal    = isset($amount) ? (int) $amount : $paketHarga['amount'];
+    $namaPaket  = $packageName ?? $paketHarga['name'];
 
     $midtransSetting = \Illuminate\Support\Facades\DB::table('payment_settings')->where('code', 'midtrans')->first();
     $manualSetting   = \Illuminate\Support\Facades\DB::table('payment_settings')->where('code', 'manual')->first();

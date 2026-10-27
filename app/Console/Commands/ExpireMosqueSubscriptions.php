@@ -12,7 +12,7 @@ class ExpireMosqueSubscriptions extends Command
 
     public function handle()
     {
-        $expired = Mosque::where('package_type', 'paid')
+        $expired = Mosque::where('package_type', '!=', 'free')
             ->whereNotNull('subscription_expires_at')
             ->where('subscription_expires_at', '<=', now())
             ->get();
