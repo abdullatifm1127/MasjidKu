@@ -206,37 +206,55 @@ Route::middleware(['auth', 'check.status'])->group(function () {
     Route::delete('/admin/acara/{acara}', [AcaraController::class, 'destroy'])->name('admin.acara.destroy');
 
     // ==================== DONASI ADMIN ====================
-    Route::get('/admin/donasi', [DonasiAdminController::class, 'index'])->name('admin.donasi');
-    Route::get('/admin/donasi/{tab}', [DonasiAdminController::class, 'index'])
-        ->whereIn('tab', ['kategori', 'pengaturan', 'penyaluran', 'rekap'])
-        ->name('admin.donasi.tab');
+Route::get('/admin/donasi', [DonasiAdminController::class, 'index'])->name('admin.donasi');
+Route::get('/admin/donasi/{tab}', [DonasiAdminController::class, 'index'])
+    ->whereIn('tab', ['kategori', 'pengaturan', 'penyaluran', 'rekap'])
+    ->name('admin.donasi.tab');
 
-    Route::patch('/admin/donasi/{donasi}/status', [DonasiAdminController::class, 'updateStatus'])
-        ->name('admin.donasi.status');
+Route::patch('/admin/donasi/{donasi}/status', [DonasiAdminController::class, 'updateStatus'])
+    ->name('admin.donasi.status');
 
-    Route::put('/admin/donasi/pengaturan', [DonasiAdminController::class, 'updatePengaturan'])->name('admin.donasi.pengaturan');
-    Route::post('/admin/donasi/galeri', [DonasiAdminController::class, 'storeGaleri'])->name('admin.donasi.galeri.store');
-    Route::delete('/admin/donasi/galeri/{id}', [DonasiAdminController::class, 'destroyGaleri'])->name('admin.donasi.galeri.destroy');
+Route::put('/admin/donasi/pengaturan', [DonasiAdminController::class, 'updatePengaturan'])->name('admin.donasi.pengaturan');
 
-    Route::post('/admin/donasi/rekening', [DonasiAdminController::class, 'storeBankAccount'])->name('admin.donasi.rekening.store');
-    Route::put('/admin/donasi/rekening/{id}', [DonasiAdminController::class, 'updateBankAccount'])->name('admin.donasi.rekening.update');
-    Route::patch('/admin/donasi/rekening/{id}/toggle', [DonasiAdminController::class, 'toggleBankAccount'])->name('admin.donasi.rekening.toggle');
-    Route::delete('/admin/donasi/rekening/{id}', [DonasiAdminController::class, 'destroyBankAccount'])->name('admin.donasi.rekening.destroy');
+// Galeri / dokumentasi penyaluran
+Route::post('/admin/donasi/galeri', [DonasiAdminController::class, 'storeGaleri'])->name('admin.donasi.galeri.store');
+Route::put('/admin/donasi/galeri/{id}', [DonasiAdminController::class, 'updateGaleri'])->name('admin.donasi.galeri.update');
+Route::delete('/admin/donasi/galeri/{id}', [DonasiAdminController::class, 'destroyGaleri'])->name('admin.donasi.galeri.destroy');
 
-    Route::post('/admin/donasi/qris', [DonasiAdminController::class, 'updateQris'])->name('admin.donasi.qris.update');
-    Route::delete('/admin/donasi/qris', [DonasiAdminController::class, 'destroyQris'])->name('admin.donasi.qris.destroy');
+// Rekening bank & QRIS
+Route::post('/admin/donasi/rekening', [DonasiAdminController::class, 'storeBankAccount'])->name('admin.donasi.rekening.store');
+Route::put('/admin/donasi/rekening/{id}', [DonasiAdminController::class, 'updateBankAccount'])->name('admin.donasi.rekening.update');
+Route::patch('/admin/donasi/rekening/{id}/toggle', [DonasiAdminController::class, 'toggleBankAccount'])->name('admin.donasi.rekening.toggle');
+Route::delete('/admin/donasi/rekening/{id}', [DonasiAdminController::class, 'destroyBankAccount'])->name('admin.donasi.rekening.destroy');
 
-    Route::post('/admin/donasi/kategori', [DonationCategoryController::class, 'store'])
-        ->name('admin.donasi.kategori.store');
+Route::post('/admin/donasi/qris', [DonasiAdminController::class, 'updateQris'])->name('admin.donasi.qris.update');
+Route::delete('/admin/donasi/qris', [DonasiAdminController::class, 'destroyQris'])->name('admin.donasi.qris.destroy');
 
-    Route::put('/admin/donasi/kategori/{kategori}', [DonationCategoryController::class, 'update'])
-        ->name('admin.donasi.kategori.update');
+// Kategori
+Route::post('/admin/donasi/kategori', [DonationCategoryController::class, 'store'])
+    ->name('admin.donasi.kategori.store');
 
-    Route::patch('/admin/donasi/kategori/{kategori}/toggle', [DonationCategoryController::class, 'toggle'])
-        ->name('admin.donasi.kategori.toggle');
+Route::put('/admin/donasi/kategori/{kategori}', [DonationCategoryController::class, 'update'])
+    ->name('admin.donasi.kategori.update');
 
-    Route::delete('/admin/donasi/kategori/{kategori}', [DonationCategoryController::class, 'destroy'])
-        ->name('admin.donasi.kategori.destroy');
+Route::patch('/admin/donasi/kategori/{kategori}/toggle', [DonationCategoryController::class, 'toggle'])
+    ->name('admin.donasi.kategori.toggle');
+
+Route::delete('/admin/donasi/kategori/{kategori}', [DonationCategoryController::class, 'destroy'])
+    ->name('admin.donasi.kategori.destroy');
+
+// BARU: catat uang masuk & uang keluar langsung dari tab Kategori
+Route::post('/admin/donasi/kategori/{id}/uang-masuk', [DonasiAdminController::class, 'storeUangMasuk'])
+    ->name('admin.donasi.kategori.uangmasuk');
+
+Route::post('/admin/donasi/kategori/{id}/penyaluran', [DonasiAdminController::class, 'storePenyaluran'])
+    ->name('admin.donasi.kategori.penyaluran');
+
+Route::put('/admin/donasi/uang-masuk/{id}', [DonasiAdminController::class, 'updateUangMasuk'])
+    ->name('admin.donasi.uangmasuk.update');
+    
+Route::delete('/admin/donasi/uang-masuk/{id}', [DonasiAdminController::class, 'destroyUangMasuk'])
+    ->name('admin.donasi.uangmasuk.destroy');
 
     // ==================== DATA JAMAAH ====================
     Route::get('/admin/jamaah', [JamaahController::class, 'index'])

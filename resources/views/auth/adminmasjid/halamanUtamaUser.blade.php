@@ -1420,7 +1420,7 @@
     </section>
     @endif
 
-    {{-- DOKUMENTASI PENYALURAN SECTION --}}
+   {{-- DOKUMENTASI PENYALURAN SECTION --}}
     @if($donasiOn)
     <section class="hu-section" id="penyaluran" style="background-color: #f8fafc; padding: 5rem 0;">
         <style>
@@ -1428,6 +1428,16 @@
             .pny-chip { padding: .5rem 1.1rem; border-radius: 999px; border: 1px solid #cbd5e1; background: #fff; color: #475569; font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; transition: .15s; }
             .pny-chip:hover { border-color: #0d9488; color: #0d9488; }
             .pny-chip.is-active { background: #0d9488; border-color: #0d9488; color: #fff; }
+            .pny-thumb { width: 72px; height: 72px; border-radius: .6rem; background-size: cover; background-position: center; border: 2px solid transparent; cursor: pointer; padding: 0; flex: 0 0 auto; }
+            .pny-thumb { cursor: zoom-in; transition: transform .15s; }
+            .pny-thumb:hover { transform: scale(1.05); }
+            .pny-thumb.is-active { border-color: #0d9488; }
+            #modalFoto.is-zoomable { cursor: zoom-in; }
+            #pnyLightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,.92); z-index:10000; align-items:center; justify-content:center; flex-direction:column; padding:1rem; }
+            #pnyLbImg { max-width:95vw; max-height:78vh; object-fit:contain; border-radius:.5rem; }
+            #pnyLbCap { color:#e2e8f0; font-size:.9rem; margin-top:.9rem; text-align:center; max-width:90vw; }
+            .pny-lb-btn { position:absolute; background:rgba(255,255,255,.15); color:#fff; border:none; width:44px; height:44px; border-radius:50%; font-size:1.3rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+            .pny-lb-btn:hover { background:rgba(255,255,255,.3); }
         </style>
 
         <div class="hu-container">
@@ -1461,18 +1471,59 @@
                             $pcKeluar = $pc->total_keluar
                                 ?? \App\Models\DonasiGaleri::where('mosque_id', $mosque->id)
                                     ->where('kategori', $pc->key)->sum('nominal_terpakai');
+                            $pcMasuk  = (float) $pcMasuk;
+                            $pcKeluar = (float) $pcKeluar;
                             $pcSisa   = $pcMasuk - $pcKeluar;
                             $pcPct    = $pcMasuk > 0 ? min(round($pcKeluar / $pcMasuk * 100), 100) : 0;
                             $pcKeyLow = strtolower(trim((string) $pc->key));
-                            $pcDok    = ($items ?? collect())
+
+                            // Semua catatan penyaluran milik program ini (terbaru dulu)
+                            $pcDocs = ($items ?? collect())
                                 ->filter(fn ($i) => strtolower(trim((string) $i->kategori)) === $pcKeyLow)
-                                ->count();
-                            $pcFoto   = !empty($pc->image)
+                                ->sortByDesc(fn ($i) => optional($i->tanggal)->timestamp ?? 0)
+                                ->values();
+
+                            // Foto dokumentasi (hanya yang punya foto)
+                            $pcGaleri = $pcDocs->filter(fn ($i) => !empty($i->foto_url))->map(fn ($i) => [
+                                'url'     => $i->foto_url,
+                                'judul'   => $i->judul,
+                                'tanggal' => $i->tanggal ? \Carbon\Carbon::parse($i->tanggal)->translatedFormat('d F Y') : '',
+                                'nominal' => (float) ($i->nominal_terpakai ?? 0),
+                            ])->values()->all();
+                            $pcDok = count($pcGaleri);
+
+                            // Tujuan: gabungan tujuan unik dari catatan penyaluran
+                            $pcTujuan = $pcDocs->pluck('tujuan')->map(fn ($t) => trim((string) $t))
+                                ->filter()->unique()->values()->implode(', ');
+                            if ($pcTujuan === '') { $pcTujuan = 'Penyaluran Tunai / Kas Masjid'; }
+
+                            // Rincian penggunaan dana dari seluruh catatan program ini
+                            $pcRincian = $pcDocs->flatMap(fn ($i) => $i->rincian ?? [])->values()->all();
+
+                            // Riwayat tiap penyaluran (dengan atau tanpa foto) untuk ditampilkan di popup
+                            $pcRiwayat = $pcDocs->map(fn ($i) => [
+                                'judul'     => $i->judul,
+                                'tanggal'   => $i->tanggal ? \Carbon\Carbon::parse($i->tanggal)->translatedFormat('d F Y') : '',
+                                'nominal'   => (float) ($i->nominal_terpakai ?? 0),
+                                'tujuan'    => $i->tujuan,
+                                'deskripsi' => $i->deskripsi,
+                                'foto'      => $i->foto_url,
+                                'rincian'   => $i->rincian ?? [],
+                            ])->values()->all();
+
+                            $pcTanggal = $pcDocs->first() && $pcDocs->first()->tanggal
+                                ? \Carbon\Carbon::parse($pcDocs->first()->tanggal)->translatedFormat('d F Y')
+                                : now()->translatedFormat('d F Y');
+
+                            $pcBanner = !empty($pc->image)
                                 ? asset('storage/' . $pc->image)
                                 : 'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&w=600&q=80';
+                            // Kartu memakai foto dokumentasi terbaru bila ada, kalau tidak pakai banner program
+                            $pcFoto = $pcGaleri[0]['url'] ?? $pcBanner;
+
                             $pcDeskripsi = ($pc->description ?: 'Program donasi ' . $pc->title . '.')
                                 . "\n\nSisa dana program: Rp " . number_format($pcSisa, 0, ',', '.')
-                                . "\nDokumentasi foto: " . ($pcDok > 0 ? $pcDok . ' kegiatan (lihat kartu di bawah)' : 'belum ada');
+                                . "\nDokumentasi foto: " . ($pcDok > 0 ? $pcDok . ' foto kegiatan (lihat di riwayat penyaluran)' : 'belum ada');
                         @endphp
                         <div class="pny-card" data-kategori="{{ $pc->key }}" style="background: #ffffff; border: 1px solid #99f6e4; border-radius: 1rem; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
                             <div style="position: relative; height: 200px; background-size: cover; background-position: center; background-image: url('{{ $pcFoto }}')">
@@ -1502,9 +1553,11 @@
                                         data-deskripsi="{{ $pcDeskripsi }}"
                                         data-nominal-keluar="Rp {{ number_format($pcKeluar, 0, ',', '.') }}"
                                         data-nominal-masuk="Rp {{ number_format($pcMasuk, 0, ',', '.') }}"
-                                        data-rekening="Penyaluran Tunai / Kas Masjid"
-                                        data-tanggal="{{ now()->translatedFormat('d F Y') }}"
-                                        data-foto="{{ $pcFoto }}"
+                                        data-rekening="{{ $pcTujuan }}"
+                                        data-tanggal="{{ $pcTanggal }}"
+                                        data-foto="{{ $pcBanner }}"
+                                        data-riwayat="{{ json_encode($pcRiwayat) }}"
+                                        data-rincian="[]"
                                         style="background: none; border: none; padding: 0; font-size: 0.85rem; font-weight: 600; color: #0d9488; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem;">
                                         Lihat detail →
                                     </button>
@@ -1513,7 +1566,7 @@
                         </div>
                     @endforeach
 
-                    {{-- Dokumentasi foto penyaluran (diunggah admin) --}}
+                    {{-- Penyaluran umum (tidak terikat program) --}}
                     @foreach(($items ?? collect()) as $item)
                         @php
                             $catTitle   = 'Penyaluran';
@@ -1541,9 +1594,15 @@
                                     ->where('status', 'diterima')
                                     ->sum('nominal')
                                 : 0;
+
+                            // Foto: pakai foto penyaluran, kalau kosong pakai banner program, kalau kosong gradient
+                            $itemFoto = $item->foto_url
+                                ?: (($matchedCat && !empty($matchedCat->image)) ? asset('storage/' . $matchedCat->image) : null);
                         @endphp
+                        {{-- Penyaluran milik program sudah ada di popup kartu program, jadi tidak ditampilkan ganda --}}
+                        @continue($matchedCat)
                         <div class="pny-card" data-kategori="{{ $catKey }}" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 1rem; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-                            <div style="height: 200px; background-size: cover; background-position: center; background-image: url('{{ $item->foto_url }}')"></div>
+                            <div style="height: 200px; background-size: cover; background-position: center; {{ $itemFoto ? "background-image: url('" . $itemFoto . "');" : 'background-image: linear-gradient(150deg,#0f766e,#115e59);' }}"></div>
                             <div style="padding: 1.5rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
                                 <div>
                                     <span style="font-size: 0.75rem; background: #e0f2fe; color: #0369a1; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600;">{{ $catTitle }}</span>
@@ -1559,12 +1618,22 @@
                                         class="btn-buka-detail"
                                         data-judul="{{ $item->judul }}"
                                         data-kategori="{{ $catTitle }}"
-                                        data-deskripsi="{{ $item->deskripsi ?? 'Tidak ada deskripsi.' }}"
+                                        data-deskripsi=""
                                         data-nominal-keluar="Rp {{ number_format($item->nominal_terpakai ?? 0, 0, ',', '.') }}"
                                         data-nominal-masuk="Rp {{ number_format($totalMasukKat, 0, ',', '.') }}"
-                                        data-rekening="{{ $item->rekening_tujuan ?? 'Penyaluran Tunai / Kas Masjid' }}"
+                                        data-rekening="{{ $item->tujuan ?: 'Penyaluran Tunai / Kas Masjid' }}"
                                         data-tanggal="{{ $formattedDate }}"
-                                        data-foto="{{ $item->foto_url }}"
+                                        data-foto="{{ $itemFoto }}"
+                                        data-riwayat="{{ json_encode([[
+                                            'judul'     => $item->judul,
+                                            'tanggal'   => $formattedDate,
+                                            'nominal'   => (float) ($item->nominal_terpakai ?? 0),
+                                            'tujuan'    => $item->tujuan,
+                                            'deskripsi' => $item->deskripsi,
+                                            'foto'      => $item->foto_url,
+                                            'rincian'   => $item->rincian ?? [],
+                                        ]]) }}"
+                                        data-rincian="[]"
                                         style="background: none; border: none; padding: 0; font-size: 0.85rem; font-weight: 600; color: #0d9488; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem;">
                                         Lihat detail →
                                     </button>
@@ -1586,98 +1655,267 @@
     </section>
 
     {{-- MODAL POPUP DETAIL PENYALURAN --}}
-    <div id="modalDetailPenyaluran" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
-        <div style="background: #fff; width: 100%; max-width: 600px; border-radius: 1rem; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); max-height: 90vh; display: flex; flex-direction: column;">
-            <div style="position: relative; height: 250px; background-size: cover; background-position: center;" id="modalFoto">
-                <button type="button" id="tutupModal" style="position: absolute; top: 1rem; right: 1rem; background: rgba(0,0,0,0.5); color: #fff; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
-            </div>
-            <div style="padding: 1.5rem; overflow-y: auto; flex: 1;">
-                <span id="modalKategori" style="font-size: 0.75rem; background: #e0f2fe; color: #0369a1; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600;"></span>
-                <h3 id="modalJudul" style="font-size: 1.25rem; font-weight: 700; color: #1e293b; margin: 0.75rem 0 0.5rem 0;"></h3>
+<div id="modalDetailPenyaluran" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #fff; width: 100%; max-width: 600px; border-radius: 1rem; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); max-height: 90vh; display: flex; flex-direction: column;">
+        <div style="position: relative; height: 250px; background-size: cover; background-position: center; background-image: linear-gradient(150deg,#0f766e,#115e59);" id="modalFoto">
+            <button type="button" id="tutupModal" style="position: absolute; top: 1rem; right: 1rem; background: rgba(0,0,0,0.5); color: #fff; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+        </div>
+        <div style="padding: 1.5rem; overflow-y: auto; flex: 1;">
+            <span id="modalKategori" style="font-size: 0.75rem; background: #e0f2fe; color: #0369a1; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600;"></span>
+            <h3 id="modalJudul" style="font-size: 1.25rem; font-weight: 700; color: #1e293b; margin: 0.75rem 0 0.5rem 0;"></h3>
 
-                <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin: 12px 0; border: 1px solid #e2e8f0; font-size: 13px; display: grid; gap: 6px;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #64748b;">Total Uang Masuk Program:</span>
-                        <strong id="modalUangMasuk" style="color: #10b981;"></strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #64748b;">Total Uang Keluar (Tersalurkan):</span>
-                        <strong id="modalUangKeluar" style="color: #ef4444;"></strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; border-top: 1px dashed #cbd5e1; padding-top: 6px;">
-                        <span style="color: #64748b;">Dikirim ke Rekening / Tujuan:</span>
-                        <strong id="modalRekening" style="color: #0f172a;"></strong>
-                    </div>
+            <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin: 12px 0; border: 1px solid #e2e8f0; font-size: 13px; display: grid; gap: 6px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: #64748b;">Total Uang Masuk Program:</span>
+                    <strong id="modalUangMasuk" style="color: #10b981;"></strong>
                 </div>
-
-                <p id="modalDeskripsi" style="font-size: 0.95rem; color: #475569; line-height: 1.6; margin: 0; white-space: pre-line;"></p>
-                <div style="margin-top: 1rem; font-size: 0.8rem; color: #94a3b8; text-align: right;" id="modalTanggal"></div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: #64748b;">Total Uang Keluar (Tersalurkan):</span>
+                    <strong id="modalUangKeluar" style="color: #ef4444;"></strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; gap: 1rem; border-top: 1px dashed #cbd5e1; padding-top: 6px;">
+                    <span style="color: #64748b; white-space: nowrap;">Dikirim ke Rekening / Tujuan:</span>
+                    <strong id="modalRekening" style="color: #0f172a; text-align: right;"></strong>
+                </div>
             </div>
+
+            <div id="modalRincianWrap" style="display:none; margin:12px 0;">
+                <strong style="font-size:.9rem; color:#1e293b;">Dana digunakan untuk:</strong>
+                <ul id="modalRincian" style="margin:.5rem 0 0; padding-left:1.1rem; font-size:.9rem; color:#475569; line-height:1.7;"></ul>
+            </div>
+
+            <div id="modalRiwayatWrap" style="display:none; margin:12px 0;">
+                <strong style="font-size:.9rem; color:#1e293b;">Riwayat penyaluran:</strong>
+                <div id="modalRiwayat" style="display:grid; gap:.5rem; margin-top:.5rem;"></div>
+            </div>
+
+            <p id="modalDeskripsi" style="font-size: 0.95rem; color: #475569; line-height: 1.6; margin: 0; white-space: pre-line;"></p>
+            <div style="margin-top: 1rem; font-size: 0.8rem; color: #94a3b8; text-align: right;" id="modalTanggal"></div>
         </div>
     </div>
+</div>
+
+    {{-- LIGHTBOX FOTO (perbesar) --}}
+<div id="pnyLightbox" role="dialog" aria-label="Pratinjau foto">
+    <button type="button" id="pnyLbClose" class="pny-lb-btn" style="top:1rem; right:1rem;" aria-label="Tutup">✕</button>
+    <button type="button" id="pnyLbPrev" class="pny-lb-btn" style="left:1rem; top:50%; transform:translateY(-50%);" aria-label="Sebelumnya">‹</button>
+    <button type="button" id="pnyLbNext" class="pny-lb-btn" style="right:1rem; top:50%; transform:translateY(-50%);" aria-label="Berikutnya">›</button>
+    <img id="pnyLbImg" alt="Foto dokumentasi">
+    <div id="pnyLbCap"></div>
+</div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // ---- Modal detail penyaluran ----
-            const modal = document.getElementById('modalDetailPenyaluran');
-            const tutupBtn = document.getElementById('tutupModal');
+    document.addEventListener('DOMContentLoaded', function () {
+        // ---- Modal detail penyaluran ----
+        const modal = document.getElementById('modalDetailPenyaluran');
+        const tutupBtn = document.getElementById('tutupModal');
+        const fotoDiv = document.getElementById('modalFoto');
+        const fallbackBg = 'linear-gradient(150deg,#0f766e,#115e59)';
 
-            document.querySelectorAll('.btn-buka-detail').forEach(button => {
-                button.addEventListener('click', function () {
-                    document.getElementById('modalJudul').textContent = this.dataset.judul;
-                    document.getElementById('modalKategori').textContent = this.dataset.kategori;
-                    document.getElementById('modalDeskripsi').textContent = this.dataset.deskripsi;
-                    document.getElementById('modalUangMasuk').textContent = this.dataset.nominalMasuk;
-                    document.getElementById('modalUangKeluar').textContent = this.dataset.nominalKeluar;
-                    document.getElementById('modalRekening').textContent = this.dataset.rekening;
-                    document.getElementById('modalTanggal').textContent = 'Tanggal: ' + this.dataset.tanggal;
+        function rupiah(n) {
+            return 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+        }
 
-                    const fotoUrl = this.dataset.foto;
-                    const fotoDiv = document.getElementById('modalFoto');
-                    if (fotoUrl) {
-                        fotoDiv.style.backgroundImage = `url('${fotoUrl}')`;
-                        fotoDiv.style.display = 'block';
-                    } else {
-                        fotoDiv.style.display = 'none';
+        let currentFoto = '';
+        let currentSet = [];
+
+        function setFoto(url) {
+            currentFoto = url || '';
+            fotoDiv.style.backgroundImage = url ? `url('${url}')` : fallbackBg;
+            fotoDiv.classList.toggle('is-zoomable', !!url);
+        }
+
+        // ---- Lightbox: lihat foto lebih jelas ----
+        const lb = document.getElementById('pnyLightbox');
+        const lbImg = document.getElementById('pnyLbImg');
+        const lbCap = document.getElementById('pnyLbCap');
+        let lbList = [];
+        let lbIdx = 0;
+
+        function lbCaption(g) {
+            return [g.judul, g.tanggal, g.nominal ? rupiah(g.nominal) : ''].filter(Boolean).join(' · ');
+        }
+        function lbShow() {
+            const g = lbList[lbIdx];
+            if (!g) return;
+            lbImg.src = g.url;
+            lbCap.textContent = lbCaption(g) + (lbList.length > 1 ? '  (' + (lbIdx + 1) + '/' + lbList.length + ')' : '');
+            document.getElementById('pnyLbPrev').style.display = lbList.length > 1 ? 'flex' : 'none';
+            document.getElementById('pnyLbNext').style.display = lbList.length > 1 ? 'flex' : 'none';
+        }
+        function lbOpen(list, idx) {
+            lbList = list;
+            lbIdx = idx || 0;
+            lbShow();
+            lb.style.display = 'flex';
+        }
+        function lbClose() { lb.style.display = 'none'; lbImg.src = ''; }
+        function lbMove(d) { lbIdx = (lbIdx + d + lbList.length) % lbList.length; lbShow(); }
+
+        document.getElementById('pnyLbClose').addEventListener('click', lbClose);
+        document.getElementById('pnyLbPrev').addEventListener('click', () => lbMove(-1));
+        document.getElementById('pnyLbNext').addEventListener('click', () => lbMove(1));
+        lb.addEventListener('click', (e) => { if (e.target === lb) lbClose(); });
+        document.addEventListener('keydown', (e) => {
+            if (lb.style.display !== 'flex') {
+                if (e.key === 'Escape' && modal && modal.style.display === 'flex') modal.style.display = 'none';
+                return;
+            }
+            if (e.key === 'Escape') lbClose();
+            if (e.key === 'ArrowLeft' && lbList.length > 1) lbMove(-1);
+            if (e.key === 'ArrowRight' && lbList.length > 1) lbMove(1);
+        });
+
+        // Klik foto utama di bagian atas popup = perbesar
+        fotoDiv.addEventListener('click', (e) => {
+            if (e.target.id === 'tutupModal' || !currentFoto) return;
+            if (currentSet.length) {
+                const idx = Math.max(0, currentSet.findIndex(g => g.url === currentFoto));
+                lbOpen(currentSet, idx);
+            } else {
+                lbOpen([{ url: currentFoto, judul: document.getElementById('modalJudul').textContent }], 0);
+            }
+        });
+
+        document.querySelectorAll('.btn-buka-detail').forEach(button => {
+            button.addEventListener('click', function () {
+                document.getElementById('modalJudul').textContent = this.dataset.judul || '';
+                document.getElementById('modalKategori').textContent = this.dataset.kategori || '';
+                document.getElementById('modalDeskripsi').textContent = this.dataset.deskripsi || '';
+                document.getElementById('modalUangMasuk').textContent = this.dataset.nominalMasuk || '';
+                document.getElementById('modalUangKeluar').textContent = this.dataset.nominalKeluar || '';
+                document.getElementById('modalRekening').textContent = this.dataset.rekening || '-';
+                document.getElementById('modalTanggal').textContent = this.dataset.tanggal ? 'Tanggal: ' + this.dataset.tanggal : '';
+
+                // Rincian penggunaan dana
+                let rincian = [];
+                try { rincian = JSON.parse(this.dataset.rincian || '[]'); } catch (e) { rincian = []; }
+                const ul = document.getElementById('modalRincian');
+                ul.innerHTML = '';
+                rincian.forEach(r => {
+                    const li = document.createElement('li');
+                    li.textContent = (r.label || '') + ' — ' + rupiah(r.nominal) + (r.keterangan ? ' (' + r.keterangan + ')' : '');
+                    ul.appendChild(li);
+                });
+                document.getElementById('modalRincianWrap').style.display = rincian.length ? 'block' : 'none';
+
+                // Riwayat penyaluran: tiap entri berisi foto, tujuan, tanggal, keterangan, rincian
+                let riwayat = [];
+                try { riwayat = JSON.parse(this.dataset.riwayat || '[]'); } catch (e) { riwayat = []; }
+                const rBox = document.getElementById('modalRiwayat');
+                rBox.innerHTML = '';
+
+                // Daftar foto untuk lightbox (urut sesuai riwayat)
+                const fotoList = riwayat.filter(r => r.foto).map(r => ({
+                    url: r.foto, judul: r.judul, tanggal: r.tanggal, nominal: r.nominal
+                }));
+                currentSet = fotoList;
+
+                function row(label, value) {
+                    const el = document.createElement('div');
+                    el.style.cssText = 'display:flex; justify-content:space-between; gap:1rem; font-size:.82rem; padding-top:4px;';
+                    const l = document.createElement('span'); l.style.cssText = 'color:#64748b; white-space:nowrap;'; l.textContent = label;
+                    const v = document.createElement('span'); v.style.cssText = 'color:#0f172a; font-weight:600; text-align:right; word-break:break-word;'; v.textContent = value;
+                    el.appendChild(l); el.appendChild(v);
+                    return el;
+                }
+
+                riwayat.forEach(r => {
+                    const d = document.createElement('div');
+                    d.style.cssText = 'border:1px solid #e2e8f0; border-radius:.75rem; padding:.85rem; background:#fff;';
+
+                    const top = document.createElement('div');
+                    top.style.cssText = 'display:flex; justify-content:space-between; gap:.75rem; font-weight:700; color:#1e293b; font-size:.95rem;';
+                    const l = document.createElement('span'); l.textContent = r.judul || '';
+                    const rt = document.createElement('span'); rt.style.color = '#ef4444'; rt.textContent = rupiah(r.nominal);
+                    top.appendChild(l); top.appendChild(rt);
+                    d.appendChild(top);
+
+                    if (r.foto) {
+                        const img = document.createElement('img');
+                        img.src = r.foto;
+                        img.alt = r.judul || 'Foto dokumentasi';
+                        img.title = 'Klik untuk memperbesar';
+                        img.style.cssText = 'width:100%; max-height:200px; object-fit:cover; border-radius:.6rem; margin-top:.6rem; cursor:zoom-in;';
+                        img.addEventListener('click', () => lbOpen(fotoList, fotoList.findIndex(f => f.url === r.foto)));
+                        d.appendChild(img);
                     }
 
-                    modal.style.display = 'flex';
+                    const box = document.createElement('div');
+                    box.style.cssText = 'margin-top:.5rem; border-top:1px dashed #e2e8f0; padding-top:.3rem;';
+                    if (r.tanggal) box.appendChild(row('Tanggal pengiriman dana', r.tanggal));
+                    box.appendChild(row('Dikirim ke rekening / tujuan', r.tujuan || 'Penyaluran Tunai / Kas Masjid'));
+                    d.appendChild(box);
+
+                    if (r.deskripsi) {
+                        const k = document.createElement('div');
+                        k.style.cssText = 'margin-top:.5rem; font-size:.85rem; color:#475569; white-space:pre-line;';
+                        const kl = document.createElement('div'); kl.style.cssText = 'font-size:.72rem; color:#94a3b8; text-transform:uppercase; letter-spacing:.03em;'; kl.textContent = 'Keterangan';
+                        const kv = document.createElement('div'); kv.textContent = r.deskripsi;
+                        k.appendChild(kl); k.appendChild(kv);
+                        d.appendChild(k);
+                    }
+
+                    if (Array.isArray(r.rincian) && r.rincian.length) {
+                        const rw = document.createElement('div');
+                        rw.style.cssText = 'margin-top:.5rem; font-size:.85rem; color:#475569;';
+                        const rl = document.createElement('div'); rl.style.cssText = 'font-size:.72rem; color:#94a3b8; text-transform:uppercase; letter-spacing:.03em;'; rl.textContent = 'Dana digunakan untuk';
+                        rw.appendChild(rl);
+                        const ul2 = document.createElement('ul');
+                        ul2.style.cssText = 'margin:.2rem 0 0; padding-left:1.1rem; line-height:1.6;';
+                        r.rincian.forEach(x => {
+                            const li = document.createElement('li');
+                            li.textContent = (x.label || '') + ' — ' + rupiah(x.nominal) + (x.keterangan ? ' (' + x.keterangan + ')' : '');
+                            ul2.appendChild(li);
+                        });
+                        rw.appendChild(ul2);
+                        d.appendChild(rw);
+                    }
+
+                    rBox.appendChild(d);
                 });
-            });
+                document.getElementById('modalRiwayatWrap').style.display = riwayat.length ? 'block' : 'none';
 
-            if (tutupBtn) tutupBtn.addEventListener('click', () => modal.style.display = 'none');
-            if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+                // Foto utama (banner / foto penyaluran)
+                setFoto(this.dataset.foto);
 
-            // ---- Filter penyaluran per program ----
-            const chips = document.querySelectorAll('.pny-chip');
-            const cards = document.querySelectorAll('.pny-card');
-            const empty = document.getElementById('pnyEmpty');
-
-            function filterPenyaluran(key) {
-                let shown = 0;
-                chips.forEach(c => c.classList.toggle('is-active', c.dataset.filter === key));
-                cards.forEach(card => {
-                    const ok = key === 'all' || card.dataset.kategori === key;
-                    card.style.display = ok ? 'flex' : 'none';
-                    if (ok) shown++;
-                });
-                if (empty) empty.style.display = shown ? 'none' : 'block';
-            }
-
-            chips.forEach(c => c.addEventListener('click', () => filterPenyaluran(c.dataset.filter)));
-
-            // ---- Tombol "Lihat Penyaluran" di kartu donasi ----
-            document.querySelectorAll('.btn-lihat-penyaluran').forEach(btn => {
-                btn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    filterPenyaluran(this.dataset.kategori);
-                    document.getElementById('penyaluran').scrollIntoView({ behavior: 'smooth' });
-                });
+                modal.style.display = 'flex';
             });
         });
-    </script>
-    @endif
 
+        if (tutupBtn) tutupBtn.addEventListener('click', () => modal.style.display = 'none');
+        if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+
+        // ---- Filter penyaluran per program ----
+        const chips = document.querySelectorAll('.pny-chip');
+        const cards = document.querySelectorAll('.pny-card');
+        const empty = document.getElementById('pnyEmpty');
+
+        function filterPenyaluran(key) {
+            let shown = 0;
+            chips.forEach(c => c.classList.toggle('is-active', c.dataset.filter === key));
+            cards.forEach(card => {
+                const ok = key === 'all' || card.dataset.kategori === key;
+                card.style.display = ok ? 'flex' : 'none';
+                if (ok) shown++;
+            });
+            if (empty) empty.style.display = shown ? 'none' : 'block';
+        }
+
+        chips.forEach(c => c.addEventListener('click', () => filterPenyaluran(c.dataset.filter)));
+
+        // ---- Tombol "Lihat Penyaluran" di kartu donasi ----
+        document.querySelectorAll('.btn-lihat-penyaluran').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                filterPenyaluran(this.dataset.kategori);
+                document.getElementById('penyaluran').scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    });
+</script>
+    @endif
+    
     {{-- KONTAK SECTION --}}
     <section class="hu-hubungi-section" id="kontak">
         <div class="hu-container">

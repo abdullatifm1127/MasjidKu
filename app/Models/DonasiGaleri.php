@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DonasiGaleri extends Model
 {
@@ -14,6 +15,8 @@ class DonasiGaleri extends Model
         'judul',
         'kategori',
         'deskripsi',
+        'tujuan',
+        'rincian',
         'tanggal',
         'nominal_terpakai',
         'foto',
@@ -21,18 +24,19 @@ class DonasiGaleri extends Model
 
     protected $casts = [
         'tanggal'          => 'date',
-        'nominal_terpakai' => 'decimal:2',
+        'nominal_terpakai' => 'float',
+        'rincian'          => 'array',
     ];
 
     /**
-     * Accessor untuk mendapatkan URL lengkap file foto galeri.
+     * URL lengkap foto galeri, atau null jika penyaluran dicatat tanpa foto.
      */
-    public function getFotoUrlAttribute()
+    public function getFotoUrlAttribute(): ?string
     {
         return $this->foto ? asset('storage/' . $this->foto) : null;
     }
 
-    public function mosque()
+    public function mosque(): BelongsTo
     {
         return $this->belongsTo(Mosque::class);
     }
