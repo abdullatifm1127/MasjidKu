@@ -542,131 +542,65 @@
             @endif
 
             {{-- =====================================================
-                 TAB 2: PENGATURAN (zakat, rekening bank, QRIS)
-                 ===================================================== --}}
-            @if ($tab === 'pengaturan')
-                <div class="dn-grid-dashboard">
-
-                    {{-- Zakat Fitrah & Nisab --}}
-                    <section class="dn-card-modern">
-                        <h3><i class="fa-solid fa-calculator text-teal-600"></i> Zakat Fitrah &amp; Nisab</h3>
-                        <p>Atur nominal standar per jiwa untuk kalkulator zakat publik.</p>
-                        <form action="{{ route('admin.donasi.pengaturan') }}" method="POST">
-                            @csrf
-                            @method('PUT')
-                            <div style="margin-bottom: 1rem;">
-                                <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Nominal per Jiwa (Rp)</label>
-                                <input type="number" step="1000" min="1000" name="zakat_fitrah_default" class="form-control-modern" value="{{ $mosque->zakat_fitrah_default ?? 45000 }}" required>
-                            </div>
-                            <div style="margin-bottom: 1rem;">
-                                <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Nisab Zakat Mal (Rp)</label>
-                                <input type="number" step="1000" min="0" name="zakat_nisab" class="form-control-modern" value="{{ $mosque->zakat_nisab ?? 85000000 }}" required>
-                                <small style="color: #94a3b8; font-size: 0.75rem;">Dipakai kalkulator zakat mal (2,5%) di halaman publik.</small>
-                            </div>
-                            <button type="submit" class="btn-primary-modern" style="width: 100%; justify-content: center;">Simpan Pengaturan</button>
-                        </form>
-                    </section>
-
-                    {{-- Rekening Bank --}}
-                    <section class="dn-card-modern">
-                        <h3><i class="fa-solid fa-building-columns text-teal-600"></i> Rekening Bank</h3>
-                        <p>Tambahkan rekening bank untuk transfer manual.</p>
-
-                        <form action="{{ route('admin.donasi.rekening.store') }}" method="POST" style="display: grid; gap: 0.75rem; margin-bottom: 1.25rem;">
-                            @csrf
-                            <input type="text" name="bank_name" class="form-control-modern" placeholder="Nama Bank (mis. BCA, BSI)" required maxlength="100">
-                            <input type="text" name="account_number" class="form-control-modern" placeholder="Nomor Rekening" required maxlength="50">
-                            <input type="text" name="account_holder" class="form-control-modern" placeholder="Atas Nama" required maxlength="100">
-                            <button type="submit" class="btn-primary-modern" style="justify-content: center;"><i class="fa-solid fa-plus"></i> Tambah Rekening</button>
-                        </form>
-
-                        @if ($bankAccounts->isEmpty())
-                            <div class="dn-empty" style="text-align:center; padding:1rem; color:#64748b; font-size: 0.85rem;">Belum ada rekening bank.</div>
-                        @else
-                            <div style="display:flex; flex-direction:column; gap:0.75rem;">
-                                @foreach ($bankAccounts as $rek)
-                                    <details style="border:1px solid #e2e8f0; border-radius:0.6rem; padding:0.75rem;">
-                                        <summary style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-weight:600; font-size:0.85rem;">
-                                            <span>{{ $rek->bank_name }} — {{ $rek->account_number }}</span>
-                                            <span style="font-size:0.65rem; padding:0.15rem 0.4rem; border-radius:999px; {{ $rek->is_active ? 'background:#dcfce7;color:#15803d;' : 'background:#f1f5f9;color:#64748b;' }}">
-                                                {{ $rek->is_active ? 'Aktif' : 'Nonaktif' }}
-                                            </span>
-                                        </summary>
-                                        <div style="margin-top:0.75rem; display:flex; flex-direction:column; gap:0.5rem;">
-                                            <form action="{{ route('admin.donasi.rekening.update', $rek->id) }}" method="POST" style="display:grid; gap:0.5rem;">
-                                                @csrf @method('PUT')
-                                                <input type="text" name="bank_name" class="form-control-modern" value="{{ $rek->bank_name }}" required maxlength="100">
-                                                <input type="text" name="account_number" class="form-control-modern" value="{{ $rek->account_number }}" required maxlength="50">
-                                                <input type="text" name="account_holder" class="form-control-modern" value="{{ $rek->account_holder }}" required maxlength="100">
-                                                <button type="submit" class="btn-primary-modern" style="padding:0.35rem 0.7rem; font-size:0.8rem;">Simpan</button>
-                                            </form>
-                                            <div style="display:flex; gap:0.5rem;">
-                                                <form action="{{ route('admin.donasi.rekening.toggle', $rek->id) }}" method="POST" style="flex:1;">
-                                                    @csrf @method('PATCH')
-                                                    <button type="submit" style="width:100%; background:#f1f5f9; border:1px solid #cbd5e1; padding:0.3rem; border-radius:0.4rem; cursor:pointer; font-size:0.75rem;">
-                                                        {{ $rek->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
-                                                    </button>
-                                                </form>
-                                                <form action="{{ route('admin.donasi.rekening.destroy', $rek->id) }}" method="POST" onsubmit="return confirm('Hapus rekening ini?');" style="flex:1;">
-                                                    @csrf @method('DELETE')
-                                                    <button type="submit" style="width:100%; background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:0.3rem; border-radius:0.4rem; cursor:pointer; font-size:0.75rem;">Hapus</button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </details>
-                                @endforeach
-                            </div>
-                        @endif
-                    </section>
-
-                    {{-- QRIS --}}
-                    <section class="dn-card-modern">
-                        <h3><i class="fa-solid fa-qrcode text-teal-600"></i> QRIS Masjid</h3>
-                        <p>Unggah gambar QRIS untuk halaman publik.</p>
-
-                        @if ($mosque->qris_image)
-                            <div style="text-align:center; margin-bottom:1rem;">
-                                <img src="{{ $mosque->qris_url }}" alt="QRIS" style="max-width:150px; border:1px solid #e2e8f0; border-radius:0.5rem; padding:0.4rem; background: #fff;">
-                                <form action="{{ route('admin.donasi.qris.destroy') }}" method="POST" onsubmit="return confirm('Hapus gambar QRIS?');" style="margin-top:0.5rem;">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:0.3rem 0.6rem; border-radius:0.4rem; cursor:pointer; font-size:0.75rem;">Hapus QRIS</button>
-                                </form>
-                            </div>
-                        @endif
-
-                        <form action="{{ route('admin.donasi.qris.update') }}" method="POST" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:0.75rem;">
-                            @csrf
-                            <input type="file" name="qris_image" accept="image/png, image/jpeg" class="form-control-modern" required style="padding: 0.4rem; font-size: 0.85rem;">
-                            <button type="submit" class="btn-primary-modern" style="justify-content:center; font-size: 0.85rem;">{{ $mosque->qris_image ? 'Ganti QRIS' : 'Unggah QRIS' }}</button>
-                        </form>
-                    </section>
-                </div>
-            @endif
-
-            {{-- =====================================================
                  TAB 3: PENYALURAN (ringkasan otomatis per program + dokumentasi)
+                 GANTI dari baris  @if ($tab === 'penyaluran')  sampai  @endif  penutupnya
+                 (tepat sebelum komentar "TAB 4: REKAP / PELAPORAN")
                  ===================================================== --}}
             @if ($tab === 'penyaluran')
                 @php
-                    // Rekap otomatis tiap program donasi (infaq, zakat, dll): dana masuk, tersalurkan, sisa
-                    $rekapProgram = $donationCategories->map(function ($c) use ($mosque, $items) {
-                        $key    = strtolower(trim((string) $c->key));
+                    // Satu fungsi pencocokan (key / id / title) supaya konsisten di semua tempat
+                    $matchProgram = function ($item, $c) {
+                        $k = strtolower(trim((string) $item->kategori));
+                        if ($k === '') {
+                            return false;
+                        }
+                        return in_array($k, [
+                            strtolower(trim((string) $c->key)),
+                            strtolower(trim((string) $c->id)),
+                            strtolower(trim((string) $c->title)),
+                        ], true);
+                    };
+
+                    // Rekap tiap program: dana masuk, tersalurkan, sisa + daftar catatan penyalurannya
+                    $grupProgram = $donationCategories->map(function ($c) use ($mosque, $items, $matchProgram) {
                         $masuk  = (float) \App\Models\Donasi::where('mosque_id', $mosque->id)
                                     ->where('jenis', $c->key)->where('status', 'diterima')->sum('nominal');
-                        $docs   = $items->filter(fn ($i) => strtolower(trim((string) $i->kategori)) === $key);
+                        $docs   = $items->filter(fn ($i) => $matchProgram($i, $c))->values();
                         $keluar = (float) $docs->sum('nominal_terpakai');
                         return (object) [
                             'key'    => $c->key,
                             'title'  => $c->title,
                             'image'  => $c->image,
-                            'active' => $c->is_active,
+                            'umum'   => false,
                             'masuk'  => $masuk,
                             'keluar' => $keluar,
                             'sisa'   => $masuk - $keluar,
                             'pct'    => $masuk > 0 ? min(round($keluar / $masuk * 100), 100) : 0,
                             'dok'    => $docs->filter(fn ($i) => !empty($i->foto))->count(),
+                            'items'  => $docs,
                         ];
                     });
+
+                    // Catatan yang tidak cocok dengan program mana pun -> dikelompokkan di kartu "Umum"
+                    $itemUmum = $items->filter(
+                        fn ($i) => !$donationCategories->contains(fn ($c) => $matchProgram($i, $c))
+                    )->values();
+
+                    $grupAll = $grupProgram->values();
+                    if ($itemUmum->isNotEmpty()) {
+                        $grupAll->push((object) [
+                            'key'    => '',
+                            'title'  => 'Umum',
+                            'image'  => null,
+                            'umum'   => true,
+                            'masuk'  => 0,
+                            'keluar' => (float) $itemUmum->sum('nominal_terpakai'),
+                            'sisa'   => 0,
+                            'pct'    => 0,
+                            'dok'    => $itemUmum->filter(fn ($i) => !empty($i->foto))->count(),
+                            'items'  => $itemUmum,
+                        ]);
+                    }
                 @endphp
 
                 <div class="dn-grid-dashboard" style="margin-bottom: 1.5rem;">
@@ -731,135 +665,142 @@
 
                 <section class="dn-card-modern">
                     <h3><i class="fa-solid fa-photo-film text-teal-600"></i> Galeri Dokumentasi Tersimpan</h3>
-                    <p>Setiap program donasi (infaq, zakat, dll) otomatis masuk ke galeri ini dan ke halaman publik. Ditambah {{ $items->count() }} catatan penyaluran yang sudah tersimpan. Klik <b>Edit Penyaluran</b> pada kartu untuk mengubah uang keluar, tujuan, keterangan, dan rincian penggunaan dana.</p>
+                    <p>Setiap program donasi punya satu kartu. Catatan penyaluran ({{ $items->count() }} tersimpan) berada di dalam kartu programnya, di bagian <b>Riwayat penyaluran</b>. Klik sebuah catatan untuk mengubah uang keluar, tujuan, keterangan, dan rincian penggunaan dana.</p>
 
-                    @if ($items->isEmpty() && $rekapProgram->isEmpty())
+                    @if ($grupAll->isEmpty())
                         <div class="dn-empty" style="text-align: center; padding: 2rem; color: #64748b;">Belum ada dokumentasi penyaluran.</div>
                     @else
-                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; margin-top: 1rem; align-items: start;">
-                            {{-- Kartu program otomatis (dari menu Kategori) --}}
-                            @foreach ($rekapProgram as $rp)
-                                <div style="border: 1px solid #99f6e4; border-radius: 0.75rem; overflow: hidden; background: #ffffff; display: flex; flex-direction: column; position: relative;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 1rem; align-items: start;">
+
+                            @foreach ($grupAll as $rp)
+                                <div style="border: 1px solid {{ $rp->umum ? '#e2e8f0' : '#99f6e4' }}; border-radius: 0.75rem; overflow: hidden; background: #ffffff; display: flex; flex-direction: column; position: relative;">
                                     <div style="position: relative; height: 160px; background-size: cover; background-position: center; background-color: #0f766e; {{ !empty($rp->image) ? "background-image:url('" . asset('storage/' . $rp->image) . "');" : 'background-image: linear-gradient(150deg,#0f766e,#115e59);' }}">
-                                        <span style="position:absolute; top:10px; left:10px; background:rgba(13,148,136,.95); color:#fff; padding:3px 10px; border-radius:999px; font-size:.65rem; font-weight:700; text-transform:uppercase;">Program &middot; Otomatis</span>
+                                        <span style="position:absolute; top:10px; left:10px; background:rgba(13,148,136,.95); color:#fff; padding:3px 10px; border-radius:999px; font-size:.65rem; font-weight:700; text-transform:uppercase;">
+                                            {{ $rp->umum ? 'Tanpa Program' : 'Program · Otomatis' }}
+                                        </span>
                                     </div>
-                                    <div style="padding: 1rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap:.75rem;">
+
+                                    <div style="padding: 1rem; display: flex; flex-direction: column; gap: .75rem;">
                                         <div>
                                             <span style="font-size: 0.7rem; background: #e0f2fe; color: #0369a1; padding: 0.2rem 0.5rem; border-radius: 999px; font-weight: 600;">{{ $rp->title }}</span>
-                                            <h4 style="font-size: 0.95rem; font-weight: 700; color: #1e293b; margin: 0.5rem 0 0.5rem 0;">Penyaluran {{ $rp->title }}</h4>
+                                            <h4 style="font-size: 0.95rem; font-weight: 700; color: #1e293b; margin: 0.5rem 0 0.5rem 0;">
+                                                {{ $rp->umum ? 'Penyaluran Umum' : 'Penyaluran ' . $rp->title }}
+                                            </h4>
+
                                             <div style="display:grid; gap:3px; font-size:.78rem;">
-                                                <div style="display:flex; justify-content:space-between;"><span style="color:#64748b;">Dana masuk</span><b style="color:#10b981;">Rp {{ number_format($rp->masuk, 0, ',', '.') }}</b></div>
+                                                @unless ($rp->umum)
+                                                    <div style="display:flex; justify-content:space-between;"><span style="color:#64748b;">Dana masuk</span><b style="color:#10b981;">Rp {{ number_format($rp->masuk, 0, ',', '.') }}</b></div>
+                                                @endunless
                                                 <div style="display:flex; justify-content:space-between;"><span style="color:#64748b;">Tersalurkan</span><b style="color:#ef4444;">Rp {{ number_format($rp->keluar, 0, ',', '.') }}</b></div>
-                                                <div style="display:flex; justify-content:space-between;"><span style="color:#64748b;">Sisa dana</span><b style="color:#0f172a;">Rp {{ number_format($rp->sisa, 0, ',', '.') }}</b></div>
+                                                @unless ($rp->umum)
+                                                    <div style="display:flex; justify-content:space-between;"><span style="color:#64748b;">Sisa dana</span><b style="color:#0f172a;">Rp {{ number_format($rp->sisa, 0, ',', '.') }}</b></div>
+                                                @endunless
                                             </div>
-                                            <div style="margin-top:.5rem; width:100%; height:6px; background:#e2e8f0; border-radius:999px; overflow:hidden;">
-                                                <div style="width: {{ $rp->pct }}%; height:100%; background: linear-gradient(90deg,#0d9488,#14b8a6);"></div>
-                                            </div>
-                                            <div style="margin-top:4px; font-size:.7rem; color:#94a3b8;">{{ $rp->pct }}% tersalurkan &middot; {{ $rp->dok }} dokumentasi foto</div>
+
+                                            @unless ($rp->umum)
+                                                <div style="margin-top:.5rem; width:100%; height:6px; background:#e2e8f0; border-radius:999px; overflow:hidden;">
+                                                    <div style="width: {{ $rp->pct }}%; height:100%; background: linear-gradient(90deg,#0d9488,#14b8a6);"></div>
+                                                </div>
+                                                <div style="margin-top:4px; font-size:.7rem; color:#94a3b8;">{{ $rp->pct }}% tersalurkan &middot; {{ $rp->dok }} dokumentasi foto</div>
+                                            @else
+                                                <div style="margin-top:4px; font-size:.7rem; color:#94a3b8;">{{ $rp->dok }} dokumentasi foto</div>
+                                            @endunless
                                         </div>
+
                                         <button type="button" class="btn-primary-modern dn-pick-program" data-kategori="{{ $rp->key }}" style="justify-content:center; padding:.45rem .8rem; font-size:.78rem;">
                                             <i class="fa-solid fa-plus"></i> Tambah Dokumentasi
                                         </button>
-                                    </div>
-                                </div>
-                            @endforeach
 
-                            {{-- Catatan penyaluran (dengan atau tanpa foto) --}}
-                            @foreach ($items as $item)
-                                <div style="border: 1px solid #e2e8f0; border-radius: 0.75rem; overflow: hidden; background: #ffffff; display: flex; flex-direction: column; position: relative;">
-                                    <div style="height: 160px; background-size: cover; background-position: center; {{ $item->foto_url ? "background-image:url('" . $item->foto_url . "');" : 'background-image: linear-gradient(150deg,#0f766e,#115e59);' }}"></div>
-                                    <div style="padding: 1rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
-                                        <div>
-                                            @php
-                                                $catTitle = 'Umum';
-                                                $itemKat  = strtolower(trim((string) $item->kategori));
-                                                $matched  = $itemKat === '' ? null : $donationCategories->first(
-                                                    fn ($c) => strtolower(trim((string) $c->key)) === $itemKat
-                                                );
-                                                if ($matched) { $catTitle = $matched->title; }
-                                            @endphp
-                                            <span style="font-size: 0.7rem; background: #e0f2fe; color: #0369a1; padding: 0.2rem 0.5rem; border-radius: 999px; font-weight: 600;">{{ $catTitle }}</span>
-                                            <h4 style="font-size: 0.95rem; font-weight: 700; color: #1e293b; margin: 0.5rem 0 0.25rem 0;">{{ $item->judul }}</h4>
-                                            <p style="font-size: 0.8rem; color: #64748b; margin: 0;">{{ optional($item->tanggal)->translatedFormat('d F Y') ?? $item->tanggal }}</p>
-                                            @if ($item->nominal_terpakai)
-                                                <p style="font-size: 0.8rem; color: #0f766e; font-weight: 600; margin: 0.25rem 0 0;">Rp {{ number_format($item->nominal_terpakai, 0, ',', '.') }}</p>
-                                            @endif
-                                            @if ($item->tujuan)
-                                                <p style="font-size: 0.75rem; color: #64748b; margin: 0.25rem 0 0;">Tujuan: {{ $item->tujuan }}</p>
-                                            @endif
-                                        </div>
+                                        {{-- ===== RIWAYAT PENYALURAN (di dalam kartu program) ===== --}}
+                                        <div style="border-top: 1px dashed #cbd5e1; padding-top: .75rem;">
+                                            <b style="font-size: .82rem; color: #dc2626;">Riwayat penyaluran ({{ $rp->items->count() }})</b>
 
-                                        {{-- ===== EDIT PENYALURAN ===== --}}
-                                        <details style="margin-top:.75rem; border-top:1px solid #f1f5f9; padding-top:.75rem;">
-                                            <summary style="cursor:pointer; font-weight:600; font-size:.82rem; color:#0f766e;">✏️ Edit Penyaluran</summary>
+                                            @forelse ($rp->items as $item)
+                                                <details style="margin-top: .5rem; border: 1px solid #fecaca; border-radius: .6rem; padding: .6rem; background: #fff;">
+                                                    <summary style="cursor: pointer; font-size: .8rem; font-weight: 600; display: flex; justify-content: space-between; gap: .5rem;">
+                                                        <span>{{ optional($item->tanggal)->format('d/m/Y') }} · {{ \Illuminate\Support\Str::limit($item->judul, 26) }}</span>
+                                                        <span style="color: #dc2626; white-space: nowrap;">Rp {{ number_format((float) $item->nominal_terpakai, 0, ',', '.') }}</span>
+                                                    </summary>
 
-                                            <form action="{{ route('admin.donasi.galeri.update', $item->id) }}" method="POST" enctype="multipart/form-data"
-                                                  style="display:flex; flex-direction:column; gap:.7rem; margin-top:.75rem;">
-                                                @csrf
-                                                @method('PUT')
+                                                    @if ($item->foto_url)
+                                                        <img src="{{ $item->foto_url }}" alt="{{ $item->judul }}" style="width: 100%; max-height: 160px; object-fit: cover; border-radius: 8px; margin-top: .6rem;">
+                                                    @endif
+                                                    @if ($item->tujuan)
+                                                        <p style="font-size: .75rem; color: #64748b; margin: .5rem 0 0;">Tujuan: {{ $item->tujuan }}</p>
+                                                    @endif
 
-                                                <div>
-                                                    <label style="font-size:.75rem; font-weight:600;">Judul</label>
-                                                    <input type="text" name="judul" class="form-control-modern" value="{{ $item->judul }}" required maxlength="150">
-                                                </div>
-                                                <div>
-                                                    <label style="font-size:.75rem; font-weight:600;">Program</label>
-                                                    <select name="kategori" class="form-control-modern">
-                                                        <option value="">Umum</option>
-                                                        @foreach ($donationCategories as $cat)
-                                                            <option value="{{ $cat->key }}" {{ $item->kategori === $cat->key ? 'selected' : '' }}>{{ $cat->title }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div>
-                                                    <label style="font-size:.75rem; font-weight:600;">Dikirim ke Rekening / Tujuan</label>
-                                                    <input type="text" name="tujuan" class="form-control-modern" value="{{ $item->tujuan }}" maxlength="150">
-                                                </div>
-                                                <div>
-                                                    <label style="font-size:.75rem; font-weight:600;">Tanggal</label>
-                                                    <input type="date" name="tanggal" class="form-control-modern" value="{{ optional($item->tanggal)->format('Y-m-d') }}" max="{{ date('Y-m-d') }}" required>
-                                                </div>
-                                                <div>
-                                                    <label style="font-size:.75rem; font-weight:600;">Uang Keluar (Rp)</label>
-                                                    <input type="number" name="nominal_terpakai" class="form-control-modern" min="0" step="1" value="{{ $item->nominal_terpakai !== null ? (int) $item->nominal_terpakai : '' }}">
-                                                    <small style="color:#94a3b8; font-size:.7rem;">Kalau rincian di bawah diisi, angka ini otomatis diganti jumlah rincian.</small>
-                                                </div>
-                                                <div>
-                                                    <label style="font-size:.75rem; font-weight:600;">Keterangan</label>
-                                                    <textarea name="deskripsi" rows="3" class="form-control-modern" maxlength="1000">{{ $item->deskripsi }}</textarea>
-                                                </div>
+                                                    {{-- ===== EDIT PENYALURAN ===== --}}
+                                                    <form action="{{ route('admin.donasi.galeri.update', $item->id) }}" method="POST" enctype="multipart/form-data"
+                                                          style="display:flex; flex-direction:column; gap:.7rem; margin-top:.75rem;">
+                                                        @csrf
+                                                        @method('PUT')
 
-                                                <div>
-                                                    <label style="font-size:.75rem; font-weight:600;">Dipakai untuk apa saja</label>
-                                                    <div class="rincian-wrap" data-next="{{ count($item->rincian ?? []) }}" style="margin:.4rem 0;">
-                                                        @foreach ($item->rincian ?? [] as $i => $r)
-                                                            <div class="rincian-row">
-                                                                <input type="text" name="rincian[{{ $i }}][label]" value="{{ $r['label'] ?? '' }}" class="form-control-modern rincian-label" placeholder="Untuk apa (mis. Beli semen)">
-                                                                <input type="number" name="rincian[{{ $i }}][nominal]" value="{{ (int) ($r['nominal'] ?? 0) }}" class="form-control-modern" placeholder="Nominal" min="0">
-                                                                <input type="text" name="rincian[{{ $i }}][keterangan]" value="{{ $r['keterangan'] ?? '' }}" class="form-control-modern" placeholder="Keterangan">
-                                                                <button type="button" class="rincian-hapus">✕</button>
+                                                        <div>
+                                                            <label style="font-size:.75rem; font-weight:600;">Judul</label>
+                                                            <input type="text" name="judul" class="form-control-modern" value="{{ $item->judul }}" required maxlength="150">
+                                                        </div>
+                                                        <div>
+                                                            <label style="font-size:.75rem; font-weight:600;">Program</label>
+                                                            <select name="kategori" class="form-control-modern">
+                                                                <option value="">Umum</option>
+                                                                @foreach ($donationCategories as $cat)
+                                                                    <option value="{{ $cat->key }}" {{ $matchProgram($item, $cat) ? 'selected' : '' }}>{{ $cat->title }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <label style="font-size:.75rem; font-weight:600;">Dikirim ke Rekening / Tujuan</label>
+                                                            <input type="text" name="tujuan" class="form-control-modern" value="{{ $item->tujuan }}" maxlength="150">
+                                                        </div>
+                                                        <div>
+                                                            <label style="font-size:.75rem; font-weight:600;">Tanggal</label>
+                                                            <input type="date" name="tanggal" class="form-control-modern" value="{{ optional($item->tanggal)->format('Y-m-d') }}" max="{{ date('Y-m-d') }}" required>
+                                                        </div>
+                                                        <div>
+                                                            <label style="font-size:.75rem; font-weight:600;">Uang Keluar (Rp)</label>
+                                                            <input type="number" name="nominal_terpakai" class="form-control-modern" min="0" step="1" value="{{ $item->nominal_terpakai !== null ? (int) $item->nominal_terpakai : '' }}">
+                                                            <small style="color:#94a3b8; font-size:.7rem;">Kalau rincian di bawah diisi, angka ini otomatis diganti jumlah rincian.</small>
+                                                        </div>
+                                                        <div>
+                                                            <label style="font-size:.75rem; font-weight:600;">Keterangan</label>
+                                                            <textarea name="deskripsi" rows="3" class="form-control-modern" maxlength="1000">{{ $item->deskripsi }}</textarea>
+                                                        </div>
+
+                                                        <div>
+                                                            <label style="font-size:.75rem; font-weight:600;">Dipakai untuk apa saja</label>
+                                                            <div class="rincian-wrap" data-next="{{ count($item->rincian ?? []) }}" style="margin:.4rem 0;">
+                                                                @foreach ($item->rincian ?? [] as $i => $r)
+                                                                    <div class="rincian-row">
+                                                                        <input type="text" name="rincian[{{ $i }}][label]" value="{{ $r['label'] ?? '' }}" class="form-control-modern rincian-label" placeholder="Untuk apa (mis. Beli semen)">
+                                                                        <input type="number" name="rincian[{{ $i }}][nominal]" value="{{ (int) ($r['nominal'] ?? 0) }}" class="form-control-modern" placeholder="Nominal" min="0">
+                                                                        <input type="text" name="rincian[{{ $i }}][keterangan]" value="{{ $r['keterangan'] ?? '' }}" class="form-control-modern" placeholder="Keterangan">
+                                                                        <button type="button" class="rincian-hapus">✕</button>
+                                                                    </div>
+                                                                @endforeach
                                                             </div>
-                                                        @endforeach
-                                                    </div>
-                                                    <button type="button" class="rincian-tambah">+ Tambah Rincian</button>
-                                                </div>
+                                                            <button type="button" class="rincian-tambah">+ Tambah Rincian</button>
+                                                        </div>
 
-                                                <div>
-                                                    <label style="font-size:.75rem; font-weight:600;">{{ $item->foto ? 'Ganti Foto (opsional)' : 'Tambah Foto (opsional)' }}</label>
-                                                    <input type="file" name="foto" accept="image/png, image/jpeg" class="form-control-modern" style="padding:.4rem; font-size:.8rem;">
-                                                </div>
+                                                        <div>
+                                                            <label style="font-size:.75rem; font-weight:600;">{{ $item->foto ? 'Ganti Foto (opsional)' : 'Tambah Foto (opsional)' }}</label>
+                                                            <input type="file" name="foto" accept="image/png, image/jpeg" class="form-control-modern" style="padding:.4rem; font-size:.8rem;">
+                                                        </div>
 
-                                                <button type="submit" class="btn-primary-modern" style="justify-content:center; padding:.5rem 1rem; font-size:.82rem;">Simpan Perubahan</button>
-                                            </form>
-                                        </details>
+                                                        <button type="submit" class="btn-primary-modern" style="justify-content:center; padding:.5rem 1rem; font-size:.82rem;">Simpan Perubahan</button>
+                                                    </form>
 
-                                        <form action="{{ route('admin.donasi.galeri.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus catatan penyaluran ini?');" style="margin-top: 1rem; display: flex; justify-content: flex-end;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" style="background: #fee2e2; color: #991b1b; border: none; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;" aria-label="Hapus">
-                                                <i class="fa-solid fa-trash" style="font-size: 0.8rem;"></i>
-                                            </button>
-                                        </form>
+                                                    <form action="{{ route('admin.donasi.galeri.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus catatan penyaluran ini?');" style="margin-top: .5rem;">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" style="width: 100%; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: .35rem; border-radius: .4rem; cursor: pointer; font-size: .75rem;">
+                                                            <i class="fa-solid fa-trash"></i> Hapus
+                                                        </button>
+                                                    </form>
+                                                </details>
+                                            @empty
+                                                <div style="margin-top: .5rem; font-size: .78rem; color: #94a3b8;">Belum ada penyaluran untuk program ini.</div>
+                                            @endforelse
+                                        </div>
                                     </div>
                                 </div>
                             @endforeach

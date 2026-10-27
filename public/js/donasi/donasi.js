@@ -358,6 +358,60 @@
 
     // ---------- modal detail dokumentasi penyaluran ----------
 
+    /** Render daftar riwayat penyaluran (foto dokumentasi admin) di dalam modal program. */
+    function renderGalleryHistory(history) {
+        const wrap = document.getElementById('gm-history');
+        const list = document.getElementById('gm-history-list');
+        if (!wrap || !list) return;
+
+        list.textContent = '';
+
+        if (!Array.isArray(history) || history.length === 0) {
+            wrap.classList.add('hidden');
+            return;
+        }
+
+        history.forEach((h) => {
+            const card = document.createElement('div');
+            card.className = 'gm-hist-item';
+
+            const head = document.createElement('div');
+            head.className = 'gm-hist-head';
+            const title = document.createElement('strong');
+            title.textContent = h.judul || '';
+            const nominal = document.createElement('span');
+            nominal.textContent = h.nominal || '';
+            head.append(title, nominal);
+            card.appendChild(head);
+
+            if (h.foto) {
+                const img = document.createElement('img');
+                img.src = h.foto;
+                img.alt = h.judul || 'Dokumentasi penyaluran';
+                img.loading = 'lazy';
+                card.appendChild(img);
+            }
+
+            if (h.tanggal) {
+                const meta = document.createElement('div');
+                meta.className = 'gm-hist-meta';
+                meta.textContent = h.tanggal;
+                card.appendChild(meta);
+            }
+
+            if (h.deskripsi) {
+                const desc = document.createElement('p');
+                desc.className = 'gm-hist-desc';
+                desc.textContent = h.deskripsi;
+                card.appendChild(desc);
+            }
+
+            list.appendChild(card);
+        });
+
+        wrap.classList.remove('hidden');
+    }
+
     function openGalleryModal(item) {
         const modal = document.getElementById('gallery-modal');
         if (!modal) return;
@@ -368,6 +422,8 @@
         document.getElementById('gm-desc').textContent = item.desc || 'Tidak ada deskripsi tambahan.';
         document.getElementById('gm-amount').textContent = item.amount || 'Rp 0';
         document.getElementById('gm-date').textContent = item.date || '-';
+
+        renderGalleryHistory(item.history || []);
 
         modal.classList.remove('hidden');
         document.body.classList.add('modal-open');
@@ -404,6 +460,13 @@
         document.body.addEventListener('click', (e) => {
             const galItem = e.target.closest('.pub-gal-item');
             if (galItem) {
+                let history = [];
+                try {
+                    history = JSON.parse(galItem.dataset.history || '[]');
+                } catch (_) {
+                    history = [];
+                }
+
                 openGalleryModal({
                     title: galItem.dataset.title,
                     desc: galItem.dataset.desc,
@@ -411,6 +474,7 @@
                     photo: galItem.dataset.photo,
                     amount: galItem.dataset.amount,
                     date: galItem.dataset.date,
+                    history,
                 });
                 return;
             }
