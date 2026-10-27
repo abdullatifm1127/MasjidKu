@@ -11,18 +11,40 @@ use Illuminate\Validation\Rule;
 
 /**
  * CATATAN INTEGRASI:
- * - Halaman publik donasi (GET) sekarang dirender oleh
+ * - Halaman publik donasi (GET) dirender oleh
  *   App\Http\Controllers\PublicMosqueController@showDonasi, BUKAN oleh index() di controller ini.
  *   index() dibiarkan ada untuk kompatibilitas/masa depan, tapi tidak terhubung ke route manapun.
  * - Yang benar-benar dipakai dari controller ini adalah store(), untuk menerima
  *   POST /masjid/{slug}/donasi dari donasi.js (AJAX fetch).
- * - Signature memakai `string $slug` lalu resolve manual, konsisten dengan
- *   PublicMosqueController@showDonasi.
  * - Kolom memakai `mosque_id` sesuai migration tabel `donasis`.
  *   Pastikan $fillable di App\Models\Donasi memuat 'mosque_id' dan 'keterangan'.
  */
 class DonasiController extends Controller
 {
+    /** Nominal minimum donasi (samakan dengan teks "Minimal donasi Rp 5.000" di halaman donasi). */
+    private const MIN_NOMINAL = 5000;
+
+    /**
+     * Fitur donasi aktif jika paket bukan free, pembayaran sudah approved,
+     * dan masa langganan belum berakhir. Aturannya sama dengan PublicMosqueController.
+     */
+    protected function hasDonationFeature(Mosque $mosque): bool
+    {
+        $berbayar = ($mosque->package_type ?? 'free') !== 'free'
+            && strtolower(trim($mosque->payment_status ?? '')) === 'approved';
+
+        if (!$berbayar) {
+            return false;
+        }
+
+        $akhir = $mosque->package_expires_at ?? $mosque->subscription_expires_at;
+        if ($akhir && \Carbon\Carbon::parse($akhir)->isPast()) {
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * Kategori donasi aktif milik satu masjid, diambil dari database
      * (dikelola admin lewat halaman "Kelola Jenis Donasi").
@@ -33,6 +55,16 @@ class DonasiController extends Controller
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->get();
+    }
+
+    /** Nomor referensi unik, mis. DN-2610-04821. */
+    protected function generateReference(): string
+    {
+        do {
+            $no = 'DN-' . now()->format('ym') . '-' . str_pad((string) random_int(1, 99999), 5, '0', STR_PAD_LEFT);
+        } while (Donasi::where('no_referensi', $no)->exists());
+
+        return $no;
     }
 
     /**
@@ -62,18 +94,19 @@ class DonasiController extends Controller
     {
         $mosque = Mosque::where('slug', $slug)->firstOrFail();
 
+        // Tolak bila fitur donasi belum aktif (paket free / pembayaran belum disetujui / langganan habis)
+        abort_unless($this->hasDonationFeature($mosque), 403, 'Fitur donasi belum aktif untuk masjid ini.');
+
         $validKeys = $this->categories($mosque)->pluck('key')->all();
 
         $data = $request->validate([
             'jenis'             => ['required', Rule::in($validKeys)],
             'zakat_subtype'     => ['nullable', Rule::in(['fitrah', 'mal'])],
-            'nominal'           => ['required', 'numeric', 'min:1000'],
+            'nominal'           => ['required', 'numeric', 'min:' . self::MIN_NOMINAL],
             'nama_donatur'      => ['nullable', 'string', 'max:100'],
             'keterangan'        => ['nullable', 'string', 'max:200'],
             'metode_pembayaran' => ['required', Rule::in(['QRIS', 'Transfer Bank', 'Dompet Digital'])],
         ]);
-
-        $noReferensi = 'DN-' . now()->format('ym') . '-' . str_pad((string) random_int(1, 99999), 5, '0', STR_PAD_LEFT);
 
         $donasi = Donasi::create([
             'mosque_id'         => $mosque->id,
@@ -88,7 +121,7 @@ class DonasiController extends Controller
                 ? trim($data['keterangan'])
                 : null,
             'metode_pembayaran' => $data['metode_pembayaran'],
-            'no_referensi'      => $noReferensi,
+            'no_referensi'      => $this->generateReference(),
             'status'            => 'pending',
         ]);
 

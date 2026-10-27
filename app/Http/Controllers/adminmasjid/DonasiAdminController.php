@@ -51,8 +51,13 @@ class DonasiAdminController extends Controller
 
         // Paket masih free / pembayaran belum lunas -> arahkan ke halaman pembayaran
         if (!$this->hasDonationFeature($mosque)) {
+            $packageType = session('pending_renewal')['package'] ?? $mosque->package_type ?? '100000_1';
+            $paket = \App\Support\PackagePricing::resolve($packageType);
+
             return view('paymentmasjid.payment', [
-                'mosque' => $mosque
+                'mosque'          => $mosque,
+                'packageName'     => $paket['name'],
+                'amountFormatted' => 'Rp ' . number_format($paket['amount'], 0, ',', '.'),
             ]);
         }
 
