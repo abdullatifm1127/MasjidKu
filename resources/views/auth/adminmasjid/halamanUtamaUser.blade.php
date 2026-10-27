@@ -1492,14 +1492,6 @@
                             ])->values()->all();
                             $pcDok = count($pcGaleri);
 
-                            // Tujuan: gabungan tujuan unik dari catatan penyaluran
-                            $pcTujuan = $pcDocs->pluck('tujuan')->map(fn ($t) => trim((string) $t))
-                                ->filter()->unique()->values()->implode(', ');
-                            if ($pcTujuan === '') { $pcTujuan = 'Penyaluran Tunai / Kas Masjid'; }
-
-                            // Rincian penggunaan dana dari seluruh catatan program ini
-                            $pcRincian = $pcDocs->flatMap(fn ($i) => $i->rincian ?? [])->values()->all();
-
                             // Riwayat tiap penyaluran (dengan atau tanpa foto) untuk ditampilkan di popup
                             $pcRiwayat = $pcDocs->map(fn ($i) => [
                                 'judul'     => $i->judul,
@@ -1521,9 +1513,9 @@
                             // Kartu memakai foto dokumentasi terbaru bila ada, kalau tidak pakai banner program
                             $pcFoto = $pcGaleri[0]['url'] ?? $pcBanner;
 
+                            // Sisa dana sudah tampil di kotak ringkasan, jadi tidak diulang di deskripsi
                             $pcDeskripsi = ($pc->description ?: 'Program donasi ' . $pc->title . '.')
-                                . "\n\nSisa dana program: Rp " . number_format($pcSisa, 0, ',', '.')
-                                . "\nDokumentasi foto: " . ($pcDok > 0 ? $pcDok . ' foto kegiatan (lihat di riwayat penyaluran)' : 'belum ada');
+                                . "\n\nDokumentasi foto: " . ($pcDok > 0 ? $pcDok . ' foto kegiatan (lihat di riwayat penyaluran)' : 'belum ada');
                         @endphp
                         <div class="pny-card" data-kategori="{{ $pc->key }}" style="background: #ffffff; border: 1px solid #99f6e4; border-radius: 1rem; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
                             <div style="position: relative; height: 200px; background-size: cover; background-position: center; background-image: url('{{ $pcFoto }}')">
@@ -1553,7 +1545,7 @@
                                         data-deskripsi="{{ $pcDeskripsi }}"
                                         data-nominal-keluar="Rp {{ number_format($pcKeluar, 0, ',', '.') }}"
                                         data-nominal-masuk="Rp {{ number_format($pcMasuk, 0, ',', '.') }}"
-                                        data-rekening="{{ $pcTujuan }}"
+                                        data-sisa="Rp {{ number_format($pcSisa, 0, ',', '.') }}"
                                         data-tanggal="{{ $pcTanggal }}"
                                         data-foto="{{ $pcBanner }}"
                                         data-riwayat="{{ json_encode($pcRiwayat) }}"
@@ -1621,7 +1613,6 @@
                                         data-deskripsi=""
                                         data-nominal-keluar="Rp {{ number_format($item->nominal_terpakai ?? 0, 0, ',', '.') }}"
                                         data-nominal-masuk="Rp {{ number_format($totalMasukKat, 0, ',', '.') }}"
-                                        data-rekening="{{ $item->tujuan ?: 'Penyaluran Tunai / Kas Masjid' }}"
                                         data-tanggal="{{ $formattedDate }}"
                                         data-foto="{{ $itemFoto }}"
                                         data-riwayat="{{ json_encode([[
@@ -1673,9 +1664,9 @@
                     <span style="color: #64748b;">Total Uang Keluar (Tersalurkan):</span>
                     <strong id="modalUangKeluar" style="color: #ef4444;"></strong>
                 </div>
-                <div style="display: flex; justify-content: space-between; gap: 1rem; border-top: 1px dashed #cbd5e1; padding-top: 6px;">
-                    <span style="color: #64748b; white-space: nowrap;">Dikirim ke Rekening / Tujuan:</span>
-                    <strong id="modalRekening" style="color: #0f172a; text-align: right;"></strong>
+                <div id="modalSisaWrap" style="display: flex; justify-content: space-between; gap: 1rem; border-top: 1px dashed #cbd5e1; padding-top: 6px;">
+                    <span style="color: #64748b; white-space: nowrap;">Sisa Dana Program:</span>
+                    <strong id="modalSisa" style="color: #0f172a; text-align: right;"></strong>
                 </div>
             </div>
 
@@ -1784,8 +1775,12 @@
                 document.getElementById('modalDeskripsi').textContent = this.dataset.deskripsi || '';
                 document.getElementById('modalUangMasuk').textContent = this.dataset.nominalMasuk || '';
                 document.getElementById('modalUangKeluar').textContent = this.dataset.nominalKeluar || '';
-                document.getElementById('modalRekening').textContent = this.dataset.rekening || '-';
                 document.getElementById('modalTanggal').textContent = this.dataset.tanggal ? 'Tanggal: ' + this.dataset.tanggal : '';
+
+                // Sisa dana program (hanya untuk kartu program; disembunyikan bila tidak ada)
+                const sisaWrap = document.getElementById('modalSisaWrap');
+                document.getElementById('modalSisa').textContent = this.dataset.sisa || '';
+                sisaWrap.style.display = this.dataset.sisa ? 'flex' : 'none';
 
                 // Rincian penggunaan dana
                 let rincian = [];
@@ -1915,7 +1910,7 @@
     });
 </script>
     @endif
-    
+
     {{-- KONTAK SECTION --}}
     <section class="hu-hubungi-section" id="kontak">
         <div class="hu-container">

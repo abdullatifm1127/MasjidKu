@@ -7,28 +7,72 @@
     <meta name="description" content="Donasi dan Zakat online untuk Masjid {{ $mosque->mosque_name ?? '' }}">
     <title>Donasi & Zakat — Masjid {{ $mosque->mosque_name ?? '' }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/donasi/donasi.css') }}?v={{ time() }}">
 </head>
 <body>
 
-    <div class="donation-wrapper"
-         id="app"
-         data-submit-url="{{ $submitUrl ?? (\Illuminate\Support\Facades\Route::has('masjid.donasi.store') && isset($mosque) ? route('masjid.donasi.store', $mosque->slug) : '') }}"
-         data-nisab="{{ $mosque->zakat_nisab ?? 85000000 }}">
+    @php
+        $heroMasuk   = (float) $categories->sum('total_masuk');
+        $heroKeluar  = (float) $categories->sum('total_keluar');
+        $heroProgram = $categories->count();
+        $heroPct     = $heroMasuk > 0 ? min(round($heroKeluar / $heroMasuk * 100), 100) : 0;
+    @endphp
 
-        <!-- Header Identitas Masjid -->
-        <header class="mosque-header">
-            <div class="mosque-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 21h18M5 21V7l7-4 7 4v14M9 9v12M15 9v12"/>
-                </svg>
+    <!-- HERO -->
+    <section class="hero">
+        <svg class="hero-skyline" viewBox="0 0 1440 140" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+            <g fill="currentColor">
+                <rect x="0" y="112" width="1440" height="30"/>
+                <rect x="250" y="40" width="14" height="80"/><path d="M247 40l10-26 10 26z"/>
+                <rect x="300" y="86" width="150" height="40"/><path d="M310 86a65 55 0 0 1 130 0z"/><rect x="373" y="14" width="4" height="22"/>
+                <rect x="590" y="54" width="12" height="70"/><path d="M588 54l8-22 8 22z"/>
+                <rect x="620" y="82" width="200" height="50"/><path d="M630 82a90 70 0 0 1 180 0z"/><rect x="718" y="2" width="4" height="22"/>
+                <rect x="838" y="54" width="12" height="70"/><path d="M836 54l8-22 8 22z"/>
+                <rect x="990" y="86" width="150" height="40"/><path d="M1000 86a65 55 0 0 1 130 0z"/><rect x="1063" y="14" width="4" height="22"/>
+                <rect x="1176" y="40" width="14" height="80"/><path d="M1173 40l10-26 10 26z"/>
+            </g>
+        </svg>
+
+        <div class="hero-inner">
+            <div class="hero-copy">
+                <div class="hero-bismillah" lang="ar" dir="rtl">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
+                <span class="hero-tag">Donasi &amp; Zakat Online</span>
+
+                <header class="mosque-header">
+                    <h1>Masjid {{ $mosque->mosque_name ?? 'Al-Ikhlas' }}</h1>
+                    <p>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                        {{ $mosque->city ?? 'Pusat Layanan Umat' }}
+                    </p>
+                </header>
+
+                <p class="hero-lead">Salurkan infaq, zakat, dan wakaf Anda dengan mudah. Setiap rupiah tercatat dan penyalurannya didokumentasikan secara terbuka.</p>
+
+                <div class="hero-actions">
+                    <a class="hero-btn primary" href="#app">Mulai Donasi <span aria-hidden="true">&rarr;</span></a>
+                    <a class="hero-btn ghost" href="#galeri">Lihat Dokumentasi</a>
+                </div>
             </div>
-            <div>
-                <h1>Masjid {{ $mosque->mosque_name ?? 'Al-Ikhlas' }}</h1>
-                <p>{{ $mosque->city ?? 'Pusat Layanan Umat' }}</p>
-            </div>
-        </header>
+
+            <aside class="hero-panel" aria-label="Ringkasan dana">
+                <div class="hp-label">Total dana terkumpul</div>
+                <div class="hp-total">Rp {{ number_format($heroMasuk, 0, ',', '.') }}</div>
+                <div class="hp-bar"><i style="width: {{ $heroPct }}%"></i></div>
+                <div class="hp-caption">{{ $heroPct }}% dana sudah tersalurkan</div>
+                <div class="hp-grid">
+                    <div class="hp-item gold"><b>Rp {{ number_format($heroKeluar, 0, ',', '.') }}</b><span>Telah disalurkan</span></div>
+                    <div class="hp-item"><b>{{ $heroProgram }} program</b><span>Aktif saat ini</span></div>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    <main class="donation-wrapper"
+          id="app"
+          data-submit-url="{{ $submitUrl ?? (\Illuminate\Support\Facades\Route::has('masjid.donasi.store') && isset($mosque) ? route('masjid.donasi.store', $mosque->slug) : '') }}"
+          data-nisab="{{ $mosque->zakat_nisab ?? 85000000 }}">
 
         <!-- Progress Steps -->
         <ol class="stepper" role="list" aria-label="Tahapan donasi">
@@ -38,130 +82,169 @@
         </ol>
 
         <div role="status" aria-live="polite" class="sr-only" id="step-announcer"></div>
-<!-- STEP 1: PILIH KATEGORI & GALERI DOKUMENTASI -->
-            <section class="panel-card" id="panel-1" aria-labelledby="panel-1-title">
-                <div class="panel-title">
-                    <h2 id="panel-1-title">Pilih kategori donasi</h2>
-                    <p>Tentukan jenis kebaikan yang ingin Anda salurkan hari ini.</p>
+
+        <!-- STEP 1: PILIH KATEGORI & GALERI DOKUMENTASI -->
+        <section class="panel-card" id="panel-1" aria-labelledby="panel-1-title">
+            <div class="panel-title">
+                <span class="eyebrow">Mulai berbagi</span>
+                <h2 id="panel-1-title">Pilih kategori donasi</h2>
+                <p>Tentukan jenis kebaikan yang ingin Anda salurkan hari ini.</p>
+            </div>
+
+            @if ($categories->isEmpty())
+                <p class="empty-box">Belum ada kategori donasi yang tersedia. Silakan kembali lagi nanti.</p>
+            @else
+                <div class="category-list">
+                    @foreach ($categories as $cat)
+                        @php
+                            $fotoKategori = $cat->image ? asset('storage/' . $cat->image) : null;
+                            $catCalc      = strtolower(trim($cat->calc_type ?? 'nominal'));
+                            $catMasuk     = (float) ($cat->total_masuk ?? 0);
+                            $catKeluar    = (float) ($cat->total_keluar ?? 0);
+                            $catPct       = $catMasuk > 0 ? min(round($catKeluar / $catMasuk * 100), 100) : 0;
+                        @endphp
+
+                        <button type="button"
+                                class="category-item"
+                                data-key="{{ $cat->key }}"
+                                data-title="{{ $cat->title }}"
+                                data-calc-type="{{ $catCalc }}">
+
+                            @if($fotoKategori)
+                                <span class="ci-cover" style="background-image: url('{{ $fotoKategori }}')">
+                                    <span class="ci-badge {{ $catCalc === 'zakat' ? 'zakat' : '' }}">{{ $catCalc === 'zakat' ? 'Kalkulator Zakat' : 'Donasi' }}</span>
+                                </span>
+                            @else
+                                <span class="ci-cover ci-cover--icon" aria-hidden="true">
+                                    <span class="ci-badge {{ $catCalc === 'zakat' ? 'zakat' : '' }}">{{ $catCalc === 'zakat' ? 'Kalkulator Zakat' : 'Donasi' }}</span>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        {!! $cat->iconPath() !!}
+                                    </svg>
+                                </span>
+                            @endif
+
+                            <span class="ci-body">
+                                <span>
+                                    <span class="ci-info-title">{{ $cat->title }}</span>
+                                    <span class="ci-info-desc">{{ $cat->description }}</span>
+                                </span>
+
+                                <span class="ci-stats">
+                                    <span class="ci-stat"><small>Masuk</small><b>Rp {{ number_format($catMasuk, 0, ',', '.') }}</b></span>
+                                    <span class="ci-stat gold"><small>Tersalur</small><b>Rp {{ number_format($catKeluar, 0, ',', '.') }}</b></span>
+                                </span>
+
+                                <span class="ci-progress">
+                                    <span class="ci-progress-track"><span class="ci-progress-fill" style="width: {{ $catPct }}%"></span></span>
+                                    <span class="ci-progress-text">{{ $catPct }}% dana sudah tersalurkan</span>
+                                </span>
+
+                                <span class="ci-cta">
+                                    <span>Donasi sekarang</span>
+                                    <span class="ci-arrow" aria-hidden="true">&rsaquo;</span>
+                                </span>
+                            </span>
+                        </button>
+                    @endforeach
                 </div>
-
-                @if ($categories->isEmpty())
-    <p class="empty-box">Belum ada kategori donasi yang tersedia. Silakan kembali lagi nanti.</p>
-@else
-    <div class="category-list">
-        @foreach ($categories as $cat)
-            @php
-                $fotoKategori = $cat->image ? asset('storage/' . $cat->image) : null;
-            @endphp
-
-            <button type="button"
-                    class="category-item"
-                    data-key="{{ $cat->key }}"
-                    data-title="{{ $cat->title }}"
-                    data-calc-type="{{ strtolower(trim($cat->calc_type ?? 'nominal')) }}"
-                    style="display: flex; align-items: center; gap: 1rem; text-align: left; padding: 1rem;">
-                
-                {{-- Tampilkan Foto Kategori --}}
-                @if($fotoKategori)
-                    <div style="width: 64px; height: 64px; border-radius: 0.5rem; background-size: cover; background-position: center; background-image: url('{{ $fotoKategori }}'); flex-shrink: 0;"></div>
-                @else
-                    <span class="ci-icon" aria-hidden="true" style="flex-shrink: 0;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            {!! $cat->iconPath() !!}
-                        </svg>
-                    </span>
-                @endif
-
-                {{-- Informasi Kategori & Transparansi Keuangan --}}
-                <span class="ci-info" style="flex: 1;">
-                    <span class="ci-info-title" style="font-size: 1.05rem; font-weight: 700; color: #1e293b;">{{ $cat->title }}</span>
-                    <span class="ci-info-desc" style="display: block; font-size: 0.85rem; color: #64748b; margin-top: 0.15rem;">{{ $cat->description }}</span>
-                    
-                    <span style="display: flex; gap: 1rem; font-size: 0.75rem; margin-top: 0.5rem; flex-wrap: wrap;">
-                        <span style="color: #10b981; font-weight: 600;">Masuk: Rp {{ number_format($cat->total_masuk ?? 0, 0, ',', '.') }}</span>
-                        <span style="color: #ef4444; font-weight: 600;">Keluar: Rp {{ number_format($cat->total_keluar ?? 0, 0, ',', '.') }}</span>
-                    </span>
-                </span>
-
-                <span class="ci-arrow" aria-hidden="true">&rsaquo;</span>
-            </button>
-        @endforeach
-    </div>
-@endif
+            @endif
 
             <!-- RIWAYAT DONASI PRIBADI -->
             @auth
-                <div style="margin: 2rem 0; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-                    <div style="margin-bottom: 1rem;">
-                        <h2 style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin: 0;">Riwayat Donasi Anda</h2>
-                        <p style="font-size: 0.85rem; color: #64748b; margin: 0.25rem 0 0 0;">Daftar transaksi donasi yang Anda lakukan dengan akun ini.</p>
+                <div class="history-card">
+                    <div class="history-card-head">
+                        <h2>Riwayat Donasi Anda</h2>
+                        <p>Daftar transaksi donasi yang Anda lakukan dengan akun ini.</p>
                     </div>
 
                     @if(isset($recentDonations) && $recentDonations->isNotEmpty())
-                        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                        <ul class="history-list">
                             @foreach ($recentDonations as $don)
-                                <li style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: #f8fafc; border-radius: 0.75rem; border: 1px solid #e2e8f0;">
-                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <span style="width: 38px; height: 38px; background: #0d9488; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem;" aria-hidden="true">
-                                            {{ strtoupper(substr($don->nama_donatur ?: 'H', 0, 1)) }}
+                                <li class="history-row">
+                                    <span class="history-avatar" aria-hidden="true">{{ strtoupper(substr($don->nama_donatur ?: 'H', 0, 1)) }}</span>
+                                    <div class="history-info">
+                                        <span class="history-name">{{ $don->nama_donatur ?: 'Hamba Allah' }}</span>
+                                        <span class="history-meta">
+                                            <span class="history-badge">{{ $don->category_title }}</span>
+                                            <span>{{ $don->created_at?->diffForHumans() }}</span>
+                                            <span class="history-status {{ strtolower($don->status) }}">{{ $don->status }}</span>
                                         </span>
-                                        <div>
-                                            <span style="display: block; font-weight: 600; color: #1e293b; font-size: 0.95rem;">{{ $don->nama_donatur ?: 'Hamba Allah' }}</span>
-                                            <span style="display: flex; gap: 0.5rem; align-items: center; font-size: 0.75rem; color: #64748b; margin-top: 0.15rem; flex-wrap: wrap;">
-                                                <span style="background: #e0f2fe; color: #0369a1; padding: 0.1rem 0.5rem; border-radius: 9999px; font-weight: 600;">{{ $don->category_title }}</span>
-                                                <span>•</span>
-                                                <span>{{ $don->created_at?->diffForHumans() }}</span>
-                                                <span>•</span>
-                                                <span style="color: {{ $don->status == 'diterima' ? '#16a34a' : '#b45309' }}; font-weight: 600; text-transform: capitalize;">{{ $don->status }}</span>
-                                            </span>
-                                            @if (!empty($don->keterangan))
-                                                <span style="display: block; font-size: 0.75rem; color: #475569; margin-top: 0.25rem; font-style: italic;">“{{ $don->keterangan }}”</span>
-                                            @endif
-                                        </div>
+                                        @if (!empty($don->keterangan))
+                                            <span class="history-note">“{{ $don->keterangan }}”</span>
+                                        @endif
                                     </div>
-                                    <span style="font-weight: 700; color: #0d9488; font-size: 0.95rem;">Rp {{ number_format($don->nominal, 0, ',', '.') }}</span>
+                                    <span class="history-amount">Rp {{ number_format($don->nominal, 0, ',', '.') }}</span>
                                 </li>
                             @endforeach
                         </ul>
                     @else
-                        <div style="text-align: center; padding: 1.5rem; background: #f8fafc; border-radius: 0.75rem; border: 1px dashed #cbd5e1; color: #64748b; font-size: 0.9rem;">
-                            Belum ada riwayat donasi tercatat dari akun Anda.
-                        </div>
+                        <p class="empty-box empty-box--tight" style="margin-top: 1rem;">Belum ada riwayat donasi tercatat dari akun Anda.</p>
                     @endif
                 </div>
             @endauth
 
             <!-- GALERI DOKUMENTASI PENYALURAN -->
-            <div class="gallery-block">
+            <div class="gallery-block" id="galeri">
                 <div class="panel-title panel-title--tight">
+                    <span class="eyebrow">Transparansi</span>
                     <h2>Dokumentasi penyaluran</h2>
                     <p>Bukti transparansi penyaluran dana kebaikan dari jamaah.</p>
                 </div>
 
                 @php
-                    $galItems   = isset($items) ? $items : collect();
-                    $galPrograms = isset($categories) ? $categories : collect();
+                    $galItems        = isset($items) ? $items : collect();
+                    $galPrograms     = isset($categories) ? $categories : collect();
                     $galFallbackFoto = 'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&w=600&q=80';
-                    $galToday   = \Carbon\Carbon::now()->translatedFormat('d F Y');
+                    $galToday        = \Carbon\Carbon::now()->translatedFormat('d F Y');
+
+                    // Satu fungsi pencocokan dipakai di mana-mana, supaya konsisten
+                    $matchProgram = function ($g, $c) {
+                        $k = strtolower(trim((string) $g->kategori));
+                        if ($k === '') {
+                            return false;
+                        }
+                        return in_array($k, [
+                            strtolower(trim((string) $c->key)),
+                            strtolower(trim((string) $c->id)),
+                            strtolower(trim((string) $c->title)),
+                        ], true);
+                    };
+
+                    // Foto yang tidak punya program -> tetap jadi kartu mandiri
+                    $galStandalone = $galItems->filter(function ($g) use ($galPrograms, $matchProgram) {
+                        return !$galPrograms->contains(fn ($c) => $matchProgram($g, $c));
+                    });
                 @endphp
 
                 @if($galPrograms->isNotEmpty() || $galItems->isNotEmpty())
                     <div class="public-gallery-grid">
 
-                        {{-- Kartu program otomatis (infaq, zakat, dll) --}}
+                        {{-- Kartu program + riwayat penyaluran di dalam "Lihat detail" --}}
                         @foreach($galPrograms as $prog)
                             @php
                                 $pMasuk  = (float) ($prog->total_masuk ?? 0);
                                 $pKeluar = (float) ($prog->total_keluar ?? 0);
                                 $pSisa   = $pMasuk - $pKeluar;
                                 $pFoto   = !empty($prog->image) ? asset('storage/' . $prog->image) : $galFallbackFoto;
-                                $pKey    = strtolower(trim((string) $prog->key));
-                                $pDok    = $galItems->filter(fn ($g) => strtolower(trim((string) $g->kategori)) === $pKey)->count();
-                                $pDesc   = 'Dana masuk Rp ' . number_format($pMasuk, 0, ',', '.')
-                                         . ' · Tersalurkan Rp ' . number_format($pKeluar, 0, ',', '.')
-                                         . ' · Sisa Rp ' . number_format($pSisa, 0, ',', '.')
-                                         . ' · ' . $pDok . ' dokumentasi foto.'
-                                         . (!empty($prog->description) ? ' ' . $prog->description : '');
+
+                                $pItems = $galItems->filter(fn ($g) => $matchProgram($g, $prog))->values();
+                                $pDok   = $pItems->count();
+
+                                $pHistory = $pItems->map(function ($g) {
+                                    return [
+                                        'judul'     => $g->judul,
+                                        'nominal'   => 'Rp ' . number_format($g->nominal_terpakai ?? 0, 0, ',', '.'),
+                                        'foto'      => $g->foto_url ?? asset('storage/' . $g->foto),
+                                        'tanggal'   => $g->tanggal ? \Carbon\Carbon::parse($g->tanggal)->translatedFormat('d F Y') : '',
+                                        'deskripsi' => $g->deskripsi,
+                                    ];
+                                })->all();
+
+                                $pDesc = 'Dana masuk Rp ' . number_format($pMasuk, 0, ',', '.')
+                                       . ' · Tersalurkan Rp ' . number_format($pKeluar, 0, ',', '.')
+                                       . ' · Sisa Rp ' . number_format($pSisa, 0, ',', '.')
+                                       . ' · ' . $pDok . ' dokumentasi foto.'
+                                       . (!empty($prog->description) ? ' ' . $prog->description : '');
                             @endphp
                             <figure class="pub-gal-item"
                                     tabindex="0"
@@ -172,7 +255,8 @@
                                     data-category="{{ $prog->title }}"
                                     data-photo="{{ $pFoto }}"
                                     data-amount="Rp {{ number_format($pKeluar, 0, ',', '.') }}"
-                                    data-date="Per {{ $galToday }}">
+                                    data-date="Per {{ $galToday }}"
+                                    data-history="{{ json_encode($pHistory) }}">
                                 <div class="pub-gal-img" style="background-image: url('{{ $pFoto }}')" role="img" aria-label="Penyaluran {{ $prog->title }}"></div>
                                 <figcaption class="pub-gal-info">
                                     <span class="pub-tag">{{ $prog->title }}</span>
@@ -187,21 +271,12 @@
                             </figure>
                         @endforeach
 
-                        {{-- Foto dokumentasi yang diunggah admin --}}
-                        @foreach($galItems as $gal)
+                        {{-- Hanya foto TANPA program yang jadi kartu sendiri --}}
+                        @foreach($galStandalone as $gal)
                             @php
-                                $galKat      = strtolower(trim((string) $gal->kategori));
-                                $galProgram  = $galKat === '' ? null : $galPrograms->first(function ($c) use ($galKat) {
-                                    return in_array($galKat, [
-                                        strtolower(trim((string) $c->key)),
-                                        strtolower(trim((string) $c->id)),
-                                        strtolower(trim((string) $c->title)),
-                                    ], true);
-                                });
-                                $galCatTitle = $galProgram->title ?? ($galKat === '' ? 'Umum' : 'Penyaluran');
-                                $galDate     = $gal->tanggal ? \Carbon\Carbon::parse($gal->tanggal)->translatedFormat('d F Y') : '';
-                                $galFoto     = $gal->foto_url ?? asset('storage/' . $gal->foto);
-                                $galNominal  = number_format($gal->nominal_terpakai ?? 0, 0, ',', '.');
+                                $galDate    = $gal->tanggal ? \Carbon\Carbon::parse($gal->tanggal)->translatedFormat('d F Y') : '';
+                                $galFoto    = $gal->foto_url ?? asset('storage/' . $gal->foto);
+                                $galNominal = number_format($gal->nominal_terpakai ?? 0, 0, ',', '.');
                             @endphp
                             <figure class="pub-gal-item"
                                     tabindex="0"
@@ -209,13 +284,14 @@
                                     aria-haspopup="dialog"
                                     data-title="{{ $gal->judul }}"
                                     data-desc="{{ $gal->deskripsi }}"
-                                    data-category="{{ $galCatTitle }}"
+                                    data-category="Umum"
                                     data-photo="{{ $galFoto }}"
                                     data-amount="Rp {{ $galNominal }}"
-                                    data-date="{{ $galDate }}">
+                                    data-date="{{ $galDate }}"
+                                    data-history="[]">
                                 <div class="pub-gal-img" style="background-image: url('{{ $galFoto }}')" role="img" aria-label="{{ $gal->judul }}"></div>
                                 <figcaption class="pub-gal-info">
-                                    <span class="pub-tag">{{ $galCatTitle }}</span>
+                                    <span class="pub-tag">Umum</span>
                                     <h4>{{ $gal->judul }}</h4>
                                     <p>{{ \Illuminate\Support\Str::limit($gal->deskripsi, 60) }}</p>
                                     <div class="pub-meta">
@@ -238,6 +314,7 @@
             <button type="button" class="btn-back" data-goto-step="1">&larr; Kembali ke kategori</button>
 
             <div class="panel-title">
+                <span class="eyebrow">Langkah 2</span>
                 <h2 id="panel-2-title" data-role="selected-cat-title">Nominal donasi</h2>
                 <p>Pilih atau ketik jumlah dana yang ingin disumbangkan.</p>
             </div>
@@ -312,6 +389,7 @@
             <button type="button" class="btn-back" data-goto-step="2">&larr; Ubah nominal</button>
 
             <div class="panel-title">
+                <span class="eyebrow">Langkah 3</span>
                 <h2 id="panel-3-title">Metode pembayaran</h2>
                 <p>Silakan pilih kanal pembayaran yang Anda inginkan.</p>
             </div>
@@ -335,8 +413,8 @@
                             <span>Scan pakai GoPay, OVO, Dana, BCA, Mandiri, dll</span>
                         </span>
                     </label>
-                    <div class="qris-preview" data-for-payment="QRIS" style="text-align:center; margin: -0.5rem 0 0.75rem;">
-                        <img src="{{ $mosque->qris_url }}" alt="QRIS {{ $mosque->mosque_name }}" style="max-width:200px; border:1px solid #e5e7eb; border-radius:0.5rem; padding:0.5rem; background: #fff;">
+                    <div class="qris-preview" data-for-payment="QRIS">
+                        <img src="{{ $mosque->qris_url }}" alt="QRIS {{ $mosque->mosque_name }}">
                     </div>
                 @endif
 
@@ -369,7 +447,7 @@
                 @endif
             </fieldset>
 
-            <p class="hint" style="margin-bottom: 14px;">Setelah transfer, simpan nomor referensi yang muncul di layar berikutnya sebagai bukti. Admin masjid akan memverifikasi penerimaan dana secara manual.</p>
+            <p class="hint hint--block">Setelah transfer, simpan nomor referensi yang muncul di layar berikutnya sebagai bukti. Admin masjid akan memverifikasi penerimaan dana secara manual.</p>
 
             <p class="field-error hidden" id="submit-error" role="alert"></p>
 
@@ -394,7 +472,7 @@
                 <div class="receipt-row"><span>Kategori</span><b id="res-cat">-</b></div>
                 <div class="receipt-row"><span>Jumlah</span><b id="res-total">Rp 0</b></div>
                 <div class="receipt-row"><span>Keterangan</span><b id="res-note">-</b></div>
-                <div class="receipt-row"><span>Status</span><b style="color:#b45309;">Menunggu verifikasi admin</b></div>
+                <div class="receipt-row"><span>Status</span><b class="status-pending">Menunggu verifikasi admin</b></div>
             </div>
 
             <div class="receipt-actions">
@@ -403,7 +481,12 @@
             </div>
         </section>
 
-    </div>
+    </main>
+
+    <footer class="page-foot">
+        Dikelola secara transparan oleh pengurus Masjid {{ $mosque->mosque_name ?? '' }}.<br>
+        Setiap donasi diverifikasi admin dan penyalurannya didokumentasikan.
+    </footer>
 
     <!-- MODAL DETAIL DOKUMENTASI PENYALURAN -->
     <div class="gallery-modal hidden" id="gallery-modal" role="dialog" aria-modal="true" aria-labelledby="gm-title">
@@ -418,6 +501,12 @@
                 <div class="gallery-modal-meta">
                     <div><span>Dana terpakai</span><b id="gm-amount">Rp 0</b></div>
                     <div><span>Tanggal</span><b id="gm-date">-</b></div>
+                </div>
+
+                <!-- Riwayat penyaluran (diisi lewat JS dari data-history) -->
+                <div class="gm-history hidden" id="gm-history">
+                    <h4>Riwayat penyaluran:</h4>
+                    <div id="gm-history-list"></div>
                 </div>
             </div>
         </div>
