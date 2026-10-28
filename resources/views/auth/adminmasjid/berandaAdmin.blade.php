@@ -9,7 +9,9 @@
     |  - 'locked' : modul berbayar tapi paket masjid masih 'free'
     |  - 'aktif'  : route ada dan paket mengizinkan
     */
-    $paketFree = ($mosque->package_type ?? null) === 'free';
+  $paketFree = ($mosque->package_type ?? null) === 'free'
+    || ($mosque->subscription_expires_at
+        && \Illuminate\Support\Carbon::parse($mosque->subscription_expires_at)->isPast());
 
     $defs = [
         ['label' => 'Landing Page',     'icon' => 'fa-globe',               'route' => 'admin.landing-page',  'match' => 'admin.landing-page*',  'paid' => false, 'desc' => 'Atur halaman utama masjid'],
