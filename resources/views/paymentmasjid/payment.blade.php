@@ -27,11 +27,33 @@
 
     $midtransSetting = \Illuminate\Support\Facades\DB::table('payment_settings')->where('code', 'midtrans')->first();
     $manualSetting   = \Illuminate\Support\Facades\DB::table('payment_settings')->where('code', 'manual')->first();
+    $qrisSetting     = \Illuminate\Support\Facades\DB::table('payment_settings')->where('code', 'qris')->first();
 
-    $isMidtransActive = $midtransSetting ? $midtransSetting->is_active : true;
-    $isManualActive   = $manualSetting ? $manualSetting->is_active : false;
-    $manualConfig     = $manualSetting ? json_decode($manualSetting->config_data, true) : [];
-    $isPending        = $mosque->payment_status === 'pending';
+    $manualConfig = $manualSetting ? (json_decode($manualSetting->config_data, true) ?: []) : [];
+    $qrisConfig   = $qrisSetting ? (json_decode($qrisSetting->config_data, true) ?: []) : [];
+
+    // Daftar rekening (mendukung format lama: satu rekening)
+    $accounts = $manualConfig['accounts'] ?? [];
+    if (!$accounts && !empty($manualConfig['bank_name'])) {
+        $accounts = [[
+            'bank_name'      => $manualConfig['bank_name'],
+            'account_number' => $manualConfig['account_number'] ?? '',
+            'account_holder' => $manualConfig['account_holder'] ?? '',
+        ]];
+    }
+
+    $qrisImage = !empty($qrisConfig['qris_image']) ? asset('storage/' . $qrisConfig['qris_image']) : null;
+
+    $isMidtransActive = $midtransSetting ? (bool) $midtransSetting->is_active : true;
+    $isManualActive   = (bool) ($manualSetting && $manualSetting->is_active && count($accounts) > 0);
+    $isQrisActive     = (bool) ($qrisSetting && $qrisSetting->is_active && $qrisImage);
+
+    $activeCount = (int) $isMidtransActive + (int) $isManualActive + (int) $isQrisActive;
+    $defaultTab  = $isMidtransActive ? 'midtrans' : ($isManualActive ? 'manual' : ($isQrisActive ? 'qris' : null));
+    $firstOffline = $isManualActive ? 'manual' : 'qris';
+    $offlineTab   = in_array($defaultTab, ['manual', 'qris']) ? $defaultTab : $firstOffline;
+
+    $isPending = $mosque->payment_status === 'pending';
 @endphp
 
 <div class="pay-card">
@@ -61,6 +83,7 @@
         {{-- NOTIFIKASI --}}
         @if(session('success'))<div class="alert ok">✔ {{ session('success') }}</div>@endif
         @if(session('error'))<div class="alert err">⚠ {{ session('error') }}</div>@endif
+        @if($errors->any())<div class="alert err">⚠ {{ $errors->first() }}</div>@endif
 
         @if($isPending)
             {{-- ===== MENUNGGU VERIFIKASI ===== --}}
@@ -84,32 +107,47 @@
                 <div class="alert err">⚠ Harga paket belum diatur oleh Super Admin. Silakan hubungi Super Admin.</div>
             @endif
 
-            @if(!$isMidtransActive && !$isManualActive)
+            @if($activeCount === 0)
                 <div class="alert info">Belum ada metode pembayaran yang aktif. Silakan hubungi Super Admin.</div>
             @endif
 
             {{-- ===== PILIH METODE ===== --}}
-            @if($isMidtransActive && $isManualActive)
+            @if($activeCount > 1)
                 <p class="label-small">Pilih cara bayar</p>
                 <div class="methods">
-                    <button type="button" class="method active" onclick="switchTab('midtrans', this)">
+                    @if($isMidtransActive)
+                    <button type="button" class="method {{ $defaultTab === 'midtrans' ? 'active' : '' }}" onclick="switchTab('midtrans', this)">
                         <span class="rec">REKOMENDASI</span>
                         <span class="chk">✓</span>
                         <span class="m-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg></span>
                         <b>Bayar Otomatis</b>
                         <small>Midtrans, aktif langsung setelah bayar</small>
                     </button>
-                    <button type="button" class="method" onclick="switchTab('manual', this)">
+                    @endif
+
+                    @if($isQrisActive)
+                    <button type="button" class="method {{ $defaultTab === 'qris' ? 'active' : '' }}" onclick="switchTab('qris', this)">
+                        <span class="chk">✓</span>
+                        <span class="m-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h3M20 17v4"/></svg></span>
+                        <b>QRIS</b>
+                        <small>Scan, lalu kirim bukti bayar</small>
+                    </button>
+                    @endif
+
+                    @if($isManualActive)
+                    <button type="button" class="method {{ $defaultTab === 'manual' ? 'active' : '' }}" onclick="switchTab('manual', this)">
                         <span class="chk">✓</span>
                         <span class="m-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9 10v8M15 10v8M19 10v8"/><path d="M3 21h18"/></svg></span>
-                        <b>Transfer Manual</b>
+                        <b>Transfer Bank</b>
                         <small>Kirim foto bukti transfer</small>
                     </button>
+                    @endif
                 </div>
             @endif
 
             {{-- ===== MIDTRANS ===== --}}
-            <div id="section-midtrans" class="payment-section @if($isMidtransActive) active @endif">
+            @if($isMidtransActive)
+            <div id="section-midtrans" class="payment-section {{ $defaultTab === 'midtrans' ? 'active' : '' }}">
                 <div class="gate">
                     <div class="gate-top">
                         <div class="gate-logo">ID</div>
@@ -120,34 +158,64 @@
                 </div>
                 <button type="button" class="btn-submit" id="pay-button" @if($nominal <= 0) disabled @endif>Bayar Sekarang (Otomatis)</button>
             </div>
+            @endif
 
-            {{-- ===== TRANSFER MANUAL ===== --}}
-            <div id="section-manual" class="payment-section @if(!$isMidtransActive && $isManualActive) active @endif">
+            {{-- ===== QRIS & TRANSFER BANK (satu form bukti pembayaran) ===== --}}
+            @if($isManualActive || $isQrisActive)
+            <div id="section-offline" class="payment-section {{ in_array($defaultTab, ['manual', 'qris']) ? 'active' : '' }}">
                 <form action="{{ route('payment.manual.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
+                    <input type="hidden" name="payment_method" id="payMethod" value="{{ $offlineTab }}">
 
-                    <div class="acct">
-                        <small>Transfer ke</small>
-                        <div class="bank">{{ $manualConfig['bank_name'] ?? 'BSI' }}</div>
-                        <small>Nomor rekening</small>
-                        <div class="num-row">
-                            <div class="num" id="acctNum">{{ $manualConfig['account_number'] ?? '1234567890' }}</div>
-                            <button type="button" class="copy" id="copyBtn">Salin</button>
-                        </div>
-                        <small>Atas nama</small>
-                        <div class="an">{{ $manualConfig['account_holder'] ?? 'Takmir Masjid' }}</div>
+                    @if($isManualActive)
+                    <div class="pane" id="pane-manual" style="{{ $offlineTab === 'manual' ? '' : 'display:none' }}">
+                        @foreach($accounts as $a)
+                            <div class="acct">
+                                <small>Transfer ke</small>
+                                <div class="bank">{{ $a['bank_name'] }}</div>
+                                <small>Nomor rekening</small>
+                                <div class="num-row">
+                                    <div class="num">{{ $a['account_number'] }}</div>
+                                    <button type="button" class="copy" data-copy="{{ $a['account_number'] }}">Salin</button>
+                                </div>
+                                @if(!empty($a['account_holder']))
+                                    <small>Atas nama</small>
+                                    <div class="an">{{ $a['account_holder'] }}</div>
+                                @endif
+                            </div>
+                        @endforeach
+
+                        <ol class="howto">
+                            <li>Pilih salah satu rekening, lalu transfer sesuai total tagihan <b>Rp {{ number_format($nominal, 0, ',', '.') }}</b>.</li>
+                            <li>Foto atau screenshot bukti transfernya.</li>
+                            <li>Unggah fotonya di bawah, lalu kirim untuk diverifikasi.</li>
+                        </ol>
                     </div>
+                    @endif
 
-                    <ol class="howto">
-                        <li>Transfer sesuai total tagihan <b>Rp {{ number_format($nominal, 0, ',', '.') }}</b> ke rekening di atas.</li>
-                        <li>Foto atau screenshot bukti transfernya.</li>
-                        <li>Unggah fotonya di bawah, lalu kirim untuk diverifikasi.</li>
-                    </ol>
+                    @if($isQrisActive)
+                    <div class="pane" id="pane-qris" style="{{ $offlineTab === 'qris' ? '' : 'display:none' }}">
+                        <div class="qris-box">
+                            <small>Scan dengan e-wallet atau m-banking</small>
+                            @if(!empty($qrisConfig['merchant_name']))
+                                <div class="merchant">{{ $qrisConfig['merchant_name'] }}</div>
+                            @endif
+                            <img src="{{ $qrisImage }}" alt="Kode QRIS">
+                            <a href="{{ $qrisImage }}" download="qris.png" class="qris-dl">Unduh gambar QRIS</a>
+                        </div>
+
+                        <ol class="howto">
+                            <li>Buka aplikasi e-wallet atau m-banking, lalu scan QRIS di atas.</li>
+                            <li>Masukkan nominal tepat <b>Rp {{ number_format($nominal, 0, ',', '.') }}</b>.</li>
+                            <li>Screenshot bukti pembayaran, unggah di bawah, lalu kirim untuk diverifikasi.</li>
+                        </ol>
+                    </div>
+                    @endif
 
                     <label class="drop" id="drop">
-                        <img id="preview" alt="Pratinjau bukti transfer">
+                        <img id="preview" alt="Pratinjau bukti pembayaran">
                         <div class="d-ico">📷</div>
-                        <b id="dropText">Pilih foto bukti transfer</b>
+                        <b id="dropText">Pilih foto bukti pembayaran</b>
                         <small>Foto atau screenshot (JPG, PNG)</small>
                         <input type="file" name="proof_of_payment" id="proof" accept="image/*" required>
                     </label>
@@ -155,6 +223,7 @@
                     <button type="submit" class="btn-submit blue" @if($nominal <= 0) disabled @endif>Kirim Bukti Pembayaran</button>
                 </form>
             </div>
+            @endif
 
             <div class="foot-link">
                 <a href="{{ route('masjid.cancel') }}" onclick="return confirm('Apakah Anda yakin ingin membatalkan transaksi ini?');" class="btn-cancel">Batalkan & Kembali</a>
@@ -169,20 +238,32 @@
     function switchTab(type, el) {
         document.querySelectorAll('.method').forEach(function (b) { b.classList.remove('active'); });
         document.querySelectorAll('.payment-section').forEach(function (s) { s.classList.remove('active'); });
-        document.getElementById('section-' + type).classList.add('active');
+
+        var offline = type !== 'midtrans';
+        var section = document.getElementById(offline ? 'section-offline' : 'section-midtrans');
+        if (section) section.classList.add('active');
+
+        if (offline) {
+            document.querySelectorAll('.pane').forEach(function (p) {
+                p.style.display = (p.id === 'pane-' + type) ? '' : 'none';
+            });
+            var pm = document.getElementById('payMethod');
+            if (pm) pm.value = type;
+        }
         if (el) el.classList.add('active');
     }
 
-    // Salin nomor rekening
-    var copyBtn = document.getElementById('copyBtn');
-    if (copyBtn) copyBtn.addEventListener('click', function () {
-        var text = document.getElementById('acctNum').textContent.trim();
-        var done = function () { copyBtn.textContent = 'Tersalin ✓'; setTimeout(function () { copyBtn.textContent = 'Salin'; }, 1800); };
-        if (navigator.clipboard) { navigator.clipboard.writeText(text).then(done); }
-        else { var t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); done(); }
+    // Salin nomor rekening (bisa lebih dari satu)
+    document.querySelectorAll('.copy[data-copy]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var text = btn.dataset.copy;
+            var done = function () { btn.textContent = 'Tersalin ✓'; setTimeout(function () { btn.textContent = 'Salin'; }, 1800); };
+            if (navigator.clipboard) { navigator.clipboard.writeText(text).then(done); }
+            else { var t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); done(); }
+        });
     });
 
-    // Pratinjau foto bukti transfer
+    // Pratinjau foto bukti pembayaran
     var proof = document.getElementById('proof');
     if (proof) proof.addEventListener('change', function () {
         var f = proof.files[0], drop = document.getElementById('drop');
@@ -194,9 +275,9 @@
     });
 </script>
 
-{{-- Midtrans Snap --}}
+{{-- Midtrans Snap (otomatis memakai URL sandbox / production sesuai config) --}}
 @if($isMidtransActive)
-<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
+<script src="{{ config('services.midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
 <script>
     const payBtn = document.getElementById('pay-button');
     if (payBtn) {

@@ -297,63 +297,72 @@ class PaymentController extends Controller
         return redirect()->route('dashboard')->with('info', 'Pembayaran dibatalkan.');
     }
 
-    // Menangani pengiriman bukti pembayaran transfer manual
-    public function storeManualPayment(Request $request)
-    {
-        $request->validate([
-            'proof_of_payment' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-        ]);
+    // Menangani pengiriman bukti pembayaran (transfer bank / QRIS)
+public function storeManualPayment(Request $request)
+{
+    $request->validate([
+        'proof_of_payment' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        'payment_method'   => 'nullable|in:manual,qris', // BARU
+    ]);
 
-        $mosque = Mosque::where('user_id', Auth::id())->first();
+    $method = $request->input('payment_method', 'manual'); // BARU
 
-        if (!$mosque) {
-            return redirect()->route('daftar.masjid')->with('error', 'Data masjid tidak ditemukan.');
-        }
+    $mosque = Mosque::where('user_id', Auth::id())->first();
 
-        $pendingRenewal = session('pending_renewal');
-        $packageType = $this->normalizePackage(
-            $pendingRenewal ? ($pendingRenewal['package'] ?? null) : $mosque->package_type
-        );
-        $orderId = $pendingRenewal ? $pendingRenewal['order_id'] : ('MOSQUE-MANUAL-' . $mosque->id . '-' . time());
-
-        // Nominal dari pengaturan Super Admin
-        $grossAmount = PackagePricing::amount($packageType);
-
-        if ($grossAmount <= 0) {
-            return back()->with('error', 'Harga paket belum diatur oleh Super Admin. Silakan hubungi Super Admin.');
-        }
-
-        // Upload file bukti transfer foto
-        if ($request->hasFile('proof_of_payment')) {
-            $path = $request->file('proof_of_payment')->store('bukti-pembayaran', 'public');
-        } else {
-            return back()->with('error', 'Bukti pembayaran wajib diunggah.');
-        }
-
-        // Update data masjid
-        $mosque->update([
-            'order_id'       => $orderId,
-            'package_type'   => $packageType,
-            'payment_status' => 'pending', // Menunggu verifikasi admin
-        ]);
-
-        // Simpan ke riwayat subscriptions
-        Subscription::updateOrCreate(
-            ['order_id' => $orderId],
-            [
-                'mosque_id'          => $mosque->id,
-                'package_type'       => $packageType,
-                'amount'             => $grossAmount,
-                'status'             => 'pending',
-                'transaction_status' => 'manual_pending',
-                'payment_type'       => 'manual_transfer',
-                'raw_notification'   => ['proof_of_payment' => $path],
-            ]
-        );
-
-        session()->forget('pending_renewal');
-
-        return redirect()->route('dashboard')
-            ->with('success', 'Bukti pembayaran berhasil dikirim. Mohon tunggu verifikasi dari Superadmin.');
+    if (!$mosque) {
+        return redirect()->route('daftar.masjid')->with('error', 'Data masjid tidak ditemukan.');
     }
+
+    $pendingRenewal = session('pending_renewal');
+    $packageType = $this->normalizePackage(
+        $pendingRenewal ? ($pendingRenewal['package'] ?? null) : $mosque->package_type
+    );
+
+    // BARU: prefix order berbeda supaya mudah dibedakan di riwayat
+    $prefix  = $method === 'qris' ? 'MOSQUE-QRIS-' : 'MOSQUE-MANUAL-';
+    $orderId = $pendingRenewal ? $pendingRenewal['order_id'] : ($prefix . $mosque->id . '-' . time());
+
+    // Nominal dari pengaturan Super Admin
+    $grossAmount = PackagePricing::amount($packageType);
+
+    if ($grossAmount <= 0) {
+        return back()->with('error', 'Harga paket belum diatur oleh Super Admin. Silakan hubungi Super Admin.');
+    }
+
+    // Upload file bukti pembayaran
+    if ($request->hasFile('proof_of_payment')) {
+        $path = $request->file('proof_of_payment')->store('bukti-pembayaran', 'public');
+    } else {
+        return back()->with('error', 'Bukti pembayaran wajib diunggah.');
+    }
+
+    // Update data masjid
+    $mosque->update([
+        'order_id'       => $orderId,
+        'package_type'   => $packageType,
+        'payment_status' => 'pending', // Menunggu verifikasi admin
+    ]);
+
+    // Simpan ke riwayat subscriptions
+    Subscription::updateOrCreate(
+        ['order_id' => $orderId],
+        [
+            'mosque_id'          => $mosque->id,
+            'package_type'       => $packageType,
+            'amount'             => $grossAmount,
+            'status'             => 'pending',
+            'transaction_status' => 'manual_pending',   // sengaja tidak diubah
+            'payment_type'       => 'manual_transfer',  // sengaja tidak diubah
+            'raw_notification'   => [
+                'proof_of_payment' => $path,
+                'method'           => $method,           // BARU: 'manual' atau 'qris'
+            ],
+        ]
+    );
+
+    session()->forget('pending_renewal');
+
+    return redirect()->route('dashboard')
+        ->with('success', 'Bukti pembayaran berhasil dikirim. Mohon tunggu verifikasi dari Superadmin.');
+}
 }

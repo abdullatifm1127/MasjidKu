@@ -16,8 +16,9 @@
     @include('auth.superadmin.partials.sidebar', ['active' => 'pembayaran'])
 
     @php
-        $metode = $settings->filter(fn ($s) => in_array($s->code, ['midtrans', 'manual']));
-        $paket  = $settings->reject(fn ($s) => in_array($s->code, ['midtrans', 'manual']));
+        $kodeMetode = ['midtrans', 'manual', 'qris'];
+        $metode = $settings->filter(fn ($s) => in_array($s->code, $kodeMetode));
+        $paket  = $settings->reject(fn ($s) => in_array($s->code, $kodeMetode));
     @endphp
 
     {{-- MAIN CONTENT --}}
@@ -41,6 +42,12 @@
             <div class="pb-alert"><i class="fa-solid fa-circle-check"></i> {{ session('success') }}</div>
         @endif
 
+        @if($errors->any())
+            <div class="pb-alert" style="background:#fef2f2;color:#991b1b;border-color:#fecaca">
+                <i class="fa-solid fa-circle-exclamation"></i> {{ $errors->first() }}
+            </div>
+        @endif
+
         {{-- ===== METODE PEMBAYARAN ===== --}}
         <div class="pb-section">
             <h2>Metode Pembayaran</h2>
@@ -49,15 +56,22 @@
 
         <div class="pb-grid">
             @forelse($metode as $s)
-                @php $config = json_decode($s->config_data, true) ?: []; @endphp
+                @php
+                    $config = json_decode($s->config_data, true) ?: [];
+                    $ikon = [
+                        'midtrans' => ['blue', 'fa-credit-card'],
+                        'manual'   => ['', 'fa-building-columns'],
+                        'qris'     => ['gold', 'fa-qrcode'],
+                    ][$s->code] ?? ['', 'fa-wallet'];
+                @endphp
 
                 <div class="pb-card {{ $s->is_active ? '' : 'off' }}" data-code="{{ $s->code }}">
-                    <form action="{{ route('superadmin.pembayaran.update', $s->id) }}" method="POST" autocomplete="off">
+                    <form action="{{ route('superadmin.pembayaran.update', $s->id) }}" method="POST" autocomplete="off" enctype="multipart/form-data">
                         @csrf
 
                         <div class="pb-card-head">
                             <div class="pb-title">
-                                <span class="pb-icon {{ $s->code === 'midtrans' ? 'blue' : '' }}"><i class="fa-solid {{ $s->code === 'midtrans' ? 'fa-credit-card' : 'fa-building-columns' }}"></i></span>
+                                <span class="pb-icon {{ $ikon[0] }}"><i class="fa-solid {{ $ikon[1] }}"></i></span>
                                 <div>
                                     <h3>{{ $s->method_name }}</h3>
                                     <span class="pb-pill" data-pill>{{ $s->is_active ? 'Aktif' : 'Nonaktif' }}</span>
@@ -99,31 +113,84 @@
                                 </div>
                                 <div class="pb-spacer"></div>
 
-                            @else
-                                <p class="pb-desc">Pembayar transfer ke rekening di bawah ini, lalu mengunggah foto bukti transfer.</p>
+                            @elseif($s->code === 'manual')
+                                @php
+                                    $akun = $config['accounts'] ?? [];
+                                    if (!$akun && !empty($config['bank_name'])) {
+                                        $akun = [[
+                                            'bank_name'      => $config['bank_name'],
+                                            'account_number' => $config['account_number'] ?? '',
+                                            'account_holder' => $config['account_holder'] ?? '',
+                                        ]];
+                                    }
+                                    if (!$akun) $akun = [['bank_name' => '', 'account_number' => '', 'account_holder' => '']];
+                                @endphp
 
-                                {{-- Pratinjau kartu rekening --}}
-                                <div class="pb-bank">
-                                    <small>Transfer ke</small>
-                                    <div class="bank" data-v="bank_name">{{ $config['bank_name'] ?? 'Nama Bank' }}</div>
-                                    <div class="num" data-v="account_number">{{ $config['account_number'] ?? '0000000000' }}</div>
-                                    <small>Atas nama</small>
-                                    <div class="an" data-v="account_holder">{{ $config['account_holder'] ?? 'Nama Pemilik' }}</div>
+                                <p class="pb-desc">Pembayar transfer ke salah satu rekening di bawah ini, lalu mengunggah foto bukti transfer. Anda bisa menambahkan lebih dari satu bank.</p>
+
+                                <div data-accounts>
+                                    @foreach($akun as $i => $a)
+                                        <div class="pb-account" data-account>
+                                            <button type="button" class="pb-remove" data-remove aria-label="Hapus rekening"><i class="fa-solid fa-trash"></i></button>
+                                            <div class="pb-row2">
+                                                <div class="pb-field">
+                                                    <label>Nama Bank / E-Wallet</label>
+                                                    <input type="text" name="accounts[{{ $i }}][bank_name]" value="{{ $a['bank_name'] }}" placeholder="Contoh: BSI / BCA / DANA">
+                                                </div>
+                                                <div class="pb-field">
+                                                    <label>Nomor Rekening</label>
+                                                    <input type="text" name="accounts[{{ $i }}][account_number]" value="{{ $a['account_number'] }}" placeholder="1234567890">
+                                                </div>
+                                            </div>
+                                            <div class="pb-field" style="margin-bottom:0">
+                                                <label>Atas Nama (A.N)</label>
+                                                <input type="text" name="accounts[{{ $i }}][account_holder]" value="{{ $a['account_holder'] }}" placeholder="Takmir Masjid">
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
 
-                                <div class="pb-row2">
-                                    <div class="pb-field">
-                                        <label>Nama Bank / E-Wallet</label>
-                                        <input type="text" name="bank_name" value="{{ $config['bank_name'] ?? '' }}" placeholder="Contoh: BSI / BCA" data-bind="bank_name">
+                                <button type="button" class="pb-add" data-add-account><i class="fa-solid fa-plus"></i> Tambah Rekening / Bank Lain</button>
+
+                                <template data-account-template>
+                                    <div class="pb-account" data-account>
+                                        <button type="button" class="pb-remove" data-remove aria-label="Hapus rekening"><i class="fa-solid fa-trash"></i></button>
+                                        <div class="pb-row2">
+                                            <div class="pb-field">
+                                                <label>Nama Bank / E-Wallet</label>
+                                                <input type="text" name="accounts[__I__][bank_name]" placeholder="Contoh: BSI / BCA / DANA">
+                                            </div>
+                                            <div class="pb-field">
+                                                <label>Nomor Rekening</label>
+                                                <input type="text" name="accounts[__I__][account_number]" placeholder="1234567890">
+                                            </div>
+                                        </div>
+                                        <div class="pb-field" style="margin-bottom:0">
+                                            <label>Atas Nama (A.N)</label>
+                                            <input type="text" name="accounts[__I__][account_holder]" placeholder="Takmir Masjid">
+                                        </div>
                                     </div>
-                                    <div class="pb-field">
-                                        <label>Nomor Rekening</label>
-                                        <input type="text" name="account_number" value="{{ $config['account_number'] ?? '' }}" placeholder="1234567890" data-bind="account_number">
-                                    </div>
+                                </template>
+                                <div class="pb-spacer"></div>
+
+                            @elseif($s->code === 'qris')
+                                @php $qrisUrl = !empty($config['qris_image']) ? asset('storage/' . $config['qris_image']) : ''; @endphp
+
+                                <p class="pb-desc">Pembayar scan kode QRIS di bawah memakai e-wallet atau m-banking, lalu mengunggah foto bukti pembayaran. QRIS baru bisa diaktifkan setelah gambarnya diunggah.</p>
+
+                                <div class="pb-qris">
+                                    <img src="{{ $qrisUrl }}" alt="QRIS" data-qris-preview style="{{ $qrisUrl ? '' : 'display:none' }}">
+                                    <span data-qris-empty style="{{ $qrisUrl ? 'display:none' : '' }}">Belum ada gambar QRIS</span>
+                                </div>
+
+                                <div class="pb-field">
+                                    <label>Nama Merchant</label>
+                                    <input type="text" name="merchant_name" value="{{ $config['merchant_name'] ?? '' }}" placeholder="Contoh: Masjid Al-Ikhlas">
                                 </div>
                                 <div class="pb-field">
-                                    <label>Atas Nama (A.N)</label>
-                                    <input type="text" name="account_holder" value="{{ $config['account_holder'] ?? '' }}" placeholder="Takmir Masjid" data-bind="account_holder">
+                                    <label>Unggah Gambar QRIS</label>
+                                    <input type="file" name="qris_image" accept="image/png,image/jpeg,image/webp" data-qris-file>
+                                    <small>JPG, PNG, atau WEBP, maksimal 2 MB. Kosongkan jika tidak ingin mengganti.</small>
                                 </div>
                                 <div class="pb-spacer"></div>
                             @endif
@@ -224,7 +291,7 @@
             if (pill) pill.textContent = sw.checked ? 'Aktif' : 'Nonaktif';
         });
 
-        // Pratinjau langsung saat mengetik
+        // Pratinjau langsung saat mengetik (kartu paket)
         card.querySelectorAll('[data-bind]').forEach(function (input) {
             input.addEventListener('input', function () {
                 var key = input.dataset.bind, target = card.querySelector('[data-v="' + key + '"]');
@@ -250,6 +317,41 @@
             var input = btn.parentElement.querySelector('input'), show = input.type === 'password';
             input.type = show ? 'text' : 'password';
             btn.innerHTML = '<i class="fa-solid ' + (show ? 'fa-eye-slash' : 'fa-eye') + '"></i>';
+        });
+    });
+
+    // Tambah / hapus rekening bank
+    document.querySelectorAll('[data-accounts]').forEach(function (list) {
+        var body = list.closest('.pb-body');
+        var tpl = body.querySelector('[data-account-template]');
+        var n = 0;
+
+        body.querySelector('[data-add-account]').addEventListener('click', function () {
+            var html = tpl.innerHTML.replace(/__I__/g, 'n' + Date.now() + (n++));
+            list.insertAdjacentHTML('beforeend', html);
+        });
+
+        list.addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-remove]');
+            if (!btn) return;
+            var items = list.querySelectorAll('[data-account]');
+            if (items.length > 1) {
+                btn.closest('[data-account]').remove();
+            } else {
+                items[0].querySelectorAll('input').forEach(function (i) { i.value = ''; });
+            }
+        });
+    });
+
+    // Pratinjau gambar QRIS sebelum disimpan
+    document.querySelectorAll('[data-qris-file]').forEach(function (file) {
+        file.addEventListener('change', function () {
+            var f = file.files[0]; if (!f) return;
+            var body = file.closest('.pb-body');
+            var img = body.querySelector('[data-qris-preview]'), empty = body.querySelector('[data-qris-empty]');
+            var r = new FileReader();
+            r.onload = function (e) { img.src = e.target.result; img.style.display = 'block'; empty.style.display = 'none'; };
+            r.readAsDataURL(f);
         });
     });
 </script>
