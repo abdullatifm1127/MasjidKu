@@ -3,15 +3,39 @@
 namespace App\Http\Controllers;
 
 use App\Models\Mosque;
+use App\Support\PackagePricing;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Subscription;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 class MosqueController extends Controller
 {
+    /**
+     * Hitung tanggal berakhir langganan dari kode paket (mis. "150000_1" -> +1 bulan).
+     * Kalau masjid masih punya langganan aktif, masa aktif disambung dari tanggal berakhir lama.
+     */
+    private function hitungExpired(Mosque $mosque, ?string $packageType, bool $sambung = true): ?Carbon
+    {
+        $months = PackagePricing::months($packageType);
+        if ($months <= 0) {
+            return null;
+        }
+
+        $base = now();
+        if ($sambung && $mosque->subscription_expires_at) {
+            $lama = Carbon::parse($mosque->subscription_expires_at);
+            if ($lama->isFuture()) {
+                $base = $lama;
+            }
+        }
+
+        return $base->copy()->addMonths($months);
+    }
+
     /**
      * Menampilkan form pendaftaran masjid.
      */
@@ -85,7 +109,9 @@ class MosqueController extends Controller
             'has_online_donation' => 'nullable',
             'has_prayer_schedule' => 'nullable',
 
-            'package_type' => 'required|in:free,8000_1,1000000_12,100000_1',
+            // Format kode paket: "free" atau "harga_bulan" (mis. 150000_1 / 1500000_12).
+            // Tidak lagi dikunci ke angka tertentu supaya ikut harga yang diatur Super Admin.
+            'package_type' => ['required', 'regex:/^(free|\d+_(1|12))$/'],
             'description' => 'nullable|string',
             'agree' => 'required|accepted',
         ]);
@@ -348,11 +374,22 @@ class MosqueController extends Controller
             ->first();
 
         if ($pendingSubscription) {
-            $pendingSubscription->update(['status' => 'approved']);
-            $mosque->update([
-                'payment_status'      => 'approved',
-                'has_online_donation' => true,
+            // Hitung masa aktif dari paket transaksi ini (disambung bila masih ada langganan aktif)
+            $paketTransaksi = $pendingSubscription->package_type ?: $mosque->package_type;
+            $expired = $this->hitungExpired($mosque, $paketTransaksi);
+
+            $pendingSubscription->update([
+                'status'       => 'approved',
+                'paid_at'      => $pendingSubscription->paid_at ?? now(),
+                'expired_date' => $expired,
             ]);
+
+            // forceFill agar subscription_expires_at tersimpan walau belum ada di $fillable model
+            $mosque->forceFill([
+                'payment_status'          => 'approved',
+                'has_online_donation'     => true,
+                'subscription_expires_at' => $expired,
+            ])->save();
         }
 
         return redirect()->route('superadmin.verifikasi')->with('success', 'Berhasil disetujui.');
@@ -412,9 +449,12 @@ class MosqueController extends Controller
         $masjids = Mosque::latest()->get();
 
         $totalSemua = $masjids->count();
-        $totalAktif = Mosque::where('status', 'Aktif')->count();      
-        $totalPending = Mosque::where('status', 'Pending')->count();   
-        $totalNonaktif = Mosque::where('status', 'Nonaktif')->count(); 
+
+        // Status di database berupa 'approved' / 'pending' / 'rejected' (huruf kecil),
+        // sehingga hitungan lama (where status = 'Aktif') selalu 0. Disesuaikan dengan nilai sebenarnya.
+        $totalAktif    = Mosque::whereIn(DB::raw('LOWER(status)'), ['approved', 'aktif'])->count();
+        $totalPending  = Mosque::whereIn(DB::raw('LOWER(status)'), ['pending'])->count();
+        $totalNonaktif = Mosque::whereIn(DB::raw('LOWER(status)'), ['rejected', 'nonaktif'])->count();
 
         return view('auth.superadmin.manajemenMasjidSuperAdmin', compact(
             'masjids',
@@ -439,18 +479,19 @@ class MosqueController extends Controller
 
         // Jika memilih Paket Free (0_0), langsung terapkan perubahannya tanpa Midtrans
         if ($request->package === '0_0') {
-            $mosque->update([
-                'package_type'        => 'free',
-                'payment_status'      => 'approved',
-                'has_online_donation' => false, // Matikan donasi online untuk paket free
-                'order_id'            => null,
-            ]);
+            $mosque->forceFill([
+                'package_type'            => 'free',
+                'payment_status'          => 'approved',
+                'has_online_donation'     => false, // Matikan donasi online untuk paket free
+                'order_id'                => null,
+                'subscription_expires_at' => null,
+            ])->save();
 
             return redirect()->route('dashboard')
                              ->with('status', 'Paket Free berhasil dipilih. Fitur donasi online dinonaktifkan.');
         }
 
-        // Untuk paket berbayar (100000_1 atau 1000000_12):
+        // Untuk paket berbayar (format "harga_bulan", mis. 150000_1 atau 1500000_12):
         // SIMPAN KE SESSION SEMENTARA (Jangan ubah data masjid dulu agar aman jika dibatalkan)
         $orderId = 'RENEW-' . time() . '-' . rand(100, 999);
 
@@ -511,15 +552,16 @@ class MosqueController extends Controller
             return redirect()->back()->with('error', 'Data masjid tidak ditemukan.');
         }
 
-        $mosque->update([
-            'package_type'   => 'free',
-            'payment_status' => 'approved', 
-            'status'         => 'approved'  
-        ]);
-
-        \App\Models\Subscription::where('mosque_id', $mosque->id)->update([
-            'status' => 'approved' 
-        ]);
+        // Kembali ke Free: donasi online dimatikan dan tanggal berakhir dikosongkan.
+        // Riwayat transaksi (subscriptions) sengaja TIDAK diubah. Sebelumnya semua riwayat
+        // dipaksa jadi 'approved', yang merusak data (transaksi gagal/kedaluwarsa ikut terlihat lunas).
+        $mosque->forceFill([
+            'package_type'            => 'free',
+            'payment_status'          => 'approved',
+            'status'                  => 'approved',
+            'has_online_donation'     => false,
+            'subscription_expires_at' => null,
+        ])->save();
 
         return redirect()->route('dashboard')->with('status', 'Anda telah berhenti berlangganan ke paket Free.');
     }
@@ -532,21 +574,42 @@ class MosqueController extends Controller
         $mosque = Mosque::findOrFail($id);
 
         $request->validate([
-            'package_type' => 'required|in:free,8000_1,100000_1,1000000_12',
-            'payment_status' => 'required|in:approved,unpaid,pending',
+            // Kode paket dinamis ("harga_bulan") agar ikut harga yang diatur Super Admin
+            'package_type'   => ['required', 'regex:/^(free|\d+_(1|12))$/'],
+            // 'failed' ditambahkan karena ada di pilihan form
+            'payment_status' => 'required|in:approved,unpaid,pending,failed',
         ]);
 
-        $packageType = $request->package_type;
+        $packageType   = $request->package_type;
         $paymentStatus = $request->payment_status;
 
-        // Tentukan apakah donasi online aktif (aktif jika bukan paket free dan payment_status approved)
-        $hasOnlineDonation = ($packageType !== 'free' && $paymentStatus === 'approved');
+        $isFree = $packageType === 'free';
+        $aktif  = !$isFree && $paymentStatus === 'approved';
 
-        $mosque->update([
-            'package_type' => $packageType,
-            'payment_status' => $paymentStatus,
-            'has_online_donation' => $hasOnlineDonation,
-        ]);
+        $data = [
+            'package_type'        => $packageType,
+            'payment_status'      => $paymentStatus,
+            // Donasi online aktif jika bukan paket free dan pembayaran approved
+            'has_online_donation' => $aktif,
+        ];
+
+        if ($isFree) {
+            // Paket Free tidak punya masa aktif
+            $data['subscription_expires_at'] = null;
+        } elseif ($aktif) {
+            // Tanggal berakhir diisi otomatis dari paket. Kalau paket sama dan masih aktif,
+            // tanggal lama dipertahankan supaya menekan Simpan berulang tidak memperpanjang terus.
+            $sudahSama = $mosque->package_type === $packageType
+                && $mosque->payment_status === 'approved'
+                && $mosque->subscription_expires_at
+                && Carbon::parse($mosque->subscription_expires_at)->isFuture();
+
+            if (!$sudahSama) {
+                $data['subscription_expires_at'] = $this->hitungExpired($mosque, $packageType, false);
+            }
+        }
+
+        $mosque->forceFill($data)->save();
 
         return redirect()->route('superadmin.verifikasi')
             ->with('success', 'Status paket dan fitur donasi masjid berhasil diperbarui secara manual.');

@@ -5,8 +5,8 @@ namespace App\Http\Controllers\PaymentMasjid;
 use Illuminate\Http\Request;
 use App\Models\Mosque;
 use App\Models\Subscription;
+use App\Support\PackagePricing;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
 use Midtrans\Config;
 use Midtrans\Snap;
@@ -20,6 +20,19 @@ class PaymentController extends Controller
         Config::$isProduction = config('services.midtrans.is_production');
         Config::$isSanitized = true;
         Config::$is3ds = true;
+    }
+
+    /**
+     * Ambil kode paket yang valid. Jika kosong / 'free', pakai paket bulanan
+     * dengan harga yang diatur Super Admin (bukan angka tetap).
+     */
+    private function normalizePackage(?string $packageType): string
+    {
+        if (empty($packageType) || $packageType === 'free') {
+            return PackagePricing::defaultCode();
+        }
+
+        return $packageType;
     }
 
     // Menampilkan halaman form pembayaran (menampilkan tombol bayar Midtrans Snap)
@@ -57,17 +70,18 @@ class PaymentController extends Controller
                 return redirect()->route('dashboard');
             }
 
-            $packageType = $mosque->package_type ?? '100000_1';
+            $packageType = $this->normalizePackage($mosque->package_type);
         } else {
-            $packageType = $pendingRenewal['package'];
+            $packageType = $this->normalizePackage($pendingRenewal['package'] ?? null);
         }
 
-        // Tentukan teks dan nominal untuk ditampilkan di layar (1 Bulan = Rp 100.000)
-        $paket = \App\Support\PackagePricing::resolve($packageType);
+        // Nama paket & nominal diambil dari pengaturan Super Admin
+        $paket = PackagePricing::resolve($packageType);
         $packageName = $paket['name'];
-        $amountFormatted = 'Rp ' . number_format($paket['amount'], 0, ',', '.');
+        $amount = $paket['amount'];
+        $amountFormatted = 'Rp ' . number_format($amount, 0, ',', '.');
 
-        return view('paymentmasjid.payment', compact('mosque', 'packageName', 'amountFormatted'));
+        return view('paymentmasjid.payment', compact('mosque', 'packageName', 'amount', 'amountFormatted'));
     }
 
     public function createTransaction(Request $request)
@@ -83,14 +97,20 @@ class PaymentController extends Controller
 
         if ($pendingRenewal) {
             $orderId = $pendingRenewal['order_id'];
-            $packageType = $pendingRenewal['package'];
+            $packageType = $this->normalizePackage($pendingRenewal['package'] ?? null);
         } else {
             $orderId = 'MOSQUE-' . $mosque->id . '-' . time();
-            $packageType = $mosque->package_type ?? '100000_1';
+            $packageType = $this->normalizePackage($mosque->package_type);
         }
 
-        // AMBIL NOMINAL HARGA SECARA OTOMATIS (1 Bulan = 100000, 1 Tahun = 1000000)
-        $grossAmount = \App\Support\PackagePricing::amount($packageType);
+        // Nominal SELALU diambil dari pengaturan Super Admin (tabel payment_settings)
+        $grossAmount = PackagePricing::amount($packageType);
+
+        if ($grossAmount <= 0) {
+            return response()->json([
+                'error' => 'Harga paket belum diatur oleh Super Admin. Silakan hubungi Super Admin.',
+            ], 422);
+        }
 
         // Simpan order_id dan package_type terbaru ke database
         $mosque->update([
@@ -175,13 +195,13 @@ class PaymentController extends Controller
             $statusSederhana = 'pending';
         }
 
-        $packageType = $subscription->package_type ?? $mosque->package_type ?? '100000_1';
+        $packageType = $this->normalizePackage($subscription->package_type ?? $mosque->package_type);
 
         // Masa aktif: dihitung sekali saat pertama kali lunas (aman jika Midtrans mengirim settlement berulang).
         // Kalau masih ada langganan aktif, masa aktif baru disambung dari tanggal berakhir yang lama.
         $expiredDate = $subscription->expired_date ?? null;
         if ($isPaid && !$expiredDate) {
-            $months = (int) (explode('_', $packageType)[1] ?? 1) ?: 1;
+            $months = PackagePricing::months($packageType) ?: 1;
 
             $lastActive = Subscription::where('mosque_id', $mosque->id)
                 ->where('order_id', '!=', $orderId)
@@ -291,11 +311,17 @@ class PaymentController extends Controller
         }
 
         $pendingRenewal = session('pending_renewal');
-        $packageType = $pendingRenewal ? $pendingRenewal['package'] : ($mosque->package_type ?? '100000_1');
+        $packageType = $this->normalizePackage(
+            $pendingRenewal ? ($pendingRenewal['package'] ?? null) : $mosque->package_type
+        );
         $orderId = $pendingRenewal ? $pendingRenewal['order_id'] : ('MOSQUE-MANUAL-' . $mosque->id . '-' . time());
 
-        // Hitung nominal harga
-        $grossAmount = \App\Support\PackagePricing::amount($packageType);
+        // Nominal dari pengaturan Super Admin
+        $grossAmount = PackagePricing::amount($packageType);
+
+        if ($grossAmount <= 0) {
+            return back()->with('error', 'Harga paket belum diatur oleh Super Admin. Silakan hubungi Super Admin.');
+        }
 
         // Upload file bukti transfer foto
         if ($request->hasFile('proof_of_payment')) {

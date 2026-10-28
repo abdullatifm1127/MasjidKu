@@ -12,10 +12,12 @@
 
 @php
     $pendingRenewal = session('pending_renewal');
-    $rawPackage = $pendingRenewal['package'] ?? ($mosque->package_type ?? '100000_1');
+    $rawPackage = $pendingRenewal['package'] ?? ($mosque->package_type ?? null);
 
-    // Masjid yang masih "free" / kode paket kosong -> pakai paket bulanan sebagai default pembelian
-    $kodePaket = (empty($rawPackage) || $rawPackage === 'free') ? '100000_1' : $rawPackage;
+    // Masjid yang masih "free" / kode paket kosong -> pakai paket bulanan (harga dari Super Admin) sebagai default pembelian
+    $kodePaket = (empty($rawPackage) || $rawPackage === 'free')
+        ? \App\Support\PackagePricing::defaultCode()
+        : $rawPackage;
 
     // Harga & nama paket dari PackagePricing (mengikuti pengaturan Super Admin).
     // Bila controller sudah mengirim $amount / $packageName, nilai itu yang dipakai.
@@ -78,6 +80,10 @@
                 <div class="order-total"><span>Total tagihan</span><strong>Rp {{ number_format($nominal, 0, ',', '.') }}</strong></div>
             </div>
 
+            @if($nominal <= 0)
+                <div class="alert err">⚠ Harga paket belum diatur oleh Super Admin. Silakan hubungi Super Admin.</div>
+            @endif
+
             @if(!$isMidtransActive && !$isManualActive)
                 <div class="alert info">Belum ada metode pembayaran yang aktif. Silakan hubungi Super Admin.</div>
             @endif
@@ -112,7 +118,7 @@
                     <div class="chips"><span>QRIS</span><span>Virtual Account</span><span>E-Wallet</span><span>Kartu Kredit</span></div>
                     <div class="secure">🔒 Pembayaran diproses aman oleh Midtrans</div>
                 </div>
-                <button type="button" class="btn-submit" id="pay-button">Bayar Sekarang (Otomatis)</button>
+                <button type="button" class="btn-submit" id="pay-button" @if($nominal <= 0) disabled @endif>Bayar Sekarang (Otomatis)</button>
             </div>
 
             {{-- ===== TRANSFER MANUAL ===== --}}
@@ -146,7 +152,7 @@
                         <input type="file" name="proof_of_payment" id="proof" accept="image/*" required>
                     </label>
 
-                    <button type="submit" class="btn-submit blue">Kirim Bukti Pembayaran</button>
+                    <button type="submit" class="btn-submit blue" @if($nominal <= 0) disabled @endif>Kirim Bukti Pembayaran</button>
                 </form>
             </div>
 

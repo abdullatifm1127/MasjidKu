@@ -9,7 +9,9 @@
     |  - 'locked' : modul berbayar tapi paket masjid masih 'free'
     |  - 'aktif'  : route ada dan paket mengizinkan
     */
-    $paketFree = ($mosque->package_type ?? null) === 'free';
+  $paketFree = ($mosque->package_type ?? null) === 'free'
+    || ($mosque->subscription_expires_at
+        && \Illuminate\Support\Carbon::parse($mosque->subscription_expires_at)->isPast());
 
     $defs = [
         ['label' => 'Landing Page',     'icon' => 'fa-globe',               'route' => 'admin.landing-page',  'match' => 'admin.landing-page*',  'paid' => false, 'desc' => 'Atur halaman utama masjid'],
@@ -61,8 +63,19 @@
     $sapaIcon  = ($jam >= 5 && $jam < 18) ? 'fa-sun' : 'fa-moon';
     $tanggal   = now()->translatedFormat('l, d F Y');
 
-    // Paket
-    $paketLabel = $paketFree ? 'Paket Free' : 'Paket ' . Str::title($mosque->package_type ?? 'Premium');
+    // Paket: nama diambil dari pengaturan Super Admin (bukan kode mentah seperti "100000_1")
+    $kodePaket = $mosque->package_type ?? null;
+    if ($paketFree) {
+        $paketLabel = 'Paket Free';
+    } elseif (empty($kodePaket)) {
+        $paketLabel = 'Paket Premium';
+    } else {
+        $paketLabel = \App\Support\PackagePricing::resolve($kodePaket)['name'];
+    }
+
+    // Tanggal berakhir paket (jika tercatat)
+    $akhirRaw   = data_get($mosque, 'subscription_expires_at') ?: data_get($mosque, 'package_expires_at');
+    $akhirPaket = (! $paketFree && $akhirRaw) ? \Illuminate\Support\Carbon::parse($akhirRaw) : null;
 
     // Ring progres (r = 52)
     $ringC    = round(2 * M_PI * 52, 1);
@@ -305,7 +318,15 @@
                                 <span class="db-plan-icon {{ $paketFree ? 'free' : '' }}"><i class="fa-solid {{ $paketFree ? 'fa-seedling' : 'fa-crown' }}"></i></span>
                                 <div>
                                     <div class="db-plan-name">{{ $paketLabel }}</div>
-                                    <div class="db-plan-sub">{{ $paketFree ? 'Fitur dasar masjid' : 'Semua fitur tersedia' }}</div>
+                                    <div class="db-plan-sub">
+                                        @if($paketFree)
+                                            Fitur dasar masjid
+                                        @elseif($akhirPaket)
+                                            Aktif sampai {{ $akhirPaket->translatedFormat('d M Y') }}
+                                        @else
+                                            Semua fitur tersedia
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
 

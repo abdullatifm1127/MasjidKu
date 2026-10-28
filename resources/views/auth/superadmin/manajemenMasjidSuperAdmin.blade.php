@@ -14,27 +14,51 @@
 
 @php
     /**
+     * Tanggal berakhir terakhir dari riwayat transaksi (tabel subscriptions),
+     * dipakai sebagai cadangan jika kolom di tabel masjid belum terisi.
+     * Satu query untuk semua masjid agar tidak lambat.
+     */
+    $akhirDariRiwayat = \App\Models\Subscription::whereIn('mosque_id', collect($masjids)->pluck('id'))
+        ->whereIn('status', ['paid', 'approved'])
+        ->whereNotNull('expired_date')
+        ->selectRaw('mosque_id, MAX(expired_date) as akhir')
+        ->groupBy('mosque_id')
+        ->pluck('akhir', 'mosque_id');
+
+    // Cache hasil harga per kode paket supaya tidak query berulang untuk tiap baris
+    $cachePaket = [];
+
+    /**
      * Status langganan satu masjid.
      * kode : aktif | segera | habis | menunggu | free
      * grup : berlangganan | tidak | habis   (dipakai untuk filter)
      */
-    $hitungLangganan = function ($m) {
+    $hitungLangganan = function ($m) use ($akhirDariRiwayat, &$cachePaket) {
         $status   = strtolower((string) ($m->payment_status ?? ''));
         $paket    = strtolower((string) ($m->package_type ?? ''));
         $lunas    = in_array($status, ['approved', 'paid', 'settlement', 'capture', 'lunas'], true);
         $berbayar = $paket !== '' && $paket !== 'free';
 
-        $akhirRaw = data_get($m, 'subscription_ends_at');   // kosong bila kolomnya belum ada
+        // Tanggal berakhir: kolom masjid dulu, lalu riwayat transaksi
+        $akhirRaw = data_get($m, 'subscription_expires_at')
+            ?: data_get($m, 'package_expires_at')
+            ?: ($akhirDariRiwayat[$m->id] ?? null);
         $akhir    = $akhirRaw ? \Illuminate\Support\Carbon::parse($akhirRaw) : null;
         $sisa     = $akhir ? (int) now()->startOfDay()->diffInDays($akhir->copy()->startOfDay(), false) : null;
 
-        // Nama paket dari kode "harga_bulan", mis. 100000_1 -> 1 Bulan
+        // Nama & harga paket diambil dari pengaturan Super Admin (bukan dari angka di dalam kode paket)
         $paketLabel = null;
-        if ($berbayar && str_contains($paket, '_')) {
-            [$harga, $bulan] = array_pad(explode('_', $paket), 2, 1);
-            $bulan = max(1, (int) $bulan);
-            $lama  = $bulan % 12 === 0 ? ($bulan / 12) . ' Tahun' : $bulan . ' Bulan';
-            $paketLabel = $lama . ' · Rp ' . number_format((int) $harga, 0, ',', '.');
+        if ($berbayar) {
+            if (!isset($cachePaket[$paket])) {
+                $cachePaket[$paket] = \App\Support\PackagePricing::resolve($paket);
+            }
+            $info  = $cachePaket[$paket];
+            $bulan = (int) ($info['months'] ?? 0);
+
+            if ($bulan > 0) {
+                $lama = $bulan % 12 === 0 ? ($bulan / 12) . ' Tahun' : $bulan . ' Bulan';
+                $paketLabel = $lama . ' · Rp ' . number_format((int) $info['amount'], 0, ',', '.');
+            }
         }
 
         if ($status === 'pending') {

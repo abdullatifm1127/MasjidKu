@@ -12,6 +12,30 @@
 </head>
 <body class="sa-page" id="saBody">
 
+@php
+    /**
+     * Pilihan paket untuk kontrol manual: diambil dari pengaturan Super Admin (tabel payment_settings),
+     * bukan angka tetap. Kode paket berformat "harga_jumlahBulan", mis. 150000_1.
+     */
+    $paketRows = \Illuminate\Support\Facades\DB::table('payment_settings')
+        ->whereIn('code', ['package_monthly', 'package_yearly'])
+        ->get()
+        ->keyBy('code');
+
+    $opsiPaket = [];
+    foreach ([['package_monthly', 1, 'Paket 1 Bulan'], ['package_yearly', 12, 'Paket 1 Tahun']] as [$kodeSetting, $bulanPaket, $namaDefault]) {
+        $row = $paketRows[$kodeSetting] ?? null;
+        if (! $row) { continue; }
+
+        $cfgPaket = json_decode($row->config_data ?? '', true) ?: [];
+        $hargaPaket = (int) ($cfgPaket['price'] ?? 0);
+        if ($hargaPaket <= 0) { continue; }
+
+        $opsiPaket[$hargaPaket . '_' . $bulanPaket] =
+            ($row->method_name ?: $namaDefault) . ' · Rp ' . number_format($hargaPaket, 0, ',', '.');
+    }
+@endphp
+
     <aside class="sa-sidebar" id="saSidebar">
         <div class="sa-brand">
             <div class="sa-brand-avatar">SA</div>
@@ -93,7 +117,8 @@
                 <span class="vf-topbar-badge">{{ $totalPending ?? 0 }} pending</span>
             </div>
             <div class="sa-topbar-right">
-                <a href="{{ route('home') }}" class="sa-btn-website" target="_blank">
+                {{-- url('/') dipakai agar tidak error bila route bernama 'home' tidak ada --}}
+                <a href="{{ url('/') }}" class="sa-btn-website" target="_blank">
                     <i class="fa-solid fa-arrow-up-right-from-square"></i>
                     Lihat Website
                 </a>
@@ -117,6 +142,13 @@
                 <div style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-size:0.9rem; display:flex; justify-content:space-between; align-items:center;">
                     <span><i class="fa-solid fa-circle-exclamation"></i>&nbsp; {{ session('error') }}</span>
                     <button type="button" onclick="this.closest('div').remove()" style="background:none; border:none; font-size:1rem; color:#991b1b; cursor:pointer;">&times;</button>
+                </div>
+            @endif
+            @if ($errors->any())
+                <div style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-size:0.9rem;">
+                    @foreach ($errors->all() as $err)
+                        <div><i class="fa-solid fa-circle-exclamation"></i>&nbsp; {{ $err }}</div>
+                    @endforeach
                 </div>
             @endif
 
@@ -183,6 +215,15 @@
 
                             // Transaksi Midtrans terbaru masjid ini
                             $latestSub = collect($p->subscriptions ?? [])->sortByDesc('created_at')->first();
+
+                            // Pilihan paket untuk masjid ini. Jika kode paket tersimpan sudah tidak ada di
+                            // pengaturan (mis. harga diubah), tetap ditampilkan supaya pilihan tidak hilang
+                            // dan tidak otomatis berubah jadi Free saat disimpan.
+                            $opsiMasjid = $opsiPaket;
+                            if (! empty($p->package_type) && $p->package_type !== 'free' && ! isset($opsiMasjid[$p->package_type])) {
+                                $infoLama = \App\Support\PackagePricing::resolve($p->package_type);
+                                $opsiMasjid[$p->package_type] = $infoLama['name'] . ' · Rp ' . number_format($infoLama['amount'], 0, ',', '.') . ' (kode lama)';
+                            }
                         @endphp
                         <div class="vf-card {{ $tabStatus }}"
                              data-status="{{ $tabStatus }}"
@@ -283,8 +324,9 @@
                                         <div style="flex: 1; min-width: 140px;">
                                             <select name="package_type" style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.82rem; background: #fff;">
                                                 <option value="free" {{ $p->package_type == 'free' ? 'selected' : '' }}>Free (Nonaktif Donasi)</option>
-                                                <option value="100000_1" {{ $p->package_type == '100000_1' ? 'selected' : '' }}>Paket 1 Bulan (Pro)</option>
-                                                <option value="1000000_12" {{ $p->package_type == '1000000_12' ? 'selected' : '' }}>Paket 1 Tahun (Premium)</option>
+                                                @foreach($opsiMasjid as $kodeOpsi => $labelOpsi)
+                                                    <option value="{{ $kodeOpsi }}" {{ $p->package_type == $kodeOpsi ? 'selected' : '' }}>{{ $labelOpsi }}</option>
+                                                @endforeach
                                             </select>
                                         </div>
 
@@ -407,7 +449,9 @@
     </div>
 
     <script>
-    const detailData = @json($pendaftaran ?? []);
+    // Data dari server. Jika $pendaftaran berupa paginator, ambil isi 'data'-nya agar .find() tidak error.
+    const rawDetail = @json($pendaftaran ?? []);
+    const detailData = Array.isArray(rawDetail) ? rawDetail : (rawDetail && Array.isArray(rawDetail.data) ? rawDetail.data : Object.values(rawDetail || {}));
 
     // Escape HTML agar data pendaftar tidak bisa menyisipkan markup/script
     function esc(v) {
@@ -435,9 +479,11 @@
 
     function fmtDate(v, withTime) {
         if (!v) return '-';
+        const dt = new Date(v);
+        if (isNaN(dt.getTime())) return '-';
         const opt = { day: '2-digit', month: 'short', year: 'numeric' };
         if (withTime) { opt.hour = '2-digit'; opt.minute = '2-digit'; }
-        return new Date(v).toLocaleString('id-ID', opt);
+        return dt.toLocaleString('id-ID', opt);
     }
 
     function fmtRupiah(n) {
@@ -477,7 +523,7 @@
     }
 
     function vfOpenDetail(id) {
-        const d = detailData.find(x => x.id === id);
+        const d = detailData.find(x => Number(x.id) === Number(id));
         if (!d) return;
 
         document.getElementById('vfModalTitle').textContent = 'Detail — ' + (d.mosque_name || '');
@@ -575,7 +621,7 @@
             ? programsArray.map(prog => `<span class="vf-tag" style="display:inline-block; margin-right:4px; margin-bottom:4px;">${esc(prog)}</span>`).join('')
             : '<span style="color: #9ca3af; font-style: italic; font-size: 0.9rem;">Tidak ada program yang dipilih.</span>';
 
-        const formattedDate = d.created_at ? new Date(d.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+        const formattedDate = d.created_at ? fmtDate(d.created_at, false) : '-';
         const mosqueInitials = (d.mosque_name || 'MS').substring(0, 2).toUpperCase();
 
         document.getElementById('vfModalBody').innerHTML = `
