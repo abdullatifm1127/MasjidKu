@@ -5,81 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pengaturan Tema - {{ $mosque->mosque_name ?? 'SIM Masjid' }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/adminmasjid/berandaAdmin.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        .ba2-theme-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .ba2-theme-card {
-            background: #ffffff;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            position: relative;
-        }
-        .ba2-theme-card:hover:not(.locked) {
-            border-color: #047857;
-            transform: translateY(-3px);
-        }
-        .ba2-theme-preview {
-            height: 110px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            color: white;
-            text-align: center;
-            padding: 0 10px;
-        }
-        /* Preview warna untuk setiap tema termasuk default */
-        .theme-preview-default { background: linear-gradient(135deg, #0d9488, #0f766e); }
-        .theme-preview-emerald { background: linear-gradient(135deg, #064e3b, #047857); }
-        .theme-preview-terracotta { background: linear-gradient(135deg, #9A3412, #C2410C); }
-        .theme-preview-corporate { background: linear-gradient(135deg, #020617, #1e3a8a); }
-
-        .ba2-theme-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 5px;
-        }
-        .ba2-theme-desc {
-            font-size: 13px;
-            color: #64748b;
-        }
-        .ba2-theme-card.selected {
-            border-color: #047857;
-            background-color: #f0fdf4;
-            box-shadow: 0 0 0 2px #047857;
-        }
-        .ba2-theme-card.locked {
-            opacity: 0.65;
-            cursor: not-allowed;
-            background-color: #f8fafc;
-        }
-        .ba2-locked-badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: #ef4444;
-            color: white;
-            padding: 4px 10px;
-            font-size: 11px;
-            font-weight: bold;
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/adminmasjid/temaAdmin.css') }}?v={{ time() }}">
 </head>
 <body class="ba2-body" id="ba2Body">
 
@@ -186,92 +115,230 @@
             </div>
         </header>
 
+        @php
+            // Daftar tema. Key harus sama dengan nilai yang diterima controller (admin.tema.update).
+            $themes = [
+                'default'    => ['name' => 'Default Asli',        'tag' => 'Bawaan',     'locked' => false, 'desc' => 'Tampilan asli bawaan sistem tanpa modifikasi warna khusus.'],
+                'emerald'    => ['name' => 'Emerald Minimalist',  'tag' => 'Minimalis',  'locked' => true,  'desc' => 'Nuansa hijau zamrud yang bersih dan segar.'],
+                'terracotta' => ['name' => 'Warm Terracotta',     'tag' => 'Nusantara',  'locked' => true,  'desc' => 'Nuansa terakota hangat khas masjid tradisional.'],
+                'corporate'  => ['name' => 'Corporate Navy',      'tag' => 'Dark Mode',  'locked' => true,  'desc' => 'Gaya korporat dark mode yang elegan dan profesional.'],
+            ];
+
+            $currentTheme = strtolower(trim(optional($mosque)->theme ?? 'default'));
+            $activeKey    = in_array($currentTheme, ['', 'default'], true) ? 'default' : $currentTheme;
+            if (!isset($themes[$activeKey])) {
+                $activeKey = 'default';
+            }
+
+            $isBerbayar = (optional($mosque)->package_type ?? 'free') !== 'free'
+                && strtolower(trim(optional($mosque)->payment_status ?? '')) === 'approved';
+
+            // Kerangka mini landing page, dipakai di kartu & banner
+            $mockHtml = '<div class="tm-mock"><div class="tm-mock-bar"><i></i><i></i><i></i></div>'
+                . '<div class="tm-mock-nav"><b></b><span><i></i><i></i><i></i></span></div>'
+                . '<div class="tm-mock-hero"><b></b><span></span><em></em></div>'
+                . '<div class="tm-mock-cards"><i></i><i></i><i></i></div></div>';
+        @endphp
+
         <main class="ba2-content">
-            <div class="ba2-card">
-                <div class="ba2-card-head">
-                    <span class="ba2-card-title">Pilihan Tema Landing Page</span>
-                </div>
-                <div class="ba2-card-body">
-                    <p style="color: #64748b; font-size: 14px; margin-bottom: 15px;">Klik salah satu tema di bawah ini untuk langsung menerapkan dan melihat tampilan halaman utama masjid.</p>
-                    
-                    @php
-                        $currentTheme = strtolower(trim(optional($mosque)->theme ?? 'default'));
-                        $isBerbayar = (optional($mosque)->package_type ?? 'free') !== 'free'
-                            && strtolower(trim(optional($mosque)->payment_status ?? '')) === 'approved';
-                    @endphp
+            <div class="tm-page">
 
-                    @if(!$isBerbayar)
-                        <div style="background: #fffbeb; border: 1px solid #fde68a; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; color: #92400e; font-size: 14px;">
-                            <i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px;"></i> Anda menggunakan <b>Paket Free</b>. Pilihan tema kustom (Emerald, Terracotta, Corporate) terkunci. Upgrade ke paket berbayar untuk membuka semua tema.
-                        </div>
-                    @endif
+                {{-- ===== Banner tema aktif ===== --}}
+                <section class="tm-active tm-theme-{{ $activeKey }}" id="tmActive" aria-live="polite">
+                    <div class="tm-active-info">
+                        <span class="tm-active-label"><i class="fa-solid fa-circle-check"></i> Tema aktif</span>
+                        <div class="tm-active-name" id="tmActiveName">{{ $themes[$activeKey]['name'] }}</div>
+                        <div class="tm-active-tag" id="tmActiveDesc">{{ $themes[$activeKey]['desc'] }}</div>
 
-                    <div class="ba2-theme-grid">
-                        <!-- Tema 0: Default Original (Selalu Bisa Dipilih) -->
-                        <div class="ba2-theme-card {{ in_array($currentTheme, ['', 'default']) ? 'selected' : '' }}" onclick="changeTheme('default', this, false)">
-                            <div class="ba2-theme-preview theme-preview-default">Default Bawaan</div>
-                            <div class="ba2-theme-title">Default Asli</div>
-                            <div class="ba2-theme-desc">Tampilan asli bawaan sistem tanpa modifikasi warna khusus.</div>
-                        </div>
-
-                        <!-- Tema 1: Emerald -->
-                        <div class="ba2-theme-card {{ !$isBerbayar ? 'locked' : '' }} {{ $currentTheme == 'emerald' ? 'selected' : '' }}" onclick="changeTheme('emerald', this, {{ $isBerbayar ? 'false' : 'true' }})">
-                            @if(!$isBerbayar)<span class="ba2-locked-badge"><i class="fa-solid fa-lock"></i> Locked</span>@endif
-                            <div class="ba2-theme-preview theme-preview-emerald">Modern Minimalis</div>
-                            <div class="ba2-theme-title">Emerald Minimalist</div>
-                            <div class="ba2-theme-desc">Nuansa hijau zamrud yang bersih dan segar.</div>
-                        </div>
-
-                        <!-- Tema 2: Terracotta -->
-                        <div class="ba2-theme-card {{ !$isBerbayar ? 'locked' : '' }} {{ $currentTheme == 'terracotta' ? 'selected' : '' }}" onclick="changeTheme('terracotta', this, {{ $isBerbayar ? 'false' : 'true' }})">
-                            @if(!$isBerbayar)<span class="ba2-locked-badge"><i class="fa-solid fa-lock"></i> Locked</span>@endif
-                            <div class="ba2-theme-preview theme-preview-terracotta">Klasik Nusantara</div>
-                            <div class="ba2-theme-title">Warm Terracotta</div>
-                            <div class="ba2-theme-desc">Nuansa terakota hangat khas masjid tradisional.</div>
-                        </div>
-
-                        <!-- Tema 3: Corporate -->
-                        <div class="ba2-theme-card {{ !$isBerbayar ? 'locked' : '' }} {{ $currentTheme == 'corporate' ? 'selected' : '' }}" onclick="changeTheme('corporate', this, {{ $isBerbayar ? 'false' : 'true' }})">
-                            @if(!$isBerbayar)<span class="ba2-locked-badge"><i class="fa-solid fa-lock"></i> Locked</span>@endif
-                            <div class="ba2-theme-preview theme-preview-corporate">Executive Professional</div>
-                            <div class="ba2-theme-title">Corporate Navy</div>
-                            <div class="ba2-theme-desc">Gaya korporat dark mode elegan.</div>
+                        <div class="tm-active-actions">
+                            @if(!empty($mosque->slug))
+                                <a href="{{ url('masjid/' . $mosque->slug) }}" target="_blank" rel="noopener" class="tm-btn tm-btn-light">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Lihat Landing Page
+                                </a>
+                            @endif
                         </div>
                     </div>
+                    <div class="tm-active-thumb" aria-hidden="true">{!! $mockHtml !!}</div>
+                </section>
 
-                    <script>
-                        function changeTheme(themeName, element, isLocked) {
-                            if (isLocked) {
-                                alert("Tema ini terkunci! Fitur ganti tema hanya tersedia untuk masjid berbayar.");
-                                return;
-                            }
+                {{-- ===== Info paket Free ===== --}}
+                @if(!$isBerbayar)
+                    <div class="tm-upgrade">
+                        <span class="tm-upgrade-icon"><i class="fa-solid fa-lock"></i></span>
+                        <div class="tm-upgrade-text">
+                            Anda menggunakan <b>Paket Free</b>. Tema kustom (Emerald, Terracotta, Corporate) masih terkunci.
+                            Upgrade ke paket berbayar untuk membuka semua tema.
+                        </div>
+                        <a href="{{ route('masjid.perpanjangan.create') }}" class="tm-btn tm-btn-amber">
+                            <i class="fa-solid fa-rocket"></i> Upgrade Paket
+                        </a>
+                    </div>
+                @endif
 
-                            fetch("{{ route('admin.tema.update') }}", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                                },
-                                body: JSON.stringify({ theme: themeName })
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    document.querySelectorAll('.ba2-theme-card').forEach(card => card.classList.remove('selected'));
-                                    element.classList.add('selected');
-                                    alert("Tema berhasil diubah! Silakan refresh halaman web masjid Anda.");
-                                } else {
-                                    alert(data.message || "Gagal mengubah tema.");
-                                }
-                            })
-                            .catch(error => {
-                                console.error("Error:", error);
-                            });
-                        }
-                    </script>
-                </div>
+                {{-- ===== Pilihan tema ===== --}}
+                <section>
+                    <div class="tm-section-head" style="margin-bottom: 18px;">
+                        <h2>Pilih Tema Landing Page</h2>
+                        <p>Klik salah satu tema untuk langsung menerapkannya pada halaman utama masjid.</p>
+                    </div>
+
+                    <div class="tm-grid" id="tmGrid">
+                        @foreach($themes as $key => $t)
+                            @php
+                                $locked   = $t['locked'] && !$isBerbayar;
+                                $selected = $key === $activeKey;
+                            @endphp
+                            <button type="button"
+                                    class="tm-card tm-theme-{{ $key }} {{ $selected ? 'is-selected' : '' }} {{ $locked ? 'is-locked' : '' }}"
+                                    data-theme="{{ $key }}"
+                                    data-name="{{ $t['name'] }}"
+                                    data-desc="{{ $t['desc'] }}"
+                                    data-locked="{{ $locked ? '1' : '0' }}"
+                                    aria-pressed="{{ $selected ? 'true' : 'false' }}">
+
+                                <span class="tm-check"><i class="fa-solid fa-check"></i> Dipakai</span>
+                                @if($locked)
+                                    <span class="tm-lock"><i class="fa-solid fa-lock"></i> Terkunci</span>
+                                @endif
+
+                                <span class="tm-preview" aria-hidden="true">{!! $mockHtml !!}</span>
+
+                                <span class="tm-body">
+                                    <span class="tm-title-row">
+                                        <span class="tm-name">{{ $t['name'] }}</span>
+                                        <span class="tm-tag">{{ $t['tag'] }}</span>
+                                    </span>
+                                    <span class="tm-desc">{{ $t['desc'] }}</span>
+                                    <span class="tm-swatches" aria-hidden="true"><i></i><i></i><i></i></span>
+
+                                    <span class="tm-cta">
+                                        <span class="tm-cta-text">
+                                            @if($selected) Sedang dipakai
+                                            @elseif($locked) Upgrade untuk membuka
+                                            @else Terapkan tema
+                                            @endif
+                                        </span>
+                                        <span class="tm-cta-icon">
+                                            <i class="fa-solid {{ $locked ? 'fa-lock' : ($selected ? 'fa-check' : 'fa-arrow-right') }}"></i>
+                                        </span>
+                                    </span>
+                                </span>
+                            </button>
+                        @endforeach
+                    </div>
+                </section>
+
             </div>
         </main>
     </div>
+
+    <div class="tm-toast-wrap" id="tmToasts" aria-live="polite"></div>
+
+    <script>
+        (function () {
+            'use strict';
+
+            const updateUrl  = @json(route('admin.tema.update'));
+            const upgradeUrl = @json(route('masjid.perpanjangan.create'));
+            const csrfToken  = @json(csrf_token());
+
+            const grid     = document.getElementById('tmGrid');
+            const banner   = document.getElementById('tmActive');
+            const toasts   = document.getElementById('tmToasts');
+
+            // ---------- toast ----------
+            function toast(message, type, action) {
+                const icons = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info' };
+                const el = document.createElement('div');
+                el.className = 'tm-toast' + (type === 'error' ? ' is-error' : type === 'info' ? ' is-info' : '');
+
+                const icon = document.createElement('i');
+                icon.className = 'fa-solid ' + (icons[type] || icons.success);
+
+                const body = document.createElement('div');
+                const text = document.createElement('div');
+                text.textContent = message;
+                body.appendChild(text);
+
+                if (action) {
+                    const a = document.createElement('a');
+                    a.href = action.href;
+                    a.textContent = action.label;
+                    if (action.blank) { a.target = '_blank'; a.rel = 'noopener'; }
+                    body.appendChild(a);
+                }
+
+                el.appendChild(icon);
+                el.appendChild(body);
+                toasts.appendChild(el);
+
+                setTimeout(() => {
+                    el.classList.add('is-leaving');
+                    setTimeout(() => el.remove(), 260);
+                }, 5000);
+            }
+
+            // ---------- tandai kartu terpilih + perbarui banner ----------
+            function markSelected(card) {
+                grid.querySelectorAll('.tm-card').forEach(c => {
+                    const on = c === card;
+                    c.classList.toggle('is-selected', on);
+                    c.setAttribute('aria-pressed', on ? 'true' : 'false');
+
+                    const locked = c.dataset.locked === '1';
+                    const txt  = c.querySelector('.tm-cta-text');
+                    const icon = c.querySelector('.tm-cta-icon i');
+                    if (txt)  txt.textContent = on ? 'Sedang dipakai' : (locked ? 'Upgrade untuk membuka' : 'Terapkan tema');
+                    if (icon) icon.className = 'fa-solid ' + (on ? 'fa-check' : (locked ? 'fa-lock' : 'fa-arrow-right'));
+                });
+
+                banner.className = 'tm-active tm-theme-' + card.dataset.theme;
+                document.getElementById('tmActiveName').textContent = card.dataset.name;
+                document.getElementById('tmActiveDesc').textContent = card.dataset.desc;
+            }
+
+            // ---------- ganti tema ----------
+            async function applyTheme(card) {
+                if (card.classList.contains('is-loading') || card.classList.contains('is-selected')) return;
+
+                if (card.dataset.locked === '1') {
+                    toast('Tema ini terkunci. Fitur ganti tema hanya tersedia untuk masjid berbayar.', 'info',
+                          { href: upgradeUrl, label: 'Upgrade paket sekarang' });
+                    return;
+                }
+
+                card.classList.add('is-loading');
+                try {
+                    const res = await fetch(updateUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        body: JSON.stringify({ theme: card.dataset.theme })
+                    });
+
+                    const data = await res.json().catch(() => null);
+
+                    if (!res.ok || !data || !data.success) {
+                        throw new Error((data && data.message) ? data.message : 'Gagal mengubah tema (kode ' + res.status + ').');
+                    }
+
+                    markSelected(card);
+                    toast('Tema "' + card.dataset.name + '" berhasil diterapkan. Muat ulang halaman masjid Anda untuk melihatnya.', 'success');
+                } catch (err) {
+                    toast(err.message || 'Terjadi kesalahan jaringan. Silakan coba lagi.', 'error');
+                } finally {
+                    card.classList.remove('is-loading');
+                }
+            }
+
+            grid.addEventListener('click', function (e) {
+                const card = e.target.closest('.tm-card');
+                if (card) applyTheme(card);
+            });
+        })();
+    </script>
 </body>
 </html>

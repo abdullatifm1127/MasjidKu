@@ -29,73 +29,73 @@
                 <div class="ba2-brand-sub">{{ $mosque->city ?? 'Baitul Digital' }}</div>
             </div>
         </div>
-{{-- Nav --}}
-<nav class="ba2-nav">
-    <a href="{{ route('admin.dashboard') }}" class="ba2-nav-item {{ request()->routeIs('admin.dashboard*') ? 'active' : '' }}">
-        <span class="ba2-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
-        <span class="ba2-nav-label">Dashboard</span>
-    </a>
 
-    <a href="{{ route('admin.landing-page') }}" class="ba2-nav-item {{ request()->routeIs('admin.landing-page*') ? 'active' : '' }}">
-        <span class="ba2-nav-icon"><i class="fa-solid fa-globe"></i></span>
-        <span class="ba2-nav-label">Landing Page</span>
-    </a>
+        {{-- Nav --}}
+        <nav class="ba2-nav">
+            <a href="{{ route('admin.dashboard') }}" class="ba2-nav-item {{ request()->routeIs('admin.dashboard*') ? 'active' : '' }}">
+                <span class="ba2-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
+                <span class="ba2-nav-label">Dashboard</span>
+            </a>
 
-    <a href="{{ route('admin.profil-masjid') }}" class="ba2-nav-item {{ request()->routeIs('admin.profil-masjid*') ? 'active' : '' }}">
-        <span class="ba2-nav-icon"><i class="fa-solid fa-mosque"></i></span>
-        <span class="ba2-nav-label">Profil Masjid</span>
-    </a>
+            <a href="{{ route('admin.landing-page') }}" class="ba2-nav-item {{ request()->routeIs('admin.landing-page*') ? 'active' : '' }}">
+                <span class="ba2-nav-icon"><i class="fa-solid fa-globe"></i></span>
+                <span class="ba2-nav-label">Landing Page</span>
+            </a>
 
-    <a href="{{ route('admin.jadwal-sholat') }}" class="ba2-nav-item {{ request()->routeIs('admin.jadwal-sholat*') ? 'active' : '' }}">
-        <span class="ba2-nav-icon"><i class="fa-solid fa-clock"></i></span>
-        <span class="ba2-nav-label">Jadwal Shalat</span>
-    </a>
+            <a href="{{ route('admin.profil-masjid') }}" class="ba2-nav-item {{ request()->routeIs('admin.profil-masjid*') ? 'active' : '' }}">
+                <span class="ba2-nav-icon"><i class="fa-solid fa-mosque"></i></span>
+                <span class="ba2-nav-label">Profil Masjid</span>
+            </a>
 
-    {{-- MENU PENGUMUMAN DINAMIS --}}
-    @php
-        $pengumumanAktif = isset($mosque)
-            ? \App\Models\Pengumuman::where('mosque_id', $mosque->id)->active()->count()
-            : 0;
-    @endphp
-    <a href="{{ route('admin.pengumuman') }}" class="ba2-nav-item {{ request()->routeIs('admin.pengumuman*') ? 'active' : '' }}">
-        <span class="ba2-nav-icon"><i class="fa-solid fa-bullhorn"></i></span>
-        <span class="ba2-nav-label">Pengumuman</span>
-        @if($pengumumanAktif > 0)
-            <span class="ba2-nav-badge" style="background: #e74c3c; color: white; padding: 2px 6px; border-radius: 10px; font-size: 11px; font-weight: bold;">{{ $pengumumanAktif }}</span>
-        @endif
-    </a>
+            <a href="{{ route('admin.jadwal-sholat') }}" class="ba2-nav-item {{ request()->routeIs('admin.jadwal-sholat*') ? 'active' : '' }}">
+                <span class="ba2-nav-icon"><i class="fa-solid fa-clock"></i></span>
+                <span class="ba2-nav-label">Jadwal Shalat</span>
+            </a>
 
-    <a href="{{ route('admin.acara') }}" class="ba2-nav-item {{ request()->routeIs('admin.acara*') ? 'active' : '' }}">
-        <span class="ba2-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
-        <span class="ba2-nav-label">Kegiatan &amp; Acara</span>
-    </a>
+            {{-- MENU PENGUMUMAN DINAMIS --}}
+            @php
+                $pengumumanAktif = isset($mosque)
+                    ? \App\Models\Pengumuman::where('mosque_id', $mosque->id)->active()->count()
+                    : 0;
+            @endphp
+            <a href="{{ route('admin.pengumuman') }}" class="ba2-nav-item {{ request()->routeIs('admin.pengumuman*') ? 'active' : '' }}">
+                <span class="ba2-nav-icon"><i class="fa-solid fa-bullhorn"></i></span>
+                <span class="ba2-nav-label">Pengumuman</span>
+                @if($pengumumanAktif > 0)
+                    <span class="ba2-nav-badge" style="background: #e74c3c; color: white; padding: 2px 6px; border-radius: 10px; font-size: 11px; font-weight: bold;">{{ $pengumumanAktif }}</span>
+                @endif
+            </a>
 
-    {{-- MENU DONASI DINAMIS BERDASARKAN PAKET MASJID --}}
-    @if(isset($mosque) && $mosque->package_type === 'free')
-        <a href="{{ route('masjid.perpanjangan.create') }}" class="ba2-nav-item {{ request()->routeIs('masjid.perpanjangan*') ? 'active' : '' }}" style="opacity: 0.8;" title="Upgrade paket untuk membuka fitur donasi">
-            <span class="ba2-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
-            <span class="ba2-nav-label">Donasi</span>
-            <span class="lp-nav-soon" style="background: #e74c3c; color: white;">Locked</span>
-        </a>
-    @else
-        <a href="{{ route('admin.donasi') }}" class="ba2-nav-item {{ request()->routeIs('admin.donasi*') ? 'active' : '' }}">
-            <span class="ba2-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
-            <span class="ba2-nav-label">Donasi</span>
-            <span class="lp-nav-soon" style="background: #27ae60; color: white;">Aktif</span>
-        </a>
-    @endif
+            <a href="{{ route('admin.acara') }}" class="ba2-nav-item {{ request()->routeIs('admin.acara*') ? 'active' : '' }}">
+                <span class="ba2-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
+                <span class="ba2-nav-label">Kegiatan &amp; Acara</span>
+            </a>
 
-    <a href="{{ route('admin.jamaah') }}" class="ba2-nav-item {{ request()->routeIs('admin.jamaah*') ? 'active' : '' }}">
-        <span class="ba2-nav-icon"><i class="fa-solid fa-users"></i></span>
-        <span class="ba2-nav-label">Data Jamaah</span>
-    </a>
+            {{-- MENU DONASI DINAMIS BERDASARKAN PAKET MASJID --}}
+            @if(isset($mosque) && $mosque->package_type === 'free')
+                <a href="{{ route('masjid.perpanjangan.create') }}" class="ba2-nav-item {{ request()->routeIs('masjid.perpanjangan*') ? 'active' : '' }}" style="opacity: 0.8;" title="Upgrade paket untuk membuka fitur donasi">
+                    <span class="ba2-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+                    <span class="ba2-nav-label">Donasi</span>
+                    <span class="lp-nav-soon" style="background: #e74c3c; color: white;">Locked</span>
+                </a>
+            @else
+                <a href="{{ route('admin.donasi') }}" class="ba2-nav-item {{ request()->routeIs('admin.donasi*') ? 'active' : '' }}">
+                    <span class="ba2-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+                    <span class="ba2-nav-label">Donasi</span>
+                    <span class="lp-nav-soon" style="background: #27ae60; color: white;">Aktif</span>
+                </a>
+            @endif
 
-    {{-- MENU TEMA TAMPILAN (DITAMBAHKAN DI SINI) --}}
-    <a href="{{ route('admin.tema') }}" class="ba2-nav-item {{ request()->routeIs('admin.tema*') ? 'active' : '' }}">
-        <span class="ba2-nav-icon"><i class="fa-solid fa-palette"></i></span>
-        <span class="ba2-nav-label">Tema Tampilan</span>
-    </a>
-</nav>
+            <a href="{{ route('admin.jamaah') }}" class="ba2-nav-item {{ request()->routeIs('admin.jamaah*') ? 'active' : '' }}">
+                <span class="ba2-nav-icon"><i class="fa-solid fa-users"></i></span>
+                <span class="ba2-nav-label">Data Jamaah</span>
+            </a>
+
+            <a href="{{ route('admin.tema') }}" class="ba2-nav-item {{ request()->routeIs('admin.tema*') ? 'active' : '' }}">
+                <span class="ba2-nav-icon"><i class="fa-solid fa-palette"></i></span>
+                <span class="ba2-nav-label">Tema Tampilan</span>
+            </a>
+        </nav>
 
         {{-- User footer --}}
         <div class="ba2-user">
@@ -139,38 +139,70 @@
         {{-- Content --}}
         <main class="ba2-content pm-content">
 
+            @php
+                // Hitung kelengkapan profil (untuk progress di hero)
+                $cekField = ['mosque_name','tagline','founded','capacity','description','about_vision',
+                             'imam_name','chairman_name','address','kelurahan','kecamatan','city','province','phone','email'];
+                $terisi = 0;
+                foreach ($cekField as $f) {
+                    if (!empty($mosque->$f ?? null)) $terisi++;
+                }
+                if (!empty($mosque->photo ?? null)) { $terisi++; }
+                $totalCek   = count($cekField) + 1;
+                $kelengkapan = (int) round($terisi / $totalCek * 100);
+
+                // Helper URL foto
+                $fotoUrl = function ($path) {
+                    if (empty($path)) return null;
+                    return \Illuminate\Support\Str::startsWith($path, ['http://', 'https://', '/'])
+                        ? $path
+                        : asset('storage/' . ltrim($path, '/'));
+                };
+                $fotoUtama = $fotoUrl($mosque->photo ?? null);
+                $fotoKedua = $fotoUrl($mosque->photo_secondary ?? null);
+            @endphp
+
             {{-- Alert sukses / error --}}
             @if(session('success'))
                 <div class="pm-alert pm-alert-success">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
+                    <i class="fa-solid fa-circle-check"></i>
                     {{ session('success') }}
                 </div>
             @endif
             @if($errors->any())
                 <div class="pm-alert pm-alert-error">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
-                    </svg>
+                    <i class="fa-solid fa-circle-exclamation"></i>
                     Terdapat kesalahan. Periksa kembali isian di bawah.
                 </div>
             @endif
 
+            {{-- Hero ringkas --}}
+            <div class="pm-hero">
+                <div class="pm-hero-icon">
+                    <i class="fa-solid fa-mosque" style="font-size:24px;"></i>
+                </div>
+                <div class="pm-hero-text">
+                    <div class="pm-hero-name">{{ $mosque->mosque_name ?? 'Nama Masjid' }}</div>
+                    <div class="pm-hero-sub">
+                        {{ collect([$mosque->city ?? null, $mosque->province ?? null])->filter()->implode(', ') ?: 'Lengkapi profil masjid Anda' }}
+                    </div>
+                </div>
+                <div class="pm-hero-progress">
+                    <div class="pm-hero-progress-top">
+                        <span>Kelengkapan profil</span>
+                        <strong>{{ $kelengkapan }}%</strong>
+                    </div>
+                    <div class="pm-hero-bar"><span style="width: {{ $kelengkapan }}%"></span></div>
+                </div>
+            </div>
+
             {{-- Tab Navigation --}}
-            <div class="pm-tabs">
-                <button class="pm-tab active" data-tab="identitas" type="button">Identitas</button>
-                <button class="pm-tab" data-tab="pengurus" type="button">Pengurus</button>
-                <button class="pm-tab" data-tab="lokasi" type="button">Lokasi &amp; Kontak</button>
-                <button class="pm-tab" data-tab="program" type="button">Program</button>
-                <button class="pm-tab pm-tab-preview" data-tab="preview" type="button">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="14" height="14">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.641 0-8.573-3.007-9.964-7.178z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                    Preview
-                </button>
-                      
+            <div class="pm-tabs" role="tablist">
+                <button class="pm-tab active" data-tab="identitas" type="button" role="tab"><i class="fa-solid fa-id-card"></i> Identitas</button>
+                <button class="pm-tab" data-tab="pengurus" type="button" role="tab"><i class="fa-solid fa-user-tie"></i> Pengurus</button>
+                <button class="pm-tab" data-tab="lokasi" type="button" role="tab"><i class="fa-solid fa-location-dot"></i> Lokasi &amp; Kontak</button>
+                <button class="pm-tab" data-tab="program" type="button" role="tab"><i class="fa-solid fa-list-check"></i> Program</button>
+                <button class="pm-tab pm-tab-preview" data-tab="preview" type="button" role="tab"><i class="fa-solid fa-eye"></i> Preview</button>
             </div>
 
             <form id="pmForm" method="POST" action="{{ route('admin.profil-masjid.update') }}" enctype="multipart/form-data">
@@ -179,17 +211,78 @@
 
                 {{-- ===== TAB: IDENTITAS ===== --}}
                 <div class="pm-tab-content active" id="tab-identitas">
+
+                    {{-- Foto --}}
                     <div class="pm-section">
                         <div class="pm-section-title">
-                            <span class="pm-section-bar"></span>
-                            Identitas Masjid
+                            <span class="pm-section-title-icon"><i class="fa-solid fa-image"></i></span>
+                            Foto masjid
                         </div>
+                        <p class="pm-section-desc">Foto ini tampil di halaman publik. Gunakan foto landscape yang terang dan jelas.</p>
+
+                        <div class="pm-photo-grid">
+                            @php
+                                $photoFields = [
+                                    ['name' => 'photo',           'title' => 'Foto utama',     'tag' => 'Section Profil',   'alt' => false, 'url' => $fotoUtama, 'hint' => 'Ditampilkan di section Profil pada Landing Page.'],
+                                    ['name' => 'photo_secondary', 'title' => 'Foto pendukung', 'tag' => 'Kotak kanan',      'alt' => true,  'url' => $fotoKedua, 'hint' => 'Ditampilkan di kotak sebelah kanan Landing Page.'],
+                                ];
+                            @endphp
+
+                            @foreach($photoFields as $pf)
+                                <div class="pm-photo-item">
+                                    <div class="pm-photo-label">
+                                        {{ $pf['title'] }}
+                                        <span class="pm-photo-tag {{ $pf['alt'] ? 'alt' : '' }}">{{ $pf['tag'] }}</span>
+                                    </div>
+
+                                    <label class="pm-dropzone {{ $pf['url'] ? 'has-image' : '' }}"
+                                           data-dropzone data-original="{{ $pf['url'] }}">
+                                        <input type="file" id="{{ $pf['name'] }}" name="{{ $pf['name'] }}"
+                                               accept="image/png,image/jpeg,image/webp,image/avif">
+
+                                        <div class="pm-dropzone-empty">
+                                            <div class="pm-dropzone-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                                            <div class="pm-dropzone-title">Tarik foto ke sini atau <u>pilih dari perangkat</u></div>
+                                            <div class="pm-dropzone-note">PNG, JPG, WebP, AVIF · maksimal 2 MB</div>
+                                        </div>
+
+                                        <div class="pm-dropzone-preview">
+                                            <img src="{{ $pf['url'] }}" alt="Pratinjau {{ strtolower($pf['title']) }}" data-preview>
+                                            <span class="pm-photo-badge">Foto baru</span>
+                                            <div class="pm-dropzone-meta">
+                                                <div style="min-width:0;">
+                                                    <div class="pm-dropzone-filename" data-filename>{{ $pf['url'] ? 'Foto saat ini' : '' }}</div>
+                                                    <div class="pm-dropzone-filesize" data-filesize></div>
+                                                </div>
+                                                <div class="pm-dropzone-actions">
+                                                    <button type="button" class="pm-photo-btn" data-change><i class="fa-solid fa-arrows-rotate"></i> Ganti</button>
+                                                    <button type="button" class="pm-photo-btn danger" data-clear hidden><i class="fa-solid fa-xmark"></i> Batal</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </label>
+
+                                    <div class="pm-photo-error" data-error></div>
+                                    <span class="pm-hint" style="display:block;margin-top:8px;">{{ $pf['hint'] }}</span>
+                                    @error($pf['name'])
+                                        <span class="pm-field-error">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Identitas --}}
+                    <div class="pm-section">
+                        <div class="pm-section-title">
+                            <span class="pm-section-title-icon"><i class="fa-solid fa-mosque"></i></span>
+                            Identitas masjid
+                        </div>
+                        <p class="pm-section-desc">Nama, slogan, dan cerita singkat tentang masjid.</p>
 
                         <div class="pm-grid-2">
                             <div class="pm-field">
-                                <label class="pm-label" for="mosque_name">
-                                    NAMA MASJID <span class="pm-required">*</span>
-                                </label>
+                                <label class="pm-label" for="mosque_name">Nama masjid <span class="pm-required">*</span></label>
                                 <input type="text" id="mosque_name" name="mosque_name"
                                        class="pm-input @error('mosque_name') pm-input-error @enderror"
                                        value="{{ old('mosque_name', $mosque->mosque_name ?? '') }}"
@@ -200,94 +293,64 @@
                             </div>
 
                             <div class="pm-field">
-                                <label class="pm-label" for="arabic_name">NAMA ARAB</label>
+                                <label class="pm-label" for="arabic_name">Nama Arab</label>
                                 <input type="text" id="arabic_name" name="arabic_name"
                                        class="pm-input pm-input-rtl"
                                        value="{{ old('arabic_name', $mosque->arabic_name ?? '') }}"
-                                       placeholder="الاسم بالعربية"
-                                       dir="rtl">
-                                <span style="font-size:0.72rem;color:var(--text-light);">Nama ini juga otomatis tampil di Hero Landing Page.</span>
+                                       placeholder="الاسم بالعربية" dir="rtl">
+                                <span class="pm-hint">Nama ini juga otomatis tampil di Hero Landing Page.</span>
                             </div>
                         </div>
 
                         <div class="pm-field">
-                            <label class="pm-label" for="tagline">TAGLINE / SLOGAN</label>
-                            <input type="text" id="tagline" name="tagline"
-                                   class="pm-input"
+                            <label class="pm-label" for="tagline">Tagline / slogan</label>
+                            <input type="text" id="tagline" name="tagline" class="pm-input"
                                    value="{{ old('tagline', $mosque->tagline ?? '') }}"
                                    placeholder="Slogan atau tagline masjid">
                         </div>
 
                         <div class="pm-grid-2">
                             <div class="pm-field">
-                                <label class="pm-label" for="founded">TAHUN BERDIRI</label>
-                                <input type="number" id="founded" name="founded"
-                                       class="pm-input"
+                                <label class="pm-label" for="founded">Tahun berdiri</label>
+                                <input type="number" id="founded" name="founded" class="pm-input"
                                        value="{{ old('founded', $mosque->founded ?? '') }}"
-                                       placeholder="Contoh: 1987"
-                                       min="1000" max="{{ date('Y') }}">
+                                       placeholder="Contoh: 1987" min="1000" max="{{ date('Y') }}">
                             </div>
 
                             <div class="pm-field">
-                                <label class="pm-label" for="capacity">KAPASITAS JAMAAH</label>
-                                <input type="text" id="capacity" name="capacity"
-                                       class="pm-input"
+                                <label class="pm-label" for="capacity">Kapasitas jamaah</label>
+                                <input type="text" id="capacity" name="capacity" class="pm-input"
                                        value="{{ old('capacity', $mosque->capacity ?? '') }}"
                                        placeholder="Contoh: 2.500 jamaah">
                             </div>
                         </div>
 
                         <div class="pm-field">
-                            <label class="pm-label" for="description">DESKRIPSI / SEJARAH SINGKAT</label>
-                            <textarea id="description" name="description"
-                                      class="pm-textarea"
-                                      rows="4"
+                            <label class="pm-label" for="description">Deskripsi / sejarah singkat</label>
+                            <textarea id="description" name="description" class="pm-textarea" rows="4"
                                       placeholder="Ceritakan sedikit tentang masjid ini...">{{ old('description', $mosque->description ?? '') }}</textarea>
                         </div>
 
                         <div class="pm-field">
-                            <label class="pm-label" for="vision">VISI &amp; MISI</label>
-                            <textarea id="vision" name="vision"
-                                      class="pm-textarea"
-                                      rows="3"
+                            <label class="pm-label" for="vision">Visi &amp; misi</label>
+                            <textarea id="vision" name="vision" class="pm-textarea" rows="3"
                                       placeholder="Visi dan misi masjid Anda...">{{ old('vision', $mosque->about_vision ?? '') }}</textarea>
                         </div>
-
-                        <div class="pm-field">
-                            <label class="pm-label" for="photo">FOTO MASJID</label>
-                            <input type="file" id="photo" name="photo" accept="image/*" class="pm-input">
-                            <span style="font-size:0.72rem;color:var(--text-light);">PNG, JPG, AVIF, WebP · Maks. 2MB · Ditampilkan di section Profil pada Landing Page.</span>
-                        </div>
-
-                        <div class="pm-field" style="margin-top: 15px;">
-                            <label class="pm-label" for="photo_secondary">FOTO KEDUA (PENDUKUNG)</label>
-                            <input type="file" id="photo_secondary" name="photo_secondary" accept="image/*" class="pm-input">
-                            <span style="font-size:0.72rem;color:var(--text-light);">PNG, JPG, AVIF, WebP · Maks. 2MB · Ditampilkan di kotak sebelah kanan Landing Page.</span>
-                        </div>
-                    </div><!-- /.pm-section -->
-                </div><!-- /#tab-identitas -->
-
-                {{-- ===== FOOTER ACTIONS ===== --}}
-                <div class="pm-footer" id="pmFooter">
-                    <span class="pm-footer-status" id="pmStatus">Perubahan belum disimpan</span>
-                    <div class="pm-footer-actions">
-                        <button type="button" class="pm-btn-reset" id="pmReset">Reset</button>
-                        <button type="submit" class="pm-btn-save">Simpan Perubahan</button>
                     </div>
-                </div>
+                </div><!-- /#tab-identitas -->
 
                 {{-- ===== TAB: PENGURUS ===== --}}
                 <div class="pm-tab-content" id="tab-pengurus">
                     <div class="pm-section">
                         <div class="pm-section-title">
-                            <span class="pm-section-bar"></span>
-                            Struktur Pengurus
+                            <span class="pm-section-title-icon"><i class="fa-solid fa-user-tie"></i></span>
+                            Struktur pengurus
                         </div>
+                        <p class="pm-section-desc">Data imam, ketua DKM, dan pengurus inti.</p>
 
                         <div class="pm-field">
-                            <label class="pm-label" for="organization_name">NAMA ORGANISASI / YAYASAN</label>
-                            <input type="text" id="organization_name" name="organization_name"
-                                   class="pm-input"
+                            <label class="pm-label" for="organization_name">Nama organisasi / yayasan</label>
+                            <input type="text" id="organization_name" name="organization_name" class="pm-input"
                                    value="{{ old('organization_name', $mosque->organization_name ?? '') }}"
                                    placeholder="Nama DKM / Yayasan">
                         </div>
@@ -296,9 +359,7 @@
 
                         <div class="pm-grid-2">
                             <div class="pm-field">
-                                <label class="pm-label" for="imam_name">
-                                    NAMA IMAM <span class="pm-required">*</span>
-                                </label>
+                                <label class="pm-label" for="imam_name">Nama imam <span class="pm-required">*</span></label>
                                 <input type="text" id="imam_name" name="imam_name"
                                        class="pm-input @error('imam_name') pm-input-error @enderror"
                                        value="{{ old('imam_name', $mosque->imam_name ?? '') }}"
@@ -309,9 +370,8 @@
                             </div>
 
                             <div class="pm-field">
-                                <label class="pm-label" for="imam_phone">NO. TELEPON IMAM</label>
-                                <input type="text" id="imam_phone" name="imam_phone"
-                                       class="pm-input"
+                                <label class="pm-label" for="imam_phone">No. telepon imam</label>
+                                <input type="text" id="imam_phone" name="imam_phone" class="pm-input"
                                        value="{{ old('imam_phone', $mosque->imam_phone ?? '') }}"
                                        placeholder="08xxxxxxxxxx">
                             </div>
@@ -321,9 +381,7 @@
 
                         <div class="pm-grid-2">
                             <div class="pm-field">
-                                <label class="pm-label" for="chairman_name">
-                                    NAMA KETUA <span class="pm-required">*</span>
-                                </label>
+                                <label class="pm-label" for="chairman_name">Nama ketua <span class="pm-required">*</span></label>
                                 <input type="text" id="chairman_name" name="chairman_name"
                                        class="pm-input @error('chairman_name') pm-input-error @enderror"
                                        value="{{ old('chairman_name', $mosque->chairman_name ?? '') }}"
@@ -334,9 +392,8 @@
                             </div>
 
                             <div class="pm-field">
-                                <label class="pm-label" for="chairman_phone">NO. TELEPON KETUA</label>
-                                <input type="text" id="chairman_phone" name="chairman_phone"
-                                       class="pm-input"
+                                <label class="pm-label" for="chairman_phone">No. telepon ketua</label>
+                                <input type="text" id="chairman_phone" name="chairman_phone" class="pm-input"
                                        value="{{ old('chairman_phone', $mosque->chairman_phone ?? '') }}"
                                        placeholder="08xxxxxxxxxx">
                             </div>
@@ -344,45 +401,33 @@
 
                         <div class="pm-grid-2">
                             <div class="pm-field">
-                                <label class="pm-label" for="secretary_name">NAMA SEKRETARIS</label>
-                                <input type="text" id="secretary_name" name="secretary_name"
-                                       class="pm-input"
+                                <label class="pm-label" for="secretary_name">Nama sekretaris</label>
+                                <input type="text" id="secretary_name" name="secretary_name" class="pm-input"
                                        value="{{ old('secretary_name', $mosque->secretary_name ?? '') }}"
                                        placeholder="Nama sekretaris">
                             </div>
 
                             <div class="pm-field">
-                                <label class="pm-label" for="treasurer_name">NAMA BENDAHARA</label>
-                                <input type="text" id="treasurer_name" name="treasurer_name"
-                                       class="pm-input"
+                                <label class="pm-label" for="treasurer_name">Nama bendahara</label>
+                                <input type="text" id="treasurer_name" name="treasurer_name" class="pm-input"
                                        value="{{ old('treasurer_name', $mosque->treasurer_name ?? '') }}"
                                        placeholder="Nama bendahara">
                             </div>
                         </div>
-                    </div><!-- /.pm-section -->
-                </div><!-- /#tab-pengurus -->
-
-                {{-- ===== FOOTER ACTIONS ===== --}}
-                <div class="pm-footer" id="pmFooter">
-                    <span class="pm-footer-status" id="pmStatus">Perubahan belum disimpan</span>
-                    <div class="pm-footer-actions">
-                        <button type="button" class="pm-btn-reset" id="pmReset">Reset</button>
-                        <button type="submit" class="pm-btn-save">Simpan Perubahan</button>
                     </div>
-                </div>
+                </div><!-- /#tab-pengurus -->
 
                 {{-- ===== TAB: LOKASI & KONTAK ===== --}}
                 <div class="pm-tab-content" id="tab-lokasi">
                     <div class="pm-section">
                         <div class="pm-section-title">
-                            <span class="pm-section-bar"></span>
+                            <span class="pm-section-title-icon"><i class="fa-solid fa-location-dot"></i></span>
                             Lokasi
                         </div>
+                        <p class="pm-section-desc">Alamat lengkap supaya jamaah mudah menemukan masjid.</p>
 
                         <div class="pm-field">
-                            <label class="pm-label" for="address">
-                                ALAMAT LENGKAP <span class="pm-required">*</span>
-                            </label>
+                            <label class="pm-label" for="address">Alamat lengkap <span class="pm-required">*</span></label>
                             <textarea id="address" name="address"
                                       class="pm-textarea @error('address') pm-input-error @enderror"
                                       rows="2"
@@ -394,9 +439,7 @@
 
                         <div class="pm-grid-2">
                             <div class="pm-field">
-                                <label class="pm-label" for="kelurahan">
-                                    KELURAHAN <span class="pm-required">*</span>
-                                </label>
+                                <label class="pm-label" for="kelurahan">Kelurahan <span class="pm-required">*</span></label>
                                 <input type="text" id="kelurahan" name="kelurahan"
                                        class="pm-input @error('kelurahan') pm-input-error @enderror"
                                        value="{{ old('kelurahan', $mosque->kelurahan ?? '') }}"
@@ -407,9 +450,7 @@
                             </div>
 
                             <div class="pm-field">
-                                <label class="pm-label" for="kecamatan">
-                                    KECAMATAN <span class="pm-required">*</span>
-                                </label>
+                                <label class="pm-label" for="kecamatan">Kecamatan <span class="pm-required">*</span></label>
                                 <input type="text" id="kecamatan" name="kecamatan"
                                        class="pm-input @error('kecamatan') pm-input-error @enderror"
                                        value="{{ old('kecamatan', $mosque->kecamatan ?? '') }}"
@@ -422,9 +463,7 @@
 
                         <div class="pm-grid-3">
                             <div class="pm-field">
-                                <label class="pm-label" for="city">
-                                    KOTA / KABUPATEN <span class="pm-required">*</span>
-                                </label>
+                                <label class="pm-label" for="city">Kota / kabupaten <span class="pm-required">*</span></label>
                                 <input type="text" id="city" name="city"
                                        class="pm-input @error('city') pm-input-error @enderror"
                                        value="{{ old('city', $mosque->city ?? '') }}"
@@ -435,9 +474,7 @@
                             </div>
 
                             <div class="pm-field">
-                                <label class="pm-label" for="province">
-                                    PROVINSI <span class="pm-required">*</span>
-                                </label>
+                                <label class="pm-label" for="province">Provinsi <span class="pm-required">*</span></label>
                                 <input type="text" id="province" name="province"
                                        class="pm-input @error('province') pm-input-error @enderror"
                                        value="{{ old('province', $mosque->province ?? '') }}"
@@ -448,26 +485,24 @@
                             </div>
 
                             <div class="pm-field">
-                                <label class="pm-label" for="postal_code">KODE POS</label>
-                                <input type="text" id="postal_code" name="postal_code"
-                                       class="pm-input"
+                                <label class="pm-label" for="postal_code">Kode pos</label>
+                                <input type="text" id="postal_code" name="postal_code" class="pm-input"
                                        value="{{ old('postal_code', $mosque->postal_code ?? '') }}"
                                        placeholder="12345">
                             </div>
                         </div>
-                    </div><!-- /.pm-section -->
+                    </div>
 
                     <div class="pm-section">
                         <div class="pm-section-title">
-                            <span class="pm-section-bar"></span>
+                            <span class="pm-section-title-icon"><i class="fa-solid fa-phone"></i></span>
                             Kontak
                         </div>
+                        <p class="pm-section-desc">Nomor dan email yang bisa dihubungi jamaah.</p>
 
                         <div class="pm-grid-2">
                             <div class="pm-field">
-                                <label class="pm-label" for="phone">
-                                    NO. TELEPON / WA <span class="pm-required">*</span>
-                                </label>
+                                <label class="pm-label" for="phone">No. telepon / WA <span class="pm-required">*</span></label>
                                 <input type="text" id="phone" name="phone"
                                        class="pm-input @error('phone') pm-input-error @enderror"
                                        value="{{ old('phone', $mosque->phone ?? '') }}"
@@ -478,9 +513,7 @@
                             </div>
 
                             <div class="pm-field">
-                                <label class="pm-label" for="email">
-                                    EMAIL <span class="pm-required">*</span>
-                                </label>
+                                <label class="pm-label" for="email">Email <span class="pm-required">*</span></label>
                                 <input type="email" id="email" name="email"
                                        class="pm-input @error('email') pm-input-error @enderror"
                                        value="{{ old('email', $mosque->email ?? '') }}"
@@ -490,25 +523,17 @@
                                 @enderror
                             </div>
                         </div>
-                    </div><!-- /.pm-section -->
-                </div><!-- /#tab-lokasi -->
-
-                {{-- ===== FOOTER ACTIONS ===== --}}
-                <div class="pm-footer" id="pmFooter">
-                    <span class="pm-footer-status" id="pmStatus">Perubahan belum disimpan</span>
-                    <div class="pm-footer-actions">
-                        <button type="button" class="pm-btn-reset" id="pmReset">Reset</button>
-                        <button type="submit" class="pm-btn-save">Simpan Perubahan</button>
                     </div>
-                </div>
+                </div><!-- /#tab-lokasi -->
 
                 {{-- ===== TAB: PROGRAM ===== --}}
                 <div class="pm-tab-content" id="tab-program">
                     <div class="pm-section">
                         <div class="pm-section-title">
-                            <span class="pm-section-bar"></span>
+                            <span class="pm-section-title-icon"><i class="fa-solid fa-building-columns"></i></span>
                             Fasilitas
                         </div>
+                        <p class="pm-section-desc">Pilih fasilitas yang tersedia di masjid.</p>
 
                         <div class="pm-checkbox-grid">
                             @php
@@ -525,13 +550,14 @@
                                 </label>
                             @endforeach
                         </div>
-                    </div><!-- /.pm-section -->
+                    </div>
 
                     <div class="pm-section">
                         <div class="pm-section-title">
-                            <span class="pm-section-bar"></span>
-                            Program Kegiatan
+                            <span class="pm-section-title-icon"><i class="fa-solid fa-book-quran"></i></span>
+                            Program kegiatan
                         </div>
+                        <p class="pm-section-desc">Pilih kegiatan rutin yang diadakan masjid.</p>
 
                         <div class="pm-checkbox-grid">
                             @php
@@ -548,92 +574,90 @@
                                 </label>
                             @endforeach
                         </div>
-                    </div><!-- /.pm-section -->
+                    </div>
+                </div><!-- /#tab-program -->
 
-                    
                 {{-- ===== TAB: PREVIEW ===== --}}
                 <div class="pm-tab-content" id="tab-preview">
                     <div class="pm-preview-card">
-                        <div class="pm-preview-header">
-                            <div class="pm-preview-mosque-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="32" height="32">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008z"/>
-                                </svg>
+                        @if($fotoUtama)
+                            <div class="pm-preview-cover"><img src="{{ $fotoUtama }}" alt="Foto {{ $mosque->mosque_name ?? 'masjid' }}"></div>
+                        @endif
+
+                        <div class="pm-preview-body">
+                            <div class="pm-preview-header">
+                                <div class="pm-preview-mosque-icon">
+                                    <i class="fa-solid fa-mosque" style="font-size:26px;"></i>
+                                </div>
+                                <div>
+                                    <div class="pm-preview-mosque-name" id="prev-name">{{ $mosque->mosque_name ?? 'Nama Masjid' }}</div>
+                                    @if(!empty($mosque->arabic_name))
+                                        <div class="pm-preview-arabic" id="prev-arabic">{{ $mosque->arabic_name }}</div>
+                                    @endif
+                                    @if(!empty($mosque->tagline))
+                                        <div class="pm-preview-tagline" id="prev-tagline">{{ $mosque->tagline }}</div>
+                                    @endif
+                                </div>
                             </div>
-                            <div>
-                                <div class="pm-preview-mosque-name" id="prev-name">
-                                    {{ $mosque->mosque_name ?? 'Nama Masjid' }}
-                                </div>
-                                @if(!empty($mosque->arabic_name))
-                                <div class="pm-preview-arabic" id="prev-arabic">
-                                    {{ $mosque->arabic_name }}
-                                </div>
+
+                            <div class="pm-preview-grid">
+                                @if(!empty($mosque->founded))
+                                    <div class="pm-preview-info-item">
+                                        <span class="pm-preview-info-label">Tahun berdiri</span>
+                                        <span class="pm-preview-info-val">{{ $mosque->founded }}</span>
+                                    </div>
                                 @endif
-                                @if(!empty($mosque->tagline))
-                                <div class="pm-preview-tagline" id="prev-tagline">
-                                    {{ $mosque->tagline }}
-                                </div>
+                                @if(!empty($mosque->capacity))
+                                    <div class="pm-preview-info-item">
+                                        <span class="pm-preview-info-label">Kapasitas jamaah</span>
+                                        <span class="pm-preview-info-val">{{ $mosque->capacity }}</span>
+                                    </div>
+                                @endif
+                                @if(!empty($mosque->city))
+                                    <div class="pm-preview-info-item">
+                                        <span class="pm-preview-info-label">Kota</span>
+                                        <span class="pm-preview-info-val">{{ $mosque->city }}</span>
+                                    </div>
+                                @endif
+                                @if(!empty($mosque->imam_name))
+                                    <div class="pm-preview-info-item">
+                                        <span class="pm-preview-info-label">Imam</span>
+                                        <span class="pm-preview-info-val">{{ $mosque->imam_name }}</span>
+                                    </div>
                                 @endif
                             </div>
-                        </div>
 
-                        <div class="pm-preview-grid">
-                            @if(!empty($mosque->founded))
-                            <div class="pm-preview-info-item">
-                                <span class="pm-preview-info-label">Tahun Berdiri</span>
-                                <span class="pm-preview-info-val">{{ $mosque->founded }}</span>
-                            </div>
+                            @if(!empty($mosque->description))
+                                <div class="pm-preview-desc">{{ $mosque->description }}</div>
                             @endif
-                            @if(!empty($mosque->capacity))
-                            <div class="pm-preview-info-item">
-                                <span class="pm-preview-info-label">Kapasitas Jamaah</span>
-                                <span class="pm-preview-info-val">{{ $mosque->capacity }}</span>
-                            </div>
+
+                            @if(!empty($mosque->facilities))
+                                <div class="pm-preview-section-title">Fasilitas</div>
+                                <div class="pm-preview-tags">
+                                    @foreach($mosque->facilities as $f)
+                                        <span class="pm-preview-tag">{{ $f }}</span>
+                                    @endforeach
+                                </div>
                             @endif
-                            @if(!empty($mosque->city))
-                            <div class="pm-preview-info-item">
-                                <span class="pm-preview-info-label">Kota</span>
-                                <span class="pm-preview-info-val">{{ $mosque->city }}</span>
-                            </div>
-                            @endif
-                            @if(!empty($mosque->imam_name))
-                            <div class="pm-preview-info-item">
-                                <span class="pm-preview-info-label">Imam</span>
-                                <span class="pm-preview-info-val">{{ $mosque->imam_name }}</span>
-                            </div>
+
+                            @if(!empty($mosque->programs))
+                                <div class="pm-preview-section-title">Program kegiatan</div>
+                                <div class="pm-preview-tags">
+                                    @foreach($mosque->programs as $p)
+                                        <span class="pm-preview-tag green">{{ $p }}</span>
+                                    @endforeach
+                                </div>
                             @endif
                         </div>
-
-                        @if(!empty($mosque->description))
-                        <div class="pm-preview-desc">{{ $mosque->description }}</div>
-                        @endif
-
-                        @if(!empty($mosque->facilities))
-                        <div class="pm-preview-section-title">Fasilitas</div>
-                        <div class="pm-preview-tags">
-                            @foreach($mosque->facilities as $f)
-                                <span class="pm-preview-tag">{{ $f }}</span>
-                            @endforeach
-                        </div>
-                        @endif
-
-                        @if(!empty($mosque->programs))
-                        <div class="pm-preview-section-title">Program Kegiatan</div>
-                        <div class="pm-preview-tags">
-                            @foreach($mosque->programs as $p)
-                                <span class="pm-preview-tag green">{{ $p }}</span>
-                            @endforeach
-                        </div>
-                        @endif
                     </div><!-- /.pm-preview-card -->
                 </div><!-- /#tab-preview -->
 
-                {{-- ===== FOOTER ACTIONS ===== --}}
+                {{-- ===== FOOTER ACTIONS (satu saja) ===== --}}
                 <div class="pm-footer" id="pmFooter">
-                    <span class="pm-footer-status" id="pmStatus">Perubahan belum disimpan</span>
+                    <span class="pm-footer-status" id="pmStatus">Belum ada perubahan</span>
                     <div class="pm-footer-actions">
                         <button type="button" class="pm-btn-reset" id="pmReset">Reset</button>
-                        <button type="submit" class="pm-btn-save">Simpan Perubahan</button>
+                        <button type="submit" class="pm-btn-save"><i class="fa-solid fa-floppy-disk"></i> Simpan perubahan</button>
                     </div>
                 </div>
 
@@ -641,88 +665,155 @@
 
         </main>
     </div>
-<button class="ba2-fab" aria-label="Bantuan">?</button>
+    <button class="ba2-fab" aria-label="Bantuan">?</button>
 
-   {{-- LETAKKAN KODE JAVASCRIPT INI --}}
     <script>
-        // ---- Tab switching ----
+    (function () {
+        const MAX_SIZE = 2 * 1024 * 1024; // 2 MB
+        const ALLOWED  = ['image/png', 'image/jpeg', 'image/webp', 'image/avif'];
+
         const tabs   = document.querySelectorAll('.pm-tab');
         const panels = document.querySelectorAll('.pm-tab-content');
         const footer = document.getElementById('pmFooter');
-
-        function updateFooterVisibility(tabName) {
-            if (tabName === 'preview') {
-                footer.classList.add('preview-hidden');
-            } else {
-                footer.classList.remove('preview-hidden');
-            }
-        }
-
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(t => t.classList.remove('active'));
-                panels.forEach(p => p.classList.remove('active'));
-                tab.classList.add('active');
-
-                const tabName = tab.dataset.tab;
-                const target = document.getElementById('tab-' + tabName);
-                if (target) target.classList.add('active');
-
-                // Mengubah URL browser tanpa reload halaman (#nama_tab)
-                history.pushState(null, null, '#' + tabName);
-
-                updateFooterVisibility(tabName);
-            });
-        });
-
-        // Agar saat halaman dibuka/refresh, tab dan footer langsung menyesuaikan
-        window.addEventListener('DOMContentLoaded', () => {
-            const hash = window.location.hash.replace('#', '');
-            let activeTabName = '';
-
-            if (hash) {
-                const targetTab = document.querySelector(`.pm-tab[data-tab="${hash}"]`);
-                if (targetTab) {
-                    activeTabName = hash;
-                    targetTab.click(); 
-                }
-            } else {
-                // Cek tab mana yang aktif secara default di HTML
-                const currentActive = document.querySelector('.pm-tab.active');
-                if (currentActive) {
-                    activeTabName = currentActive.dataset.tab;
-                }
-            }
-
-            // Atur visibilitas footer saat pertama kali load
-            updateFooterVisibility(activeTabName);
-        });
-
-        // ---- Dirty state tracking ----
-        const form   = document.getElementById('pmForm'); // Pastikan form Anda memiliki id="pmForm"
+        const form   = document.getElementById('pmForm');
         const status = document.getElementById('pmStatus');
-        let isDirty  = false;
 
-        if (form) {
-            form.querySelectorAll('input, textarea, select').forEach(el => {
-                el.addEventListener('change', () => {
-                    isDirty = true;
-                    status.textContent = 'Ada perubahan yang belum disimpan';
-                    status.classList.add('pm-footer-status--dirty');
-                });
-            });
+        /* ---------- Tabs ---------- */
+        function showTab(name, pushHash) {
+            const target = document.getElementById('tab-' + name);
+            if (!target) return;
+            tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+            panels.forEach(p => p.classList.toggle('active', p === target));
+            footer.classList.toggle('preview-hidden', name === 'preview');
+            if (pushHash) history.replaceState(null, '', '#' + name);
+        }
+        tabs.forEach(t => t.addEventListener('click', () => showTab(t.dataset.tab, true)));
+        const initial = location.hash.replace('#', '');
+        if (initial && document.getElementById('tab-' + initial)) showTab(initial, false);
+
+        /* ---------- Dirty state ---------- */
+        function markDirty() {
+            status.textContent = 'Ada perubahan yang belum disimpan';
+            status.classList.add('pm-footer-status--dirty');
+        }
+        function markClean() {
+            status.textContent = 'Belum ada perubahan';
+            status.classList.remove('pm-footer-status--dirty');
+        }
+        form.addEventListener('input',  markDirty);
+        form.addEventListener('change', markDirty);
+
+        /* ---------- Dropzone foto ---------- */
+        function formatSize(bytes) {
+            return bytes < 1024 * 1024
+                ? Math.round(bytes / 1024) + ' KB'
+                : (bytes / 1024 / 1024).toFixed(1) + ' MB';
         }
 
-        // ---- Reset button ----
-        const btnReset = document.getElementById('pmReset');
-        if (btnReset) {
-            btnReset.addEventListener('click', () => {
-                if (confirm('Reset semua perubahan yang belum disimpan?')) {
-                    form.reset();
-                    isDirty = false;
-                    status.textContent = 'Perubahan belum disimpan';
-                    status.classList.remove('pm-footer-status--dirty');
+        document.querySelectorAll('[data-dropzone]').forEach(zone => {
+            const input    = zone.querySelector('input[type="file"]');
+            const img      = zone.querySelector('[data-preview]');
+            const fname    = zone.querySelector('[data-filename]');
+            const fsize    = zone.querySelector('[data-filesize]');
+            const btnClear = zone.querySelector('[data-clear]');
+            const btnChg   = zone.querySelector('[data-change]');
+            const errBox   = zone.parentElement.querySelector('[data-error]');
+            const original = zone.dataset.original || '';
+
+            function showError(msg) {
+                errBox.textContent = msg;
+                errBox.classList.toggle('show', !!msg);
+            }
+
+            function restoreOriginal() {
+                input.value = '';
+                zone.classList.remove('has-new');
+                btnClear.hidden = true;
+                fsize.textContent = '';
+                if (original) {
+                    img.src = original;
+                    fname.textContent = 'Foto saat ini';
+                    zone.classList.add('has-image');
+                } else {
+                    img.removeAttribute('src');
+                    fname.textContent = '';
+                    zone.classList.remove('has-image');
                 }
+            }
+
+            function handleFile(file) {
+                showError('');
+                if (!file) return;
+                if (!ALLOWED.includes(file.type)) {
+                    input.value = '';
+                    return showError('Format tidak didukung. Gunakan PNG, JPG, WebP, atau AVIF.');
+                }
+                if (file.size > MAX_SIZE) {
+                    input.value = '';
+                    return showError('Ukuran ' + formatSize(file.size) + ' melebihi batas 2 MB. Kompres fotonya lalu coba lagi.');
+                }
+                const reader = new FileReader();
+                reader.onload = e => {
+                    img.src = e.target.result;
+                    fname.textContent = file.name;
+                    fsize.textContent = formatSize(file.size);
+                    zone.classList.add('has-image', 'has-new');
+                    btnClear.hidden = false;
+                };
+                reader.readAsDataURL(file);
+                markDirty();
+            }
+
+            input.addEventListener('change', () => handleFile(input.files[0]));
+
+            // Tombol "Ganti" membuka dialog pilih file
+            btnChg.addEventListener('click', e => {
+                e.preventDefault(); e.stopPropagation();
+                input.style.pointerEvents = 'auto';
+                input.click();
+                input.style.pointerEvents = '';
             });
-        }
+            // Tombol "Batal" mengembalikan ke foto sebelumnya
+            btnClear.addEventListener('click', e => {
+                e.preventDefault(); e.stopPropagation();
+                restoreOriginal();
+                showError('');
+            });
+
+            // Drag & drop
+            ['dragenter', 'dragover'].forEach(ev =>
+                zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.add('is-drag'); }));
+            ['dragleave', 'drop'].forEach(ev =>
+                zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.remove('is-drag'); }));
+            zone.addEventListener('drop', e => {
+                const file = e.dataTransfer.files && e.dataTransfer.files[0];
+                if (!file) return;
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                input.files = dt.files;
+                handleFile(file);
+            });
+
+            zone._restore = () => { restoreOriginal(); showError(''); };
+        });
+
+        /* ---------- Reset ---------- */
+        document.getElementById('pmReset').addEventListener('click', () => {
+            if (!confirm('Reset semua perubahan yang belum disimpan?')) return;
+            form.reset();
+            document.querySelectorAll('[data-dropzone]').forEach(z => z._restore && z._restore());
+            markClean();
+        });
+
+        /* ---------- Peringatan keluar halaman ---------- */
+        let submitting = false;
+        form.addEventListener('submit', () => { submitting = true; });
+        window.addEventListener('beforeunload', e => {
+            if (!submitting && status.classList.contains('pm-footer-status--dirty')) {
+                e.preventDefault(); e.returnValue = '';
+            }
+        });
+    })();
     </script>
+</body>
+</html>

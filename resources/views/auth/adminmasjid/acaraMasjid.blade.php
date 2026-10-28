@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kegiatan & Acara - Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/adminmasjid/landingPage.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/adminmasjid/acara.css') }}">
 </head>
 <body class="lp-body" id="lpBody">
 
@@ -28,73 +29,73 @@
             </div>
         </div>
 
-       {{-- Nav --}}
-<nav class="lp-nav">
-    <a href="{{ route('admin.dashboard') }}" class="lp-nav-item {{ request()->routeIs('admin.dashboard*') ? 'active' : '' }}">
-        <span class="lp-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
-        <span class="lp-nav-label">Dashboard</span>
-    </a>
+        {{-- Nav --}}
+        <nav class="lp-nav">
+            <a href="{{ route('admin.dashboard') }}" class="lp-nav-item {{ request()->routeIs('admin.dashboard*') ? 'active' : '' }}">
+                <span class="lp-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
+                <span class="lp-nav-label">Dashboard</span>
+            </a>
 
-    <a href="{{ route('admin.landing-page') }}" class="lp-nav-item {{ request()->routeIs('admin.landing-page*') ? 'active' : '' }}">
-        <span class="lp-nav-icon"><i class="fa-solid fa-globe"></i></span>
-        <span class="lp-nav-label">Landing Page</span>
-    </a>
+            <a href="{{ route('admin.landing-page') }}" class="lp-nav-item {{ request()->routeIs('admin.landing-page*') ? 'active' : '' }}">
+                <span class="lp-nav-icon"><i class="fa-solid fa-globe"></i></span>
+                <span class="lp-nav-label">Landing Page</span>
+            </a>
 
-    <a href="{{ route('admin.profil-masjid') }}" class="lp-nav-item {{ request()->routeIs('admin.profil-masjid*') ? 'active' : '' }}">
-        <span class="lp-nav-icon"><i class="fa-solid fa-mosque"></i></span>
-        <span class="lp-nav-label">Profil Masjid</span>
-    </a>
+            <a href="{{ route('admin.profil-masjid') }}" class="lp-nav-item {{ request()->routeIs('admin.profil-masjid*') ? 'active' : '' }}">
+                <span class="lp-nav-icon"><i class="fa-solid fa-mosque"></i></span>
+                <span class="lp-nav-label">Profil Masjid</span>
+            </a>
 
-    <a href="{{ route('admin.jadwal-sholat') }}" class="lp-nav-item {{ request()->routeIs('admin.jadwal-sholat*') ? 'active' : '' }}">
-        <span class="lp-nav-icon"><i class="fa-solid fa-clock"></i></span>
-        <span class="lp-nav-label">Jadwal Shalat</span>
-    </a>
+            <a href="{{ route('admin.jadwal-sholat') }}" class="lp-nav-item {{ request()->routeIs('admin.jadwal-sholat*') ? 'active' : '' }}">
+                <span class="lp-nav-icon"><i class="fa-solid fa-clock"></i></span>
+                <span class="lp-nav-label">Jadwal Shalat</span>
+            </a>
 
-    {{-- MENU PENGUMUMAN DINAMIS --}}
-    @php
-        $pengumumanAktif = isset($mosque)
-            ? \App\Models\Pengumuman::where('mosque_id', $mosque->id)->active()->count()
-            : 0;
-    @endphp
-    <a href="{{ route('admin.pengumuman') }}" class="lp-nav-item {{ request()->routeIs('admin.pengumuman*') ? 'active' : '' }}">
-        <span class="lp-nav-icon"><i class="fa-solid fa-bullhorn"></i></span>
-        <span class="lp-nav-label">Pengumuman</span>
-        @if($pengumumanAktif > 0)
-            <span class="lp-nav-badge" style="background: #e74c3c; color: white; padding: 2px 6px; border-radius: 10px; font-size: 11px; font-weight: bold;">{{ $pengumumanAktif }}</span>
-        @endif
-    </a>
+            {{-- MENU PENGUMUMAN DINAMIS --}}
+            @php
+                $pengumumanAktif = isset($mosque)
+                    ? \App\Models\Pengumuman::where('mosque_id', $mosque->id)->active()->count()
+                    : 0;
+            @endphp
+            <a href="{{ route('admin.pengumuman') }}" class="lp-nav-item {{ request()->routeIs('admin.pengumuman*') ? 'active' : '' }}">
+                <span class="lp-nav-icon"><i class="fa-solid fa-bullhorn"></i></span>
+                <span class="lp-nav-label">Pengumuman</span>
+                @if($pengumumanAktif > 0)
+                    <span class="lp-nav-badge">{{ $pengumumanAktif }}</span>
+                @endif
+            </a>
 
-    <a href="{{ route('admin.acara') }}" class="lp-nav-item {{ request()->routeIs('admin.acara*') ? 'active' : '' }}">
-        <span class="lp-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
-        <span class="lp-nav-label">Kegiatan &amp; Acara</span>
-    </a>
+            <a href="{{ route('admin.acara') }}" class="lp-nav-item {{ request()->routeIs('admin.acara*') ? 'active' : '' }}">
+                <span class="lp-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
+                <span class="lp-nav-label">Kegiatan &amp; Acara</span>
+            </a>
 
-    {{-- MENU DONASI DINAMIS BERDASARKAN PAKET MASJID --}}
-    @if(isset($mosque) && $mosque->package_type === 'free')
-        <a href="{{ route('masjid.perpanjangan.create') }}" class="lp-nav-item {{ request()->routeIs('masjid.perpanjangan*') ? 'active' : '' }}" style="opacity: 0.8;" title="Upgrade paket untuk membuka fitur donasi">
-            <span class="lp-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
-            <span class="lp-nav-label">Donasi</span>
-            <span class="lp-nav-soon" style="background: #e74c3c; color: white;">Locked</span>
-        </a>
-    @else
-        <a href="{{ route('admin.donasi') }}" class="lp-nav-item {{ request()->routeIs('admin.donasi*') ? 'active' : '' }}">
-            <span class="lp-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
-            <span class="lp-nav-label">Donasi</span>
-            <span class="lp-nav-soon" style="background: #27ae60; color: white;">Aktif</span>
-        </a>
-    @endif
+            {{-- MENU DONASI DINAMIS BERDASARKAN PAKET MASJID --}}
+            @if(isset($mosque) && $mosque->package_type === 'free')
+                <a href="{{ route('masjid.perpanjangan.create') }}" class="lp-nav-item {{ request()->routeIs('masjid.perpanjangan*') ? 'active' : '' }}" style="opacity: 0.8;" title="Upgrade paket untuk membuka fitur donasi">
+                    <span class="lp-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+                    <span class="lp-nav-label">Donasi</span>
+                    <span class="lp-nav-soon" style="background: #e74c3c; color: white;">Locked</span>
+                </a>
+            @else
+                <a href="{{ route('admin.donasi') }}" class="lp-nav-item {{ request()->routeIs('admin.donasi*') ? 'active' : '' }}">
+                    <span class="lp-nav-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+                    <span class="lp-nav-label">Donasi</span>
+                    <span class="lp-nav-soon" style="background: #27ae60; color: white;">Aktif</span>
+                </a>
+            @endif
 
-    <a href="{{ route('admin.jamaah') }}" class="lp-nav-item {{ request()->routeIs('admin.jamaah*') ? 'active' : '' }}">
-        <span class="lp-nav-icon"><i class="fa-solid fa-users"></i></span>
-        <span class="lp-nav-label">Data Jamaah</span>
-    </a>
+            <a href="{{ route('admin.jamaah') }}" class="lp-nav-item {{ request()->routeIs('admin.jamaah*') ? 'active' : '' }}">
+                <span class="lp-nav-icon"><i class="fa-solid fa-users"></i></span>
+                <span class="lp-nav-label">Data Jamaah</span>
+            </a>
 
-    {{-- MENU TEMA TAMPILAN --}}
-    <a href="{{ route('admin.tema') }}" class="lp-nav-item {{ request()->routeIs('admin.tema*') ? 'active' : '' }}">
-        <span class="lp-nav-icon"><i class="fa-solid fa-palette"></i></span>
-        <span class="lp-nav-label">Tema Tampilan</span>
-    </a>
-</nav>
+            {{-- MENU TEMA TAMPILAN --}}
+            <a href="{{ route('admin.tema') }}" class="lp-nav-item {{ request()->routeIs('admin.tema*') ? 'active' : '' }}">
+                <span class="lp-nav-icon"><i class="fa-solid fa-palette"></i></span>
+                <span class="lp-nav-label">Tema Tampilan</span>
+            </a>
+        </nav>
 
         <div class="lp-user">
             <div class="lp-user-avatar">{{ substr(auth()->user()->name ?? 'A', 0, 2) }}</div>
@@ -124,287 +125,469 @@
             </div>
             <div class="lp-topbar-right">
                 <a href="{{ route('masjid.publik', $mosque->slug) }}" class="lp-btn-back" target="_blank">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                         stroke-width="1.8" stroke="currentColor" width="14" height="14">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                    Preview
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    <span>Preview</span>
                 </a>
             </div>
         </header>
 
         <main class="lp-content">
-            <div class="ac-wrap">
-                <div class="ac-header">
-                    <div></div>
-                    <button type="button" id="acToggleAdd" class="ac-btn-add">+ Tambah Acara</button>
-                </div>
+            @php
+                $today = \Illuminate\Support\Carbon::today();
+
+                // Tambahkan info tanggal ke tiap acara (tanpa mengubah model)
+                $daftar = $acaras->map(function ($a) use ($today) {
+                    $tgl = \Illuminate\Support\Carbon::parse($a->event_date)->startOfDay();
+                    $a->_tgl     = $tgl;
+                    $a->_selisih = (int) round($today->diffInDays($tgl, false)); // + = akan datang, 0 = hari ini, - = lewat
+                    $a->_selesai = $a->_selisih < 0;
+                    return $a;
+                });
+
+                $totalAcara     = $daftar->count();
+                $totalMendatang = $daftar->where('_selesai', false)->count();
+                $totalSelesai   = $daftar->where('_selesai', true)->count();
+                $berikutnya     = $daftar->where('_selesai', false)->sortBy('_tgl')->first();
+
+                $labelSelisih = function (int $n) {
+                    if ($n === 0) return 'Hari ini';
+                    if ($n === 1) return 'Besok';
+                    return $n . ' hari lagi';
+                };
+
+                $editIdError  = old('_edit_id');
+                $urlUpdateErr = $editIdError ? route('admin.acara.update', $editIdError) : '';
+                $bukaModal    = $errors->any() && old('_form') === 'acara';
+            @endphp
+
+            <div class="ev-page">
 
                 @if(session('success'))
-                    <div class="ac-alert ac-alert-success">{{ session('success') }}</div>
+                    <div class="ev-alert ev-alert-success"><i class="fa-solid fa-circle-check"></i> {{ session('success') }}</div>
                 @endif
                 @if(session('error'))
-                    <div class="ac-alert ac-alert-error">{{ session('error') }}</div>
+                    <div class="ev-alert ev-alert-error"><i class="fa-solid fa-circle-exclamation"></i> {{ session('error') }}</div>
                 @endif
                 @if($errors->any())
-                <div class="ac-alert ac-alert-error">
-                    <ul style="margin:0; padding-left:18px;">
-                        @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
+                    <div class="ev-alert ev-alert-error">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <ul>
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 @endif
 
-                {{-- FORM TAMBAH — tersembunyi, muncul saat tombol "+ Tambah Acara" diklik --}}
-                <div id="acAddForm" class="ac-form-box" style="display:none;">
-                    <form action="{{ route('admin.acara.store') }}" method="POST" class="ac-form" enctype="multipart/form-data">
-                        @csrf
-
-                        <label class="ac-label">Judul Acara</label>
-                        <input type="text" name="title" class="ac-input" placeholder="mis. Halaqah Quran Bersama" required>
-
-                        <div class="ac-row">
-                            <div>
-                                <label class="ac-label">Tanggal</label>
-                                <input type="date" name="event_date" class="ac-input" required>
-                            </div>
-                            <div>
-                                <label class="ac-label">Jam (opsional)</label>
-                                <input type="text" name="event_time" class="ac-input" placeholder="mis. 16:00 WIB">
-                            </div>
+                {{-- Acara berikutnya --}}
+                @if($berikutnya)
+                    <section class="ev-next" aria-label="Acara berikutnya">
+                        <div class="ev-next-date">
+                            <small>{{ $berikutnya->_tgl->translatedFormat('M') }}</small>
+                            <b>{{ $berikutnya->_tgl->format('d') }}</b>
+                            <span>{{ $berikutnya->_tgl->translatedFormat('l') }}</span>
                         </div>
-
-                        <label class="ac-label">Pengisi / Penyelenggara (opsional)</label>
-                        <input type="text" name="organizer" class="ac-input" placeholder="mis. Ustadz Yusuf Mansur">
-
-                        <label class="ac-label">Deskripsi (opsional)</label>
-                        <textarea name="description" class="ac-input ac-textarea" rows="3"></textarea>
-
-                        <label class="ac-label">Foto Acara (opsional)</label>
-                        <input type="file" name="photo" accept="image/*" class="ac-input">
-                        <span class="ac-hint">PNG, JPG, WebP, AVIF · Maks. 2MB · Ditampilkan di kartu acara pada halaman publik.</span>
-
-                        <label class="ac-checkbox">
-                            <input type="checkbox" name="is_featured" value="1">
-                            Tandai sebagai acara "Terbaru"
-                        </label>
-
-                        <div class="ac-form-actions">
-                            <button type="button" class="ac-btn-cancel" onclick="document.getElementById('acAddForm').style.display='none';">Batal</button>
-                            <button type="submit" class="ac-btn-save">Simpan Acara</button>
-                        </div>
-                    </form>
-                </div>
-
-                {{-- DAFTAR ACARA --}}
-                @forelse($acaras as $acara)
-                <div class="ac-card" id="acCard-{{ $acara->id }}">
-                    <div class="ac-card-view">
-                        @if($acara->photo)
-                        <div class="ac-card-photo">
-                            <img src="{{ asset('storage/'.$acara->photo) }}" alt="{{ $acara->title }}" loading="lazy">
-                        </div>
-                        @else
-                        <div class="ac-card-date">
-                            <div class="ac-card-month">{{ \Illuminate\Support\Carbon::parse($acara->event_date)->translatedFormat('M') }}</div>
-                            <div class="ac-card-day">{{ \Illuminate\Support\Carbon::parse($acara->event_date)->format('d') }}</div>
-                        </div>
-                        @endif
-                        <div class="ac-card-body">
-                            <div class="ac-card-top">
-                                <div class="ac-card-title">{{ $acara->title }}</div>
-                                @if($acara->is_featured)<span class="ac-badge">Terbaru</span>@endif
-                            </div>
-                            <div class="ac-card-meta">
-                                {{ $acara->event_time ?? '-' }}
-                                @if($acara->organizer) · {{ $acara->organizer }} @endif
-                                · {{ \Illuminate\Support\Carbon::parse($acara->event_date)->translatedFormat('d F Y') }}
+                        <div>
+                            <div class="ev-next-label">Acara berikutnya</div>
+                            <div class="ev-next-title">{{ $berikutnya->title }}</div>
+                            <div class="ev-next-meta">
+                                @if($berikutnya->event_time)<span><i class="fa-regular fa-clock"></i>{{ $berikutnya->event_time }}</span>@endif
+                                @if($berikutnya->organizer)<span><i class="fa-regular fa-user"></i>{{ $berikutnya->organizer }}</span>@endif
+                                <span><i class="fa-regular fa-calendar"></i>{{ $berikutnya->_tgl->translatedFormat('d F Y') }}</span>
                             </div>
                         </div>
-                        <div class="ac-card-actions">
-                            <button type="button" class="ac-btn-edit" onclick="acToggleEdit({{ $acara->id }})">Edit</button>
-                            <form action="{{ route('admin.acara.destroy', $acara->id) }}" method="POST" onsubmit="return confirm('Hapus acara ini?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="ac-btn-delete">Hapus</button>
-                            </form>
-                        </div>
-                    </div>
-
-                    {{-- FORM EDIT --}}
-                    <div id="acEditForm-{{ $acara->id }}" class="ac-form-box" style="display:none;">
-                        <form action="{{ route('admin.acara.update', $acara->id) }}" method="POST" class="ac-form" enctype="multipart/form-data">
-                            @csrf
-                            @method('PUT')
-
-                            <label class="ac-label">Judul Acara</label>
-                            <input type="text" name="title" value="{{ $acara->title }}" class="ac-input" required>
-
-                            <div class="ac-row">
-                                <div>
-                                    <label class="ac-label">Tanggal</label>
-                                    <input type="date" name="event_date" value="{{ \Illuminate\Support\Carbon::parse($acara->event_date)->format('Y-m-d') }}" class="ac-input" required>
-                                </div>
-                                <div>
-                                    <label class="ac-label">Jam (opsional)</label>
-                                    <input type="text" name="event_time" value="{{ $acara->event_time }}" class="ac-input">
-                                </div>
-                            </div>
-
-                            <label class="ac-label">Pengisi / Penyelenggara (opsional)</label>
-                            <input type="text" name="organizer" value="{{ $acara->organizer }}" class="ac-input">
-
-                            <label class="ac-label">Deskripsi (opsional)</label>
-                            <textarea name="description" class="ac-input ac-textarea" rows="3">{{ $acara->description }}</textarea>
-
-                            <label class="ac-label">Foto Acara (opsional)</label>
-                            @if($acara->photo)
-                            <div class="ac-photo-preview">
-                                <img src="{{ asset('storage/'.$acara->photo) }}" alt="Foto saat ini">
-                                <span>Foto saat ini — pilih file baru untuk menggantinya.</span>
-                            </div>
+                        <div class="ev-countdown">
+                            @if($berikutnya->_selisih <= 1)
+                                <b>{{ $labelSelisih($berikutnya->_selisih) }}</b>
+                            @else
+                                <b>{{ $berikutnya->_selisih }}</b><span>hari lagi</span>
                             @endif
-                            <input type="file" name="photo" accept="image/*" class="ac-input">
+                        </div>
+                    </section>
+                @endif
 
-                            <label class="ac-checkbox">
-                                <input type="checkbox" name="is_featured" value="1" {{ $acara->is_featured ? 'checked' : '' }}>
-                                Tandai sebagai acara "Terbaru"
-                            </label>
-
-                            <div class="ac-form-actions">
-                                <button type="button" class="ac-btn-cancel" onclick="acToggleEdit({{ $acara->id }})">Batal</button>
-                                <button type="submit" class="ac-btn-save">Simpan Perubahan</button>
-                            </div>
-                        </form>
+                {{-- Toolbar --}}
+                <div class="ev-toolbar">
+                    <div class="ev-tabs" role="tablist" aria-label="Filter acara">
+                        <button type="button" class="ev-tab active" data-filter="all" role="tab">Semua <em>{{ $totalAcara }}</em></button>
+                        <button type="button" class="ev-tab" data-filter="upcoming" role="tab">Akan datang <em>{{ $totalMendatang }}</em></button>
+                        <button type="button" class="ev-tab" data-filter="past" role="tab">Selesai <em>{{ $totalSelesai }}</em></button>
                     </div>
+
+                    <label class="ev-search">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="search" id="evSearch" placeholder="Cari judul atau pengisi..." aria-label="Cari acara">
+                    </label>
+
+                    <button type="button" class="ev-btn-add" id="evCreate">
+                        <i class="fa-solid fa-plus"></i> Tambah acara
+                    </button>
                 </div>
-                @empty
-                <div class="ac-empty">Belum ada acara. Klik "Tambah Acara" untuk membuat yang pertama.</div>
-                @endforelse
+
+                {{-- Daftar acara --}}
+                @if($totalAcara > 0)
+                    <div class="ev-grid" id="evGrid">
+                        @foreach($daftar as $acara)
+                            @php
+                                $fotoUrl = $acara->photo ? asset('storage/' . $acara->photo) : null;
+                                $editData = [
+                                    'id'          => $acara->id,
+                                    'title'       => $acara->title,
+                                    'event_date'  => $acara->_tgl->format('Y-m-d'),
+                                    'event_time'  => $acara->event_time,
+                                    'organizer'   => $acara->organizer,
+                                    'description' => $acara->description,
+                                    'is_featured' => (bool) $acara->is_featured,
+                                    'photo_url'   => $fotoUrl,
+                                    'update_url'  => route('admin.acara.update', $acara->id),
+                                ];
+                            @endphp
+
+                            <article class="ev-card {{ $acara->is_featured ? 'is-featured' : '' }} {{ $acara->_selesai ? 'is-past' : '' }}"
+                                     data-state="{{ $acara->_selesai ? 'past' : 'upcoming' }}"
+                                     data-search="{{ \Illuminate\Support\Str::lower($acara->title . ' ' . $acara->organizer) }}">
+
+                                <div class="ev-media">
+                                    @if($fotoUrl)
+                                        <img src="{{ $fotoUrl }}" alt="{{ $acara->title }}" loading="lazy">
+                                    @else
+                                        <div class="ev-media-date">
+                                            <b>{{ $acara->_tgl->format('d') }}</b>
+                                            <span>{{ $acara->_tgl->translatedFormat('F Y') }}</span>
+                                        </div>
+                                    @endif
+
+                                    <div class="ev-media-top">
+                                        @if($fotoUrl)
+                                            <span class="ev-date-chip"><b>{{ $acara->_tgl->format('d') }}</b>{{ $acara->_tgl->translatedFormat('M') }}</span>
+                                        @endif
+                                        @if($acara->is_featured)
+                                            <span class="ev-star"><i class="fa-solid fa-star"></i> Terbaru</span>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div class="ev-body">
+                                    @if($acara->_selesai)
+                                        <span class="ev-pill is-past">Selesai</span>
+                                    @elseif($acara->_selisih === 0)
+                                        <span class="ev-pill is-today"><i></i>Hari ini</span>
+                                    @else
+                                        <span class="ev-pill"><i></i>{{ $labelSelisih($acara->_selisih) }}</span>
+                                    @endif
+
+                                    <div class="ev-title">{{ $acara->title }}</div>
+
+                                    <div class="ev-meta">
+                                        <span><i class="fa-regular fa-calendar"></i>{{ $acara->_tgl->translatedFormat('l, d F Y') }}</span>
+                                        @if($acara->event_time)<span><i class="fa-regular fa-clock"></i>{{ $acara->event_time }}</span>@endif
+                                        @if($acara->organizer)<span><i class="fa-regular fa-user"></i>{{ $acara->organizer }}</span>@endif
+                                    </div>
+
+                                    @if($acara->description)
+                                        <p class="ev-desc">{{ $acara->description }}</p>
+                                    @endif
+                                </div>
+
+                                <div class="ev-foot">
+                                    <button type="button" class="ev-btn-edit btn-edit" data-item="{{ json_encode($editData) }}">
+                                        <i class="fa-solid fa-pen"></i> Edit
+                                    </button>
+                                    <form action="{{ route('admin.acara.destroy', $acara->id) }}" method="POST"
+                                          onsubmit="return confirm('Hapus acara ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="ev-btn-del" aria-label="Hapus acara {{ $acara->title }}">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+
+                    <div class="ev-nomatch" id="evNoMatch">
+                        <div class="ev-empty-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                        <div class="ev-empty-title">Tidak ada acara yang cocok</div>
+                        <p>Coba kata kunci lain atau pilih filter yang berbeda.</p>
+                    </div>
+                @else
+                    <div class="ev-empty">
+                        <div class="ev-empty-icon"><i class="fa-solid fa-calendar-plus"></i></div>
+                        <div class="ev-empty-title">Belum ada acara</div>
+                        <p>Tambahkan kajian, pengajian, atau kegiatan lain supaya jamaah tahu jadwalnya.</p>
+                        <button type="button" class="ev-btn-add" style="margin:0 auto;" data-create>
+                            <i class="fa-solid fa-plus"></i> Tambah acara pertama
+                        </button>
+                    </div>
+                @endif
             </div>
         </main>
     </div>
 
+    {{-- ===== MODAL TAMBAH / EDIT ===== --}}
+    <dialog class="ev-dialog" id="evDialog">
+        <form method="POST" action="{{ route('admin.acara.store') }}" enctype="multipart/form-data" class="ev-form" id="evForm">
+            @csrf
+            <span id="evMethodSlot"></span>
+            <input type="hidden" name="_form" value="acara">
+            <input type="hidden" name="_edit_id" id="evEditId" value="{{ $editIdError }}">
+
+            <div class="ev-form-head">
+                <div class="ev-form-title">
+                    <span class="ev-form-icon"><i class="fa-solid fa-calendar-plus" id="evFormIcon"></i></span>
+                    <span id="evFormTitle">Acara baru</span>
+                </div>
+                <button type="button" class="ev-x" id="evClose" aria-label="Tutup">&times;</button>
+            </div>
+
+            <div class="ev-fields">
+
+                <div class="ev-field">
+                    <label class="ev-label" for="fTitle">Judul acara</label>
+                    <input type="text" id="fTitle" name="title" class="ev-input"
+                           value="{{ old('title') }}" placeholder="mis. Halaqah Quran Bersama" required>
+                </div>
+
+                <div class="ev-row">
+                    <div class="ev-field">
+                        <label class="ev-label" for="fDate">Tanggal</label>
+                        <input type="date" id="fDate" name="event_date" class="ev-input" value="{{ old('event_date') }}" required>
+                    </div>
+                    <div class="ev-field">
+                        <label class="ev-label" for="fTime">Jam <span class="ev-opt">opsional</span></label>
+                        <input type="text" id="fTime" name="event_time" class="ev-input" value="{{ old('event_time') }}" placeholder="mis. 16:00 WIB">
+                    </div>
+                </div>
+
+                <div class="ev-field">
+                    <label class="ev-label" for="fOrganizer">Pengisi / penyelenggara <span class="ev-opt">opsional</span></label>
+                    <input type="text" id="fOrganizer" name="organizer" class="ev-input" value="{{ old('organizer') }}" placeholder="mis. Ustadz Yusuf Mansur">
+                </div>
+
+                <div class="ev-field">
+                    <label class="ev-label" for="fDesc">Deskripsi <span class="ev-opt">opsional</span></label>
+                    <textarea id="fDesc" name="description" class="ev-input ev-textarea" rows="3"
+                              placeholder="Ceritakan singkat tentang acara ini...">{{ old('description') }}</textarea>
+                </div>
+
+                {{-- FOTO ACARA --}}
+                <div class="ev-field">
+                    <label class="ev-label">Foto acara <span class="ev-opt">opsional</span></label>
+
+                    <div class="ev-drop" id="evDrop" tabindex="0" role="button" aria-label="Pilih foto acara">
+                        <div class="ev-drop-icon"><i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i></div>
+                        <div class="ev-drop-title">Tarik foto ke sini atau <u>pilih dari perangkat</u></div>
+                        <div class="ev-drop-note">PNG, JPG, WebP, AVIF · maksimal 2 MB</div>
+                    </div>
+                    <input type="file" id="fPhoto" name="photo" accept="image/png,image/jpeg,image/webp,image/avif" hidden>
+
+                    <div class="ev-preview" id="evPreview">
+                        <img src="" alt="Pratinjau foto acara" id="evPreviewImg">
+                        <span class="ev-preview-badge">Foto baru</span>
+                        <div class="ev-preview-meta">
+                            <div class="ev-preview-info">
+                                <div class="ev-preview-name" id="evPreviewName"></div>
+                                <div class="ev-preview-size" id="evPreviewSize"></div>
+                            </div>
+                            <div class="ev-preview-actions">
+                                <button type="button" class="ev-photo-btn" id="evChange"><i class="fa-solid fa-arrows-rotate"></i> Ganti</button>
+                                <button type="button" class="ev-photo-btn danger" id="evUndo"><i class="fa-solid fa-xmark"></i> <span id="evUndoText">Hapus</span></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ev-photo-err" id="evPhotoErr"></div>
+                    <span class="ev-hint">Ditampilkan di kartu acara pada halaman publik. Rekomendasi rasio 16:10.</span>
+                </div>
+
+                <label class="ev-feature">
+                    <input type="checkbox" id="fFeatured" name="is_featured" value="1" {{ old('is_featured') ? 'checked' : '' }}>
+                    <span class="ev-switch"></span>
+                    <span class="ev-feature-text">
+                        <strong>Tandai sebagai acara "Terbaru"</strong>
+                        <small>Acara akan diberi lencana khusus di halaman publik.</small>
+                    </span>
+                </label>
+            </div>
+
+            <div class="ev-form-actions">
+                <button type="button" class="ev-btn-cancel" id="evCancel">Batal</button>
+                <button type="submit" class="ev-btn-save" id="evSave"><i class="fa-solid fa-floppy-disk"></i> Simpan acara</button>
+            </div>
+        </form>
+    </dialog>
+
     <button class="lp-fab" aria-label="Bantuan">?</button>
 
-    <style>
-    .ac-wrap { max-width: 760px; }
-    .ac-header { display: flex; align-items: center; justify-content: flex-end; margin-bottom: 20px; }
-
-    .ac-alert { padding: 12px 16px; border-radius: 10px; margin-bottom: 18px; font-size: 0.88rem; }
-    .ac-alert-success { background: #e4eee6; color: #0f4a38; }
-    .ac-alert-error { background: #fbe4e4; color: #8a2c2c; }
-
-    .ac-btn-add {
-        background: #0f4a38; color: #fff; border: none; padding: 11px 22px;
-        border-radius: 999px; font-weight: 600; cursor: pointer; font-size: 0.88rem;
-        white-space: nowrap;
-    }
-    .ac-btn-add:hover { background: #15583f; }
-
-    .ac-form-box {
-        background: #faf8f3; border: 1px solid #e5e2d8; border-radius: 14px;
-        padding: 18px; margin-bottom: 16px;
-    }
-    .ac-form { display: flex; flex-direction: column; }
-    .ac-label { font-size: 0.8rem; font-weight: 600; color: #4b5a50; margin: 12px 0 6px; }
-    .ac-hint { font-size: 0.72rem; color: #8a9891; margin-top: 4px; }
-    .ac-input {
-        border: 1px solid #e5e2d8; border-radius: 10px; padding: 10px 12px;
-        font-size: 0.92rem; font-family: inherit; width: 100%; background: #fff;
-    }
-    .ac-input:focus { outline: none; border-color: #c0923d; }
-    .ac-textarea { resize: vertical; }
-    .ac-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .ac-row .ac-label { margin-top: 0; }
-    .ac-checkbox { display: flex; align-items: center; gap: 8px; margin-top: 16px; font-size: 0.84rem; color: #4b5a50; }
-
-    .ac-photo-preview {
-        display: flex; align-items: center; gap: 12px; margin-top: 8px;
-        padding: 10px; background: #fff; border: 1px solid #e5e2d8; border-radius: 10px;
-    }
-    .ac-photo-preview img { width: 54px; height: 54px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
-    .ac-photo-preview span { font-size: 0.76rem; color: #6b7a71; }
-
-    .ac-form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-    .ac-btn-cancel {
-        padding: 10px 18px; border-radius: 999px; border: 1px solid #e5e2d8;
-        background: transparent; color: #4b5a50; font-size: 0.86rem; font-weight: 600; cursor: pointer;
-    }
-    .ac-btn-save {
-        background: #0f4a38; color: #fff; border: none; padding: 10px 24px;
-        border-radius: 999px; font-weight: 600; cursor: pointer; font-size: 0.86rem;
-    }
-    .ac-btn-save:hover { background: #15583f; }
-
-    .ac-card {
-        background: #fff; border: 1px solid #e5e2d8; border-radius: 14px;
-        padding: 16px; margin-bottom: 12px;
-    }
-    .ac-card-view { display: flex; align-items: center; gap: 16px; }
-    .ac-card-date {
-        flex-shrink: 0; width: 54px; height: 54px; border-radius: 999px 999px 0 0;
-        background: #0f4a38; color: #fff; display: flex; flex-direction: column;
-        align-items: center; justify-content: center; line-height: 1.1;
-    }
-    .ac-card-month { font-size: 0.6rem; letter-spacing: 0.06em; text-transform: uppercase; color: #e7cd8e; }
-    .ac-card-day { font-size: 1.05rem; font-weight: 700; }
-
-    .ac-card-photo { flex-shrink: 0; width: 54px; height: 54px; border-radius: 10px; overflow: hidden; }
-    .ac-card-photo img { width: 100%; height: 100%; object-fit: cover; }
-
-    .ac-card-body { flex: 1; min-width: 0; }
-    .ac-card-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .ac-card-title { font-weight: 700; font-size: 1.02rem; }
-    .ac-badge {
-        font-size: 0.66rem; font-weight: 700; letter-spacing: 0.04em;
-        color: #93672a; background: #e7cd8e; padding: 3px 9px; border-radius: 999px;
-    }
-    .ac-card-meta { margin-top: 4px; font-size: 0.84rem; color: #6b7a71; }
-
-    .ac-card-actions { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
-    .ac-btn-edit, .ac-btn-delete {
-        border: 1px solid #e5e2d8; background: #faf8f3; border-radius: 8px;
-        padding: 8px 14px; font-size: 0.82rem; font-weight: 600; cursor: pointer;
-        color: #1c2620;
-    }
-    .ac-btn-edit:hover { border-color: #1e6e4c; background: #e4eee6; }
-    .ac-btn-delete:hover { border-color: #c0392b; background: #fbe4e4; color: #c0392b; }
-
-    .ac-empty {
-        text-align: center; padding: 48px 20px; color: #6b7a71;
-        border: 1.5px dashed #e5e2d8; border-radius: 14px; font-size: 0.92rem;
-    }
-    </style>
-
     <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const lpSidebar = document.getElementById('lpSidebar');
-        const lpBody = document.getElementById('lpBody');
-        const lpToggle = document.getElementById('lpToggle');
-        const lpSidebarToggle = document.getElementById('lpSidebarToggle');
+    document.addEventListener('DOMContentLoaded', function () {
+        const $  = (s, r = document) => r.querySelector(s);
+        const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
-        function toggleSidebarFunc() {
-            lpSidebar?.classList.toggle('collapsed');
-            lpBody?.classList.toggle('lp-sidebar-collapsed');
+        /* ---------- Sidebar ---------- */
+        $('#lpToggle')?.addEventListener('click', () => {
+            $('#lpSidebar')?.classList.toggle('collapsed');
+            $('#lpBody')?.classList.toggle('lp-sidebar-collapsed');
+        });
+
+        /* ---------- Filter + pencarian ---------- */
+        const cards   = $$('.ev-card');
+        const noMatch = $('#evNoMatch');
+        let filter = 'all';
+        let query  = '';
+
+        function applyFilter() {
+            let shown = 0;
+            cards.forEach(card => {
+                const okState = filter === 'all' || card.dataset.state === filter;
+                const okText  = !query || card.dataset.search.includes(query);
+                card.hidden = !(okState && okText);
+                if (!card.hidden) shown++;
+            });
+            noMatch?.classList.toggle('show', cards.length > 0 && shown === 0);
+        }
+        $$('.ev-tab').forEach(tab => tab.addEventListener('click', () => {
+            $$('.ev-tab').forEach(t => t.classList.toggle('active', t === tab));
+            filter = tab.dataset.filter;
+            applyFilter();
+        }));
+        $('#evSearch')?.addEventListener('input', e => {
+            query = e.target.value.trim().toLowerCase();
+            applyFilter();
+        });
+
+        /* ---------- Modal ---------- */
+        const dlg      = $('#evDialog');
+        const form     = $('#evForm');
+        const f = {
+            title: $('#fTitle'), date: $('#fDate'), time: $('#fTime'),
+            org: $('#fOrganizer'), desc: $('#fDesc'), featured: $('#fFeatured'),
+        };
+        const storeUrl = @json(route('admin.acara.store'));
+        const errUpdateUrl = @json($urlUpdateErr);
+
+        function setFields(d) {
+            f.title.value    = d.title || '';
+            f.date.value     = d.event_date || '';
+            f.time.value     = d.event_time || '';
+            f.org.value      = d.organizer || '';
+            f.desc.value     = d.description || '';
+            f.featured.checked = !!d.is_featured;
         }
 
-        lpToggle?.addEventListener('click', toggleSidebarFunc);
-        lpSidebarToggle?.addEventListener('click', toggleSidebarFunc);
+        function setMode(edit, id, updateUrl) {
+            form.action = edit ? updateUrl : storeUrl;
+            $('#evMethodSlot').innerHTML = edit ? '<input type="hidden" name="_method" value="PUT">' : '';
+            $('#evEditId').value = edit ? id : '';
+            $('#evFormTitle').textContent = edit ? 'Edit acara' : 'Acara baru';
+            $('#evFormIcon').className = 'fa-solid ' + (edit ? 'fa-pen-to-square' : 'fa-calendar-plus');
+            $('#evSave').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> ' + (edit ? 'Simpan perubahan' : 'Simpan acara');
+            $('#evSave').disabled = false;
+        }
 
-        document.getElementById('acToggleAdd')?.addEventListener('click', function () {
-            const box = document.getElementById('acAddForm');
-            box.style.display = (box.style.display === 'none') ? 'block' : 'none';
+        function openCreate() {
+            setFields({});
+            setMode(false);
+            photo.reset('');
+            dlg.showModal();
+            f.title.focus();
+        }
+        function openEdit(d) {
+            setFields(d);
+            setMode(true, d.id, d.update_url);
+            photo.reset(d.photo_url || '');
+            dlg.showModal();
+        }
+
+        $('#evCreate')?.addEventListener('click', openCreate);
+        $$('[data-create]').forEach(b => b.addEventListener('click', openCreate));
+        $$('.btn-edit').forEach(b => b.addEventListener('click', () => openEdit(JSON.parse(b.dataset.item))));
+        $('#evClose').addEventListener('click', () => dlg.close());
+        $('#evCancel').addEventListener('click', () => dlg.close());
+        dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+        form.addEventListener('submit', () => {
+            const btn = $('#evSave');
+            btn.innerHTML = '<span class="lp-spin"></span> Menyimpan...';
+            setTimeout(() => { btn.disabled = true; }, 0);
         });
-    });
 
-    function acToggleEdit(id) {
-        const box = document.getElementById('acEditForm-' + id);
-        box.style.display = (box.style.display === 'none') ? 'block' : 'none';
-    }
+        /* ---------- Foto acara ---------- */
+        const photo = (function () {
+            const MAX = 2 * 1024 * 1024;
+            const ALLOWED = ['image/png', 'image/jpeg', 'image/webp', 'image/avif'];
+            const input = $('#fPhoto'), drop = $('#evDrop'), preview = $('#evPreview');
+            const img = $('#evPreviewImg'), pName = $('#evPreviewName'), pSize = $('#evPreviewSize');
+            const err = $('#evPhotoErr'), undoText = $('#evUndoText');
+            let original = '', objectUrl = null;
+
+            const fmt = b => b < 1048576 ? Math.round(b / 1024) + ' KB' : (b / 1048576).toFixed(1) + ' MB';
+            const showErr = m => { err.textContent = m; err.classList.toggle('show', !!m); };
+            const revoke = () => { if (objectUrl) { URL.revokeObjectURL(objectUrl); objectUrl = null; } };
+
+            function show(src, name, size, isNew) {
+                img.src = src;
+                pName.textContent = name || '';
+                pSize.textContent = size || '';
+                preview.classList.add('show');
+                preview.classList.toggle('is-new', !!isNew);
+                drop.style.display = 'none';
+                undoText.textContent = original ? 'Batal' : 'Hapus';
+            }
+            function empty() {
+                revoke();
+                input.value = '';
+                img.removeAttribute('src');
+                preview.classList.remove('show', 'is-new');
+                drop.style.display = '';
+            }
+            function reset(orig) {
+                original = orig || '';
+                showErr('');
+                empty();
+                if (original) show(original, 'Foto saat ini', '', false);
+            }
+            function handle(file) {
+                showErr('');
+                if (!file) return;
+                if (!ALLOWED.includes(file.type)) { input.value = ''; return showErr('Format tidak didukung. Gunakan PNG, JPG, WebP, atau AVIF.'); }
+                if (file.size > MAX) { input.value = ''; return showErr('Ukuran ' + fmt(file.size) + ' melebihi batas 2 MB. Kompres fotonya lalu coba lagi.'); }
+                revoke();
+                objectUrl = URL.createObjectURL(file);
+                show(objectUrl, file.name, fmt(file.size), true);
+            }
+
+            drop.addEventListener('click', () => input.click());
+            drop.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); } });
+            ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+            ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+            drop.addEventListener('drop', e => {
+                const file = e.dataTransfer.files && e.dataTransfer.files[0];
+                if (!file) return;
+                const dt = new DataTransfer(); dt.items.add(file); input.files = dt.files;
+                handle(file);
+            });
+            input.addEventListener('change', () => handle(input.files[0]));
+            $('#evChange').addEventListener('click', () => input.click());
+            $('#evUndo').addEventListener('click', () => {
+                // Batal: kembali ke foto lama. Hapus (saat tambah): kosongkan.
+                const o = original;
+                reset(o);
+            });
+
+            return { reset };
+        })();
+
+        /* ---------- Buka ulang modal jika validasi server gagal ---------- */
+        @if($bukaModal)
+            (function () {
+                const editId = @json($editIdError);
+                setMode(!!editId, editId, errUpdateUrl);
+                photo.reset('');
+                dlg.showModal();
+            })();
+        @endif
+    });
     </script>
 </body>
 </html>

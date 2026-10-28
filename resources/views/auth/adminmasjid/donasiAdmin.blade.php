@@ -231,8 +231,8 @@
             @endif
 
             {{-- =====================================================
-                TAB 1: KATEGORI
-                ===================================================== --}}
+                 TAB 1: KATEGORI
+                 ===================================================== --}}
             @if ($tab === 'kategori')
                 <section class="dn-card-modern">
                     <h3><i class="fa-solid fa-layer-group text-teal-600"></i> Kelola Jenis &amp; Kategori Donasi</h3>
@@ -517,9 +517,7 @@
                         </div>
                     @endif
                 </section>
-            @endif
 
-                        @if ($tab === 'kategori')
                 <script>
                     // Tambah / hapus baris rincian penggunaan dana (tab Kategori)
                     document.addEventListener('click', function (e) {
@@ -542,9 +540,109 @@
             @endif
 
             {{-- =====================================================
-                 TAB 3: PENYALURAN (ringkasan otomatis per program + dokumentasi)
-                 GANTI dari baris  @if ($tab === 'penyaluran')  sampai  @endif  penutupnya
-                 (tepat sebelum komentar "TAB 4: REKAP / PELAPORAN")
+                 TAB 2: PENGATURAN (zakat, rekening bank, QRIS)
+                 ===================================================== --}}
+            @if ($tab === 'pengaturan')
+                <div class="dn-grid-dashboard">
+
+                    {{-- Zakat Fitrah & Nisab --}}
+                    <section class="dn-card-modern">
+                        <h3><i class="fa-solid fa-calculator text-teal-600"></i> Zakat Fitrah &amp; Nisab</h3>
+                        <p>Atur nominal standar per jiwa untuk kalkulator zakat publik.</p>
+                        <form action="{{ route('admin.donasi.pengaturan') }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Nominal per Jiwa (Rp)</label>
+                                <input type="number" step="1000" min="1000" name="zakat_fitrah_default" class="form-control-modern" value="{{ $mosque->zakat_fitrah_default ?? 45000 }}" required>
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem;">Nisab Zakat Mal (Rp)</label>
+                                <input type="number" step="1000" min="0" name="zakat_nisab" class="form-control-modern" value="{{ $mosque->zakat_nisab ?? 85000000 }}" required>
+                                <small style="color: #94a3b8; font-size: 0.75rem;">Dipakai kalkulator zakat mal (2,5%) di halaman publik.</small>
+                            </div>
+                            <button type="submit" class="btn-primary-modern" style="width: 100%; justify-content: center;">Simpan Pengaturan</button>
+                        </form>
+                    </section>
+
+                    {{-- Rekening Bank --}}
+                    <section class="dn-card-modern">
+                        <h3><i class="fa-solid fa-building-columns text-teal-600"></i> Rekening Bank</h3>
+                        <p>Tambahkan rekening bank untuk transfer manual.</p>
+
+                        <form action="{{ route('admin.donasi.rekening.store') }}" method="POST" style="display: grid; gap: 0.75rem; margin-bottom: 1.25rem;">
+                            @csrf
+                            <input type="text" name="bank_name" class="form-control-modern" placeholder="Nama Bank (mis. BCA, BSI)" required maxlength="100">
+                            <input type="text" name="account_number" class="form-control-modern" placeholder="Nomor Rekening" required maxlength="50">
+                            <input type="text" name="account_holder" class="form-control-modern" placeholder="Atas Nama" required maxlength="100">
+                            <button type="submit" class="btn-primary-modern" style="justify-content: center;"><i class="fa-solid fa-plus"></i> Tambah Rekening</button>
+                        </form>
+
+                        @if ($bankAccounts->isEmpty())
+                            <div class="dn-empty" style="text-align:center; padding:1rem; color:#64748b; font-size: 0.85rem;">Belum ada rekening bank.</div>
+                        @else
+                            <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                                @foreach ($bankAccounts as $rek)
+                                    <details style="border:1px solid #e2e8f0; border-radius:0.6rem; padding:0.75rem;">
+                                        <summary style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-weight:600; font-size:0.85rem;">
+                                            <span>{{ $rek->bank_name }} — {{ $rek->account_number }}</span>
+                                            <span style="font-size:0.65rem; padding:0.15rem 0.4rem; border-radius:999px; {{ $rek->is_active ? 'background:#dcfce7;color:#15803d;' : 'background:#f1f5f9;color:#64748b;' }}">
+                                                {{ $rek->is_active ? 'Aktif' : 'Nonaktif' }}
+                                            </span>
+                                        </summary>
+                                        <div style="margin-top:0.75rem; display:flex; flex-direction:column; gap:0.5rem;">
+                                            <form action="{{ route('admin.donasi.rekening.update', $rek->id) }}" method="POST" style="display:grid; gap:0.5rem;">
+                                                @csrf @method('PUT')
+                                                <input type="text" name="bank_name" class="form-control-modern" value="{{ $rek->bank_name }}" required maxlength="100">
+                                                <input type="text" name="account_number" class="form-control-modern" value="{{ $rek->account_number }}" required maxlength="50">
+                                                <input type="text" name="account_holder" class="form-control-modern" value="{{ $rek->account_holder }}" required maxlength="100">
+                                                <button type="submit" class="btn-primary-modern" style="padding:0.35rem 0.7rem; font-size:0.8rem;">Simpan</button>
+                                            </form>
+                                            <div style="display:flex; gap:0.5rem;">
+                                                <form action="{{ route('admin.donasi.rekening.toggle', $rek->id) }}" method="POST" style="flex:1;">
+                                                    @csrf @method('PATCH')
+                                                    <button type="submit" style="width:100%; background:#f1f5f9; border:1px solid #cbd5e1; padding:0.3rem; border-radius:0.4rem; cursor:pointer; font-size:0.75rem;">
+                                                        {{ $rek->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('admin.donasi.rekening.destroy', $rek->id) }}" method="POST" onsubmit="return confirm('Hapus rekening ini?');" style="flex:1;">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit" style="width:100%; background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:0.3rem; border-radius:0.4rem; cursor:pointer; font-size:0.75rem;">Hapus</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </details>
+                                @endforeach
+                            </div>
+                        @endif
+                    </section>
+
+                    {{-- QRIS --}}
+                    <section class="dn-card-modern">
+                        <h3><i class="fa-solid fa-qrcode text-teal-600"></i> QRIS Masjid</h3>
+                        <p>Unggah gambar QRIS untuk halaman publik.</p>
+
+                        @if ($mosque->qris_image)
+                            <div style="text-align:center; margin-bottom:1rem;">
+                                <img src="{{ $mosque->qris_url }}" alt="QRIS" style="max-width:150px; border:1px solid #e2e8f0; border-radius:0.5rem; padding:0.4rem; background: #fff;">
+                                <form action="{{ route('admin.donasi.qris.destroy') }}" method="POST" onsubmit="return confirm('Hapus gambar QRIS?');" style="margin-top:0.5rem;">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:0.3rem 0.6rem; border-radius:0.4rem; cursor:pointer; font-size:0.75rem;">Hapus QRIS</button>
+                                </form>
+                            </div>
+                        @endif
+
+                        <form action="{{ route('admin.donasi.qris.update') }}" method="POST" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:0.75rem;">
+                            @csrf
+                            <input type="file" name="qris_image" accept="image/png, image/jpeg" class="form-control-modern" required style="padding: 0.4rem; font-size: 0.85rem;">
+                            <button type="submit" class="btn-primary-modern" style="justify-content:center; font-size: 0.85rem;">{{ $mosque->qris_image ? 'Ganti QRIS' : 'Unggah QRIS' }}</button>
+                        </form>
+                    </section>
+                </div>
+            @endif
+
+            {{-- =====================================================
+                 TAB 3: PENYALURAN (satu kartu per program, riwayat di dalam kartu)
                  ===================================================== --}}
             @if ($tab === 'penyaluran')
                 @php
@@ -673,8 +771,14 @@
                         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 1rem; align-items: start;">
 
                             @foreach ($grupAll as $rp)
+                                @php
+                                    // Sampul: banner program -> kalau tidak ada, pakai foto catatan penyaluran pertama
+                                    $cover = !empty($rp->image)
+                                        ? asset('storage/' . $rp->image)
+                                        : optional($rp->items->first(fn ($i) => !empty($i->foto_url)))->foto_url;
+                                @endphp
                                 <div style="border: 1px solid {{ $rp->umum ? '#e2e8f0' : '#99f6e4' }}; border-radius: 0.75rem; overflow: hidden; background: #ffffff; display: flex; flex-direction: column; position: relative;">
-                                    <div style="position: relative; height: 160px; background-size: cover; background-position: center; background-color: #0f766e; {{ !empty($rp->image) ? "background-image:url('" . asset('storage/' . $rp->image) . "');" : 'background-image: linear-gradient(150deg,#0f766e,#115e59);' }}">
+                                    <div style="position: relative; height: 160px; background-size: cover; background-position: center; background-color: #0f766e; {{ $cover ? "background-image:url('" . $cover . "');" : 'background-image: linear-gradient(150deg,#0f766e,#115e59);' }}">
                                         <span style="position:absolute; top:10px; left:10px; background:rgba(13,148,136,.95); color:#fff; padding:3px 10px; border-radius:999px; font-size:.65rem; font-weight:700; text-transform:uppercase;">
                                             {{ $rp->umum ? 'Tanpa Program' : 'Program · Otomatis' }}
                                         </span>
