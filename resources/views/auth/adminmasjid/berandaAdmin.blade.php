@@ -3,7 +3,7 @@
     use Illuminate\Support\Str;
 
     /*
-    | SATU SUMBER DATA MODUL (dipakai sidebar, kartu status, dan banner).
+    | SATU SUMBER DATA MODUL (dipakai sidebar, kartu akses cepat, dan ringkasan paket).
     | Status dihitung OTOMATIS:
     |  - 'segera' : route modul belum ada di routes/web.php
     |  - 'locked' : modul berbayar tapi paket masjid masih 'free'
@@ -12,14 +12,14 @@
     $paketFree = ($mosque->package_type ?? null) === 'free';
 
     $defs = [
-        ['label' => 'Landing Page',     'icon' => 'fa-globe',               'route' => 'admin.landing-page',  'match' => 'admin.landing-page*',  'paid' => false],
-        ['label' => 'Profil Masjid',    'icon' => 'fa-mosque',              'route' => 'admin.profil-masjid', 'match' => 'admin.profil-masjid*', 'paid' => false],
-        ['label' => 'Jadwal Shalat',    'icon' => 'fa-clock',               'route' => 'admin.jadwal-sholat', 'match' => 'admin.jadwal-sholat*', 'paid' => false],
-        ['label' => 'Pengumuman',       'icon' => 'fa-bullhorn',            'route' => 'admin.pengumuman',    'match' => 'admin.pengumuman*',    'paid' => false, 'count' => $totalPengumuman ?? 0],
-        ['label' => 'Kegiatan & Acara', 'icon' => 'fa-calendar-days',       'route' => 'admin.acara',         'match' => 'admin.acara*',         'paid' => false, 'count' => $totalAcara ?? 0],
-        ['label' => 'Donasi',           'icon' => 'fa-hand-holding-dollar', 'route' => 'admin.donasi',        'match' => 'admin.donasi*',        'paid' => true],
-        ['label' => 'Data Jamaah',      'icon' => 'fa-users',               'route' => 'admin.jamaah',        'match' => 'admin.jamaah*',        'paid' => false],
-        ['label' => 'Tema Tampilan',    'icon' => 'fa-palette',             'route' => 'admin.tema',          'match' => 'admin.tema*',          'paid' => false],
+        ['label' => 'Landing Page',     'icon' => 'fa-globe',               'route' => 'admin.landing-page',  'match' => 'admin.landing-page*',  'paid' => false, 'desc' => 'Atur halaman utama masjid'],
+        ['label' => 'Profil Masjid',    'icon' => 'fa-mosque',              'route' => 'admin.profil-masjid', 'match' => 'admin.profil-masjid*', 'paid' => false, 'desc' => 'Identitas & data masjid'],
+        ['label' => 'Jadwal Shalat',    'icon' => 'fa-clock',               'route' => 'admin.jadwal-sholat', 'match' => 'admin.jadwal-sholat*', 'paid' => false, 'desc' => 'Waktu shalat harian'],
+        ['label' => 'Pengumuman',       'icon' => 'fa-bullhorn',            'route' => 'admin.pengumuman',    'match' => 'admin.pengumuman*',    'paid' => false, 'desc' => 'Informasi untuk jamaah', 'count' => $totalPengumuman ?? 0],
+        ['label' => 'Kegiatan & Acara', 'icon' => 'fa-calendar-days',       'route' => 'admin.acara',         'match' => 'admin.acara*',         'paid' => false, 'desc' => 'Agenda & kegiatan masjid', 'count' => $totalAcara ?? 0],
+        ['label' => 'Donasi',           'icon' => 'fa-hand-holding-dollar', 'route' => 'admin.donasi',        'match' => 'admin.donasi*',        'paid' => true,  'desc' => 'Zakat, infaq & wakaf'],
+        ['label' => 'Data Jamaah',      'icon' => 'fa-users',               'route' => 'admin.jamaah',        'match' => 'admin.jamaah*',        'paid' => false, 'desc' => 'Data anggota jamaah'],
+        ['label' => 'Tema Tampilan',    'icon' => 'fa-palette',             'route' => 'admin.tema',          'match' => 'admin.tema*',          'paid' => false, 'desc' => 'Warna & gaya tampilan'],
     ];
 
     $modules = collect($defs)->map(function ($m) use ($paketFree) {
@@ -37,6 +37,7 @@
     });
 
     $aktifList   = $modules->where('status', 'aktif');
+    $lockedList  = $modules->where('status', 'locked');
     $jumlahAktif = $aktifList->count();
     $jumlahTotal = $modules->count();
     $persen      = $jumlahTotal ? round($jumlahAktif / $jumlahTotal * 100) : 0;
@@ -50,8 +51,22 @@
 
     $namaMasjid = $mosque->mosque_name ?? 'SIM Masjid';
     $namaUser   = Auth::user()->name ?? 'Admin Masjid';
+    $namaDepan  = explode(' ', trim($namaUser))[0] ?: 'Admin';
     $inisial    = Str::upper(Str::substr($namaUser, 0, 2));
     $urlPublik  = isset($mosque->slug) ? route('masjid.publik', $mosque->slug) : url('/');
+
+    // Sapaan sesuai jam
+    $jam       = (int) now()->format('H');
+    $sapa      = $jam < 11 ? 'Selamat pagi' : ($jam < 15 ? 'Selamat siang' : ($jam < 18 ? 'Selamat sore' : 'Selamat malam'));
+    $sapaIcon  = ($jam >= 5 && $jam < 18) ? 'fa-sun' : 'fa-moon';
+    $tanggal   = now()->translatedFormat('l, d F Y');
+
+    // Paket
+    $paketLabel = $paketFree ? 'Paket Free' : 'Paket ' . Str::title($mosque->package_type ?? 'Premium');
+
+    // Ring progres (r = 52)
+    $ringC    = round(2 * M_PI * 52, 1);
+    $ringDash = round($persen / 100 * $ringC, 1);
 @endphp
 <!DOCTYPE html>
 <html lang="id">
@@ -60,8 +75,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - {{ $namaMasjid }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/adminmasjid/berandaAdmin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/adminmasjid/dashboardAdmin.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body class="ba2-body" id="ba2Body">
@@ -78,21 +94,22 @@
         </div>
 
         <nav class="ba2-nav">
-            <a href="{{ route('admin.dashboard') }}" class="ba2-nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+            <a href="{{ route('admin.dashboard') }}" title="Dashboard" class="ba2-nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <span class="ba2-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
                 <span class="ba2-nav-label">Dashboard</span>
             </a>
 
             @foreach($modules as $m)
                 <a href="{{ $m['url'] }}"
+                   title="{{ $m['status'] === 'locked' ? 'Upgrade paket untuk membuka ' . $m['label'] : $m['label'] }}"
                    class="ba2-nav-item {{ $m['status'] !== 'segera' && request()->routeIs($m['match']) ? 'active' : '' }}"
-                   @if($m['status'] === 'segera') style="opacity:.5;pointer-events:none;" aria-disabled="true" tabindex="-1" @endif
-                   @if($m['status'] === 'locked') style="opacity:.8;" title="Upgrade paket untuk membuka {{ $m['label'] }}" @endif>
+                   @if($m['status'] === 'segera') style="opacity:.5;pointer-events:none;" aria-disabled="true" tabindex="-1"
+                   @elseif($m['status'] === 'locked') style="opacity:.8;" @endif>
                     <span class="ba2-nav-icon"><i class="fa-solid {{ $m['icon'] }}"></i></span>
                     <span class="ba2-nav-label">{{ $m['label'] }}</span>
 
                     @if($m['status'] === 'locked')
-                        <span class="ba2-nav-soon" style="background:#e74c3c;color:#fff;padding:1px 6px;border-radius:100px;"><i class="fa-solid fa-lock"></i></span>
+                        <span class="ba2-nav-soon" style="background:#e74c3c;color:#fff;padding:2px 7px;border-radius:100px;"><i class="fa-solid fa-lock"></i></span>
                     @elseif($m['status'] === 'segera')
                         <span class="ba2-nav-soon">Segera</span>
                     @elseif(($m['count'] ?? 0) > 0)
@@ -137,126 +154,206 @@
         </header>
 
         <main class="ba2-content">
+            <div class="db-page">
 
-            {{-- ===== BANNER (di atas, otomatis dari status modul) ===== --}}
-            <div class="ba2-banner">
-                <div class="ba2-banner-title">{{ $namaMasjid }} — {{ $mosque->city ?? 'Indonesia' }}</div>
-                <div class="ba2-banner-sub">
-                    Sistem Informasi Masjid versi 1.0 &middot; {{ $jumlahAktif }} dari {{ $jumlahTotal }} modul aktif
-                    @if($paketFree) &middot; Upgrade paket untuk membuka modul terkunci @endif
-                </div>
+                {{-- ===== HERO ===== --}}
+                <section class="db-hero">
+                    <div class="db-hero-main">
+                        <span class="db-greet"><i class="fa-solid {{ $sapaIcon }}"></i> {{ $sapa }} &middot; {{ $tanggal }}</span>
 
-                {{-- Progress modul aktif --}}
-                <div style="height:8px;border-radius:100px;background:rgba(255,255,255,.18);overflow:hidden;margin-bottom:14px;max-width:420px;">
-                    <div style="height:100%;width:{{ $persen }}%;background:#f5a623;border-radius:100px;"></div>
-                </div>
+                        <h1 class="db-hero-title">Assalamu'alaikum, <span>{{ $namaDepan }}</span></h1>
+                        <p class="db-hero-sub">
+                            Kelola <b>{{ $namaMasjid }}</b>@if(!empty($mosque->city)) di {{ $mosque->city }}@endif.
+                            Semua modul masjid dapat Anda atur dari satu tempat.
+                        </p>
 
-                <div class="ba2-banner-tags">
-                    @foreach($modules as $m)
-                        <span class="ba2-banner-tag {{ $m['status'] === 'aktif' ? 'active' : 'soon' }}">
-                            {{ $m['label'] }}
-                            @if($m['status'] === 'aktif') ✓ @elseif($m['status'] === 'locked') 🔒 @endif
-                        </span>
-                    @endforeach
-                </div>
-            </div>
+                        <div class="db-chips">
+                            <span class="db-chip {{ $paketFree ? '' : 'gold' }}"><i class="fa-solid {{ $paketFree ? 'fa-seedling' : 'fa-crown' }}"></i> {{ $paketLabel }}</span>
+                            <span class="db-chip"><i class="fa-solid fa-code-branch"></i> SIM Masjid v1.0</span>
+                            <span class="db-chip"><i class="fa-solid fa-circle-check"></i> {{ $jumlahAktif }} modul aktif</span>
+                        </div>
 
-            {{-- ===== STATS CARDS ===== --}}
-            @php
-                $iconBox = 'width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;';
-            @endphp
-            <div class="ba2-stats-grid">
-                <div class="ba2-stat-card">
-                    <div class="ba2-stat-top">
-                        <span class="ba2-stat-icon" style="{{ $iconBox }}background:#e8e9fd;color:#5457e0;"><i class="fa-solid fa-users"></i></span>
-                        <span class="ba2-stat-badge green">Aktif</span>
+                        <div class="db-actions">
+                            <a href="{{ $urlPublik }}" class="db-btn db-btn-gold"><i class="fa-solid fa-arrow-up-right-from-square"></i> Lihat Halaman Publik</a>
+                            @if($paketFree && Route::has('masjid.perpanjangan.create'))
+                                <a href="{{ route('masjid.perpanjangan.create') }}" class="db-btn db-btn-ghost"><i class="fa-solid fa-rocket"></i> Upgrade Paket</a>
+                            @endif
+                        </div>
                     </div>
-                    <div class="ba2-stat-value">{{ number_format($totalJamaah ?? 0, 0, ',', '.') }}</div>
-                    <div class="ba2-stat-label">Total Jamaah</div>
-                </div>
 
-                <div class="ba2-stat-card">
-                    <div class="ba2-stat-top">
-                        <span class="ba2-stat-icon" style="{{ $iconBox }}background:#dff1fb;color:#0b86c4;"><i class="fa-solid fa-credit-card"></i></span>
-                        <span class="ba2-stat-badge blue">Bulan Ini</span>
+                    <div class="db-ring-wrap">
+                        <div class="db-ring">
+                            <svg viewBox="0 0 124 124" aria-hidden="true">
+                                <defs>
+                                    <linearGradient id="dbRingGrad" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0%" stop-color="#ffd98a"/>
+                                        <stop offset="100%" stop-color="#f5a623"/>
+                                    </linearGradient>
+                                </defs>
+                                <circle class="trk" cx="62" cy="62" r="52"/>
+                                <circle class="bar" cx="62" cy="62" r="52" stroke-dasharray="{{ $ringDash }} {{ $ringC }}"/>
+                            </svg>
+                            <div class="db-ring-text"><b>{{ $persen }}%</b><span>modul aktif</span></div>
+                        </div>
+                        <div class="db-ring-cap">{{ $jumlahAktif }} dari {{ $jumlahTotal }} modul<br>sudah dapat dipakai</div>
                     </div>
-                    <div class="ba2-stat-value">Rp {{ number_format($totalDonasiBulanIni ?? 0, 0, ',', '.') }}</div>
-                    <div class="ba2-stat-label">Donasi Bulan Ini</div>
-                </div>
+                </section>
 
-                <div class="ba2-stat-card">
-                    <div class="ba2-stat-top">
-                        <span class="ba2-stat-icon" style="{{ $iconBox }}background:#fdf0d5;color:#a8741a;"><i class="fa-solid fa-calendar-days"></i></span>
-                        <span class="ba2-stat-badge amber">Agenda</span>
+                {{-- ===== STATS CARDS ===== --}}
+                <div class="ba2-stats-grid">
+                    <div class="ba2-stat-card">
+                        <div class="ba2-stat-top">
+                            <span class="ba2-stat-icon indigo"><i class="fa-solid fa-users"></i></span>
+                            <span class="ba2-stat-badge green">Aktif</span>
+                        </div>
+                        <div class="ba2-stat-value">{{ number_format($totalJamaah ?? 0, 0, ',', '.') }}</div>
+                        <div class="ba2-stat-label">Total Jamaah</div>
                     </div>
-                    <div class="ba2-stat-value">{{ $totalAcara ?? 0 }}</div>
-                    <div class="ba2-stat-label">Acara Aktif</div>
-                </div>
 
-                <div class="ba2-stat-card">
-                    <div class="ba2-stat-top">
-                        <span class="ba2-stat-icon" style="{{ $iconBox }}background:#fde4e3;color:#cf4440;"><i class="fa-solid fa-bullhorn"></i></span>
-                        <span class="ba2-stat-badge red">Informasi</span>
+                    <div class="ba2-stat-card">
+                        <div class="ba2-stat-top">
+                            <span class="ba2-stat-icon sky"><i class="fa-solid fa-credit-card"></i></span>
+                            <span class="ba2-stat-badge blue">Bulan Ini</span>
+                        </div>
+                        <div class="ba2-stat-value">Rp {{ number_format($totalDonasiBulanIni ?? 0, 0, ',', '.') }}</div>
+                        <div class="ba2-stat-label">Donasi Bulan Ini</div>
                     </div>
-                    <div class="ba2-stat-value">{{ $totalPengumuman ?? 0 }}</div>
-                    <div class="ba2-stat-label">Pengumuman</div>
-                </div>
-            </div>
 
-            {{-- ===== AKTIVITAS + STATUS MODUL ===== --}}
-            <div class="ba2-row-2">
-                <div class="ba2-card">
-                    <div class="ba2-card-head">
-                        <span class="ba2-card-title">Aktivitas Terkini</span>
-                        <span class="ba2-card-meta">Sistem</span>
+                    <div class="ba2-stat-card">
+                        <div class="ba2-stat-top">
+                            <span class="ba2-stat-icon amber"><i class="fa-solid fa-calendar-days"></i></span>
+                            <span class="ba2-stat-badge amber">Agenda</span>
+                        </div>
+                        <div class="ba2-stat-value">{{ $totalAcara ?? 0 }}</div>
+                        <div class="ba2-stat-label">Acara Aktif</div>
                     </div>
-                    <div class="ba2-card-body">
-                        @forelse($aktivitas as $a)
-                            <div class="ba2-activity-item">
-                                <span class="ba2-dot {{ $a['color'] }}"></span>
-                                <span class="ba2-activity-text">{{ $a['teks'] }}</span>
-                                <span class="ba2-activity-time">{{ $a['waktu'] }}</span>
-                            </div>
-                        @empty
-                            <div class="ba2-activity-item">
-                                <span class="ba2-dot gray"></span>
-                                <span class="ba2-activity-text">Belum ada aktivitas.</span>
-                            </div>
-                        @endforelse
+
+                    <div class="ba2-stat-card">
+                        <div class="ba2-stat-top">
+                            <span class="ba2-stat-icon rose"><i class="fa-solid fa-bullhorn"></i></span>
+                            <span class="ba2-stat-badge red">Informasi</span>
+                        </div>
+                        <div class="ba2-stat-value">{{ $totalPengumuman ?? 0 }}</div>
+                        <div class="ba2-stat-label">Pengumuman</div>
                     </div>
                 </div>
 
-                <div class="ba2-card">
-                    <div class="ba2-card-head">
-                        <span class="ba2-card-title">Status Modul</span>
-                        <span class="ba2-card-meta">{{ $jumlahAktif }}/{{ $jumlahTotal }} aktif</span>
+                {{-- ===== AKSES CEPAT / MODUL ===== --}}
+                <section>
+                    <div class="db-head">
+                        <div>
+                            <h2>Akses Cepat Modul</h2>
+                            <p>Klik kartu untuk langsung membuka modul. {{ $jumlahAktif }}/{{ $jumlahTotal }} modul aktif.</p>
+                        </div>
                     </div>
-                    <div class="ba2-card-body">
+
+                    <div class="db-tiles">
                         @foreach($modules as $m)
-                            <a href="{{ $m['url'] }}" class="ba2-modul-item"
-                               style="text-decoration:none;color:inherit;{{ $m['status'] === 'segera' ? 'opacity:.6;pointer-events:none;' : '' }}">
-                                <span class="ba2-modul-icon"><i class="fa-solid {{ $m['icon'] }}"></i></span>
-                                <span class="ba2-modul-name">{{ $m['label'] }}</span>
-                                <span class="ba2-modul-status {{ $m['status'] === 'aktif' ? 'aktif' : 'segera' }}"
-                                      @if($m['status'] === 'locked') style="background:#fee2e2;color:#991b1b;" @endif>
-                                    {{ $labelStatus[$m['status']] }}
-                                </span>
+                            <a href="{{ $m['url'] }}"
+                               class="db-tile {{ $m['status'] }} tone-{{ $loop->index % 6 }}"
+                               @if($m['status'] === 'segera') aria-disabled="true" tabindex="-1" @endif>
+                                <span class="db-tile-chip">{{ $labelStatus[$m['status']] }}</span>
+                                <span class="db-tile-icon"><i class="fa-solid {{ $m['icon'] }}"></i></span>
+                                <span class="db-tile-name">{{ $m['label'] }}</span>
+
+                                @if($m['status'] === 'locked')
+                                    <span class="db-tile-meta">Upgrade untuk membuka</span>
+                                @elseif($m['status'] === 'segera')
+                                    <span class="db-tile-meta">Segera hadir</span>
+                                @elseif(($m['count'] ?? 0) > 0)
+                                    <span class="db-tile-count"><i class="fa-solid fa-circle" style="font-size:.4rem;"></i> {{ $m['count'] }} aktif</span>
+                                @else
+                                    <span class="db-tile-meta">{{ $m['desc'] }}</span>
+                                @endif
                             </a>
                         @endforeach
                     </div>
-                </div>
-            </div>
+                </section>
 
+                {{-- ===== AKTIVITAS + PAKET ===== --}}
+                <div class="ba2-row-2">
+                    <div class="ba2-card">
+                        <div class="ba2-card-head">
+                            <span class="ba2-card-title">Aktivitas Terkini</span>
+                            <span class="ba2-card-meta">Sistem</span>
+                        </div>
+                        <ul class="db-timeline">
+                            @forelse($aktivitas as $a)
+                                <li class="db-tl-item">
+                                    <span class="db-tl-dot {{ $a['color'] }}"></span>
+                                    <div class="db-tl-body">
+                                        <div class="db-tl-text">{{ $a['teks'] }}</div>
+                                        <div class="db-tl-time">{{ $a['waktu'] }}</div>
+                                    </div>
+                                </li>
+                            @empty
+                                <li class="db-tl-item">
+                                    <span class="db-tl-dot gray"></span>
+                                    <div class="db-tl-body"><div class="db-tl-text">Belum ada aktivitas.</div></div>
+                                </li>
+                            @endforelse
+                        </ul>
+                    </div>
+
+                    <div class="ba2-card">
+                        <div class="ba2-card-head">
+                            <span class="ba2-card-title">Ringkasan Paket</span>
+                            <span class="ba2-card-meta">{{ $jumlahAktif }}/{{ $jumlahTotal }} aktif</span>
+                        </div>
+                        <div class="db-plan-body">
+                            <div class="db-plan-top">
+                                <span class="db-plan-icon {{ $paketFree ? 'free' : '' }}"><i class="fa-solid {{ $paketFree ? 'fa-seedling' : 'fa-crown' }}"></i></span>
+                                <div>
+                                    <div class="db-plan-name">{{ $paketLabel }}</div>
+                                    <div class="db-plan-sub">{{ $paketFree ? 'Fitur dasar masjid' : 'Semua fitur tersedia' }}</div>
+                                </div>
+                            </div>
+
+                            <div class="db-bar"><i style="width: {{ $persen }}%"></i></div>
+                            <div class="db-bar-cap"><span>Modul terbuka</span><b>{{ $persen }}%</b></div>
+
+                            @if($lockedList->isNotEmpty())
+                                <div class="db-lock-list">
+                                    @foreach($lockedList as $m)
+                                        <div class="db-lock-item"><i class="fa-solid fa-lock"></i> {{ $m['label'] }}</div>
+                                    @endforeach
+                                </div>
+                                @if(Route::has('masjid.perpanjangan.create'))
+                                    <a href="{{ route('masjid.perpanjangan.create') }}" class="db-plan-cta"><i class="fa-solid fa-rocket"></i> Upgrade untuk membuka</a>
+                                @endif
+                            @else
+                                <div class="db-plan-ok"><i class="fa-solid fa-circle-check"></i> Tidak ada modul yang terkunci.</div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </main>
     </div>
 
     <button class="ba2-fab" aria-label="Bantuan">?</button>
 
     <script>
-        document.getElementById('ba2CollapseBtn').addEventListener('click', function () {
-            document.getElementById('ba2Sidebar').classList.toggle('collapsed');
-            document.getElementById('ba2Main').classList.toggle('expanded');
-        });
+        (function () {
+            var sidebar = document.getElementById('ba2Sidebar');
+            var main    = document.getElementById('ba2Main');
+            var key     = 'ba2SidebarCollapsed';
+
+            function apply(collapsed) {
+                sidebar.classList.toggle('collapsed', collapsed);
+                main.classList.toggle('expanded', collapsed);
+            }
+
+            // Ingat pilihan menu ciut/lebar
+            try { apply(localStorage.getItem(key) === '1'); } catch (e) {}
+
+            document.getElementById('ba2CollapseBtn').addEventListener('click', function () {
+                var collapsed = !sidebar.classList.contains('collapsed');
+                apply(collapsed);
+                try { localStorage.setItem(key, collapsed ? '1' : '0'); } catch (e) {}
+            });
+        })();
     </script>
 </body>
 </html>
