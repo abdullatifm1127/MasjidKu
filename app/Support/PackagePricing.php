@@ -6,33 +6,76 @@ use Illuminate\Support\Facades\DB;
 
 class PackagePricing
 {
-    /** Harga & durasi paket. Harga dibaca dari payment_settings (diatur Super Admin). */
-    public static function resolve(string $packageType): array
-    {
-        // Angka di belakang "_" pada kode paket = lama langganan (bulan)
-        $months  = (int) (explode('_', $packageType)[1] ?? 1) ?: 1;
-        $code    = $months >= 12 ? 'package_yearly' : 'package_monthly';
-        $default = $months >= 12 ? 1000000 : 100000;
+    // jumlah bulan => kode di tabel payment_settings
+    private const MAP = [
+        1  => 'package_monthly',
+        12 => 'package_yearly',
+    ];
 
-        $row    = DB::table('payment_settings')->where('code', $code)->first();
-        $config = $row ? (json_decode($row->config_data, true) ?: []) : [];
+    public static function months(?string $code): int
+    {
+        if (!$code || $code === 'free') {
+            return 0;
+        }
+        return (int) (explode('_', $code)[1] ?? 0);
+    }
+
+    private static function setting(int $months): ?array
+    {
+        $settingCode = self::MAP[$months] ?? null;
+        if (!$settingCode) {
+            return null;
+        }
+
+        $row = DB::table('payment_settings')->where('code', $settingCode)->first();
+        if (!$row) {
+            return null;
+        }
+
+        $cfg = json_decode($row->config_data, true) ?: [];
 
         return [
-            'code'   => $code,
-            'months' => $months,
-            'amount' => (int) ($config['price'] ?? $default),
-            'name'   => $row->method_name ?? ($months >= 12 ? 'Langganan 1 Tahun' : 'Langganan 1 Bulan'),
+            'name'  => $row->method_name ?? null,
+            'price' => (int) ($cfg['price'] ?? 0),
         ];
     }
 
-    public static function amount(string $packageType): int
+    /** Harga SELALU diambil dari pengaturan Super Admin, bukan dari kode yang dikirim user. */
+    public static function resolve(?string $code): array
     {
-        return self::resolve($packageType)['amount'];
+        $months = self::months($code);
+
+        if ($months === 0) {
+            return ['name' => 'Free', 'amount' => 0, 'months' => 0];
+        }
+
+        $set = self::setting($months);
+
+        if ($set) {
+            return [
+                'name'   => $set['name'] ?: ($months === 12 ? 'Paket 1 Tahun' : 'Paket ' . $months . ' Bulan'),
+                'amount' => $set['price'],
+                'months' => $months,
+            ];
+        }
+
+        // Fallback terakhir (data lama): pakai angka di dalam kode, mis. "150000_1"
+        return [
+            'name'   => 'Paket ' . $months . ' Bulan',
+            'amount' => (int) (explode('_', (string) $code)[0] ?? 0),
+            'months' => $months,
+        ];
     }
 
-    /** Contoh: rupiah(1) => "Rp 100.000", rupiah(12) => "Rp 1.000.000" (sesuai pengaturan Super Admin) */
-    public static function rupiah(int $months): string
+    public static function amount(?string $code): int
     {
-        return 'Rp ' . number_format(self::resolve('0_' . $months)['amount'], 0, ',', '.');
+        return self::resolve($code)['amount'];
+    }
+
+    /** Kode paket bulanan default, mengikuti harga Super Admin saat ini. */
+    public static function defaultCode(): string
+    {
+        $set = self::setting(1);
+        return ($set['price'] ?? 0) . '_1';
     }
 }
