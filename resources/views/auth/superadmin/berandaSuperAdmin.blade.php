@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/superadmin/berandaSuperAdmin.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 </head>
 <body class="sa-page" id="saBody">
 
@@ -83,6 +84,29 @@
 
     $jam = (int) now()->format('G');
     $salam = $jam < 11 ? 'Selamat pagi' : ($jam < 15 ? 'Selamat siang' : ($jam < 18 ? 'Selamat sore' : 'Selamat malam'));
+
+    // ===== Data pengaturan notifikasi (diambil dari NotifikasiController@dataBeranda) =====
+    $nf        = app(\App\Http\Controllers\SuperAdmin\NotifikasiController::class)->dataBeranda();
+    $nfMasjids = $nf['masjids'];
+    $nfJumlah  = $nf['jumlah'];
+    $nfRiwayat = $nf['riwayat'];
+
+    $nfIkon  = ['info' => 'fa-circle-info', 'success' => 'fa-circle-check', 'warning' => 'fa-triangle-exclamation', 'danger' => 'fa-circle-exclamation'];
+    $nfLabel = ['info' => 'Informasi', 'success' => 'Berhasil', 'warning' => 'Peringatan', 'danger' => 'Penting'];
+    $nfTarget = [
+        'all'      => ['Semua masjid aktif', 'Seluruh masjid yang sudah disetujui'],
+        'berbayar' => ['Paket berbayar',     'Selain paket free'],
+        'free'     => ['Paket free',         'Masjid tanpa langganan'],
+        'segera'   => ['Segera berakhir',    'Langganan habis dalam 7 hari'],
+        'pilih'    => ['Pilih manual',       'Tentukan masjid sendiri'],
+    ];
+    $nfOldTarget = old('target', 'all');
+    $nfOldType   = old('type', 'info');
+    $nfOldSel    = collect(old('mosque_ids', []))->map(fn ($v) => (int) $v)->all();
+
+    $nfKirim = $nfRiwayat->sum('total');
+    $nfBaca  = $nfRiwayat->sum('dibaca');
+    $nfPct   = $nfKirim > 0 ? (int) round($nfBaca / $nfKirim * 100) : 0;
 @endphp
 
 <div class="sa-main" id="saMain">
@@ -104,6 +128,7 @@
                 <a href="{{ route('superadmin.manajemen-masjid') }}" class="db-qa-btn"><i class="fa-solid fa-mosque"></i> Kelola Masjid</a>
                 <a href="{{ route('superadmin.pembayaran.index') }}" class="db-qa-btn"><i class="fa-solid fa-credit-card"></i> Pembayaran</a>
                 <a href="{{ route('superadmin.halaman-utama.edit') }}" class="db-qa-btn"><i class="fa-solid fa-pen-to-square"></i> Edit Halaman Utama</a>
+                <a href="#notifikasi" class="db-qa-btn"><i class="fa-solid fa-bell"></i> Notifikasi</a>
             </div>
         </div>
 
@@ -311,6 +336,175 @@
         </div>
     </section>
 
+    {{-- ===== PENGATURAN NOTIFIKASI KE ADMIN MASJID ===== --}}
+    <section id="notifikasi">
+
+        <div class="nf-head">
+            <div>
+                <h2>Notifikasi ke Admin Masjid</h2>
+                <p>Kirim pengumuman atau pengingat. Pesan muncul di lonceng dashboard tiap masjid.</p>
+            </div>
+            <span class="nf-badge">{{ $nfPct }}% dibaca ({{ $nfBaca }} dari {{ $nfKirim }} pesan terakhir)</span>
+        </div>
+
+        @if(session('success'))
+            <div class="nf-flash ok" role="status"><i class="fa-solid fa-circle-check"></i><div>{{ session('success') }}</div></div>
+        @endif
+        @if(session('error'))
+            <div class="nf-flash err" role="alert"><i class="fa-solid fa-circle-exclamation"></i><div>{{ session('error') }}</div></div>
+        @endif
+        @if($errors->any())
+            <div class="nf-flash err" role="alert">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <div>
+                    <strong>Notifikasi belum terkirim. Periksa isian berikut:</strong>
+                    <ul>@foreach($errors->all() as $err)<li>{{ $err }}</li>@endforeach</ul>
+                </div>
+            </div>
+        @endif
+
+        <div class="nf-grid">
+
+            {{-- Form kirim --}}
+            <div class="db-card">
+                <div class="db-card-head"><div><h2>Tulis notifikasi</h2><p>Isi pesan, pilih penerima, lalu kirim</p></div></div>
+
+                <form method="POST" action="{{ route('superadmin.notifikasi.store') }}" id="nfForm" novalidate>
+                    @csrf
+
+                    <div class="nf-field">
+                        <span class="nf-legend">Jenis pesan</span>
+                        <div class="nf-types">
+                            @foreach($nfLabel as $val => $lbl)
+                                <label class="nf-type {{ $val }}">
+                                    <input type="radio" name="type" value="{{ $val }}" {{ $nfOldType === $val ? 'checked' : '' }}>
+                                    <span><i class="fa-solid {{ $nfIkon[$val] }}"></i> {{ $lbl }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div class="nf-field">
+                        <label for="nfTitle">Judul <span class="nf-count" id="nfTitleCount">0/120</span></label>
+                        <input type="text" id="nfTitle" name="title" class="nf-input {{ $errors->has('title') ? 'bad' : '' }}"
+                               maxlength="120" value="{{ old('title') }}" placeholder="Contoh: Langganan Anda berakhir minggu ini">
+                    </div>
+
+                    <div class="nf-field">
+                        <label for="nfMessage">Isi pesan <span class="nf-count" id="nfMsgCount">0/1000</span></label>
+                        <textarea id="nfMessage" name="message" class="nf-textarea {{ $errors->has('message') ? 'bad' : '' }}"
+                                  maxlength="1000" placeholder="Tulis pesan yang singkat dan jelas.">{{ old('message') }}</textarea>
+                    </div>
+
+                    <div class="nf-field">
+                        <label for="nfUrl">Tautan saat diklik (opsional)</label>
+                        <input type="text" id="nfUrl" name="url" class="nf-input {{ $errors->has('url') ? 'bad' : '' }}"
+                               maxlength="255" value="{{ old('url') }}" placeholder="/masjid/perpanjangan atau https://...">
+                        <small>Awali dengan "/" untuk halaman di dalam aplikasi, atau "https://" untuk situs luar.</small>
+                    </div>
+
+                    <div class="nf-field">
+                        <span class="nf-legend">Kirim ke</span>
+                        <div class="nf-targets">
+                            @foreach($nfTarget as $val => [$tNama, $tKet])
+                                <label class="nf-target">
+                                    <input type="radio" name="target" value="{{ $val }}" {{ $nfOldTarget === $val ? 'checked' : '' }}>
+                                    <span>
+                                        <span><b>{{ $tNama }}</b><em>{{ $tKet }}</em></span>
+                                        @if($val !== 'pilih')
+                                            <span class="nf-n">{{ $nfJumlah[$val] ?? 0 }}</span>
+                                        @else
+                                            <span class="nf-n"><i class="fa-solid fa-hand-pointer"></i></span>
+                                        @endif
+                                    </span>
+                                </label>
+                            @endforeach
+                        </div>
+
+                        <div class="nf-pick" id="nfPick" {{ $nfOldTarget === 'pilih' ? '' : 'hidden' }}>
+                            <div class="nf-pick-bar">
+                                <div class="db-search">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input type="search" id="nfPickSearch" placeholder="Cari nama masjid atau kota..." autocomplete="off">
+                                </div>
+                                <button type="button" class="nf-mini" id="nfPickAll">Pilih yang tampil</button>
+                                <button type="button" class="nf-mini" id="nfPickNone">Kosongkan</button>
+                            </div>
+                            <div class="nf-pick-list" id="nfPickList">
+                                @foreach($nfMasjids as $nm)
+                                    <label class="nf-pick-item" data-text="{{ strtolower($nm->mosque_name.' '.$nm->city) }}">
+                                        <input type="checkbox" name="mosque_ids[]" value="{{ $nm->id }}" {{ in_array($nm->id, $nfOldSel, true) ? 'checked' : '' }}>
+                                        <span>{{ $nm->mosque_name }}</span>
+                                        <small>{{ $nm->city ?: '-' }} · {{ ($nm->package_type && $nm->package_type !== 'free') ? ucfirst($nm->package_type) : 'Free' }}</small>
+                                    </label>
+                                @endforeach
+                                @if($nfMasjids->isEmpty())
+                                    <div class="db-empty"><i class="fa-solid fa-mosque"></i><p>Belum ada masjid terdaftar.</p></div>
+                                @endif
+                            </div>
+                            <div class="nf-pick-count"><b id="nfPickN">0</b> masjid dipilih</div>
+                        </div>
+                    </div>
+
+                    <div class="nf-actions">
+                        <button type="submit" class="nf-send" id="nfSend"><i class="fa-solid fa-paper-plane"></i> Kirim notifikasi</button>
+                        <span class="nf-hint" id="nfHint"></span>
+                    </div>
+                </form>
+            </div>
+
+            {{-- Sisi kanan: pratinjau + riwayat --}}
+            <div class="nf-side">
+
+                <div class="db-card">
+                    <div class="db-card-head"><div><h2>Pratinjau</h2><p>Tampilan di lonceng admin masjid</p></div></div>
+                    <div class="nf-prev info" id="nfPrev">
+                        <span class="nf-ico info" id="nfPrevIco"><i class="fa-solid fa-circle-info"></i></span>
+                        <div>
+                            <strong id="nfPrevTitle">Judul notifikasi</strong>
+                            <p id="nfPrevMsg">Isi pesan akan tampil di sini.</p>
+                            <small>Baru saja</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="db-card">
+                    <div class="db-card-head"><div><h2>Riwayat pengiriman</h2><p>30 pengiriman terakhir</p></div></div>
+                    <ul class="nf-hist">
+                        @forelse($nfRiwayat as $r)
+                            @php
+                                $tp = array_key_exists($r->type, $nfIkon) ? $r->type : 'info';
+                                $pb = $r->total > 0 ? (int) round($r->dibaca / $r->total * 100) : 0;
+                                $wk = \Illuminate\Support\Carbon::parse($r->dikirim)->locale('id');
+                            @endphp
+                            <li class="nf-h">
+                                <span class="nf-ico {{ $tp }}"><i class="fa-solid {{ $nfIkon[$tp] }}"></i></span>
+                                <div class="nf-h-body">
+                                    <strong>{{ $r->title }}</strong>
+                                    <p>{{ $r->message }}</p>
+                                    <div class="nf-h-meta">
+                                        <span><i class="fa-regular fa-clock"></i>{{ $wk->translatedFormat('d M Y, H:i') }}</span>
+                                        <span><i class="fa-solid fa-mosque"></i>{{ $r->total }} masjid</span>
+                                        <span><i class="fa-regular fa-eye"></i>{{ $r->dibaca }} dibaca</span>
+                                    </div>
+                                    <div class="nf-read" title="{{ $pb }}% dibaca"><i style="width: {{ $pb }}%"></i></div>
+                                </div>
+                                <form method="POST" action="{{ route('superadmin.notifikasi.destroy', $r->batch_id) }}"
+                                      onsubmit="return confirm('Tarik notifikasi ini dari semua penerima? Pesan akan hilang dari lonceng admin masjid.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="nf-del">Tarik</button>
+                                </form>
+                            </li>
+                        @empty
+                            <li class="db-empty"><i class="fa-regular fa-bell"></i><p>Belum ada notifikasi terkirim. Tulis pesan pertama di formulir.</p></li>
+                        @endforelse
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
 </div>
 </main>
 </div>
@@ -385,6 +579,73 @@
     }
     relTime(); setInterval(relTime, 30000);
 
+    /* ===== Pengaturan notifikasi ===== */
+    var nfForm = document.getElementById('nfForm');
+    var nfTitle = document.getElementById('nfTitle');
+    var nfMsg = document.getElementById('nfMessage');
+    var nfIcons = {info:'fa-circle-info', success:'fa-circle-check', warning:'fa-triangle-exclamation', danger:'fa-circle-exclamation'};
+
+    function nfText() {
+        document.getElementById('nfTitleCount').textContent = nfTitle.value.length + '/120';
+        document.getElementById('nfMsgCount').textContent = nfMsg.value.length + '/1000';
+        document.getElementById('nfPrevTitle').textContent = nfTitle.value.trim() || 'Judul notifikasi';
+        document.getElementById('nfPrevMsg').textContent = nfMsg.value.trim() || 'Isi pesan akan tampil di sini.';
+    }
+    function nfType() {
+        var t = nfForm.querySelector('input[name="type"]:checked').value;
+        document.getElementById('nfPrev').className = 'nf-prev ' + t;
+        var ico = document.getElementById('nfPrevIco');
+        ico.className = 'nf-ico ' + t;
+        ico.innerHTML = '<i class="fa-solid ' + nfIcons[t] + '"></i>';
+    }
+    var nfPick = document.getElementById('nfPick');
+    var nfItems = [].slice.call(document.querySelectorAll('#nfPickList .nf-pick-item'));
+    var nfSearch = document.getElementById('nfPickSearch');
+    function nfCount() {
+        document.getElementById('nfPickN').textContent = nfForm.querySelectorAll('input[name="mosque_ids[]"]:checked').length;
+    }
+    function nfTarget() {
+        nfPick.hidden = (nfForm.querySelector('input[name="target"]:checked').value !== 'pilih');
+    }
+
+    nfTitle.addEventListener('input', nfText);
+    nfMsg.addEventListener('input', nfText);
+    nfForm.querySelectorAll('input[name="type"]').forEach(function (r) { r.addEventListener('change', nfType); });
+    nfForm.querySelectorAll('input[name="target"]').forEach(function (r) { r.addEventListener('change', nfTarget); });
+    nfSearch.addEventListener('input', function () {
+        var q = nfSearch.value.trim().toLowerCase();
+        nfItems.forEach(function (it) { it.hidden = it.dataset.text.indexOf(q) === -1; });
+    });
+    document.getElementById('nfPickAll').addEventListener('click', function () {
+        nfItems.forEach(function (it) { if (!it.hidden) it.querySelector('input').checked = true; });
+        nfCount();
+    });
+    document.getElementById('nfPickNone').addEventListener('click', function () {
+        nfItems.forEach(function (it) { it.querySelector('input').checked = false; });
+        nfCount();
+    });
+    nfItems.forEach(function (it) { it.querySelector('input').addEventListener('change', nfCount); });
+
+    nfForm.addEventListener('submit', function (e) {
+        var hint = document.getElementById('nfHint');
+        var t = nfForm.querySelector('input[name="target"]:checked').value;
+        var problem = '';
+        if (!nfTitle.value.trim()) problem = 'Judul belum diisi.';
+        else if (!nfMsg.value.trim()) problem = 'Isi pesan belum diisi.';
+        else if (t === 'pilih' && nfForm.querySelectorAll('input[name="mosque_ids[]"]:checked').length === 0) problem = 'Pilih minimal satu masjid.';
+
+        if (problem) { e.preventDefault(); hint.textContent = problem; hint.style.color = '#b91c1c'; return; }
+        var btn = document.getElementById('nfSend');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
+    });
+
+    nfText(); nfType(); nfTarget(); nfCount();
+
+    @if(session('success') || session('error') || $errors->any())
+        document.getElementById('notifikasi').scrollIntoView();
+    @endif
+
     /* Segarkan data: manual & otomatis tiap 60 detik */
     var auto = document.getElementById('dbAuto'), cd = document.getElementById('dbCountdown'), left = 60;
     try { if (localStorage.getItem('dbAuto') === '0') auto.checked = false; } catch (e) {}
@@ -398,6 +659,8 @@
     setInterval(function () {
         if (!auto.checked || document.hidden) return;
         if (document.activeElement === search || search.value) return; // jangan ganggu saat mencari
+        // jangan refresh saat notifikasi sedang ditulis
+        if (nfForm.contains(document.activeElement) || nfTitle.value !== '' || nfMsg.value !== '') return;
         left--; cd.textContent = left;
         if (left <= 0) location.reload();
     }, 1000);

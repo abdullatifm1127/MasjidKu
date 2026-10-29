@@ -6,12 +6,12 @@
     | SATU SUMBER DATA MODUL (dipakai sidebar, kartu akses cepat, dan ringkasan paket).
     | Status dihitung OTOMATIS:
     |  - 'segera' : route modul belum ada di routes/web.php
-    |  - 'locked' : modul berbayar tapi paket masjid masih 'free'
+    |  - 'locked' : modul berbayar tapi paket masjid masih 'free' / masa aktif sudah habis
     |  - 'aktif'  : route ada dan paket mengizinkan
     */
-  $paketFree = ($mosque->package_type ?? null) === 'free'
-    || ($mosque->subscription_expires_at
-        && \Illuminate\Support\Carbon::parse($mosque->subscription_expires_at)->isPast());
+    $paketFree = ($mosque->package_type ?? null) === 'free'
+        || ($mosque->subscription_expires_at
+            && \Illuminate\Support\Carbon::parse($mosque->subscription_expires_at)->isPast());
 
     $defs = [
         ['label' => 'Landing Page',     'icon' => 'fa-globe',               'route' => 'admin.landing-page',  'match' => 'admin.landing-page*',  'paid' => false, 'desc' => 'Atur halaman utama masjid'],
@@ -77,15 +77,37 @@
     $akhirRaw   = data_get($mosque, 'subscription_expires_at') ?: data_get($mosque, 'package_expires_at');
     $akhirPaket = (! $paketFree && $akhirRaw) ? \Illuminate\Support\Carbon::parse($akhirRaw) : null;
 
+    // Sisa masa aktif (hari) + persentase dari lama paket
+    $infoPaket   = (! $paketFree && ! empty($kodePaket)) ? \App\Support\PackagePricing::resolve($kodePaket) : null;
+    $sisaHari    = $akhirPaket ? (int) now()->startOfDay()->diffInDays($akhirPaket->copy()->startOfDay(), false) : null;
+    $totalHari   = ($infoPaket && ($infoPaket['months'] ?? 0) > 0) ? $infoPaket['months'] * 30 : null;
+    $persenWaktu = ($sisaHari !== null && $totalHari) ? max(0, min(100, (int) round($sisaHari / $totalHari * 100))) : null;
+    $segeraHabis = $sisaHari !== null && $sisaHari <= 7;
+
     // Ring progres (r = 52)
     $ringC    = round(2 * M_PI * 52, 1);
     $ringDash = round($persen / 100 * $ringC, 1);
+
+    // ===== Notifikasi dari Super Admin untuk masjid ini =====
+    $notifs     = isset($mosque->id)
+        ? \App\Models\MosqueNotification::where('mosque_id', $mosque->id)->latest()->limit(20)->get()
+        : collect();
+    $notifBelum = isset($mosque->id)
+        ? \App\Models\MosqueNotification::where('mosque_id', $mosque->id)->unread()->count()
+        : 0;
+    $ntIkon = [
+        'info'    => 'fa-circle-info',
+        'success' => 'fa-circle-check',
+        'warning' => 'fa-triangle-exclamation',
+        'danger'  => 'fa-circle-exclamation',
+    ];
 @endphp
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Dashboard Admin - {{ $namaMasjid }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -145,7 +167,7 @@
     <div class="ba2-main" id="ba2Main">
 
         <header class="ba2-topbar">
-            <div class="ba2-topbar-left" style="display:flex;align-items:center;gap:12px;">
+            <div class="ba2-topbar-left" style="display:flex;align-items:center;gap:14px;">
                 <button type="button" class="ba2-notif-btn" id="ba2CollapseBtn" aria-label="Ciutkan atau lebarkan menu">
                     <i class="fa-solid fa-bars"></i>
                 </button>
@@ -159,10 +181,49 @@
                     <i class="fa-solid fa-arrow-left"></i>
                     Kembali ke Publik
                 </a>
-                <button type="button" class="ba2-notif-btn" aria-label="Notifikasi">
-                    <i class="fa-solid fa-bell"></i>
-                    @if(($totalPengumuman ?? 0) > 0)<span class="ba2-notif-dot"></span>@endif
-                </button>
+
+                {{-- ===== LONCENG NOTIFIKASI (dari Super Admin) ===== --}}
+                <div class="nt-wrap" id="ntWrap"
+                     data-read-url="{{ route('admin.notifikasi.read', '__ID__') }}"
+                     data-read-all-url="{{ route('admin.notifikasi.read-all') }}">
+
+                    <button type="button" class="ba2-notif-btn" id="ntBtn" aria-label="Notifikasi"
+                            aria-haspopup="true" aria-expanded="false" aria-controls="ntPanel">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="nt-badge" id="ntBadge" {{ $notifBelum > 0 ? '' : 'hidden' }}>{{ $notifBelum > 99 ? '99+' : $notifBelum }}</span>
+                    </button>
+
+                    <div class="nt-panel" id="ntPanel" role="dialog" aria-label="Notifikasi" hidden>
+                        <div class="nt-head">
+                            <div>
+                                <strong>Notifikasi</strong>
+                                <span id="ntSub">{{ $notifBelum > 0 ? $notifBelum . ' belum dibaca' : 'Semua sudah dibaca' }}</span>
+                            </div>
+                            <button type="button" class="nt-readall" id="ntReadAll" {{ $notifBelum > 0 ? '' : 'hidden' }}>Tandai semua dibaca</button>
+                        </div>
+
+                        <div class="nt-list" id="ntList">
+                            @forelse($notifs as $n)
+                                @php
+                                    $tp = array_key_exists($n->type, $ntIkon) ? $n->type : 'info';
+                                    $unread = is_null($n->read_at);
+                                @endphp
+                                <button type="button" class="nt-item {{ $tp }} {{ $unread ? 'unread' : '' }}"
+                                        data-id="{{ $n->id }}" data-url="{{ $n->url }}">
+                                    <span class="nt-ico {{ $tp }}"><i class="fa-solid {{ $ntIkon[$tp] }}"></i></span>
+                                    <span class="nt-body">
+                                        <strong>{{ $n->title }}</strong>
+                                        <span class="nt-msg">{{ $n->message }}</span>
+                                        <small>{{ $n->created_at->locale('id')->diffForHumans() }}@if($n->url) &middot; ketuk untuk membuka @endif</small>
+                                    </span>
+                                    <span class="nt-dot" aria-hidden="true"></span>
+                                </button>
+                            @empty
+                                <div class="nt-empty"><i class="fa-regular fa-bell"></i><p>Belum ada notifikasi.</p></div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -182,7 +243,9 @@
 
                         <div class="db-chips">
                             <span class="db-chip {{ $paketFree ? '' : 'gold' }}"><i class="fa-solid {{ $paketFree ? 'fa-seedling' : 'fa-crown' }}"></i> {{ $paketLabel }}</span>
-                            <span class="db-chip"><i class="fa-solid fa-code-branch"></i> SIM Masjid v1.0</span>
+                            @if($akhirPaket)
+                                <span class="db-chip {{ $segeraHabis ? 'warn' : '' }}"><i class="fa-solid fa-hourglass-half"></i> {{ $sisaHari > 0 ? $sisaHari . ' hari lagi' : 'Berakhir hari ini' }}</span>
+                            @endif
                             <span class="db-chip"><i class="fa-solid fa-circle-check"></i> {{ $jumlahAktif }} modul aktif</span>
                         </div>
 
@@ -256,8 +319,9 @@
                     <div class="db-head">
                         <div>
                             <h2>Akses Cepat Modul</h2>
-                            <p>Klik kartu untuk langsung membuka modul. {{ $jumlahAktif }}/{{ $jumlahTotal }} modul aktif.</p>
+                            <p>Klik kartu untuk langsung membuka modul.</p>
                         </div>
+                        <span class="db-head-badge">{{ $jumlahAktif }}/{{ $jumlahTotal }} aktif</span>
                     </div>
 
                     <div class="db-tiles">
@@ -277,6 +341,10 @@
                                     <span class="db-tile-count"><i class="fa-solid fa-circle" style="font-size:.4rem;"></i> {{ $m['count'] }} aktif</span>
                                 @else
                                     <span class="db-tile-meta">{{ $m['desc'] }}</span>
+                                @endif
+
+                                @if($m['status'] !== 'segera')
+                                    <span class="db-tile-go"><i class="fa-solid {{ $m['status'] === 'locked' ? 'fa-lock' : 'fa-arrow-right' }}"></i></span>
                                 @endif
                             </a>
                         @endforeach
@@ -318,18 +386,34 @@
                                 <span class="db-plan-icon {{ $paketFree ? 'free' : '' }}"><i class="fa-solid {{ $paketFree ? 'fa-seedling' : 'fa-crown' }}"></i></span>
                                 <div>
                                     <div class="db-plan-name">{{ $paketLabel }}</div>
-                                    <div class="db-plan-sub">
-                                        @if($paketFree)
-                                            Fitur dasar masjid
-                                        @elseif($akhirPaket)
-                                            Aktif sampai {{ $akhirPaket->translatedFormat('d M Y') }}
-                                        @else
-                                            Semua fitur tersedia
-                                        @endif
-                                    </div>
+                                    <div class="db-plan-sub">{{ $paketFree ? 'Fitur dasar masjid' : 'Semua fitur tersedia' }}</div>
                                 </div>
                             </div>
 
+                            {{-- Masa aktif --}}
+                            @if(! $paketFree && $akhirPaket)
+                                <div class="db-plan-rows">
+                                    <div class="db-plan-row">
+                                        <span><i class="fa-regular fa-calendar"></i> Berakhir pada</span>
+                                        <b>{{ $akhirPaket->translatedFormat('d M Y') }}</b>
+                                    </div>
+                                    <div class="db-plan-row">
+                                        <span><i class="fa-regular fa-clock"></i> Sisa waktu</span>
+                                        <b class="{{ $segeraHabis ? 'warn' : '' }}">{{ $sisaHari > 0 ? $sisaHari . ' hari' : 'Berakhir hari ini' }}</b>
+                                    </div>
+                                </div>
+
+                                @if($persenWaktu !== null)
+                                    <div class="db-bar {{ $segeraHabis ? 'warn' : 'time' }}"><i style="width: {{ $persenWaktu }}%"></i></div>
+                                    <div class="db-bar-cap"><span>Masa aktif tersisa</span><b>{{ $persenWaktu }}%</b></div>
+                                @endif
+
+                                @if($segeraHabis)
+                                    <div class="db-plan-warn"><i class="fa-solid fa-triangle-exclamation"></i> Paket segera berakhir. Perpanjang agar fitur Donasi tetap aktif.</div>
+                                @endif
+                            @endif
+
+                            {{-- Modul --}}
                             <div class="db-bar"><i style="width: {{ $persen }}%"></i></div>
                             <div class="db-bar-cap"><span>Modul terbuka</span><b>{{ $persen }}%</b></div>
 
@@ -339,11 +423,16 @@
                                         <div class="db-lock-item"><i class="fa-solid fa-lock"></i> {{ $m['label'] }}</div>
                                     @endforeach
                                 </div>
-                                @if(Route::has('masjid.perpanjangan.create'))
-                                    <a href="{{ route('masjid.perpanjangan.create') }}" class="db-plan-cta"><i class="fa-solid fa-rocket"></i> Upgrade untuk membuka</a>
-                                @endif
                             @else
                                 <div class="db-plan-ok"><i class="fa-solid fa-circle-check"></i> Tidak ada modul yang terkunci.</div>
+                            @endif
+
+                            @if(Route::has('masjid.perpanjangan.create'))
+                                @if($paketFree)
+                                    <a href="{{ route('masjid.perpanjangan.create') }}" class="db-plan-cta"><i class="fa-solid fa-rocket"></i> Upgrade untuk membuka</a>
+                                @else
+                                    <a href="{{ route('masjid.perpanjangan.create') }}" class="db-plan-cta {{ $segeraHabis ? 'gold' : 'outline' }}"><i class="fa-solid fa-rotate"></i> Perpanjang Paket</a>
+                                @endif
                             @endif
                         </div>
                     </div>
@@ -373,6 +462,69 @@
                 var collapsed = !sidebar.classList.contains('collapsed');
                 apply(collapsed);
                 try { localStorage.setItem(key, collapsed ? '1' : '0'); } catch (e) {}
+            });
+        })();
+
+        /* ===== Notifikasi dari Super Admin ===== */
+        (function () {
+            var wrap = document.getElementById('ntWrap');
+            if (!wrap) return;
+
+            var btn     = document.getElementById('ntBtn');
+            var panel   = document.getElementById('ntPanel');
+            var badge   = document.getElementById('ntBadge');
+            var sub     = document.getElementById('ntSub');
+            var readAll = document.getElementById('ntReadAll');
+            var csrf    = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            function open(show) {
+                panel.hidden = !show;
+                btn.setAttribute('aria-expanded', show ? 'true' : 'false');
+            }
+            btn.addEventListener('click', function (e) { e.stopPropagation(); open(panel.hidden); });
+            document.addEventListener('click', function (e) { if (!wrap.contains(e.target)) open(false); });
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape') open(false); });
+
+            // Perbarui angka pada lonceng sesuai jumlah yang belum dibaca
+            function refreshCount() {
+                var n = panel.querySelectorAll('.nt-item.unread').length;
+                badge.hidden = n === 0;
+                badge.textContent = n > 99 ? '99+' : n;
+                sub.textContent = n > 0 ? n + ' belum dibaca' : 'Semua sudah dibaca';
+                readAll.hidden = n === 0;
+            }
+
+            function post(url) {
+                return fetch(url, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    credentials: 'same-origin',
+                    keepalive: true
+                });
+            }
+
+            panel.querySelectorAll('.nt-item').forEach(function (it) {
+                it.addEventListener('click', function () {
+                    var url = it.dataset.url;
+                    var go  = function () {
+                        // hanya tautan internal atau http(s)
+                        if (url && /^(\/(?!\/)|https?:\/\/)/.test(url)) window.location.href = url;
+                    };
+
+                    if (it.classList.contains('unread')) {
+                        it.classList.remove('unread');
+                        refreshCount();
+                        post(wrap.dataset.readUrl.replace('__ID__', it.dataset.id)).then(go, go);
+                    } else {
+                        go();
+                    }
+                });
+            });
+
+            readAll.addEventListener('click', function () {
+                panel.querySelectorAll('.nt-item.unread').forEach(function (it) { it.classList.remove('unread'); });
+                refreshCount();
+                post(wrap.dataset.readAllUrl);
             });
         })();
     </script>

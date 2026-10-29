@@ -1,12 +1,15 @@
 /* =============================================================
    DASHBOARD ADMIN — public/css/adminmasjid/dashboardAdmin.css
    Semua class diawali `db-`. Melengkapi berandaAdmin.css.
+   Hanya dimuat di halaman dashboard, jadi override di sini
+   tidak mempengaruhi halaman admin lain.
    ============================================================= */
 
-.db-page { display: flex; flex-direction: column; gap: 24px; }
+.db-page { display: flex; flex-direction: column; gap: 28px; }
 
-.db-page h1, .db-page h2, .db-page h3, .db-page p, .db-page ul { margin: 0; padding: 0; }
-.db-page ul { list-style: none; }
+/* :where() = specificity 0, jadi class lain (mis. .db-timeline) tidak tertimpa reset ini */
+.db-page :where(h1, h2, h3, p, ul) { margin: 0; padding: 0; }
+.db-page :where(ul) { list-style: none; }
 
 @keyframes dbIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 .db-page > * { animation: dbIn 0.45s ease both; }
@@ -16,6 +19,14 @@
 @media (prefers-reduced-motion: reduce) { .db-page > * { animation: none; } }
 
 /* =============================================================
+   TOPBAR & KONTEN (khusus halaman dashboard)
+   ============================================================= */
+body.ba2-body .ba2-topbar { height: 66px; padding: 0 30px; }
+body.ba2-body .ba2-page-title { font-size: 1.12rem; line-height: 1.25; }
+body.ba2-body .ba2-page-sub   { margin-top: 1px; font-size: 0.76rem; }
+body.ba2-body .ba2-content    { padding: 28px 30px 64px; }
+
+/* =============================================================
    HERO
    ============================================================= */
 .db-hero {
@@ -23,10 +34,10 @@
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: center;
-    gap: 32px;
-    padding: 32px 36px;
+    gap: 36px;
+    padding: 36px 40px;
     overflow: hidden;
-    border-radius: 24px;
+    border-radius: 26px;
     color: #fff;
     background: linear-gradient(135deg, #0a2a1c 0%, #1a4731 55%, #2f7a52 100%);
     box-shadow: 0 30px 50px -30px rgba(14, 51, 32, 0.9);
@@ -54,7 +65,7 @@
 
 .db-greet {
     display: inline-flex; align-items: center; gap: 8px;
-    padding: 6px 14px;
+    padding: 7px 15px;
     background: rgba(255, 255, 255, 0.13);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 999px;
@@ -63,36 +74,37 @@
 }
 
 .db-hero-title {
-    margin: 14px 0 6px !important;
-    font-size: clamp(1.5rem, 3vw, 2.15rem);
+    margin: 16px 0 8px;
+    font-size: clamp(1.55rem, 3vw, 2.2rem);
     font-weight: 800;
     letter-spacing: -0.02em;
     line-height: 1.18;
 }
 .db-hero-title span { color: #ffd27a; }
 
-.db-hero-sub { font-size: 0.9rem; line-height: 1.6; color: rgba(255, 255, 255, 0.78); }
+.db-hero-sub { max-width: 560px; font-size: 0.92rem; line-height: 1.65; color: rgba(255, 255, 255, 0.78); }
 .db-hero-sub b { color: #fff; font-weight: 700; }
 
-.db-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.db-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .db-chip {
     display: inline-flex; align-items: center; gap: 7px;
-    padding: 5px 13px;
+    padding: 6px 14px;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 999px;
-    font-size: 0.72rem; font-weight: 700;
+    font-size: 0.74rem; font-weight: 700;
     color: rgba(255, 255, 255, 0.9);
 }
 .db-chip.gold { background: rgba(245, 166, 35, 0.22); border-color: rgba(245, 166, 35, 0.5); color: #ffe2a8; }
+.db-chip.warn { background: rgba(239, 68, 68, 0.22); border-color: rgba(252, 165, 165, 0.55); color: #fecaca; }
 
-.db-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.db-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
 
 .db-btn {
     display: inline-flex; align-items: center; gap: 8px;
-    padding: 11px 20px;
+    padding: 12px 22px;
     border-radius: 12px;
-    font-family: inherit; font-size: 0.84rem; font-weight: 700;
+    font-family: inherit; font-size: 0.85rem; font-weight: 700;
     text-decoration: none; cursor: pointer; border: none;
     transition: transform 0.15s, box-shadow 0.15s, background-color 0.15s;
 }
@@ -103,42 +115,66 @@
 
 /* Ring progres modul */
 .db-ring-wrap {
-    display: flex; flex-direction: column; align-items: center; gap: 10px;
-    padding: 20px 26px;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    padding: 22px 30px;
     background: rgba(255, 255, 255, 0.09);
     border: 1px solid rgba(255, 255, 255, 0.16);
     -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-    border-radius: 22px;
+    border-radius: 24px;
 }
-.db-ring { position: relative; width: 124px; height: 124px; }
+.db-ring { position: relative; width: 128px; height: 128px; }
 .db-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
 .db-ring .trk { fill: none; stroke: rgba(255, 255, 255, 0.16); stroke-width: 10; }
 .db-ring .bar { fill: none; stroke: url(#dbRingGrad); stroke-width: 10; stroke-linecap: round; transition: stroke-dasharray 0.9s ease; }
 .db-ring-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.db-ring-text b { font-size: 1.7rem; font-weight: 800; line-height: 1; }
-.db-ring-text span { margin-top: 3px; font-size: 0.66rem; font-weight: 600; color: rgba(255, 255, 255, 0.7); }
-.db-ring-cap { font-size: 0.76rem; font-weight: 600; color: rgba(255, 255, 255, 0.85); text-align: center; }
+.db-ring-text b { font-size: 1.75rem; font-weight: 800; line-height: 1; }
+.db-ring-text span { margin-top: 4px; font-size: 0.66rem; font-weight: 600; color: rgba(255, 255, 255, 0.7); }
+.db-ring-cap { font-size: 0.76rem; font-weight: 600; color: rgba(255, 255, 255, 0.85); text-align: center; line-height: 1.5; }
+
+/* =============================================================
+   KARTU STATISTIK (melengkapi berandaAdmin.css)
+   ============================================================= */
+.db-page .ba2-stats-grid { gap: 20px; }
+
+.db-page .ba2-stat-card { padding: 22px 24px; }
+.db-page .ba2-stat-card::after {
+    content: "";
+    position: absolute; right: -28px; top: -28px;
+    width: 96px; height: 96px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(47, 122, 82, 0.1), transparent 70%);
+    pointer-events: none;
+}
+.db-page .ba2-stat-value { font-size: 1.75rem; }
 
 /* =============================================================
    JUDUL BAGIAN
    ============================================================= */
-.db-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
-.db-head h2 { font-size: 1.12rem; font-weight: 800; letter-spacing: -0.01em; color: var(--text); }
-.db-head p  { margin-top: 3px !important; font-size: 0.8rem; color: var(--text-light); }
+.db-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.db-head h2 { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; color: var(--text); }
+.db-head p  { margin-top: 3px; font-size: 0.82rem; color: var(--text-light); }
+
+.db-head-badge {
+    flex-shrink: 0;
+    padding: 5px 13px;
+    background: #e9f5ee; color: #166534;
+    border-radius: 999px;
+    font-size: 0.74rem; font-weight: 800;
+}
 
 /* =============================================================
-   TILE MODUL / AKSES CEPAT
+   TILE MODUL / AKSES CEPAT  (4 kolom = 2 baris rapi untuk 8 modul)
    ============================================================= */
-.db-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+.db-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
 
 .db-tile {
     --tc: #4f46e5; --tb: #eef2ff;
     position: relative;
     display: flex; flex-direction: column; gap: 6px;
-    padding: 18px;
+    min-height: 168px;
+    padding: 22px 22px 20px;
     background: #fff;
     border: 1px solid var(--border);
-    border-radius: 18px;
+    border-radius: 20px;
     text-decoration: none; color: inherit;
     box-shadow: var(--shadow-sm);
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
@@ -153,21 +189,21 @@
 .db-tile:hover::after { opacity: 1; }
 
 .db-tile-icon {
-    width: 46px; height: 46px;
+    width: 50px; height: 50px;
     display: grid; place-items: center;
     background: var(--tb); color: var(--tc);
-    border-radius: 14px;
-    font-size: 1.15rem;
-    margin-bottom: 8px;
+    border-radius: 15px;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
     transition: transform 0.2s;
 }
 .db-tile:hover .db-tile-icon { transform: scale(1.08) rotate(-4deg); }
 
-.db-tile-name { font-size: 0.92rem; font-weight: 800; color: var(--text); }
-.db-tile-meta { font-size: 0.76rem; color: var(--text-light); }
+.db-tile-name { font-size: 0.98rem; font-weight: 800; color: var(--text); line-height: 1.3; }
+.db-tile-meta { font-size: 0.78rem; line-height: 1.45; color: var(--text-light); padding-right: 36px; }
 
 .db-tile-chip {
-    position: absolute; top: 14px; right: 14px;
+    position: absolute; top: 16px; right: 16px;
     padding: 3px 10px;
     border-radius: 999px;
     font-size: 0.64rem; font-weight: 800;
@@ -180,13 +216,27 @@
 .db-tile.locked .db-tile-icon { filter: grayscale(0.6); }
 .db-tile.segera { opacity: 0.55; pointer-events: none; }
 
+/* tombol panah kecil di pojok kanan bawah */
+.db-tile-go {
+    position: absolute; right: 16px; bottom: 16px;
+    width: 30px; height: 30px;
+    display: grid; place-items: center;
+    background: var(--tb); color: var(--tc);
+    border-radius: 50%;
+    font-size: 0.72rem;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+.db-tile:hover .db-tile-go { background: var(--tc); color: #fff; transform: translateX(3px); }
+.db-tile.locked .db-tile-go { background: #fee2e2; color: #dc2626; }
+.db-tile.locked:hover .db-tile-go { background: #dc2626; color: #fff; }
+
 .db-tile-count {
     display: inline-flex; align-items: center; gap: 6px;
     width: fit-content;
-    padding: 2px 10px;
+    padding: 3px 11px;
     background: var(--tb); color: var(--tc);
     border-radius: 999px;
-    font-size: 0.7rem; font-weight: 800;
+    font-size: 0.72rem; font-weight: 800;
 }
 
 .tone-0 { --tc: #4f46e5; --tb: #eef2ff; }
@@ -197,23 +247,37 @@
 .tone-5 { --tc: #7c3aed; --tb: #ede9fe; }
 
 /* =============================================================
-   TIMELINE AKTIVITAS
+   BARIS AKTIVITAS + PAKET
    ============================================================= */
-.db-timeline { position: relative; padding: 8px 22px 10px 22px; }
+.db-page .ba2-row-2 {
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 20px;
+    align-items: stretch;
+}
+.db-page .ba2-row-2 > .ba2-card { display: flex; flex-direction: column; }
+.db-page .ba2-card-head { padding: 18px 24px; }
+
+/* =============================================================
+   TIMELINE AKTIVITAS
+   (sebelumnya garis vertikal tidak sejajar dengan titik karena
+    padding ter-reset oleh `.db-page ul`; sudah diperbaiki)
+   ============================================================= */
+.db-timeline { position: relative; padding: 10px 24px 14px; }
 .db-timeline::before {
     content: "";
-    position: absolute; left: 31px; top: 20px; bottom: 20px;
-    width: 2px; background: linear-gradient(180deg, #d6e6dc, transparent);
+    position: absolute; left: 33px; top: 28px; bottom: 28px;
+    width: 2px; background: linear-gradient(180deg, #cfe3d6, #eef3ef);
 }
 
 .db-tl-item { position: relative; display: flex; align-items: flex-start; gap: 16px; padding: 12px 0; }
+.db-tl-item + .db-tl-item { border-top: 1px dashed transparent; }
+
 .db-tl-dot {
     position: relative; z-index: 1;
     flex-shrink: 0;
     width: 20px; height: 20px; margin-top: 1px;
     display: grid; place-items: center;
     background: #fff; border: 2px solid currentColor; border-radius: 50%;
-    font-size: 0.5rem;
 }
 .db-tl-dot.green  { color: #22c55e; }
 .db-tl-dot.blue   { color: #3b82f6; }
@@ -223,73 +287,219 @@
 .db-tl-dot::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 
 .db-tl-body { flex: 1; min-width: 0; }
-.db-tl-text { font-size: 0.86rem; font-weight: 600; color: var(--text); line-height: 1.45; }
-.db-tl-time { margin-top: 2px; font-size: 0.72rem; color: var(--text-light); }
+.db-tl-text { font-size: 0.88rem; font-weight: 600; color: var(--text); line-height: 1.45; }
+.db-tl-time { margin-top: 2px; font-size: 0.74rem; color: var(--text-light); }
 
 /* =============================================================
    KARTU PAKET
    ============================================================= */
-.db-plan-body { padding: 20px; }
+.db-plan-body { flex: 1; display: flex; flex-direction: column; padding: 22px 24px 24px; }
 
-.db-plan-top { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.db-plan-top { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
 .db-plan-icon {
-    width: 48px; height: 48px;
+    width: 50px; height: 50px;
     display: grid; place-items: center;
     background: linear-gradient(135deg, #ffe7b0, #fbbf24);
     color: #78350f;
-    border-radius: 15px;
+    border-radius: 16px;
     font-size: 1.2rem;
     box-shadow: 0 10px 18px -10px rgba(245, 158, 11, 0.9);
 }
 .db-plan-icon.free { background: linear-gradient(135deg, #e2e8f0, #cbd5e1); color: #475569; box-shadow: none; }
-.db-plan-name { font-size: 1rem; font-weight: 800; color: var(--text); }
-.db-plan-sub  { font-size: 0.74rem; color: var(--text-light); }
+.db-plan-name { font-size: 1.05rem; font-weight: 800; color: var(--text); }
+.db-plan-sub  { margin-top: 2px; font-size: 0.76rem; color: var(--text-light); }
+
+/* rincian masa aktif */
+.db-plan-rows {
+    display: flex; flex-direction: column;
+    margin-bottom: 14px;
+    background: #f7faf8; border: 1px solid #e3ece6; border-radius: 14px;
+}
+.db-plan-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 11px 14px;
+    font-size: 0.8rem; color: var(--text-mid);
+}
+.db-plan-row + .db-plan-row { border-top: 1px solid #e3ece6; }
+.db-plan-row span { display: inline-flex; align-items: center; gap: 8px; }
+.db-plan-row span i { width: 14px; text-align: center; color: var(--green-2); }
+.db-plan-row b { font-weight: 800; color: var(--text); }
+.db-plan-row b.warn { color: #dc2626; }
 
 .db-bar { height: 8px; overflow: hidden; background: #edf1ee; border-radius: 999px; }
-.db-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--green-2), #34d399); border-radius: 999px; }
-.db-bar-cap { display: flex; justify-content: space-between; margin: 8px 0 16px; font-size: 0.74rem; color: var(--text-light); }
+.db-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--green-2), #34d399); border-radius: 999px; transition: width 0.8s ease; }
+.db-bar.time i { background: linear-gradient(90deg, #f5a623, #fbbf24); }
+.db-bar.warn i { background: linear-gradient(90deg, #ef4444, #f87171); }
+.db-bar-cap { display: flex; justify-content: space-between; margin: 8px 0 16px; font-size: 0.76rem; color: var(--text-light); }
 .db-bar-cap b { color: var(--text); }
+
+.db-plan-warn {
+    display: flex; align-items: flex-start; gap: 10px;
+    margin-bottom: 16px; padding: 11px 13px;
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px;
+    font-size: 0.78rem; font-weight: 600; line-height: 1.45; color: #92400e;
+}
+.db-plan-warn i { margin-top: 2px; color: #f59e0b; }
 
 .db-lock-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 .db-lock-item {
     display: flex; align-items: center; gap: 10px;
-    padding: 9px 12px;
+    padding: 10px 13px;
     background: #fff7f7; border: 1px solid #fde0e0; border-radius: 12px;
-    font-size: 0.8rem; font-weight: 600; color: #7f1d1d;
+    font-size: 0.82rem; font-weight: 600; color: #7f1d1d;
 }
 .db-lock-item i { color: #ef4444; font-size: 0.78rem; }
 
 .db-plan-ok {
     display: flex; align-items: center; gap: 10px;
-    padding: 12px 14px; margin-bottom: 4px;
+    padding: 12px 14px; margin-bottom: 16px;
     background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px;
     font-size: 0.82rem; font-weight: 600; color: #166534;
 }
 
+/* tombol selalu menempel di dasar kartu */
 .db-plan-cta {
     display: flex; align-items: center; justify-content: center; gap: 8px;
-    width: 100%; padding: 12px;
+    width: 100%; margin-top: auto; padding: 13px;
     background: linear-gradient(135deg, #0e3320, #1a4731);
     color: #fff; text-decoration: none;
     border-radius: 13px;
-    font-size: 0.84rem; font-weight: 700;
+    font-size: 0.86rem; font-weight: 700;
     box-shadow: 0 14px 22px -14px rgba(14, 51, 32, 0.9);
-    transition: transform 0.15s, filter 0.15s;
+    transition: transform 0.15s, filter 0.15s, background 0.15s;
 }
 .db-plan-cta:hover { transform: translateY(-2px); filter: brightness(1.12); }
+.db-plan-cta.outline { background: #fff; color: var(--green); border: 1.5px solid #b9d4c4; box-shadow: none; }
+.db-plan-cta.outline:hover { background: #f0f7f3; filter: none; }
+.db-plan-cta.gold { background: linear-gradient(135deg, #ffd98a, #f5a623); color: #3a2704; box-shadow: 0 14px 22px -12px rgba(245, 166, 35, 0.95); }
 
 /* =============================================================
    RESPONSIF
    ============================================================= */
+@media (max-width: 1280px) {
+    .db-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 1100px) {
+    .db-page .ba2-row-2 { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 900px) {
-    .db-hero { grid-template-columns: 1fr; padding: 26px 22px; gap: 22px; }
+    .db-hero { grid-template-columns: 1fr; padding: 28px 24px; gap: 24px; }
     .db-ring-wrap { flex-direction: row; justify-content: center; gap: 18px; padding: 16px 20px; }
-    .db-ring { width: 96px; height: 96px; }
-    .db-ring-text b { font-size: 1.35rem; }
+    .db-ring { width: 100px; height: 100px; }
+    .db-ring-text b { font-size: 1.4rem; }
+    .db-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 560px) {
-    .db-tiles { grid-template-columns: 1fr 1fr; gap: 12px; }
-    .db-tile { padding: 15px; }
+    body.ba2-body .ba2-topbar { padding: 0 16px; }
+    body.ba2-body .ba2-content { padding: 18px 16px 56px; }
+    .db-page { gap: 22px; }
+    .db-tiles { gap: 12px; }
+    .db-tile { min-height: 150px; padding: 16px; }
     .db-btn { flex: 1; justify-content: center; }
+    .db-head-badge { display: none; }
+}
+
+/* =============================================================
+   LONCENG NOTIFIKASI (prefix nt-)
+   Tempel di AKHIR public/css/adminmasjid/dashboardAdmin.css
+   Memakai variabel dari berandaAdmin.css (--border, --text, --text-light, --green, dll)
+   ============================================================= */
+
+.nt-wrap { position: relative; }
+
+/* angka belum dibaca di lonceng */
+.nt-badge {
+    position: absolute; top: -6px; right: -6px;
+    min-width: 18px; height: 18px; padding: 0 5px;
+    display: grid; place-items: center;
+    background: #ef4444; color: #fff;
+    border: 2px solid #fff; border-radius: 999px;
+    font-size: 0.6rem; font-weight: 800; line-height: 1;
+}
+.nt-badge[hidden] { display: none; }
+
+/* panel dropdown */
+.nt-panel {
+    position: absolute; right: 0; top: calc(100% + 10px);
+    width: 380px; max-width: calc(100vw - 24px);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 24px 48px -20px rgba(15, 35, 27, 0.45);
+    overflow: hidden;
+    z-index: 400;
+}
+.nt-panel[hidden] { display: none; }
+
+.nt-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+}
+.nt-head strong { display: block; font-size: 0.95rem; font-weight: 800; color: var(--text); }
+.nt-head span   { display: block; margin-top: 1px; font-size: 0.72rem; color: var(--text-light); }
+
+.nt-readall {
+    border: 0; background: #e9f5ee; color: #166534;
+    font: inherit; font-size: 0.74rem; font-weight: 700;
+    padding: 6px 12px; border-radius: 999px; cursor: pointer;
+    transition: background 0.15s;
+}
+.nt-readall:hover { background: #d3ecdc; }
+.nt-readall[hidden] { display: none; }
+
+.nt-list { max-height: 420px; overflow-y: auto; }
+
+.nt-item {
+    position: relative;
+    display: flex; align-items: flex-start; gap: 12px;
+    width: 100%; padding: 14px 18px;
+    background: #fff; border: 0; border-bottom: 1px solid #f1f4f1;
+    font: inherit; text-align: left; color: inherit; cursor: pointer;
+    transition: background 0.15s;
+}
+.nt-item:last-child { border-bottom: 0; }
+.nt-item:hover { background: #f8faf8; }
+.nt-item:focus-visible { outline: 3px solid rgba(47, 122, 82, 0.4); outline-offset: -3px; }
+.nt-item.unread { background: #f4faf6; }
+.nt-item.unread:hover { background: #ebf5ee; }
+
+.nt-ico {
+    flex: none; width: 36px; height: 36px;
+    display: grid; place-items: center;
+    border-radius: 11px; font-size: 0.95rem;
+}
+.nt-ico.info    { background: #dbeafe; color: #1d4ed8; }
+.nt-ico.success { background: #dcfce7; color: #166534; }
+.nt-ico.warning { background: #fef3c7; color: #b45309; }
+.nt-ico.danger  { background: #fee2e2; color: #b91c1c; }
+
+.nt-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.nt-body strong { font-size: 0.84rem; font-weight: 700; line-height: 1.35; color: var(--text); word-break: break-word; }
+.nt-item:not(.unread) .nt-body strong { font-weight: 600; }
+.nt-msg {
+    font-size: 0.78rem; line-height: 1.5; color: var(--text-mid);
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+    word-break: break-word;
+}
+.nt-body small { margin-top: 3px; font-size: 0.7rem; color: var(--text-light); }
+
+/* titik penanda belum dibaca */
+.nt-dot {
+    flex: none; width: 9px; height: 9px; margin-top: 6px;
+    border-radius: 50%; background: #22c55e;
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
+    visibility: hidden;
+}
+.nt-item.unread .nt-dot { visibility: visible; }
+
+.nt-empty { padding: 36px 20px; text-align: center; color: var(--text-light); }
+.nt-empty i { display: block; margin-bottom: 10px; font-size: 1.9rem; color: #b9c6b9; }
+.nt-empty p { margin: 0; font-size: 0.84rem; }
+
+@media (max-width: 560px) {
+    .nt-panel { position: fixed; left: 12px; right: 12px; top: 74px; width: auto; max-width: none; }
 }
