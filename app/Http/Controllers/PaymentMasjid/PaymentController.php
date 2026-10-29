@@ -353,6 +353,7 @@ public function storeManualPayment(Request $request)
             'status'             => 'pending',
             'transaction_status' => 'manual_pending',   // sengaja tidak diubah
             'payment_type'       => 'manual_transfer',  // sengaja tidak diubah
+            'payment_proof'      => $path,   
             'raw_notification'   => [
                 'proof_of_payment' => $path,
                 'method'           => $method,           // BARU: 'manual' atau 'qris'
