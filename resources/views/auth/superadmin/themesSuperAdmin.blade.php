@@ -8,58 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/superadmin/berandaSuperAdmin.css') }}">
     <link rel="stylesheet" href="{{ asset('css/superadmin/penggunaSuperAdmin.css') }}">
-    <style>
-        /* Styling tambahan khusus kartu tema */
-        .theme-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .theme-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .theme-card-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-        }
-        .theme-badge-key {
-            background: #f1f5f9;
-            color: #475569;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-family: monospace;
-            font-weight: 600;
-        }
-        .theme-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #0f172a;
-            margin-bottom: 6px;
-        }
-        .theme-desc {
-            font-size: 13px;
-            color: #64748b;
-            margin-bottom: 20px;
-            line-height: 1.4;
-        }
-        .theme-actions {
-            display: flex;
-            gap: 8px;
-            border-top: 1px solid #f1f5f9;
-            padding-top: 15px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/superadmin/manajemenTemaSuperAdmin.css') }}">
 </head>
 <body class="sa-page" id="saBody">
 
@@ -134,7 +83,6 @@
                 <span class="sa-nav-label">Halaman Utama</span>
             </a>
 
-            {{-- MENU MANAJEMEN TEMA (BARU) --}}
             <a href="{{ route('superadmin.themes.index') }}" class="sa-nav-item {{ request()->routeIs('superadmin.themes*') ? 'active' : '' }}">
                 <span class="sa-nav-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="18" height="18">
@@ -196,10 +144,56 @@
             </div>
             @endif
 
+            @if($errors->any())
+            <div class="th-errors">
+                <ul>
+                    @foreach($errors->all() as $err)
+                    <li>{{ $err }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+
+            @php
+                // Preset tampilan per key tema (sama dengan yang tampil di admin masjid).
+                // Tema baru yang belum ada di sini otomatis memakai warna netral.
+                $presets = [
+                    'default' => [
+                        'tag' => 'Bawaan', 'bg' => '#f0fdfa', 'dark' => false,
+                        'colors' => ['#0f766e', '#14b8a6', '#f59e0b'],
+                        'hero' => 'linear-gradient(135deg,#0f766e,#14b8a6)',
+                    ],
+                    'emerald' => [
+                        'tag' => 'Minimalis', 'bg' => '#ecfdf5', 'dark' => false,
+                        'colors' => ['#064e3b', '#10b981', '#fde047'],
+                        'hero' => 'linear-gradient(135deg,#064e3b,#10b981)',
+                    ],
+                    'terracotta' => [
+                        'tag' => 'Nusantara', 'bg' => '#fff7ed', 'dark' => false,
+                        'colors' => ['#9a3412', '#ea580c', '#fde68a'],
+                        'hero' => 'linear-gradient(135deg,#9a3412,#ea580c)',
+                    ],
+                    'corporate' => [
+                        'tag' => 'Dark Mode', 'bg' => '#0b1220', 'dark' => true,
+                        'colors' => ['#0b1120', '#1e3a8a', '#60a5fa'],
+                        'hero' => 'linear-gradient(135deg,#0b1120,#1e3a8a)',
+                    ],
+                ];
+                $fallback = [
+                    'tag' => 'Kustom', 'bg' => '#f8fafc', 'dark' => false,
+                    'colors' => ['#334155', '#64748b', '#94a3b8'],
+                    'hero' => 'linear-gradient(135deg,#334155,#64748b)',
+                ];
+                $aktif = $themes->where('is_active', true)->count();
+            @endphp
+
             {{-- ===== SUBHEADER ===== --}}
             <div class="pg-subheader">
-                <span class="pg-count">{{ $themes->count() }} tema aktif terdaftar</span>
-                <button class="pg-btn-tambah" id="pgTambahBtn">
+                <div>
+                    <span class="pg-count">{{ $aktif }} dari {{ $themes->count() }} tema aktif</span>
+                    <p class="th-intro">Tema yang aktif akan muncul sebagai pilihan di halaman Tema Tampilan admin masjid.</p>
+                </div>
+                <button class="pg-btn-tambah" id="pgTambahBtn" type="button">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="14" height="14">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
                     </svg>
@@ -208,32 +202,87 @@
             </div>
 
             {{-- ===== KARTU GRID TEMA ===== --}}
-            <div class="theme-grid">
+            @if($themes->isEmpty())
+                <div class="th-empty">Belum ada tema. Klik "Tambah Tema Baru" untuk membuat yang pertama.</div>
+            @else
+            <div class="th-grid">
                 @foreach($themes as $theme)
-                <div class="theme-card">
-                    <div>
-                        <div class="theme-card-top">
-                            <span class="theme-badge-key">{{ $theme->key }}</span>
-                            <span style="font-size: 12px; color: {{ $theme->is_active ? '#10b981' : '#ef4444' }}; font-weight: 500;">
-                                {{ $theme->is_active ? 'Aktif' : 'Nonaktif' }}
-                            </span>
+                @php
+                    $p = $presets[$theme->key] ?? $fallback;
+                    $c = $p['colors'];
+                @endphp
+                <div class="th-card {{ $theme->is_active ? '' : 'is-off' }}">
+                    <div class="th-preview" style="background: linear-gradient(180deg, {{ $p['bg'] }}, #fff);">
+                        <div class="th-mock" style="background: {{ $p['bg'] }};">
+                            <div class="th-mock-bar"><i></i><i></i><i></i></div>
+                            <div class="th-mock-nav">
+                                <div class="th-mock-logo" style="background: {{ $c[0] }};"></div>
+                                <div class="th-mock-links">
+                                    <span></span><span></span>
+                                    <b style="background: {{ $c[1] }};"></b>
+                                </div>
+                            </div>
+                            <div class="th-mock-hero" style="background: {{ $p['hero'] }};">
+                                <div class="l1"></div>
+                                <div class="l2"></div>
+                                <div class="btn" style="background: {{ $c[2] }};"></div>
+                            </div>
+                            <div class="th-mock-cards">
+                                <div style="border-color: {{ $c[1] }}; {{ $p['dark'] ? 'background:#1e293b;' : '' }}"></div>
+                                <div style="border-color: {{ $c[1] }}; {{ $p['dark'] ? 'background:#1e293b;' : '' }}"></div>
+                                <div style="border-color: {{ $c[1] }}; {{ $p['dark'] ? 'background:#1e293b;' : '' }}"></div>
+                            </div>
                         </div>
-                        <div class="theme-title">{{ $theme->name }}</div>
-                        <div class="theme-desc">{{ $theme->description ?? 'Tidak ada deskripsi tema.' }}</div>
+                        <span class="th-pill {{ $theme->is_active ? 'on' : 'off' }}">
+                            {{ $theme->is_active ? 'Aktif' : 'Nonaktif' }}
+                        </span>
                     </div>
-                    <div class="theme-actions">
-                        <button type="button" class="pg-btn-edit" onclick="openEditModal({{ $theme->id }}, '{{ $theme->key }}', '{{ $theme->name }}', '{{ addslashes($theme->description) }}')">Edit</button>
+
+                    <div class="th-body">
+                        <div class="th-title-row">
+                            <h3 class="th-title">{{ $theme->name }}</h3>
+                            <span class="th-tag">{{ $p['tag'] }}</span>
+                        </div>
+                        <p class="th-desc">{{ $theme->description ?: 'Tidak ada deskripsi tema.' }}</p>
+                        <div class="th-swatches">
+                            @foreach($c as $warna)
+                                <span style="background: {{ $warna }};"></span>
+                            @endforeach
+                        </div>
+                        <span class="th-key">{{ $theme->key }}</span>
+                    </div>
+
+                    <div class="th-actions">
+                        <button type="button" class="th-btn th-btn-edit js-edit-theme"
+                                data-theme="{{ json_encode([
+                                    'id' => $theme->id,
+                                    'key' => $theme->key,
+                                    'name' => $theme->name,
+                                    'description' => $theme->description,
+                                ]) }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/>
+                            </svg>
+                            Edit
+                        </button>
                         @if($theme->key !== 'default')
-                        <form action="{{ route('superadmin.themes.destroy', $theme->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus tema ini?');" style="display:inline;">
+                        <form action="{{ route('superadmin.themes.destroy', $theme->id) }}" method="POST"
+                              onsubmit="return confirm('Yakin ingin menghapus tema ini?');">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="pg-btn-delete" style="background:#fee2e2; color:#dc2626; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:13px;">Hapus</button>
+                            <button type="submit" class="th-btn th-btn-del">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                                </svg>
+                                Hapus
+                            </button>
                         </form>
                         @endif
                     </div>
                 </div>
                 @endforeach
             </div>
+            @endif
         </main>
     </div>
 
@@ -248,7 +297,7 @@
                     </svg>
                 </button>
             </div>
-            
+
             <form class="pg-modal-body" id="pgModalForm" method="POST" action="{{ route('superadmin.themes.store') }}">
                 @csrf
                 <div id="pgMethodContainer"></div>
@@ -288,40 +337,46 @@
         const modalTitle = document.getElementById('pgModalTitle');
         const methodContainer = document.getElementById('pgMethodContainer');
         const simpanBtn = document.getElementById('pgSimpanBtn');
+        const keyInput = document.getElementById('themeKey');
 
         function openModal() { modalOverlay.classList.add('active'); }
         function closeModal() { modalOverlay.classList.remove('active'); }
 
+        // Tambah
         document.getElementById('pgTambahBtn').addEventListener('click', () => {
             modalForm.reset();
             modalForm.action = "{{ route('superadmin.themes.store') }}";
             modalTitle.textContent = 'Tambah Tema Baru';
             methodContainer.innerHTML = '';
             simpanBtn.textContent = 'Simpan Tema';
-            document.getElementById('themeKey').readOnly = false;
+            keyInput.readOnly = false;
             openModal();
         });
 
-        function openEditModal(id, key, name, desc) {
-            modalForm.reset();
-            modalForm.action = "/superadmin/themes/" + id;
-            modalTitle.textContent = 'Edit Tema';
-            methodContainer.innerHTML = '<input type="hidden" name="_method" value="PUT">';
-            simpanBtn.textContent = 'Simpan Perubahan';
-            
-            document.getElementById('themeKey').value = key;
-            document.getElementById('themeKey').readOnly = true; // Key unik tidak boleh diubah
-            document.getElementById('themeName').value = name;
-            document.getElementById('themeDesc').value = desc;
-            
-            openModal();
-        }
+        // Edit: data dibaca dari atribut data-theme (JSON) sehingga aman dari tanda kutip / karakter khusus
+        document.querySelectorAll('.js-edit-theme').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const t = JSON.parse(btn.dataset.theme);
+                modalForm.reset();
+                modalForm.action = "{{ url('/superadmin/themes') }}/" + t.id;
+                modalTitle.textContent = 'Edit Tema';
+                methodContainer.innerHTML = '<input type="hidden" name="_method" value="PUT">';
+                simpanBtn.textContent = 'Simpan Perubahan';
+
+                keyInput.value = t.key;
+                keyInput.readOnly = true; // key unik tidak boleh diubah
+                document.getElementById('themeName').value = t.name ?? '';
+                document.getElementById('themeDesc').value = t.description ?? '';
+                openModal();
+            });
+        });
 
         document.getElementById('pgModalClose').addEventListener('click', closeModal);
         document.getElementById('pgCancelBtn').addEventListener('click', closeModal);
-        modalOverlay.addEventListener('click', function(e) {
+        modalOverlay.addEventListener('click', function (e) {
             if (e.target === this) closeModal();
         });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
     </script>
 </body>
 </html>
