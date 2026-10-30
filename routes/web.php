@@ -26,7 +26,7 @@ use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\adminmasjid\PengumumanController;
 use App\Http\Controllers\SuperAdmin\PaymentSettingController;
 use App\Http\Controllers\adminmasjid\ThemeController;
-use App\Http\Controllers\Superadmin\ThemeManagementController;
+use App\Http\Controllers\SuperAdmin\ThemeManagementController;
 
 /*
 |--------------------------------------------------------------------------
