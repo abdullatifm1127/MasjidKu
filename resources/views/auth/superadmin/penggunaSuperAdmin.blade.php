@@ -83,6 +83,16 @@
         <span class="sa-nav-label">Halaman Utama</span>
     </a>
 
+    {{-- MENU MANAJEMEN TEMA --}}
+    <a href="{{ route('superadmin.themes.index') }}" class="sa-nav-item {{ request()->routeIs('superadmin.themes*') ? 'active' : '' }}">
+        <span class="sa-nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="18" height="18">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h13.125c.621 0 1.125.504 1.125 1.125v5.25m-9.75 9.75h9.75a3.75 3.75 0 003.75-3.75V11.25M12 6.75h.008v.008H12V6.75zm3 3h.008v.008H15V9.75zm-6 3h.008v.008H9V12.75z"/>
+            </svg>
+        </span>
+        <span class="sa-nav-label">Manajemen Tema</span>
+    </a>
+
     <a href="{{ route('superadmin.pengaturan') }}" class="sa-nav-item {{ request()->routeIs('superadmin.pengaturan*') ? 'active' : '' }}">
         <span class="sa-nav-icon">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="18" height="18">

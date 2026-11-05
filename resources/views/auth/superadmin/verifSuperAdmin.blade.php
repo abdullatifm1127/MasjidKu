@@ -49,44 +49,50 @@
         </div>
 
         <nav class="sa-nav">
-            <a href="{{ route('superadmin.dashboard') }}" class="sa-nav-item {{ request()->routeIs('superadmin.dashboard') ? 'active' : '' }}">
-                <span class="sa-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
-                <span class="sa-nav-label">Dashboard</span>
-            </a>
+    <a href="{{ route('superadmin.dashboard') }}" class="sa-nav-item {{ request()->routeIs('superadmin.dashboard') ? 'active' : '' }}">
+        <span class="sa-nav-icon"><i class="fa-solid fa-table-cells-large"></i></span>
+        <span class="sa-nav-label">Dashboard</span>
+    </a>
 
-            <a href="{{ route('superadmin.verifikasi') }}" class="sa-nav-item sa-nav-has-badge {{ request()->routeIs('superadmin.verifikasi*') ? 'active' : '' }}">
-                <span class="sa-nav-icon"><i class="fa-solid fa-shield-halved"></i></span>
-                <span class="sa-nav-label">Verifikasi Pendaftaran</span>
-                @if($pendingCount > 0)
-                    <span class="sa-nav-badge-number vf-nav-badge">{{ $pendingCount }}</span>
-                @endif
-            </a>
+    <a href="{{ route('superadmin.verifikasi') }}" class="sa-nav-item sa-nav-has-badge {{ request()->routeIs('superadmin.verifikasi*') ? 'active' : '' }}">
+        <span class="sa-nav-icon"><i class="fa-solid fa-shield-halved"></i></span>
+        <span class="sa-nav-label">Verifikasi Pendaftaran</span>
+        @if(($pendingCount ?? 0) > 0)
+            <span class="sa-nav-badge-number vf-nav-badge">{{ $pendingCount }}</span>
+        @endif
+    </a>
 
-            <a href="{{ route('superadmin.manajemen-masjid') }}" class="sa-nav-item {{ request()->routeIs('superadmin.manajemen-masjid*') ? 'active' : '' }}">
-                <span class="sa-nav-icon"><i class="fa-solid fa-mosque"></i></span>
-                <span class="sa-nav-label">Manajemen Masjid</span>
-            </a>
+    <a href="{{ route('superadmin.manajemen-masjid') }}" class="sa-nav-item {{ request()->routeIs('superadmin.manajemen-masjid*') ? 'active' : '' }}">
+        <span class="sa-nav-icon"><i class="fa-solid fa-mosque"></i></span>
+        <span class="sa-nav-label">Manajemen Masjid</span>
+    </a>
 
-            <a href="{{ route('superadmin.pembayaran.index') }}" class="sa-nav-item {{ request()->routeIs('superadmin.pembayaran*') ? 'active' : '' }}">
-                <span class="sa-nav-icon"><i class="fa-solid fa-credit-card"></i></span>
-                <span class="sa-nav-label">Pembayaran</span>
-            </a>
+    <a href="{{ route('superadmin.pembayaran.index') }}" class="sa-nav-item {{ request()->routeIs('superadmin.pembayaran*') ? 'active' : '' }}">
+        <span class="sa-nav-icon"><i class="fa-solid fa-credit-card"></i></span>
+        <span class="sa-nav-label">Pembayaran</span>
+    </a>
 
-            <a href="{{ route('superadmin.pengguna') }}" class="sa-nav-item {{ request()->routeIs('superadmin.pengguna*') ? 'active' : '' }}">
-                <span class="sa-nav-icon"><i class="fa-solid fa-users"></i></span>
-                <span class="sa-nav-label">Pengguna</span>
-            </a>
+    <a href="{{ route('superadmin.pengguna') }}" class="sa-nav-item {{ request()->routeIs('superadmin.pengguna*') ? 'active' : '' }}">
+        <span class="sa-nav-icon"><i class="fa-solid fa-users"></i></span>
+        <span class="sa-nav-label">Pengguna</span>
+    </a>
 
-            <a href="{{ route('superadmin.halaman-utama.edit') }}" class="sa-nav-item {{ request()->routeIs('superadmin.halaman-utama*') ? 'active' : '' }}">
-                <span class="sa-nav-icon"><i class="fa-solid fa-pen-to-square"></i></span>
-                <span class="sa-nav-label">Halaman Utama</span>
-            </a>
+    <a href="{{ route('superadmin.halaman-utama.edit') }}" class="sa-nav-item {{ request()->routeIs('superadmin.halaman-utama*') ? 'active' : '' }}">
+        <span class="sa-nav-icon"><i class="fa-solid fa-pen-to-square"></i></span>
+        <span class="sa-nav-label">Halaman Utama</span>
+    </a>
 
-            <a href="{{ route('superadmin.pengaturan') }}" class="sa-nav-item {{ request()->routeIs('superadmin.pengaturan*') ? 'active' : '' }}">
-                <span class="sa-nav-icon"><i class="fa-solid fa-gear"></i></span>
-                <span class="sa-nav-label">Pengaturan</span>
-            </a>
-        </nav>
+    {{-- Menu Manajemen Tema Ditambahkan di Sini --}}
+    <a href="{{ route('superadmin.themes.index') }}" class="sa-nav-item {{ request()->routeIs('superadmin.themes*') ? 'active' : '' }}">
+        <span class="sa-nav-icon"><i class="fa-solid fa-palette"></i></span>
+        <span class="sa-nav-label">Manajemen Tema</span>
+    </a>
+
+    <a href="{{ route('superadmin.pengaturan') }}" class="sa-nav-item {{ request()->routeIs('superadmin.pengaturan*') ? 'active' : '' }}">
+        <span class="sa-nav-icon"><i class="fa-solid fa-gear"></i></span>
+        <span class="sa-nav-label">Pengaturan</span>
+    </a>
+</nav>
 
         <div class="sa-user-footer">
             <div class="sa-user-avatar-sm">SA</div>

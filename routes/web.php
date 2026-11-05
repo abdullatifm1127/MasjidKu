@@ -1,8 +1,10 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Mosque;
+use App\Models\Article;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MosqueController;
 use App\Http\Controllers\SuperAdmin\NotifikasiController;
@@ -44,7 +46,7 @@ Route::get('/', function () {
 
 // Halaman baca artikel (publik)
 Route::get('/artikel/{slug}', function ($slug) {
-    $artikel = \App\Models\Article::where('slug', $slug)->where('is_published', true)->firstOrFail();
+    $artikel = Article::where('slug', $slug)->where('is_published', true)->firstOrFail();
     return view('artikel.show', compact('artikel'));
 })->name('artikel.show');
 
@@ -54,7 +56,9 @@ Route::get('/artikel/{slug}', function ($slug) {
 |--------------------------------------------------------------------------
 */
 
-// Rute Webhook / Notifikasi dari Midtrans (HARUS DI LUAR middleware auth)
+// Webhook / Notifikasi dari Midtrans (HARUS DI LUAR middleware auth)
+// PENTING: kecualikan dari CSRF di bootstrap/app.php (Laravel 11+) atau
+// VerifyCsrfToken::$except (Laravel 10 ke bawah): 'masjid/pembayaran/notification'
 Route::post('/masjid/pembayaran/notification', [PaymentController::class, 'handleNotification'])
     ->name('masjid.payment.notification');
 
@@ -69,33 +73,29 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/masjid/perpanjangan', [MosqueController::class, 'storeRenewal'])->name('masjid.perpanjangan.store');
 
     Route::delete('/masjid/unsubscribe', [MosqueController::class, 'unsubscribe'])->name('masjid.unsubscribe');
+
+    // Redirect ke halaman publik masjid milik user
+    Route::get('/masjidUser', function () {
+        $mosque = Mosque::where('user_id', Auth::id())->first();
+        if (!$mosque) {
+            return redirect()->route('daftar.masjid')->with('error', 'Anda belum mendaftarkan masjid.');
+        }
+        return redirect()->route('masjid.publik', $mosque->slug);
+    })->name('masjid.user.redirect');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Halaman Publik Masjid, Jadwal Sholat, Donasi Publik & Tema Web
+| Halaman Publik Masjid, Donasi Publik & Tema Web
 |--------------------------------------------------------------------------
+| Route berparameter {slug} sengaja ditaruh SETELAH route statis
+| /masjid/pembayaran, /masjid/batalkan, /masjid/perpanjangan.
+| Jangan dipindah ke atas, kalau tidak route statis tadi akan tertimpa.
 */
-
 Route::get('/masjid/{slug}', [PublicMosqueController::class, 'show'])->name('masjid.publik');
-
-// Halaman Publik Donasi (Berdasarkan Slug Masjid)
 Route::get('/masjid/{slug}/donasi', [PublicMosqueController::class, 'showDonasi'])->name('masjid.donasi.publik');
-
-// Rute Publik Store Donasi
-Route::post('/masjid/{slug}/donasi', [DonasiController::class, 'store'])
-    ->name('masjid.donasi.store');
-
-// Rute Publik untuk Pratinjau Tema Web Masjid Berdasarkan Slug
+Route::post('/masjid/{slug}/donasi', [DonasiController::class, 'store'])->name('masjid.donasi.store');
 Route::get('/masjid/{slug}/theme/{theme}', [ThemeController::class, 'showTheme'])->name('masjid.theme');
-
-Route::middleware(['auth'])->get('/masjidUser', function () {
-    $mosque = \App\Models\Mosque::where('user_id', Auth::id())->first();
-    if (!$mosque) {
-        return redirect()->route('daftar.masjid')->with('error', 'Anda belum mendaftarkan masjid.');
-    }
-    return redirect()->route('masjid.publik', $mosque->slug);
-})->name('masjid.user.redirect');
 
 /*
 |--------------------------------------------------------------------------
@@ -106,7 +106,10 @@ Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
-Route::post('/login', [AuthController::class, 'login'])->name('login.process');
+// throttle: maksimal 5 percobaan per menit untuk mencegah brute force
+Route::post('/login', [AuthController::class, 'login'])
+    ->middleware('throttle:5,1')
+    ->name('login.process');
 
 Route::get('/register', function () {
     return view('auth.registerAkun');
@@ -131,12 +134,15 @@ Route::middleware('guest')->group(function () {
 |--------------------------------------------------------------------------
 | Super Admin Authentication Routes
 |--------------------------------------------------------------------------
+| Sengaja di luar grup superadmin karena harus bisa diakses sebelum login.
 */
 Route::get('/superadmin/login', function () {
     return view('auth.superadmin.halamanloginsuperadmin');
 })->name('superadmin.login');
 
-Route::post('/superadmin/login', [LoginController::class, 'login'])->name('superadmin.login.process');
+Route::post('/superadmin/login', [LoginController::class, 'login'])
+    ->middleware('throttle:5,1')
+    ->name('superadmin.login.process');
 
 /*
 |--------------------------------------------------------------------------
@@ -149,7 +155,7 @@ Route::get('/forgot-password', function () {
 
 /*
 |--------------------------------------------------------------------------
-| Admin Masjid (Harus Login & Status Aktif)
+| Admin Masjid (Harus Login)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
@@ -161,16 +167,21 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/notifikasi/{id}/baca', [NotifikasiController::class, 'adminRead'])->name('admin.notifikasi.read');
 });
 
+/*
+|--------------------------------------------------------------------------
+| Admin Masjid (Harus Login & Status Aktif)
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'check.status'])->group(function () {
     Route::get('/dashboard', [MosqueController::class, 'dashboard'])->name('dashboard');
     Route::get('/admin/dashboard', [MosqueController::class, 'dashboard'])->name('admin.dashboard');
 
-    // Rute Fitur Terkunci
+    // Fitur Terkunci
     Route::get('/admin/fitur-terkunci', function () {
         return view('auth.adminmasjid.fiturTerkunci');
     })->name('admin.fitur.terkunci');
 
-    // Rute Pengaturan Tema Admin (Digabung ke sini agar terproteksi & rapi)
+    // Pengaturan Tema Admin
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/tema', [ThemeController::class, 'index'])->name('tema');
         Route::post('/tema/update', [ThemeController::class, 'update'])->name('tema.update');
@@ -192,10 +203,11 @@ Route::middleware(['auth', 'check.status'])->group(function () {
     Route::put('/pengumuman/{id}', [PengumumanController::class, 'update'])->name('admin.pengumuman.update');
     Route::delete('/pengumuman/{id}', [PengumumanController::class, 'destroy'])->name('admin.pengumuman.destroy');
 
+    // Jadwal Sholat
     Route::get('/admin/jadwal-sholat', [JadwalSholatController::class, 'index'])->name('admin.jadwal-sholat');
     Route::put('/admin/jadwal-sholat', [JadwalSholatController::class, 'update'])->name('admin.jadwal-sholat.update');
 
-    // Rute untuk Shalat Eid / Khusus
+    // Shalat Eid / Khusus
     Route::post('/admin/jadwal-sholat/eid', [JadwalSholatController::class, 'storeEid'])->name('admin.jadwal-sholat.eid.store');
     Route::put('/admin/jadwal-sholat/eid/{eid}', [JadwalSholatController::class, 'updateEid'])->name('admin.jadwal-sholat.eid.update');
     Route::delete('/admin/jadwal-sholat/eid/{eid}', [JadwalSholatController::class, 'destroyEid'])->name('admin.jadwal-sholat.eid.destroy');
@@ -248,7 +260,7 @@ Route::middleware(['auth', 'check.status'])->group(function () {
     Route::delete('/admin/donasi/kategori/{kategori}', [DonationCategoryController::class, 'destroy'])
         ->name('admin.donasi.kategori.destroy');
 
-    // BARU: catat uang masuk & uang keluar langsung dari tab Kategori
+    // Catat uang masuk & uang keluar langsung dari tab Kategori
     Route::post('/admin/donasi/kategori/{id}/uang-masuk', [DonasiAdminController::class, 'storeUangMasuk'])
         ->name('admin.donasi.kategori.uangmasuk');
 
@@ -262,36 +274,29 @@ Route::middleware(['auth', 'check.status'])->group(function () {
         ->name('admin.donasi.uangmasuk.destroy');
 
     // ==================== DATA JAMAAH ====================
-    Route::get('/admin/jamaah', [JamaahController::class, 'index'])
-        ->name('admin.jamaah');
-
-    Route::post('/admin/jamaah', [JamaahController::class, 'store'])
-        ->name('admin.jamaah.store');
-
-    Route::get('/admin/jamaah/{jamaah}/edit', [JamaahController::class, 'edit'])
-        ->name('admin.jamaah.edit');
-
-    Route::put('/admin/jamaah/{jamaah}', [JamaahController::class, 'update'])
-        ->name('admin.jamaah.update');
-
-    Route::delete('/admin/jamaah/{jamaah}', [JamaahController::class, 'destroy'])
-        ->name('admin.jamaah.destroy');
+    Route::get('/admin/jamaah', [JamaahController::class, 'index'])->name('admin.jamaah');
+    Route::post('/admin/jamaah', [JamaahController::class, 'store'])->name('admin.jamaah.store');
+    Route::get('/admin/jamaah/{jamaah}/edit', [JamaahController::class, 'edit'])->name('admin.jamaah.edit');
+    Route::put('/admin/jamaah/{jamaah}', [JamaahController::class, 'update'])->name('admin.jamaah.update');
+    Route::delete('/admin/jamaah/{jamaah}', [JamaahController::class, 'destroy'])->name('admin.jamaah.destroy');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Super Admin Panel (Harus Login & Punya Akses)
+| Super Admin Panel (Harus Login & Super Admin)
 |--------------------------------------------------------------------------
-| Grup ini sudah memberi awalan URL "/superadmin" dan awalan nama "superadmin.",
-| jadi rute di dalamnya cukup ditulis relatif (mis. '/notifikasi' -> superadmin.notifikasi.index).
+| Grup ini memberi awalan URL "/superadmin" dan awalan nama "superadmin.",
+| jadi rute di dalamnya cukup ditulis relatif
+| (mis. '/notifikasi' -> superadmin.notifikasi.index).
+| Middleware 'superadmin' (IsSuperAdmin) berlaku untuk SEMUA rute di sini,
+| sehingga admin masjid biasa tidak bisa mengakses panel ini.
 */
-Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(function () {
-    Route::get('/dashboard', [BerandaSuperAdminController::class, 'dashboard'])->name('dashboard');
-    Route::get('/verifikasi', [MosqueController::class, 'verifikasi'])->name('verifikasi');
+Route::middleware(['auth', 'superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
 
-    // ===== PENGATURAN PEMBAYARAN =====
-    Route::get('/pembayaran', [PaymentSettingController::class, 'index'])->name('pembayaran.index');
-    Route::post('/pembayaran/{id}', [PaymentSettingController::class, 'update'])->name('pembayaran.update');
+    Route::get('/dashboard', [BerandaSuperAdminController::class, 'dashboard'])->name('dashboard');
+
+    // ===== VERIFIKASI PENDAFTARAN =====
+    Route::get('/verifikasi', [MosqueController::class, 'verifikasi'])->name('verifikasi');
 
     Route::put('/verifikasi/{id}/approve', [MosqueController::class, 'approveVerifikasi'])
         ->name('verifikasi.approve');
@@ -302,14 +307,23 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
     Route::delete('/verifikasi/{id}', [MosqueController::class, 'destroyVerifikasi'])
         ->name('verifikasi.destroy');
 
+    // ===== PENGATURAN PEMBAYARAN =====
+    Route::get('/pembayaran', [PaymentSettingController::class, 'index'])->name('pembayaran.index');
+    Route::post('/pembayaran/{id}', [PaymentSettingController::class, 'update'])->name('pembayaran.update');
+
+    // ===== MANAJEMEN MASJID =====
     Route::patch('/mosque/{id}/subscription', [MosqueController::class, 'updateSubscription'])
         ->name('mosque.subscription');
 
     Route::get('/manajemen-masjid', [MosqueController::class, 'manajemenMasjid'])->name('manajemen-masjid');
-    Route::patch('/manajemen-masjid/{id}/update-status', [MosqueManagementController::class, 'updateStatus'])->name('manajemen-masjid.updateStatus');
+    Route::patch('/manajemen-masjid/{id}/update-status', [MosqueManagementController::class, 'updateStatus'])
+        ->name('manajemen-masjid.updateStatus');
     Route::get('/riwayat-pembayaran', [MosqueManagementController::class, 'paymentHistory'])->name('riwayat-pembayaran');
 
-    Route::post('/manajemen-masjid', function (\Illuminate\Http\Request $request) {
+    // TODO: pindahkan closure ini ke controller (closure menggagalkan `php artisan route:cache`).
+    // TODO: 'user_id' => 1 masih hardcode, sehingga masjid yang ditambah lewat sini
+    //       selalu terhubung ke user ID 1. Ganti dengan pemilik masjid yang sebenarnya.
+    Route::post('/manajemen-masjid', function (Request $request) {
         $validated = $request->validate([
             'mosque_name'   => 'required|string|max:255',
             'arabic_name'   => 'nullable|string|max:255',
@@ -326,6 +340,7 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
         return redirect()->route('superadmin.manajemen-masjid')->with('success', 'Masjid berhasil ditambahkan.');
     })->name('manajemen-masjid.store');
 
+    // ===== PENGGUNA =====
     Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna');
     Route::post('/pengguna', [PenggunaController::class, 'store'])->name('pengguna.store');
     Route::put('/pengguna/{id}', [PenggunaController::class, 'update'])->name('pengguna.update');
@@ -340,19 +355,18 @@ Route::middleware(['auth'])->prefix('superadmin')->name('superadmin.')->group(fu
     Route::patch('/artikel/{id}/terbit', [ArtikelController::class, 'terbit'])->name('artikel.terbit');
     Route::delete('/artikel/{id}', [ArtikelController::class, 'hapus'])->name('artikel.hapus');
 
+    // ===== PENGATURAN PLATFORM =====
     Route::get('/pengaturan', [PengaturanController::class, 'index'])->name('pengaturan');
     Route::put('/pengaturan', [PengaturanController::class, 'update'])->name('pengaturan.update');
     Route::delete('/pengaturan/reset', [PengaturanController::class, 'reset'])->name('pengaturan.reset');
 
+    // ===== TEMA =====
     Route::get('/themes', [ThemeManagementController::class, 'index'])->name('themes.index');
     Route::post('/themes', [ThemeManagementController::class, 'store'])->name('themes.store');
     Route::delete('/themes/{id}', [ThemeManagementController::class, 'destroy'])->name('themes.destroy');
 
     // ===== NOTIFIKASI KE ADMIN MASJID =====
-    // 'superadmin' = middleware IsSuperAdmin, supaya hanya Super Admin yang bisa mengirim notifikasi.
-    Route::middleware('superadmin')->group(function () {
-        Route::get('/notifikasi', [NotifikasiController::class, 'superIndex'])->name('notifikasi.index');
-        Route::post('/notifikasi', [NotifikasiController::class, 'superStore'])->name('notifikasi.store');
-        Route::delete('/notifikasi/{batch}', [NotifikasiController::class, 'superDestroy'])->name('notifikasi.destroy');
-    });
+    Route::get('/notifikasi', [NotifikasiController::class, 'superIndex'])->name('notifikasi.index');
+    Route::post('/notifikasi', [NotifikasiController::class, 'superStore'])->name('notifikasi.store');
+    Route::delete('/notifikasi/{batch}', [NotifikasiController::class, 'superDestroy'])->name('notifikasi.destroy');
 });
