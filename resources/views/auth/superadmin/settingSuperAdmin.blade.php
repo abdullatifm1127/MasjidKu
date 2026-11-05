@@ -115,11 +115,6 @@
                 <strong>{{ $setting->platform_name }} Admin</strong>
                 <span>Super Administrator</span>
             </div>
-            <button type="button" class="sa-sidebar-toggle" id="saSidebarToggle" aria-label="Collapse sidebar">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
-                </svg>
-            </button>
         </div>
 
         <nav class="sa-nav">
@@ -467,22 +462,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            var sidebar = document.getElementById('saSidebar');
-            var main    = document.getElementById('saMain');
-
-            // Pulihkan status sidebar
-            try {
-                if (localStorage.getItem('sidebarCollapsed') === 'true') {
-                    sidebar.classList.add('collapsed');
-                    main.classList.add('expanded');
-                }
-            } catch (e) {}
-
-            document.getElementById('saSidebarToggle').addEventListener('click', function () {
-                var isCollapsed = sidebar.classList.toggle('collapsed');
-                main.classList.toggle('expanded');
-                try { localStorage.setItem('sidebarCollapsed', isCollapsed); } catch (e) {}
-            });
+            // Sidebar selalu terbuka: bersihkan status collapsed lama dari browser
+            try { localStorage.removeItem('sidebarCollapsed'); } catch (e) {}
 
             // Modal hapus data tenant
             var modal    = document.getElementById('resetModal');
