@@ -376,56 +376,78 @@
                         </ul>
                     </div>
 
+                    {{-- ===== RINGKASAN PAKET ===== --}}
                     <div class="ba2-card">
                         <div class="ba2-card-head">
                             <span class="ba2-card-title">Ringkasan Paket</span>
                             <span class="ba2-card-meta">{{ $jumlahAktif }}/{{ $jumlahTotal }} aktif</span>
                         </div>
+
                         <div class="db-plan-body">
-                            <div class="db-plan-top">
-                                <span class="db-plan-icon {{ $paketFree ? 'free' : '' }}"><i class="fa-solid {{ $paketFree ? 'fa-seedling' : 'fa-crown' }}"></i></span>
-                                <div>
-                                    <div class="db-plan-name">{{ $paketLabel }}</div>
-                                    <div class="db-plan-sub">{{ $paketFree ? 'Fitur dasar masjid' : 'Semua fitur tersedia' }}</div>
+
+                            {{-- Panel utama paket --}}
+                            <div class="db-plan-hero {{ $paketFree ? 'free' : '' }} {{ $segeraHabis ? 'warn' : '' }}">
+                                <div class="db-plan-hero-top">
+                                    <span class="db-plan-icon"><i class="fa-solid {{ $paketFree ? 'fa-seedling' : 'fa-crown' }}"></i></span>
+                                    <div class="db-plan-id">
+                                        <div class="db-plan-name">{{ $paketLabel }}</div>
+                                        <div class="db-plan-sub">{{ $paketFree ? 'Fitur dasar masjid' : 'Semua fitur tersedia' }}</div>
+                                    </div>
+                                    <span class="db-plan-state">
+                                        {{ $paketFree ? 'Gratis' : ($segeraHabis ? 'Segera berakhir' : 'Aktif') }}
+                                    </span>
                                 </div>
+
+                                @if(! $paketFree && $akhirPaket)
+                                    <div class="db-plan-count">
+                                        @if($sisaHari > 0)
+                                            <b>{{ $sisaHari }}</b><span>hari tersisa</span>
+                                        @else
+                                            <b>Hari ini</b><span>hari terakhir masa aktif</span>
+                                        @endif
+                                    </div>
+
+                                    <div class="db-plan-track"><i style="width: {{ $persenWaktu ?? 100 }}%"></i></div>
+
+                                    <div class="db-plan-date">
+                                        <i class="fa-regular fa-calendar"></i>
+                                        Berakhir {{ $akhirPaket->translatedFormat('d F Y') }}
+                                    </div>
+                                @elseif($paketFree)
+                                    <p class="db-plan-free-note">Upgrade untuk membuka Donasi dan fitur berbayar lainnya.</p>
+                                @endif
                             </div>
 
-                            {{-- Masa aktif --}}
-                            @if(! $paketFree && $akhirPaket)
-                                <div class="db-plan-rows">
-                                    <div class="db-plan-row">
-                                        <span><i class="fa-regular fa-calendar"></i> Berakhir pada</span>
-                                        <b>{{ $akhirPaket->translatedFormat('d M Y') }}</b>
-                                    </div>
-                                    <div class="db-plan-row">
-                                        <span><i class="fa-regular fa-clock"></i> Sisa waktu</span>
-                                        <b class="{{ $segeraHabis ? 'warn' : '' }}">{{ $sisaHari > 0 ? $sisaHari . ' hari' : 'Berakhir hari ini' }}</b>
-                                    </div>
+                            @if($segeraHabis)
+                                <div class="db-plan-warn">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                    Paket segera berakhir. Perpanjang agar fitur Donasi tetap aktif.
                                 </div>
-
-                                @if($persenWaktu !== null)
-                                    <div class="db-bar {{ $segeraHabis ? 'warn' : 'time' }}"><i style="width: {{ $persenWaktu }}%"></i></div>
-                                    <div class="db-bar-cap"><span>Masa aktif tersisa</span><b>{{ $persenWaktu }}%</b></div>
-                                @endif
-
-                                @if($segeraHabis)
-                                    <div class="db-plan-warn"><i class="fa-solid fa-triangle-exclamation"></i> Paket segera berakhir. Perpanjang agar fitur Donasi tetap aktif.</div>
-                                @endif
                             @endif
 
-                            {{-- Modul --}}
-                            <div class="db-bar"><i style="width: {{ $persen }}%"></i></div>
-                            <div class="db-bar-cap"><span>Modul terbuka</span><b>{{ $persen }}%</b></div>
+                            {{-- Status modul: satu segmen per modul --}}
+                            <div class="db-plan-mods">
+                                <div class="db-plan-mods-head">
+                                    <span>Modul</span>
+                                    <b>{{ $jumlahAktif }} dari {{ $jumlahTotal }} terbuka</b>
+                                </div>
 
-                            @if($lockedList->isNotEmpty())
-                                <div class="db-lock-list">
-                                    @foreach($lockedList as $m)
-                                        <div class="db-lock-item"><i class="fa-solid fa-lock"></i> {{ $m['label'] }}</div>
+                                <div class="db-seg" aria-hidden="true">
+                                    @foreach($modules as $m)
+                                        <i class="{{ $m['status'] }}" title="{{ $m['label'] }}"></i>
                                     @endforeach
                                 </div>
-                            @else
-                                <div class="db-plan-ok"><i class="fa-solid fa-circle-check"></i> Tidak ada modul yang terkunci.</div>
-                            @endif
+
+                                @if($lockedList->isNotEmpty())
+                                    <div class="db-lock-list">
+                                        @foreach($lockedList as $m)
+                                            <span class="db-lock-item"><i class="fa-solid fa-lock"></i> {{ $m['label'] }}</span>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="db-plan-ok"><i class="fa-solid fa-circle-check"></i> Tidak ada modul yang terkunci.</div>
+                                @endif
+                            </div>
 
                             @if(Route::has('masjid.perpanjangan.create'))
                                 @if($paketFree)

@@ -1,0 +1,78 @@
+/* ===== Manajemen Tema Super Admin (prefix th- agar tidak bentrok dengan CSS lain) ===== */
+.th-intro { margin: 4px 0 0; color: #64748b; font-size: 14px; }
+.th-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 22px;
+    margin-top: 22px;
+}
+.th-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 6px 18px -8px rgba(15, 23, 42, .15);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.th-card:hover { transform: translateY(-3px); box-shadow: 0 14px 28px -10px rgba(15, 23, 42, .22); }
+.th-card.is-off { opacity: .72; }
+
+/* Preview mini landing page */
+.th-preview { padding: 14px 14px 0; position: relative; }
+.th-mock {
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+    border: 1px solid rgba(15, 23, 42, .08);
+    border-bottom: none;
+    height: 150px;
+}
+.th-mock-bar { display: flex; align-items: center; gap: 4px; padding: 7px 10px; }
+.th-mock-bar i { width: 6px; height: 6px; border-radius: 50%; background: rgba(100, 116, 139, .45); display: block; }
+.th-mock-nav { display: flex; align-items: center; justify-content: space-between; padding: 4px 12px 8px; }
+.th-mock-logo { width: 10px; height: 10px; border-radius: 50%; }
+.th-mock-links { display: flex; gap: 4px; align-items: center; }
+.th-mock-links span { width: 16px; height: 3px; border-radius: 3px; background: rgba(100, 116, 139, .4); }
+.th-mock-links b { width: 22px; height: 8px; border-radius: 6px; display: block; }
+.th-mock-hero { margin: 0 12px; border-radius: 8px; padding: 14px 12px; height: 56px; }
+.th-mock-hero .l1 { width: 62%; height: 6px; border-radius: 4px; background: #fff; margin-bottom: 6px; }
+.th-mock-hero .l2 { width: 42%; height: 4px; border-radius: 4px; background: rgba(255, 255, 255, .55); margin-bottom: 8px; }
+.th-mock-hero .btn { width: 26px; height: 8px; border-radius: 6px; }
+.th-mock-cards { display: flex; gap: 6px; padding: 8px 12px 0; }
+.th-mock-cards div { flex: 1; height: 26px; border-radius: 6px 6px 0 0; background: #fff; border-top: 5px solid; opacity: .95; }
+
+.th-pill {
+    position: absolute; top: 24px; right: 24px;
+    font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 999px;
+    color: #fff; display: inline-flex; align-items: center; gap: 4px;
+}
+.th-pill.on { background: #059669; }
+.th-pill.off { background: #dc2626; }
+
+.th-body { padding: 18px 20px 6px; flex: 1; }
+.th-title-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.th-title { font-size: 17px; font-weight: 700; color: #0f172a; margin: 0; }
+.th-tag { font-size: 11px; font-weight: 600; color: #64748b; background: #f1f5f9; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.th-desc { font-size: 13px; color: #64748b; line-height: 1.5; margin: 0 0 14px; min-height: 40px; }
+.th-swatches { display: flex; gap: 7px; margin-bottom: 14px; }
+.th-swatches span { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px #e2e8f0; display: block; }
+.th-key { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; font-weight: 600; color: #475569; background: #f1f5f9; padding: 3px 8px; border-radius: 6px; }
+
+.th-actions { display: flex; gap: 8px; padding: 14px 20px 18px; border-top: 1px solid #f1f5f9; margin-top: 8px; }
+.th-btn {
+    flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 9px 12px; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: inherit;
+    cursor: pointer; border: 1px solid transparent; transition: background .15s, transform .1s;
+}
+.th-btn:active { transform: scale(.98); }
+.th-btn-edit { background: #14532d; color: #fff; }
+.th-btn-edit:hover { background: #166534; }
+.th-btn-del { background: #fff; color: #dc2626; border-color: #fecaca; }
+.th-btn-del:hover { background: #fef2f2; }
+.th-actions form { flex: 1; display: flex; margin: 0; }
+.th-actions form .th-btn { width: 100%; }
+
+.th-empty { text-align: center; padding: 60px 20px; color: #94a3b8; background: #fff; border: 2px dashed #e2e8f0; border-radius: 16px; margin-top: 22px; }
+.th-errors { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 10px; padding: 12px 16px; font-size: 13px; margin-bottom: 14px; }
+.th-errors ul { margin: 0; padding-left: 18px; }

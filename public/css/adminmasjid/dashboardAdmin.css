@@ -1,8 +1,8 @@
 /* =============================================================
    DASHBOARD ADMIN — public/css/adminmasjid/dashboardAdmin.css
-   Semua class diawali `db-`. Melengkapi berandaAdmin.css.
-   Hanya dimuat di halaman dashboard, jadi override di sini
-   tidak mempengaruhi halaman admin lain.
+   Semua class diawali `db-` (lonceng notifikasi: `nt-`).
+   Melengkapi berandaAdmin.css. Hanya dimuat di halaman dashboard,
+   jadi override di sini tidak mempengaruhi halaman admin lain.
    ============================================================= */
 
 .db-page { display: flex; flex-direction: column; gap: 28px; }
@@ -254,13 +254,11 @@ body.ba2-body .ba2-content    { padding: 28px 30px 64px; }
     gap: 20px;
     align-items: stretch;
 }
-.db-page .ba2-row-2 > .ba2-card { display: flex; flex-direction: column; }
+.db-page .ba2-row-2 > .ba2-card { display: flex; flex-direction: column; min-width: 0; }
 .db-page .ba2-card-head { padding: 18px 24px; }
 
 /* =============================================================
    TIMELINE AKTIVITAS
-   (sebelumnya garis vertikal tidak sejajar dengan titik karena
-    padding ter-reset oleh `.db-page ul`; sudah diperbaiki)
    ============================================================= */
 .db-timeline { position: relative; padding: 10px 24px 14px; }
 .db-timeline::before {
@@ -292,84 +290,103 @@ body.ba2-body .ba2-content    { padding: 28px 30px 64px; }
 
 /* =============================================================
    KARTU PAKET
+   (semua elemen memakai box-sizing: border-box agar tombol
+    tidak melebihi tepi kartu)
    ============================================================= */
-.db-plan-body { flex: 1; display: flex; flex-direction: column; padding: 22px 24px 24px; }
+.db-plan-body {
+    flex: 1; display: flex; flex-direction: column; gap: 18px;
+    padding: 20px 22px 22px; min-width: 0;
+}
+.db-plan-body *, .db-plan-cta { box-sizing: border-box; }
 
-.db-plan-top { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+/* Panel utama */
+.db-plan-hero {
+    position: relative; overflow: hidden;
+    padding: 20px; border-radius: 18px; color: #fff;
+    background: linear-gradient(135deg, #0a2a1c 0%, #1a4731 60%, #2f7a52 100%);
+    box-shadow: 0 22px 30px -22px rgba(14, 51, 32, 0.9);
+}
+.db-plan-hero::after {
+    content: ""; position: absolute; right: -50px; top: -60px;
+    width: 180px; height: 180px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(245, 166, 35, 0.32), transparent 65%);
+    pointer-events: none;
+}
+.db-plan-hero > * { position: relative; z-index: 1; }
+
+.db-plan-hero.warn { background: linear-gradient(135deg, #4a1212 0%, #8f2323 60%, #c2410c 100%); box-shadow: 0 22px 30px -22px rgba(127, 29, 29, 0.9); }
+.db-plan-hero.free { background: linear-gradient(135deg, #f1f5f9, #e2e8f0); color: #334155; border: 1px solid #dbe3ec; box-shadow: none; }
+.db-plan-hero.free::after { display: none; }
+
+.db-plan-hero-top { display: flex; align-items: center; gap: 12px; }
 .db-plan-icon {
-    width: 50px; height: 50px;
-    display: grid; place-items: center;
-    background: linear-gradient(135deg, #ffe7b0, #fbbf24);
-    color: #78350f;
-    border-radius: 16px;
-    font-size: 1.2rem;
-    box-shadow: 0 10px 18px -10px rgba(245, 158, 11, 0.9);
+    flex-shrink: 0; width: 44px; height: 44px; display: grid; place-items: center;
+    background: rgba(255, 255, 255, 0.14); border: 1px solid rgba(255, 255, 255, 0.22);
+    color: #ffd27a; border-radius: 14px; font-size: 1.05rem;
 }
-.db-plan-icon.free { background: linear-gradient(135deg, #e2e8f0, #cbd5e1); color: #475569; box-shadow: none; }
-.db-plan-name { font-size: 1.05rem; font-weight: 800; color: var(--text); }
-.db-plan-sub  { margin-top: 2px; font-size: 0.76rem; color: var(--text-light); }
+.db-plan-hero.free .db-plan-icon { background: #fff; border-color: #dbe3ec; color: #64748b; }
 
-/* rincian masa aktif */
-.db-plan-rows {
-    display: flex; flex-direction: column;
-    margin-bottom: 14px;
-    background: #f7faf8; border: 1px solid #e3ece6; border-radius: 14px;
-}
-.db-plan-row {
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    padding: 11px 14px;
-    font-size: 0.8rem; color: var(--text-mid);
-}
-.db-plan-row + .db-plan-row { border-top: 1px solid #e3ece6; }
-.db-plan-row span { display: inline-flex; align-items: center; gap: 8px; }
-.db-plan-row span i { width: 14px; text-align: center; color: var(--green-2); }
-.db-plan-row b { font-weight: 800; color: var(--text); }
-.db-plan-row b.warn { color: #dc2626; }
+.db-plan-id { flex: 1; min-width: 0; }
+.db-plan-name { font-size: 1rem; font-weight: 800; color: inherit; line-height: 1.25; }
+.db-plan-sub  { margin-top: 2px; font-size: 0.76rem; color: inherit; opacity: 0.75; }
 
-.db-bar { height: 8px; overflow: hidden; background: #edf1ee; border-radius: 999px; }
-.db-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--green-2), #34d399); border-radius: 999px; transition: width 0.8s ease; }
-.db-bar.time i { background: linear-gradient(90deg, #f5a623, #fbbf24); }
-.db-bar.warn i { background: linear-gradient(90deg, #ef4444, #f87171); }
-.db-bar-cap { display: flex; justify-content: space-between; margin: 8px 0 16px; font-size: 0.76rem; color: var(--text-light); }
-.db-bar-cap b { color: var(--text); }
+.db-plan-state {
+    flex-shrink: 0; padding: 4px 11px; border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14); border: 1px solid rgba(255, 255, 255, 0.24);
+    color: #ffe2a8; font-size: 0.68rem; font-weight: 800; white-space: nowrap;
+}
+.db-plan-hero.free .db-plan-state { background: #fff; border-color: #dbe3ec; color: #64748b; }
+
+.db-plan-count { display: flex; align-items: baseline; gap: 8px; margin: 20px 0 12px; }
+.db-plan-count b { font-size: 2.6rem; font-weight: 800; line-height: 1; letter-spacing: -0.03em; }
+.db-plan-count span { font-size: 0.82rem; opacity: 0.8; }
+
+.db-plan-track { height: 8px; overflow: hidden; background: rgba(255, 255, 255, 0.16); border-radius: 999px; }
+.db-plan-track i { display: block; height: 100%; background: linear-gradient(90deg, #ffd98a, #f5a623); border-radius: 999px; transition: width 0.8s ease; }
+
+.db-plan-date { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 0.78rem; opacity: 0.88; }
+.db-plan-free-note { margin-top: 14px; font-size: 0.82rem; line-height: 1.55; }
 
 .db-plan-warn {
-    display: flex; align-items: flex-start; gap: 10px;
-    margin-bottom: 16px; padding: 11px 13px;
+    display: flex; align-items: flex-start; gap: 10px; padding: 11px 13px;
     background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px;
     font-size: 0.78rem; font-weight: 600; line-height: 1.45; color: #92400e;
 }
 .db-plan-warn i { margin-top: 2px; color: #f59e0b; }
 
-.db-lock-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+/* Status modul */
+.db-plan-mods-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 0.8rem; }
+.db-plan-mods-head span { color: var(--text-light); }
+.db-plan-mods-head b { color: var(--text); font-weight: 800; }
+
+.db-seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 5px; margin-top: 10px; }
+.db-seg i { height: 8px; border-radius: 999px; background: #e5e7eb; }
+.db-seg i.aktif  { background: linear-gradient(90deg, var(--green-2), #34d399); }
+.db-seg i.locked { background: #fca5a5; }
+
+.db-lock-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .db-lock-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 13px;
-    background: #fff7f7; border: 1px solid #fde0e0; border-radius: 12px;
-    font-size: 0.82rem; font-weight: 600; color: #7f1d1d;
+    display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px;
+    background: #fff1f1; border: 1px solid #fde0e0; border-radius: 999px;
+    font-size: 0.76rem; font-weight: 700; color: #991b1b;
 }
-.db-lock-item i { color: #ef4444; font-size: 0.78rem; }
+.db-lock-item i { font-size: 0.68rem; color: #ef4444; }
 
-.db-plan-ok {
-    display: flex; align-items: center; gap: 10px;
-    padding: 12px 14px; margin-bottom: 16px;
-    background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px;
-    font-size: 0.82rem; font-weight: 600; color: #166534;
-}
+.db-plan-ok { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 0.8rem; font-weight: 600; color: #166534; }
+.db-plan-ok i { color: #22c55e; }
 
-/* tombol selalu menempel di dasar kartu */
+/* Tombol selalu menempel di dasar kartu */
 .db-plan-cta {
     display: flex; align-items: center; justify-content: center; gap: 8px;
     width: 100%; margin-top: auto; padding: 13px;
     background: linear-gradient(135deg, #0e3320, #1a4731);
-    color: #fff; text-decoration: none;
-    border-radius: 13px;
+    color: #fff; text-decoration: none; border: 1.5px solid transparent; border-radius: 13px;
     font-size: 0.86rem; font-weight: 700;
     box-shadow: 0 14px 22px -14px rgba(14, 51, 32, 0.9);
     transition: transform 0.15s, filter 0.15s, background 0.15s;
 }
 .db-plan-cta:hover { transform: translateY(-2px); filter: brightness(1.12); }
-.db-plan-cta.outline { background: #fff; color: var(--green); border: 1.5px solid #b9d4c4; box-shadow: none; }
+.db-plan-cta.outline { background: #fff; color: var(--green); border-color: #b9d4c4; box-shadow: none; }
 .db-plan-cta.outline:hover { background: #f0f7f3; filter: none; }
 .db-plan-cta.gold { background: linear-gradient(135deg, #ffd98a, #f5a623); color: #3a2704; box-shadow: 0 14px 22px -12px rgba(245, 166, 35, 0.95); }
 
@@ -400,11 +417,11 @@ body.ba2-body .ba2-content    { padding: 28px 30px 64px; }
     .db-tile { min-height: 150px; padding: 16px; }
     .db-btn { flex: 1; justify-content: center; }
     .db-head-badge { display: none; }
+    .db-plan-count b { font-size: 2.2rem; }
 }
 
 /* =============================================================
    LONCENG NOTIFIKASI (prefix nt-)
-   Tempel di AKHIR public/css/adminmasjid/dashboardAdmin.css
    Memakai variabel dari berandaAdmin.css (--border, --text, --text-light, --green, dll)
    ============================================================= */
 
