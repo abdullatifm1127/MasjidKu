@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftarkan Masjid - Masjid Annur</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Amiri&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/adminmasjid/registerMasjid.css') }}">
 </head>
 <body class="rm-page">
@@ -28,7 +29,13 @@
         </a>
     </nav>
 
-   {{-- ===== MAIN ===== --}}
+    {{-- ===== HERO ===== --}}
+    <header class="rm-hero">
+        <h1>Daftarkan masjid Anda</h1>
+        <p>Isi data masjid dan pengurus. Tim kami akan memverifikasinya dalam 1–3 hari kerja.</p>
+    </header>
+
+    {{-- ===== MAIN ===== --}}
     <main class="rm-container">
 
         {{-- Progress Steps --}}
@@ -157,8 +164,8 @@
                         </div>
                     </div>
 
-                    {{-- Telepon + Email + Website --}}
-                    <div class="rm-grid-3">
+                    {{-- Telepon + Email --}}
+                    <div class="rm-grid-2">
                         <div class="rm-group">
                             <label>Nomor Telepon <span class="req">*</span></label>
                             <input class="rm-input" name="phone" type="tel"
@@ -188,7 +195,7 @@
                     <h2 class="rm-card-title">Data Pengurus</h2>
                     <p class="rm-card-subtitle">Informasi pengurus yang bertanggung jawab atas masjid.</p>
 
-                    <div class="rm-group" style="margin-bottom:16px;">
+                    <div class="rm-group" style="margin-bottom:20px;">
                         <label>Nama Organisasi / Yayasan</label>
                         <input class="rm-input" name="organization_name" type="text"
                                placeholder="Nama yayasan atau DKM"
@@ -196,7 +203,7 @@
                     </div>
 
                     <p class="rm-section-title">Imam / Khatib Utama</p>
-                    <div class="rm-grid-2" style="margin-bottom:20px;">
+                    <div class="rm-grid-2" style="margin-bottom:24px;">
                         <div class="rm-group">
                             <label>Nama Lengkap <span class="req">*</span></label>
                             <input class="rm-input" name="imam_name" type="text"
@@ -210,7 +217,7 @@
                     </div>
 
                     <p class="rm-section-title">Ketua Takmir / DKM</p>
-                    <div class="rm-grid-2" style="margin-bottom:20px;">
+                    <div class="rm-grid-2" style="margin-bottom:24px;">
                         <div class="rm-group">
                             <label>Nama Lengkap <span class="req">*</span></label>
                             <input class="rm-input" name="chairman_name" type="text"
@@ -251,26 +258,28 @@
                     <p class="rm-card-subtitle">Pilih fasilitas dan program yang tersedia di masjid Anda.</p>
 
                     <p class="rm-section-title">Fasilitas</p>
-                    <div class="rm-chip-grid" style="margin-bottom:24px;">
+                    <div class="rm-chip-grid" style="margin-bottom:28px;">
                         @foreach(['Parkir Luas','Toilet Bersih','Tempat Wudhu Memadai','AC / Kipas Angin','Sound System','Proyektor / Layar','Perpustakaan','Klinik / Poliklinik','Kantin / Dapur','Ruang Pertemuan','Area Bermain Anak','WiFi Jamaah'] as $f)
                             <label class="rm-chip">
-                                <input type="checkbox" name="facilities[]" value="{{ $f }}">
+                                <input type="checkbox" name="facilities[]" value="{{ $f }}"
+                                       {{ in_array($f, old('facilities', [])) ? 'checked' : '' }}>
                                 {{ $f }}
                             </label>
                         @endforeach
                     </div>
 
                     <p class="rm-section-title">Program</p>
-                    <div class="rm-chip-grid" style="margin-bottom:24px;">
+                    <div class="rm-chip-grid" style="margin-bottom:28px;">
                         @foreach(['TPA / TPQ','Tahsin Al-Quran','Tahfidz Al-Quran','Majelis Taklim','Kajian Hadits','Kajian Fiqih','Pengajian Bulanan','Konsultasi Agama','Zakat & Infaq','Program Yatim Piatu','Koperasi Syariah','Kesehatan Gratis','Beasiswa Santri','Nikah Gratis Dhuafa','Pemberdayaan Ekonomi'] as $p)
                             <label class="rm-chip">
-                                <input type="checkbox" name="programs[]" value="{{ $p }}">
+                                <input type="checkbox" name="programs[]" value="{{ $p }}"
+                                       {{ in_array($p, old('programs', [])) ? 'checked' : '' }}>
                                 {{ $p }}
                             </label>
                         @endforeach
                     </div>
 
-                    <div class="rm-group" style="margin-top:20px;">
+                    <div class="rm-group">
                         <label>Deskripsi Masjid</label>
                         <textarea class="rm-textarea" name="description" rows="4"
                                   placeholder="Ceritakan singkat tentang masjid Anda...">{{ old('description') }}</textarea>
@@ -283,50 +292,51 @@
                 </div>
             </div>
 
-           {{-- ─── PANEL 4 : Konfirmasi & Pilihan Paket ─── --}}
+            {{-- ─── PANEL 4 : Konfirmasi & Pilihan Paket ─── --}}
             <div class="rm-panel" id="rmP4" style="display:none;">
                 <div class="rm-card">
                     <h2 class="rm-card-title">Konfirmasi & Pilihan Paket</h2>
-                    <p class="rm-card-subtitle">Pilih jenis paket layanan website masjid Anda.</p>
+                    <p class="rm-card-subtitle">Pilih paket layanan website masjid Anda.</p>
 
-                    <div style="margin-bottom: 24px;">
-                        <label style="font-weight: 600; display: block; margin-bottom: 12px; color: #1e293b;">Pilih Paket:</label>
-                        
-                        <div style="display: flex; gap: 16px;">
-    
-                            {{-- Paket Free (Gratis) --}}
-<label style="border: 1px solid #cbd5e1; padding: 16px; border-radius: 8px; flex: 1; cursor: pointer; background: #fff; display: flex; flex-direction: column; justify-content: space-between;">
-    <div>
-        <input type="radio" name="package_type" value="free" checked style="margin-right: 6px;" required> 
-        <strong style="color: #1e293b;">Paket Free</strong><br>
-        <span style="color: #64748b; font-weight: 700; font-size: 1.1rem; display: inline-block; margin-top: 4px;">Rp 0 (Gratis)</span>
-    </div>
-    <p style="font-size: 0.85rem; color: #64748b; margin-top: 8px; margin-bottom: 0;">Fitur standar website masjid. Fitur donasi online non-aktif.</p>
-</label>
+                    @php
+                        // Harga diambil dari pengaturan Super Admin (tabel payment_settings)
+                        $codeMonthly = \App\Support\PackagePricing::code(1);
+                        $codeYearly  = \App\Support\PackagePricing::code(12);
+                        $selected    = old('package_type', 'free');
+                    @endphp
 
-{{-- Paket 1 Bulan --}}
-<label style="border: 1px solid #cbd5e1; padding: 16px; border-radius: 8px; flex: 1; cursor: pointer; background: #fff; display: flex; flex-direction: column; justify-content: space-between;">
-    <div>
-        <input type="radio" name="package_type" value="100000_1" style="margin-right: 6px;"> 
-        <strong style="color: #1e293b;">Paket 1 Bulan</strong><br>
-        <span style="color: #16a34a; font-weight: 700; font-size: 1.1rem; display: inline-block; margin-top: 4px;">{{ \App\Support\PackagePricing::rupiah(1) }} / bln</span>
-    </div>
-    <p style="font-size: 0.85rem; color: #64748b; margin-top: 8px; margin-bottom: 0;">Mengaktifkan fitur donasi online penuh & dukungan prioritas.</p>
-</label>
+                    <div class="rm-plans">
 
-{{-- Paket 1 Tahun --}}
-<label style="border: 1px solid #cbd5e1; padding: 16px; border-radius: 8px; flex: 1; cursor: pointer; background: #fff; display: flex; flex-direction: column; justify-content: space-between;">
-    <div>
-        <input type="radio" name="package_type" value="1000000_12" style="margin-right: 6px;"> 
-        <strong style="color: #1e293b;">Paket 1 Tahun</strong><br>
-        <span style="color: #16a34a; font-weight: 700; font-size: 1.1rem; display: inline-block; margin-top: 4px;">{{ \App\Support\PackagePricing::rupiah(12) }} / thn</span>
-    </div>
-    <p style="font-size: 0.85rem; color: #64748b; margin-top: 8px; margin-bottom: 0;">Hemat lebih banyak dengan masa aktif penuh 12 bulan.</p>
-</label>
+                        {{-- Paket Free --}}
+                        <label class="rm-plan">
+                            <input type="radio" name="package_type" value="free"
+                                   {{ $selected === 'free' ? 'checked' : '' }} required>
+                            <span class="rm-plan-name">Paket Free</span>
+                            <span class="rm-plan-price">Rp 0 <small>/ gratis</small></span>
+                            <span class="rm-plan-desc">Fitur standar website masjid. Fitur donasi online non-aktif.</span>
+                        </label>
 
-                        </div>
+                        {{-- Paket 1 Bulan --}}
+                        <label class="rm-plan">
+                            <input type="radio" name="package_type" value="{{ $codeMonthly }}"
+                                   {{ $selected === $codeMonthly ? 'checked' : '' }}>
+                            <span class="rm-plan-name">Paket 1 Bulan</span>
+                            <span class="rm-plan-price">{{ \App\Support\PackagePricing::rupiah(1) }} <small>/ bln</small></span>
+                            <span class="rm-plan-desc">Donasi online penuh dan dukungan prioritas.</span>
+                        </label>
+
+                        {{-- Paket 1 Tahun --}}
+                        <label class="rm-plan">
+                            <span class="rm-plan-badge">Paling hemat</span>
+                            <input type="radio" name="package_type" value="{{ $codeYearly }}"
+                                   {{ $selected === $codeYearly ? 'checked' : '' }}>
+                            <span class="rm-plan-name">Paket 1 Tahun</span>
+                            <span class="rm-plan-price">{{ \App\Support\PackagePricing::rupiah(12) }} <small>/ thn</small></span>
+                            <span class="rm-plan-desc">Masa aktif penuh 12 bulan dengan harga lebih hemat.</span>
+                        </label>
+
                     </div>
-                    
+
                     <div class="rm-confirm-box">
                         Data masjid dan pengurus yang Anda masukkan akan dikirim ke sistem kami
                         untuk diproses dan diverifikasi. Proses verifikasi memakan waktu 1–3 hari kerja.
@@ -355,7 +365,7 @@
         <a href="mailto:bantuan@masjidannur.id">bantuan@masjidannur.id</a>
         atau WhatsApp <a href="https://wa.me/6281200000000">+62 812 0000 0000</a>
     </footer>
-    
+
     <script>
     /* ---- Step navigation ---- */
     const panels = [
@@ -396,6 +406,7 @@
     function goBack(idx) {
         panels[current].style.display = 'none';
         stepEls[current].className = 'rm-step is-inactive';
+
         current = idx;
         panels[current].style.display = 'block';
         stepEls[current].className = 'rm-step is-active';
@@ -410,15 +421,15 @@
     // Validasi Panel 1 (Informasi Masjid)
     document.getElementById('rmNext1').addEventListener('click', () => {
         const mosqueName = document.querySelector('[name="mosque_name"]').value.trim();
-        const founded = document.querySelector('[name="founded"]').value.trim();
-        const capacity = document.querySelector('[name="capacity"]').value.trim();
-        const address = document.querySelector('[name="address"]').value.trim();
-        const kelurahan = document.querySelector('[name="kelurahan"]').value.trim();
-        const kecamatan = document.querySelector('[name="kecamatan"]').value.trim();
-        const city = document.querySelector('[name="city"]').value.trim();
-        const province = document.querySelector('[name="province"]').value;
-        const phone = document.querySelector('[name="phone"]').value.trim();
-        const email = document.querySelector('[name="email"]').value.trim();
+        const founded    = document.querySelector('[name="founded"]').value.trim();
+        const capacity   = document.querySelector('[name="capacity"]').value.trim();
+        const address    = document.querySelector('[name="address"]').value.trim();
+        const kelurahan  = document.querySelector('[name="kelurahan"]').value.trim();
+        const kecamatan  = document.querySelector('[name="kecamatan"]').value.trim();
+        const city       = document.querySelector('[name="city"]').value.trim();
+        const province   = document.querySelector('[name="province"]').value;
+        const phone      = document.querySelector('[name="phone"]').value.trim();
+        const email      = document.querySelector('[name="email"]').value.trim();
 
         if (!mosqueName || !founded || !capacity || !address || !kelurahan || !kecamatan || !city || !province || !phone || !email) {
             alert('Mohon lengkapi semua kolom yang wajib diisi (tanda *) pada Informasi Masjid.');
@@ -437,10 +448,11 @@
 
     /* ---- Chip toggle visual ---- */
     document.querySelectorAll('.rm-chip input[type="checkbox"]').forEach(cb => {
+        cb.closest('.rm-chip').classList.toggle('checked', cb.checked);
         cb.addEventListener('change', () => {
             cb.closest('.rm-chip').classList.toggle('checked', cb.checked);
         });
     });
-</script>
+    </script>
 </body>
 </html>
