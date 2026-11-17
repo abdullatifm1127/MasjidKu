@@ -12,6 +12,10 @@ class PackagePricing
         12 => 'package_yearly',
     ];
 
+    /** Cache per-request supaya tidak query berulang untuk bulan yang sama. */
+    private static array $cache = [];
+
+    /** Ambil jumlah bulan dari kode paket, contoh "100000_1" => 1, "free" => 0. */
     public static function months(?string $code): int
     {
         if (!$code || $code === 'free') {
@@ -20,24 +24,47 @@ class PackagePricing
         return (int) (explode('_', $code)[1] ?? 0);
     }
 
+    /** Baca pengaturan paket dari tabel payment_settings (diatur Super Admin). */
     private static function setting(int $months): ?array
     {
+        if (array_key_exists($months, self::$cache)) {
+            return self::$cache[$months];
+        }
+
         $settingCode = self::MAP[$months] ?? null;
         if (!$settingCode) {
-            return null;
+            return self::$cache[$months] = null;
         }
 
         $row = DB::table('payment_settings')->where('code', $settingCode)->first();
         if (!$row) {
-            return null;
+            return self::$cache[$months] = null;
         }
 
         $cfg = json_decode($row->config_data, true) ?: [];
 
-        return [
+        return self::$cache[$months] = [
             'name'  => $row->method_name ?? null,
             'price' => (int) ($cfg['price'] ?? 0),
         ];
+    }
+
+    /** Harga (angka) sesuai pengaturan Super Admin. Dipakai untuk tampilan. */
+    public static function price(int $months): int
+    {
+        return self::setting($months)['price'] ?? 0;
+    }
+
+    /** Harga terformat, contoh: Rp 100.000 */
+    public static function rupiah(int $months): string
+    {
+        return 'Rp ' . number_format(self::price($months), 0, ',', '.');
+    }
+
+    /** Kode paket untuk value radio, mengikuti harga Super Admin, contoh: "100000_1" */
+    public static function code(int $months): string
+    {
+        return self::price($months) . '_' . $months;
     }
 
     /** Harga SELALU diambil dari pengaturan Super Admin, bukan dari kode yang dikirim user. */
@@ -75,7 +102,6 @@ class PackagePricing
     /** Kode paket bulanan default, mengikuti harga Super Admin saat ini. */
     public static function defaultCode(): string
     {
-        $set = self::setting(1);
-        return ($set['price'] ?? 0) . '_1';
+        return self::code(1);
     }
 }
