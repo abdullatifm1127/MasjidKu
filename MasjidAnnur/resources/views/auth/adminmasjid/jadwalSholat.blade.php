@@ -99,7 +99,11 @@
         {{-- Content --}}
         <main class="js-content">
             <div class="js-coming-soon">
-                <div class="js-icon">🚧</div>
+                <div class="js-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="48" height="48">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l5.653-4.655m5.8-5.8 1.875-1.875a3.375 3.375 0 0 1 4.773 4.773l-1.875 1.875m-5.8 5.8-.75.75"/>
+                    </svg>
+                </div>
                 <h2 class="js-title">Modul Jadwal Shalat</h2>
                 <p class="js-desc">
                     Modul ini sedang dalam pengembangan.<br>

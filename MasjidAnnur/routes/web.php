@@ -35,9 +35,9 @@ Route::get('/', function (\Illuminate\Http\Request $request) {
     if ($request->filled('q')) {
         $keyword = $request->q;
         $query->where(function ($sub) use ($keyword) {
-            $sub->where('mosque_name', 'ilike', "%{$keyword}%")
-                ->orWhere('city', 'ilike', "%{$keyword}%")
-                ->orWhere('province', 'ilike', "%{$keyword}%");
+            $sub->where('mosque_name', 'like', "%{$keyword}%")
+                ->orWhere('city', 'like', "%{$keyword}%")
+                ->orWhere('province', 'like', "%{$keyword}%");
         });
     }
     $direktoriMasjid = $query->latest()->get();

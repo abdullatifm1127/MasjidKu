@@ -55,7 +55,17 @@ body {
     flex-shrink: 0;
 }
 
-.brand-icon { font-size: 1.4rem; }
+.brand-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: rgba(245,166,35,0.15);
+    border-radius: 8px;
+    color: #f5a623;
+    flex-shrink: 0;
+}
 
 .brand-text {
     font-size: 1.1rem;
@@ -391,8 +401,22 @@ button.btn-nav-outline:hover {
 }
 
 .feature-icon {
-    font-size: 2rem;
-    margin-bottom: 16px;
+    width: 52px;
+    height: 52px;
+    background: var(--green-light);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+    color: var(--green-dark);
+    flex-shrink: 0;
+}
+
+.feature-card:hover .feature-icon {
+    background: var(--green-dark);
+    color: #fff;
+    transition: background 0.2s, color 0.2s;
 }
 
 .feature-card h3 {
@@ -448,11 +472,14 @@ button.btn-nav-outline:hover {
 }
 
 .program-img {
-    height: 120px;
+    height: 140px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 3rem;
+}
+
+.program-img svg {
+    opacity: 0.85;
 }
 
 .program-img.green  { background: var(--green-dark); }
