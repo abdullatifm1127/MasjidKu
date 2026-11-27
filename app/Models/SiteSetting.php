@@ -15,7 +15,7 @@ class SiteSetting extends Model
         return [
             'hero' => [
                 'show_bismillah' => 1,
-                'badge'          => '🌙 Platform Masjid Digital',
+                'badge'          => 'Platform Masjid Digital',
                 'title_1'        => 'Kelola Masjid Anda',
                 'title_2'        => 'dengan',
                 'title_highlight'=> 'Lebih Mudah',
@@ -26,19 +26,19 @@ class SiteSetting extends Model
                 'card_title'     => 'Masjid Terverifikasi',
             ],
             'strip' => [
-                ['icon' => '✔',  'text' => 'Setiap masjid diverifikasi tim kami'],
-                ['icon' => '📊', 'text' => 'Laporan kas terbuka untuk jamaah'],
-                ['icon' => '📱', 'text' => 'Bisa diakses dari ponsel'],
-                ['icon' => '🇮🇩', 'text' => 'Dibuat untuk masjid di Indonesia'],
+                ['icon' => '✓',  'text' => 'Setiap masjid diverifikasi tim kami'],
+                ['icon' => '≡',  'text' => 'Laporan kas terbuka untuk jamaah'],
+                ['icon' => '◫',  'text' => 'Bisa diakses dari ponsel'],
+                ['icon' => '◈',  'text' => 'Dibuat untuk masjid di Indonesia'],
             ],
             'features_head' => ['badge' => 'Fitur Unggulan', 'title' => 'Semua yang Anda Butuhkan dalam Satu Platform', 'desc' => 'Dirancang khusus untuk kebutuhan masjid modern di Indonesia.'],
             'features' => [
-                ['icon' => '💰', 'title' => 'Manajemen Keuangan', 'desc' => 'Catat pemasukan, pengeluaran, dan laporan keuangan masjid secara transparan dan mudah dipahami.'],
-                ['icon' => '📅', 'title' => 'Jadwal & Agenda', 'desc' => 'Kelola jadwal imam, khatib, kajian, dan acara masjid dalam satu kalender terintegrasi.'],
-                ['icon' => '📢', 'title' => 'Pengumuman Digital', 'desc' => 'Kirim informasi dan pengumuman kepada jamaah melalui notifikasi dan papan pengumuman digital.'],
-                ['icon' => '🤲', 'title' => 'Pengelolaan Donasi', 'desc' => 'Terima donasi online dan offline, kelola zakat, infaq, dan sedekah dengan laporan yang transparan.'],
-                ['icon' => '📖', 'title' => 'Program Dakwah', 'desc' => 'Daftarkan dan pantau program TPA, tahfidz, majelis taklim, dan kegiatan dakwah lainnya.'],
-                ['icon' => '👥', 'title' => 'Data Jamaah', 'desc' => 'Kelola data anggota jamaah, pantau kehadiran, dan bangun komunitas masjid yang solid.'],
+                ['icon' => 'keuangan', 'title' => 'Manajemen Keuangan', 'desc' => 'Catat pemasukan, pengeluaran, dan laporan keuangan masjid secara transparan dan mudah dipahami.'],
+                ['icon' => 'jadwal',   'title' => 'Jadwal & Agenda',    'desc' => 'Kelola jadwal imam, khatib, kajian, dan acara masjid dalam satu kalender terintegrasi.'],
+                ['icon' => 'info',     'title' => 'Pengumuman Digital', 'desc' => 'Kirim informasi dan pengumuman kepada jamaah melalui notifikasi dan papan pengumuman digital.'],
+                ['icon' => 'donasi',   'title' => 'Pengelolaan Donasi', 'desc' => 'Terima donasi online dan offline, kelola zakat, infaq, dan sedekah dengan laporan yang transparan.'],
+                ['icon' => 'program',  'title' => 'Program Dakwah',     'desc' => 'Daftarkan dan pantau program TPA, tahfidz, majelis taklim, dan kegiatan dakwah lainnya.'],
+                ['icon' => 'jamaah',   'title' => 'Data Jamaah',        'desc' => 'Kelola data anggota jamaah, pantau kehadiran, dan bangun komunitas masjid yang solid.'],
             ],
             'steps_head' => ['badge' => 'Cara Kerja', 'title' => 'Mulai dalam Tiga Langkah', 'desc' => 'Dari membuat akun sampai masjid Anda tampil di MasjidKu.'],
             'steps' => [
@@ -50,10 +50,10 @@ class SiteSetting extends Model
             'masjid_head'  => ['badge' => 'Masjid Terdaftar', 'title' => 'Masjid yang Sudah Bergabung', 'desc' => 'Daftar masjid yang telah terverifikasi dan menggunakan platform MasjidKu.'],
             'donasi_head'  => ['badge' => 'Donasi', 'title' => 'Berbagi Kebaikan Lewat Masjid', 'desc' => 'Pilih masjid terverifikasi, lalu salurkan zakat, infaq, sedekah, dan wakaf Anda.'],
             'donasi' => [
-                ['icon' => '💎', 'title' => 'Zakat', 'desc' => 'Tunaikan kewajiban zakat mal dan fitrah melalui masjid.'],
-                ['icon' => '🤲', 'title' => 'Infaq', 'desc' => 'Dukung operasional dan kegiatan masjid sehari-hari.'],
-                ['icon' => '🌱', 'title' => 'Sedekah', 'desc' => 'Berbagi untuk jamaah dan warga yang membutuhkan.'],
-                ['icon' => '🏗️', 'title' => 'Wakaf', 'desc' => 'Bantu pembangunan dan perawatan sarana masjid.'],
+                ['icon' => 'zakat',   'title' => 'Zakat',  'desc' => 'Tunaikan kewajiban zakat mal dan fitrah melalui masjid.'],
+                ['icon' => 'infaq',   'title' => 'Infaq',  'desc' => 'Dukung operasional dan kegiatan masjid sehari-hari.'],
+                ['icon' => 'sedekah', 'title' => 'Sedekah','desc' => 'Berbagi untuk jamaah dan warga yang membutuhkan.'],
+                ['icon' => 'wakaf',   'title' => 'Wakaf',  'desc' => 'Bantu pembangunan dan perawatan sarana masjid.'],
             ],
             'ayat' => [
                 'arab'   => 'مَنْ ذَا الَّذِيْ يُقْرِضُ اللّٰهَ قَرْضًا حَسَنًا فَيُضٰعِفَهٗ لَهٗٓ اَضْعَافًا كَثِيْرَةً',

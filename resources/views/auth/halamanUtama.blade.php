@@ -68,7 +68,12 @@
 {{-- ===== TOPBAR ===== --}}
 <div class="topbar">
     <div class="topbar-inner">
-        <span>📅 <b id="tglMasehi"></b> &nbsp;|&nbsp; <span id="tglHijri"></span></span>
+        <span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="13" height="13" style="vertical-align:-2px;margin-right:4px;opacity:.7">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/>
+            </svg>
+            <b id="tglMasehi"></b> &nbsp;|&nbsp; <span id="tglHijri"></span>
+        </span>
         <span><a href="#jadwal-shalat">Jadwal Shalat</a> &nbsp;·&nbsp; <a href="#donasi">Donasi</a> &nbsp;·&nbsp; <a href="#kontak">Kontak</a></span>
     </div>
 </div>
@@ -82,7 +87,7 @@
 {{-- ===== NAVBAR ===== --}}
 <nav class="navbar" id="navbar">
     <div class="navbar-inner">
-        <a href="{{ url('/') }}" class="navbar-brand"><span class="brand-icon">🕌</span><span class="brand-text">Masjid<strong>Ku</strong></span></a>
+        <a href="{{ url('/') }}" class="navbar-brand">            <span class="brand-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5M3.75 21V9.75M20.25 21V9.75M12 2.25c0 0-5.25 2.25-5.25 7.5h10.5c0-5.25-5.25-7.5-5.25-7.5ZM8.25 9.75V6.75M15.75 9.75V6.75M1.5 9.75h21M9.75 21v-3.75a2.25 2.25 0 0 1 4.5 0V21"/></svg></span><span class="brand-text">Masjid<strong>Ku</strong></span></a>
         <ul class="navbar-menu" id="navMenu">
             <li><a href="#beranda" class="nav-link active">Beranda</a></li>
             <li><a href="#tentang" class="nav-link">Fitur</a></li>
@@ -144,7 +149,7 @@
                 <h2>{{ $c['hero']['card_title'] }}</h2>
                 @forelse($latest as $l)
                     <a href="{{ $l->link }}" class="join-item">
-                        <span class="join-avatar">@if($l->foto)<img src="{{ $l->foto }}" alt="" loading="lazy">@else🕌@endif</span>
+                        <span class="join-avatar">@if($l->foto)<img src="{{ $l->foto }}" alt="" loading="lazy">@else<span class="join-initial">{{ mb_strtoupper(mb_substr($l->nama, 0, 2)) }}</span>@endif</span>
                         <span class="join-text"><strong>{{ $l->nama }}</strong><small>{{ $l->wilayah ?: 'Indonesia' }}</small></span>
                     </a>
                 @empty
@@ -172,8 +177,19 @@
 
 {{-- ===== STRIP ===== --}}
 <div class="strip"><div class="strip-inner">
+    @php
+        $stripSvg = [
+            '✓' => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>',
+            '≡' => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.5h18M3 10.5h18M3 7.5h18"/></svg>',
+            '◫' => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/></svg>',
+            '◈' => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"/></svg>',
+        ];
+    @endphp
     @foreach($c['strip'] as $s)
-        <div class="strip-item"><i>{{ $s['icon'] }}</i>{{ $s['text'] }}</div>
+        <div class="strip-item">
+            {!! $stripSvg[$s['icon']] ?? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>' !!}
+            {{ $s['text'] }}
+        </div>
     @endforeach
 </div></div>
 
@@ -186,8 +202,28 @@
             <p>{{ $c['features_head']['desc'] }}</p>
         </div>
         <div class="features-grid">
+            @php
+                $featureSvg = [
+                    'keuangan' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>',
+                    'jadwal'   => '<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/>',
+                    'info'     => '<path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 0 1-1.44-4.282m3.102.069a18.03 18.03 0 0 1-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 0 1 8.835 2.535M10.34 6.66a23.847 23.847 0 0 0 8.835-2.535m0 0A23.74 23.74 0 0 0 18.795 3m.38 1.125a23.91 23.91 0 0 1 1.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 0 0 1.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 0 1 0 3.46"/>',
+                    'donasi'   => '<path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/>',
+                    'program'  => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/>',
+                    'jamaah'   => '<path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/>',
+                ];
+            @endphp
             @foreach($c['features'] as $f)
-                <div class="feature-card"><div class="feature-icon">{{ $f['icon'] }}</div><h3>{{ $f['title'] }}</h3><p>{{ $f['desc'] }}</p></div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        @if(isset($featureSvg[$f['icon']]))
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor" width="28" height="28">{!! $featureSvg[$f['icon']] !!}</svg>
+                        @else
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor" width="28" height="28"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
+                        @endif
+                    </div>
+                    <h3>{{ $f['title'] }}</h3>
+                    <p>{{ $f['desc'] }}</p>
+                </div>
             @endforeach
         </div>
     </div>
@@ -265,7 +301,9 @@
         </div>
         <form method="GET" action="{{ url('/') }}#masjid" class="mosque-search" role="search">
             <div class="mosque-search-box">
-                <span aria-hidden="true">📍</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16" aria-hidden="true" style="flex-shrink:0;color:#9ca3af">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM19.5 19.5l-4.35-4.35"/>
+                </svg>
                 <input type="search" name="lokasi" value="{{ $keyword }}" placeholder="Cari masjid berdasarkan lokasi, mis. Malang, Kendalsari, Lowokwaru..." aria-label="Cari lokasi masjid">
                 <button type="submit">Cari</button>
             </div>
@@ -280,19 +318,31 @@
                     @php $v = $view($m); @endphp
                     <a href="{{ $v->link }}" class="mosque-card">
                         <div class="mosque-photo">
-                            @if($v->foto)<img src="{{ $v->foto }}" alt="Foto {{ $v->nama }}" loading="lazy">@else<span class="mosque-photo-placeholder">🕌</span>@endif
+                            @if($v->foto)<img src="{{ $v->foto }}" alt="Foto {{ $v->nama }}" loading="lazy">@else<span class="mosque-photo-placeholder">{{ mb_strtoupper(mb_substr($v->nama, 0, 2)) }}</span>@endif
                             <span class="mosque-badge">✔ Terverifikasi</span>
                         </div>
                         <div class="mosque-info">
                             <h3>{{ $v->nama }}</h3>
                             <ul class="mosque-meta">
                                 @if($v->alamat || $v->wilayah)
-                                    <li><span class="meta-icon">📍</span><span>
-                                        @if($v->alamat)<span class="meta-main">{{ $v->alamat }}</span>@endif
-                                        @if($v->wilayah)<span class="meta-sub">{{ $v->wilayah }}</span>@endif
-                                    </span></li>
+                                    <li>
+                                        <span class="meta-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="13" height="13"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
+                                        </span>
+                                        <span>
+                                            @if($v->alamat)<span class="meta-main">{{ $v->alamat }}</span>@endif
+                                            @if($v->wilayah)<span class="meta-sub">{{ $v->wilayah }}</span>@endif
+                                        </span>
+                                    </li>
                                 @endif
-                                @if($v->telp)<li><span class="meta-icon">📞</span><span class="meta-main">{{ $v->telp }}</span></li>@endif
+                                @if($v->telp)
+                                    <li>
+                                        <span class="meta-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="13" height="13"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/></svg>
+                                        </span>
+                                        <span class="meta-main">{{ $v->telp }}</span>
+                                    </li>
+                                @endif
                             </ul>
                             <span class="mosque-visit">Kunjungi Website →</span>
                         </div>
@@ -317,8 +367,21 @@
             <p>{{ $c['donasi_head']['desc'] }}</p>
         </div>
         <div class="donasi-grid">
+            @php
+                $donasiSvg = [
+                    'zakat'   => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>',
+                    'infaq'   => '<path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/>',
+                    'sedekah' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>',
+                    'wakaf'   => '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21"/>',
+                ];
+                $fallbackSvg = '<path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>';
+            @endphp
             @foreach($c['donasi'] as $d)
-                <a href="#masjid" class="donasi-card"><i>{{ $d['icon'] }}</i><h3>{{ $d['title'] }}</h3><p>{{ $d['desc'] }}</p></a>
+                <a href="#masjid" class="donasi-card">
+                    <i><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor" width="30" height="30">{!! $donasiSvg[$d['icon']] ?? $fallbackSvg !!}</svg></i>
+                    <h3>{{ $d['title'] }}</h3>
+                    <p>{{ $d['desc'] }}</p>
+                </a>
             @endforeach
         </div>
         <div class="ayat">
@@ -329,9 +392,7 @@
     </div>
 </section>
 
-{{-- ===== ARTIKEL ===== --}}
 @php
-    $ikonArt  = ['pdf'=>'📕','doc'=>'📘','docx'=>'📘','xls'=>'📗','xlsx'=>'📗','ppt'=>'📙','pptx'=>'📙','zip'=>'🗜️','txt'=>'📄'];
     $warnaArt = ['g1','g2','g3'];
 @endphp
 <section class="articles" id="artikel">
@@ -348,7 +409,6 @@
                     @php $menit = max(1, (int) ceil(str_word_count(strip_tags($a->isi ?? '')) / 200)); @endphp
                     <a href="{{ url('/artikel/' . $a->slug) }}" class="art-card">
                         <div class="art-cover {{ $warnaArt[$loop->index % 3] }}">
-                            <span class="art-ico">{{ $ikonArt[$a->file_ext] ?? '📰' }}</span>
                             <span class="art-date">{{ $a->created_at->translatedFormat('d M Y') }}</span>
                         </div>
                         <div class="art-body">
@@ -357,13 +417,26 @@
 
                             @if($a->file || $a->link)
                                 <div class="art-chips">
-                                    @if($a->file)<span>📎 {{ strtoupper($a->file_ext) }}</span>@endif
-                                    @if($a->link)<span>🔗 {{ $a->link_host }}</span>@endif
+                                    @if($a->file)
+                                        <span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="13" height="13" style="vertical-align:-2px"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"/></svg>
+                                            {{ strtoupper($a->file_ext) }}
+                                        </span>
+                                    @endif
+                                    @if($a->link)
+                                        <span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="13" height="13" style="vertical-align:-2px"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"/></svg>
+                                            {{ $a->link_host }}
+                                        </span>
+                                    @endif
                                 </div>
                             @endif
 
                             <div class="art-foot">
-                                <span>⏱ {{ $menit }} menit baca</span>
+                                <span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="13" height="13" style="vertical-align:-2px"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                                    {{ $menit }} menit baca
+                                </span>
                                 <b>Baca artikel →</b>
                             </div>
                         </div>
@@ -395,9 +468,18 @@
     <div class="section-container">
         <div class="section-header"><span class="section-badge">Kontak</span><h2>{{ $c['kontak']['title'] }}</h2><p>{{ $c['kontak']['desc'] }}</p></div>
         <div class="kontak-grid">
-            <div class="kontak-card"><i>✉️</i><div><h3>Email</h3>@if($email)<a href="mailto:{{ $email }}">{{ $email }}</a>@else<p>Segera tersedia</p>@endif</div></div>
-            <div class="kontak-card"><i>📍</i><div><h3>Pusat Layanan</h3><p>{{ $c['kontak']['alamat'] }}</p></div></div>
-            <div class="kontak-card"><i>🕒</i><div><h3>Jam Layanan</h3><p>{{ $c['kontak']['jam'] }}</p></div></div>
+            <div class="kontak-card">
+                <i><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor" width="22" height="22"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/></svg></i>
+                <div><h3>Email</h3>@if($email)<a href="mailto:{{ $email }}">{{ $email }}</a>@else<p>Segera tersedia</p>@endif</div>
+            </div>
+            <div class="kontak-card">
+                <i><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor" width="22" height="22"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg></i>
+                <div><h3>Pusat Layanan</h3><p>{{ $c['kontak']['alamat'] }}</p></div>
+            </div>
+            <div class="kontak-card">
+                <i><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor" width="22" height="22"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg></i>
+                <div><h3>Jam Layanan</h3><p>{{ $c['kontak']['jam'] }}</p></div>
+            </div>
         </div>
     </div>
 </section>
@@ -420,7 +502,7 @@
 <footer class="footer" id="kontak">
     <div class="footer-inner">
         <div class="footer-brand">
-            <a href="{{ url('/') }}" class="navbar-brand"><span class="brand-icon">🕌</span><span class="brand-text">Masjid<strong>Ku</strong></span></a>
+            <a href="{{ url('/') }}" class="navbar-brand">            <span class="brand-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5M3.75 21V9.75M20.25 21V9.75M12 2.25c0 0-5.25 2.25-5.25 7.5h10.5c0-5.25-5.25-7.5-5.25-7.5ZM8.25 9.75V6.75M15.75 9.75V6.75M1.5 9.75h21M9.75 21v-3.75a2.25 2.25 0 0 1 4.5 0V21"/></svg></span><span class="brand-text">Masjid<strong>Ku</strong></span></a>
             <p>{{ $c['footer']['tagline'] }}</p>
             <div class="footer-social">
                 <a href="{{ $c['footer']['instagram'] ?: '#' }}" target="_blank" rel="noopener" aria-label="Instagram"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>

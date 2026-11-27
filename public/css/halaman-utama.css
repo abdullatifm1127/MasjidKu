@@ -31,7 +31,7 @@ h1, h2, h3 { font-family: var(--serif); line-height: 1.2; }
 .navbar.scrolled { box-shadow: 0 6px 24px rgba(0,0,0,.28); }
 .navbar-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 68px; display: flex; align-items: center; gap: 24px; }
 .navbar-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
-.brand-icon { width: 38px; height: 38px; display: grid; place-items: center; font-size: 1.3rem; background: linear-gradient(135deg, var(--gold), var(--gold-d)); border-radius: 12px; }
+.brand-icon { width: 38px; height: 38px; display: grid; place-items: center; background: linear-gradient(135deg, var(--gold), var(--gold-d)); border-radius: 12px; color: #2a1d03; flex-shrink: 0; }
 .brand-text { font-family: var(--serif); font-size: 1.35rem; color: #fff; }
 .brand-text strong { color: var(--gold); font-weight: 700; }
 .navbar-menu { display: flex; list-style: none; gap: 2px; margin: 0 auto; }
@@ -82,7 +82,7 @@ h1, h2, h3 { font-family: var(--serif); line-height: 1.2; }
 .arch-in h2 { font-size: 1.35rem; margin: 4px 0 18px; }
 .join-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 12px; text-align: left; text-decoration: none; background: rgba(255,255,255,.06); margin-bottom: 8px; transition: background .2s; }
 .join-item:hover { background: rgba(255,255,255,.12); }
-.join-avatar { flex: none; width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,.1); display: grid; place-items: center; font-size: 1.3rem; overflow: hidden; }
+.join-avatar { flex: none; width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,.1); display: grid; place-items: center; font-size: .82rem; font-weight: 700; color: rgba(255,255,255,.9); overflow: hidden; letter-spacing: -.5px; }
 .join-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .join-text { min-width: 0; display: flex; flex-direction: column; }
 .join-text strong { font-size: .88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -118,7 +118,7 @@ h1, h2, h3 { font-family: var(--serif); line-height: 1.2; }
 .strip { margin-top: 70px; background: var(--g1); }
 .strip-inner { max-width: 1200px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 .strip-item { display: flex; align-items: center; gap: 12px; font-size: .86rem; font-weight: 500; color: var(--g7); }
-.strip-item i { flex: none; width: 42px; height: 42px; display: grid; place-items: center; font-style: normal; font-size: 1.2rem; background: #fff; border-radius: 12px; }
+.strip-item i { flex: none; width: 42px; height: 42px; display: grid; place-items: center; font-style: normal; background: #fff; border-radius: 12px; color: var(--g7); }
 
 /* ===== FITUR ===== */
 .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
@@ -126,7 +126,7 @@ h1, h2, h3 { font-family: var(--serif); line-height: 1.2; }
 .feature-card::after { content: ''; position: absolute; left: 0; top: 0; height: 4px; width: 0; background: linear-gradient(90deg, var(--gold), var(--g6)); transition: width .35s; }
 .feature-card:hover { border-color: transparent; box-shadow: var(--shadow-lg); transform: translateY(-6px); }
 .feature-card:hover::after { width: 100%; }
-.feature-icon { width: 60px; height: 60px; display: grid; place-items: center; font-size: 1.8rem; background: linear-gradient(135deg, var(--g1), var(--gold-l)); border-radius: 18px; margin-bottom: 20px; }
+.feature-icon { width: 60px; height: 60px; display: grid; place-items: center; background: linear-gradient(135deg, var(--g1), var(--gold-l)); border-radius: 18px; margin-bottom: 20px; color: var(--g7); }
 .feature-card h3 { font-size: 1.15rem; margin-bottom: 10px; color: var(--g8); }
 .feature-card p { font-size: .9rem; color: var(--soft); }
 
@@ -179,7 +179,7 @@ h1, h2, h3 { font-family: var(--serif); line-height: 1.2; }
 .mosque-photo { position: relative; height: 220px; background: var(--g1); overflow: hidden; }
 .mosque-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s; }
 .mosque-card:hover .mosque-photo img { transform: scale(1.07); }
-.mosque-photo-placeholder { width: 100%; height: 100%; display: grid; place-items: center; font-size: 4.5rem; }
+.mosque-photo-placeholder { width: 100%; height: 100%; display: grid; place-items: center; font-size: 1.6rem; font-weight: 800; color: var(--g6); letter-spacing: -1px; }
 .mosque-badge { position: absolute; top: 14px; left: 14px; padding: 5px 13px; font-size: .74rem; font-weight: 600; color: var(--g6); background: rgba(255,255,255,.96); border-radius: 100px; box-shadow: 0 2px 8px rgba(0,0,0,.14); }
 .mosque-info { padding: 24px; display: flex; flex-direction: column; flex: 1; }
 .mosque-info h3 { font-size: 1.25rem; color: var(--g8); margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
