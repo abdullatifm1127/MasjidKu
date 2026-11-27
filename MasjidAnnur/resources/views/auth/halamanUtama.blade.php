@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MasjidKu - Beranda</title>
+    <title>Mikhrabku - Beranda</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/halaman-utama.css">
@@ -14,7 +14,13 @@
     <nav class="navbar">
         <div class="navbar-inner">
             <a href="{{ url('/') }}" class="navbar-brand">
-                <span class="brand-icon">🕌</span>
+                <span class="brand-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+                        <path d="M3 21h18M5 21V10M19 21V10M12 3c0 0-4 2-4 7h8c0-5-4-7-4-7z"/>
+                        <path d="M9 10V7.5C9 6 10 5 12 5s3 1 3 2.5V10"/>
+                        <path d="M2 10h4M18 10h4M12 3v2"/>
+                    </svg>
+                </span>
                 <span class="brand-text">Masjid<strong>Ku</strong></span>
             </a>
             <ul class="navbar-menu" id="navMenu">
@@ -63,7 +69,12 @@
     <section class="hero" id="beranda">
         <div class="hero-inner">
             <div class="hero-content">
-                <span class="hero-badge">🌙 Platform Masjid Digital</span>
+                <span class="hero-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="13" height="13" style="vertical-align:-1px">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                    Platform Masjid Digital
+                </span>
                 <h1 class="hero-title">Kelola Masjid Anda<br>dengan <span class="text-green">Lebih Mudah</span></h1>
                 <p class="hero-subtitle">
                     Satu platform lengkap untuk mengelola keuangan, jadwal shalat,
@@ -109,32 +120,56 @@
             </div>
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="feature-icon">💰</div>
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor" width="28" height="28">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                        </svg>
+                    </div>
                     <h3>Manajemen Keuangan</h3>
                     <p>Catat pemasukan, pengeluaran, dan laporan keuangan masjid secara transparan dan mudah dipahami.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">📅</div>
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor" width="28" height="28">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/>
+                        </svg>
+                    </div>
                     <h3>Jadwal & Agenda</h3>
                     <p>Kelola jadwal imam, khatib, kajian, dan acara masjid dalam satu kalender terintegrasi.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">📢</div>
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor" width="28" height="28">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 0 1-1.44-4.282m3.102.069a18.03 18.03 0 0 1-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 0 1 8.835 2.535M10.34 6.66a23.847 23.847 0 0 0 8.835-2.535m0 0A23.74 23.74 0 0 0 18.795 3m.38 1.125a23.91 23.91 0 0 1 1.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 0 0 1.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 0 1 0 3.46"/>
+                        </svg>
+                    </div>
                     <h3>Pengumuman Digital</h3>
                     <p>Kirim informasi dan pengumuman kepada jamaah melalui notifikasi dan papan pengumuman digital.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🤲</div>
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor" width="28" height="28">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/>
+                        </svg>
+                    </div>
                     <h3>Pengelolaan Donasi</h3>
                     <p>Terima donasi online dan offline, kelola zakat, infaq, dan sedekah dengan laporan yang transparan.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">📖</div>
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor" width="28" height="28">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/>
+                        </svg>
+                    </div>
                     <h3>Program Dakwah</h3>
                     <p>Daftarkan dan pantau program TPA, tahfidz, majelis taklim, dan kegiatan dakwah lainnya.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">👥</div>
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor" width="28" height="28">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/>
+                        </svg>
+                    </div>
                     <h3>Data Jamaah</h3>
                     <p>Kelola data anggota jamaah, pantau kehadiran, dan bangun komunitas masjid yang solid.</p>
                 </div>
@@ -323,7 +358,9 @@
             <div class="programs-grid">
                 <div class="program-card">
                     <div class="program-img green">
-                        <span>📖</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="rgba(255,255,255,0.9)" width="48" height="48">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/>
+                        </svg>
                     </div>
                     <div class="program-body">
                         <span class="program-tag">Pendidikan</span>
@@ -334,7 +371,9 @@
                 </div>
                 <div class="program-card">
                     <div class="program-img gold">
-                        <span>☪</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="rgba(255,255,255,0.9)" width="48" height="48">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/>
+                        </svg>
                     </div>
                     <div class="program-body">
                         <span class="program-tag">Ibadah</span>
@@ -345,7 +384,9 @@
                 </div>
                 <div class="program-card">
                     <div class="program-img teal">
-                        <span>🤝</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="rgba(255,255,255,0.9)" width="48" height="48">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>
+                        </svg>
                     </div>
                     <div class="program-body">
                         <span class="program-tag">Sosial</span>
@@ -376,7 +417,13 @@
         <div class="footer-inner">
             <div class="footer-brand">
                 <a href="{{ url('/') }}" class="navbar-brand">
-                    <span class="brand-icon">🕌</span>
+                    <span class="brand-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+                            <path d="M3 21h18M5 21V10M19 21V10M12 3c0 0-4 2-4 7h8c0-5-4-7-4-7z"/>
+                            <path d="M9 10V7.5C9 6 10 5 12 5s3 1 3 2.5V10"/>
+                            <path d="M2 10h4M18 10h4M12 3v2"/>
+                        </svg>
+                    </span>
                     <span class="brand-text">Masjid<strong>Ku</strong></span>
                 </a>
                 <p>Platform digital untuk kemakmuran masjid Indonesia.</p>

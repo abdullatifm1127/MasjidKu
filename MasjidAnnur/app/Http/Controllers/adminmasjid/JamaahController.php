@@ -39,9 +39,9 @@ class JamaahController extends Controller
         if ($request->filled('q')) {
             $q = $request->q;
             $query->where(function ($sub) use ($q) {
-                $sub->where('nama', 'ilike', "%{$q}%")
-                    ->orWhere('no_hp', 'ilike', "%{$q}%")
-                    ->orWhere('nik', 'ilike', "%{$q}%");
+                $sub->where('nama', 'like', "%{$q}%")
+                    ->orWhere('no_hp', 'like', "%{$q}%")
+                    ->orWhere('nik', 'like', "%{$q}%");
             });
         }
 
